@@ -66,9 +66,9 @@ fn spawn_screens(
             Screen {
                 name,
                 id: screen.display_info.id,
-                refresh_rate: Timer::from_seconds(1.0, TimerMode::Repeating),
+                refresh_rate: Timer::from_seconds(0.1, TimerMode::Repeating),
             },
-            InhouseCaptureTag,
+            InhouseThreadedCaptureTag,
             Name::new(format!("Screen {}", screen.display_info.id)),
         ));
     }
@@ -81,11 +81,15 @@ pub struct ScreenLibCaptureTag;
 pub struct InhouseCaptureTag;
 
 #[derive(Component)]
+pub struct InhouseThreadedCaptureTag;
+
+#[derive(Component)]
 pub struct WinDesktopDuplicationCaptureTag;
 
 fn cycle_capture_method(
     mut commands: Commands,
     query_inhouse: Query<Entity, With<InhouseCaptureTag>>,
+    query_inhouse_threaded: Query<Entity, With<InhouseThreadedCaptureTag>>,
     query_screen_lib: Query<Entity, With<ScreenLibCaptureTag>>,
     query_win_desktop: Query<Entity, With<WinDesktopDuplicationCaptureTag>>,
     keyboard_input: Res<Input<KeyCode>>,
@@ -99,7 +103,16 @@ fn cycle_capture_method(
         commands
             .entity(entity)
             .remove::<InhouseCaptureTag>()
+            .insert(InhouseThreadedCaptureTag);
+        println!("Switched {:?} to InhouseThreadedCaptureTag", entity);
+    }
+    // For entities with InhouseCaptureTag, switch to ScreenLibCaptureTag
+    for entity in query_inhouse_threaded.iter() {
+        commands
+            .entity(entity)
+            .remove::<InhouseThreadedCaptureTag>()
             .insert(ScreenLibCaptureTag);
+        println!("Switched {:?} to ScreenLibCaptureTag", entity);
     }
 
     // For entities with ScreenLibCaptureTag, switch to WinDesktopDuplicationCaptureTag
@@ -108,6 +121,7 @@ fn cycle_capture_method(
             .entity(entity)
             .remove::<ScreenLibCaptureTag>()
             .insert(WinDesktopDuplicationCaptureTag);
+        println!("Switched {:?} to WinDesktopDuplicationCaptureTag", entity);
     }
 
     // For entities with WinDesktopDuplicationCaptureTag, switch to InhouseCaptureTag
@@ -116,5 +130,6 @@ fn cycle_capture_method(
             .entity(entity)
             .remove::<WinDesktopDuplicationCaptureTag>()
             .insert(InhouseCaptureTag);
+        println!("Switched {:?} to InhouseCaptureTag", entity);
     }
 }

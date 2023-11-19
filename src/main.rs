@@ -13,6 +13,7 @@ mod capture_methods;
 mod metrics;
 
 use crate::capture_methods::inhouse_plugin::InhouseCapturePlugin;
+use crate::capture_methods::inhouse_threaded_plugin::InhouseThreadedCapturePlugin;
 
 fn main() {
     App::new()
@@ -31,7 +32,7 @@ fn main() {
                 .build(),
         )
         .add_plugins(WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)))
-        .add_plugins((ScreenBackgroundsPlugin, CursorCharacterPlugin, InhouseCapturePlugin, ScreenLibCapturePlugin))
+        .add_plugins((ScreenBackgroundsPlugin, CursorCharacterPlugin, InhouseCapturePlugin, InhouseThreadedCapturePlugin, ScreenLibCapturePlugin))
         .add_systems(Startup, setup)
         .add_systems(Update, (camera_follow_tick, camera_zoom_tick))
         .run();
