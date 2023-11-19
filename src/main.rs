@@ -3,12 +3,15 @@ use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy::input::common_conditions::input_toggle_active;
 
 mod screen_backgrounds;
+use capture_methods::screenlib_plugin::ScreenLibCapturePlugin;
 use screen_backgrounds::ScreenBackgroundsPlugin;
 
 mod cursor_character;
 use cursor_character::{CursorCharacterPlugin, Character};
 
 mod capture_methods;
+
+use crate::capture_methods::inhouse_plugin::InhouseCapturePlugin;
 
 fn main() {
     App::new()
@@ -27,7 +30,7 @@ fn main() {
                 .build(),
         )
         .add_plugins(WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)))
-        .add_plugins((ScreenBackgroundsPlugin, CursorCharacterPlugin))
+        .add_plugins((ScreenBackgroundsPlugin, CursorCharacterPlugin, InhouseCapturePlugin, ScreenLibCapturePlugin))
         .add_systems(Startup, setup)
         .add_systems(Update, (camera_follow_tick, camera_zoom_tick))
         .run();

@@ -214,7 +214,7 @@ impl MonitorRegionCapturer {
                 self.height,
                 SRCCOPY,
             ).ok()?;
-            print!("blit took {:?}", start.elapsed());
+            print!("blit {:?}", start.elapsed());
         };
 
         let mut bitmap_info = BITMAPINFO {
@@ -249,7 +249,7 @@ impl MonitorRegionCapturer {
                 DIB_RGB_COLORS,
             ) == 0
         };
-        print!(" getdibits took {:?}", start.elapsed());
+        print!(" | getdibits {:?}", start.elapsed());
 
         if is_success {
             return Err(anyhow!("Get RGBA data failed"));
@@ -267,7 +267,7 @@ impl MonitorRegionCapturer {
                 Some(bitmap_ptr),
             );
         }
-        print!(" getobject took {:?}", start.elapsed());
+        print!(" | getobject {:?}", start.elapsed());
 
         // Rotate the image; the image data is inverted.
         let start = std::time::Instant::now();
@@ -276,7 +276,7 @@ impl MonitorRegionCapturer {
             .collect::<Vec<Vec<u8>>>();
         data.reverse();
         let mut data = data.concat();
-        print!(" reverse took {:?}", start.elapsed());
+        print!(" | reverse {:?}", start.elapsed());
 
         // The shuffle mask for converting BGRA -> RGBA
         let start = std::time::Instant::now();
@@ -294,7 +294,7 @@ impl MonitorRegionCapturer {
             vector = unsafe { _mm_shuffle_epi8(vector, mask) };
             unsafe { _mm_storeu_si128(chunk.as_mut_ptr() as *mut __m128i, vector) };
         }
-        print!(" shuffle took {:?}", start.elapsed());
+        print!(" | shuffle {:?}", start.elapsed());
         
         let data = RgbaImage::from_vec(self.width as u32, self.height as u32, data);
         data.ok_or_else(|| anyhow!("Invalid image data"))
