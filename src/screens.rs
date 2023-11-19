@@ -4,6 +4,7 @@ use image::DynamicImage;
 use std::collections::VecDeque;
 use screenshots::Screen as ScreenLib;
 
+
 pub struct ScreenBackgroundsPlugin;
 impl Plugin for ScreenBackgroundsPlugin {
     fn build(&self, app: &mut App) {
@@ -65,7 +66,7 @@ fn spawn_screens(
             Screen {
                 name,
                 id: screen.display_info.id,
-                refresh_rate: Timer::from_seconds(0.1, TimerMode::Repeating),
+                refresh_rate: Timer::from_seconds(1.0, TimerMode::Repeating),
             },
             InhouseCaptureTag,
             Name::new(format!("Screen {}", screen.display_info.id)),

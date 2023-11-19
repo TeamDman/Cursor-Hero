@@ -2,14 +2,15 @@ use bevy::{prelude::*, input::mouse::MouseWheel};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy::input::common_conditions::input_toggle_active;
 
-mod screen_backgrounds;
+mod screens;
 use capture_methods::screenlib_plugin::ScreenLibCapturePlugin;
-use screen_backgrounds::ScreenBackgroundsPlugin;
+use screens::ScreenBackgroundsPlugin;
 
 mod cursor_character;
 use cursor_character::{CursorCharacterPlugin, Character};
 
 mod capture_methods;
+mod metrics;
 
 use crate::capture_methods::inhouse_plugin::InhouseCapturePlugin;
 

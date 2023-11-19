@@ -1,4 +1,4 @@
-use crate::screen_backgrounds::{Screen, ScreenLibCaptureTag};
+use crate::screens::{Screen, ScreenLibCaptureTag};
 use bevy::prelude::*;
 use image::DynamicImage;
 use rayon::prelude::*;

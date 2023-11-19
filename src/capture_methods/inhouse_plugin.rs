@@ -1,36 +1,94 @@
-use std::rc::Rc;
+use std::{
+    sync::{Arc, Mutex},
+    thread, borrow::BorrowMut,
+};
 
 use crate::{
     capture_methods::inhouse::{
         get_all_monitors, get_full_monitor_capturers, get_monitor_capturer, MonitorRegionCapturer,
     },
-    screen_backgrounds::{InhouseCaptureTag, Screen},
+    screens::{InhouseCaptureTag, Screen},
+    metrics::Metrics,
 };
 use bevy::prelude::*;
 use windows::Win32::Foundation::RECT;
 
-pub struct CapturerResource {
-    pub inhouse_capturers: Vec<MonitorRegionCapturer>,
+pub struct CapturerHolderResource {
+    pub capturers: Vec<MonitorRegionCapturer>,
+}
+
+// Define a struct to hold captured frames
+struct CapturedFrame {
+    data: Vec<u8>,
+    // other fields as necessary
+}
+
+// Shared resource for captured frames
+#[derive(Resource)]
+struct FrameHolderResource {
+    frames: Arc<Mutex<Vec<CapturedFrame>>>,
 }
 
 pub struct InhouseCapturePlugin;
 impl Plugin for InhouseCapturePlugin {
     fn build(&self, app: &mut App) {
+        // Create a shared resource for captured frames
+        let captured_frames = Arc::new(Mutex::new(Vec::new()));
+
+        // Clone the Arc to move into the capture thread
+        let captured_frames_clone = Arc::clone(&captured_frames);
+
+        let capturer_holder = Arc::new(Mutex::new(CapturerHolderResource {
+            capturers: get_full_monitor_capturers().unwrap(),
+        }));
+
+        let captured_frames = FrameHolderResource {
+            frames: captured_frames,
+        };
+
+        // Spawn a separate thread for capturing frames
+        let ch = Arc::clone(&capturer_holder);
+        thread::spawn(move || {
+            loop {
+                // Capture logic here...
+                let frames = capture_frames(ch.clone());
+                let mut shared_frames = captured_frames_clone.lock().unwrap();
+                *shared_frames = frames;
+            }
+        });
+
         app.add_systems(
             Update,
             (update_screens, resize_capture_areas.before(update_screens)),
+            // update_screens,
         )
-        .insert_non_send_resource(CapturerResource {
-            inhouse_capturers: get_full_monitor_capturers().unwrap(),
+        .insert_non_send_resource(captured_frames)
+        .insert_non_send_resource(CapturerHolderResource {
+            capturers: get_full_monitor_capturers().unwrap(),
         });
     }
+}
+
+fn capture_frames(capturers: Arc<Mutex<CapturerHolderResource>>) -> Vec<CapturedFrame> {
+    
+    capturers.lock().unwrap()
+        .capturers
+        .iter_mut()
+        .map(|capturer| {
+            let mut metrics = Metrics::default();
+            let frame = capturer.capture(&mut metrics).unwrap();
+            CapturedFrame {
+                data: frame.to_vec(),
+            }
+        })
+        .collect::<Vec<CapturedFrame>>()
 }
 
 fn update_screens(
     mut query: Query<(&mut Screen, &Handle<Image>), With<InhouseCaptureTag>>,
     mut textures: ResMut<Assets<Image>>,
     time: Res<Time>,
-    mut capturer_resource: NonSendMut<CapturerResource>,
+    mut capturer_resource: NonSendMut<CapturerHolderResource>,
 ) {
     for (mut screen, texture) in &mut query {
         // tick the refresh rate timer
@@ -44,7 +102,7 @@ fn update_screens(
 
         // find the capturer for this screen
         let capturer = capturer_resource
-            .inhouse_capturers
+            .capturers
             .iter_mut()
             .find(|capturer| capturer.monitor.info.name == screen.name);
         if capturer.is_none() {
@@ -52,23 +110,25 @@ fn update_screens(
             continue;
         }
 
+        let mut metrics = Metrics::default();
+
         // capture the screen
-        let frame = capturer.unwrap().capture().unwrap();
-        print!(" | capture {:?}", start.elapsed());
+        metrics.begin("capture");
+        let frame = capturer.unwrap().capture(&mut metrics).unwrap();
+        metrics.end("capture");
 
         // update the texture
-        let start2 = std::time::Instant::now();
+        metrics.begin("texture");
         textures.get_mut(texture).unwrap().data = frame.to_vec();
-        println!(
-            " | texture {:?} | total {:?}",
-            start2.elapsed(),
-            start.elapsed()
-        );
+        metrics.end("texture");
+
+        // report metrics
+        println!("{}", metrics.report());
     }
 }
 
 fn resize_capture_areas(
-    mut res: NonSendMut<CapturerResource>,
+    mut res: NonSendMut<CapturerHolderResource>,
     keyboard_input: Res<Input<KeyCode>>,
     q_camera: Query<(&Camera, &GlobalTransform)>,
 ) {
@@ -106,14 +166,14 @@ fn resize_capture_areas(
             if capture_region.is_none() {
                 continue;
             }
-            let capturer = get_monitor_capturer(Rc::new(monitor), capture_region.unwrap());
+            let capturer = get_monitor_capturer(Arc::new(monitor), capture_region.unwrap());
             capturers.push(capturer);
         }
         if capturers.len() == 0 {
             eprintln!("No capturers exist after resize, aborting");
             return;
         }
-        res.inhouse_capturers = capturers;
+        res.capturers = capturers;
     }
 }
 
