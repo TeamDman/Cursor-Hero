@@ -1,4 +1,4 @@
-use bevy::{prelude::*, window::PrimaryWindow};
+use bevy::prelude::*;
 use image::DynamicImage;
 use rayon::prelude::*;
 use screenshots::Screen as ScreenLib;
@@ -126,7 +126,7 @@ fn update_screens(
 
                             let dynamic_image = DynamicImage::ImageRgba8(image_buf);
                             let image = Image::from_dynamic(dynamic_image, true);
-                            textures.get_mut(&texture).unwrap().data = image.data;
+                            textures.get_mut(texture).unwrap().data = image.data;
                         }
                         CaptureMethod::Inhouse => {
                             let start = std::time::Instant::now();
@@ -144,7 +144,7 @@ fn update_screens(
                             // let dynamic_image = DynamicImage::ImageRgba8(frame);
                             // let image = Image::from_dynamic(dynamic_image, true);
                             // textures.get_mut(&texture).unwrap().data = image.data;
-                            textures.get_mut(&texture).unwrap().data = frame.to_vec();
+                            textures.get_mut(texture).unwrap().data = frame.to_vec();
                         }
                     }
                 }

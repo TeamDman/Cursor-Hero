@@ -1,9 +1,17 @@
 use bevy::prelude::*;
+use leafwing_input_manager::prelude::*;
 
 use bevy_inspector_egui::prelude::ReflectInspectorOptions;
 use bevy_inspector_egui::InspectorOptions;
 
-pub struct CursorCharacterPlugin;
+
+#[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
+enum CharacterAction {
+    MoveUp,
+    MoveDown,
+    MoveLeft,
+    MoveRight,
+}
 
 #[derive(Component, InspectorOptions, Default, Reflect)]
 #[reflect(Component, InspectorOptions)]
@@ -12,19 +20,24 @@ pub struct Character {
     pub speed: f32,
 }
 
+pub struct CursorCharacterPlugin;
 
 impl Plugin for CursorCharacterPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_cursor_character)
+        app.add_plugins(InputManagerPlugin::<CharacterAction>::default())
+            .add_systems(Startup, spawn_cursor_character)
             .add_systems(Update, cursor_movement_tick)
             .register_type::<Character>();
     }
 }
 
-fn spawn_cursor_character(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-) {
+fn spawn_cursor_character(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let mut input_map = InputMap::default();
+    input_map.insert(KeyCode::W, CharacterAction::MoveUp);
+    input_map.insert(KeyCode::S, CharacterAction::MoveDown);
+    input_map.insert(KeyCode::A, CharacterAction::MoveLeft);
+    input_map.insert(KeyCode::D, CharacterAction::MoveRight);
+
     let texture = asset_server.load("character.png");
 
     commands.spawn((
@@ -36,30 +49,35 @@ fn spawn_cursor_character(
             texture,
             ..default()
         },
-        Character { speed: 400.0 },
-        Name::new("Cursor Character")
+        Character {
+            speed: 400.0,
+        },
+        Name::new("Cursor Character"),
+        InputManagerBundle::<CharacterAction> {
+            input_map,
+            action_state: ActionState::default(),
+            ..default()
+        }
     ));
 }
 
-
 fn cursor_movement_tick(
-    mut characters: Query<(&mut Transform, &Character)>,
-    input: Res<Input<KeyCode>>,
+    mut characters: Query<(&mut Transform, &Character, &ActionState<CharacterAction>)>,
     time: Res<Time>,
 ) {
-    for (mut transform, char) in &mut characters {
+    for (mut transform, char, action_state) in &mut characters {
         let movement_amount = char.speed * time.delta_seconds();
-
-        if input.pressed(KeyCode::W) {
+        
+        if action_state.pressed(CharacterAction::MoveUp) {
             transform.translation.y += movement_amount;
         }
-        if input.pressed(KeyCode::S) {
+        if action_state.pressed(CharacterAction::MoveDown) {
             transform.translation.y -= movement_amount;
         }
-        if input.pressed(KeyCode::D) {
+        if action_state.pressed(CharacterAction::MoveRight) {
             transform.translation.x += movement_amount;
         }
-        if input.pressed(KeyCode::A) {
+        if action_state.pressed(CharacterAction::MoveLeft) {
             transform.translation.x -= movement_amount;
         }
     }

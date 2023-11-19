@@ -43,7 +43,7 @@ fn camera_zoom_tick(
     mut cam: Query<&mut Transform, With<Camera>>,
     mut scroll: EventReader<MouseWheel>,
 ) {
-    for event in scroll.iter() {
+    for event in scroll.read() {
         cam.single_mut().scale *= Vec3::splat(1.0 - event.y / 10.0);
     }
 }
