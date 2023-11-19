@@ -7,7 +7,8 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.75"
-bevy = { version = "0.12", features = ["dynamic_linking"] }
+# bevy = { version = "0.12", features = ["dynamic_linking"] } # broken https://github.com/rust-lang/rust/issues/53014
+bevy = { version = "0.12" }
 bevy-inspector-egui = "0.21.0"
 image = "0.24.7"
 leafwing-input-manager = "0.11.1"
@@ -16,6 +17,7 @@ mouse-rs = "0.4.2"
 rayon = "1.8.0"
 screenshots = "0.8.4"
 widestring = "1.0.2"
+win_desktop_duplication = "0.10.7"
 windows = { version = "0.51.1", features = ["Win32_Foundation", "Win32_Graphics_Gdi"] }
 
 [profile.dev]

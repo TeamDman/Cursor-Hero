@@ -6,7 +6,7 @@ use windows::Win32::Foundation::RECT;
 use std::{collections::VecDeque, rc::Rc};
 
 pub struct ScreenBackgroundsPlugin;
-use crate::windows_screen_capturing::{get_full_monitor_capturers, MonitorRegionCapturer, get_all_monitors, get_monitor_capturer};
+use crate::capture_methods::inhouse::{get_full_monitor_capturers, MonitorRegionCapturer, get_all_monitors, get_monitor_capturer};
 
 
 impl Plugin for ScreenBackgroundsPlugin {
@@ -28,6 +28,7 @@ pub enum CaptureMethod {
     #[default]
     Inhouse,
     Screen,
+    WinDesktopDuplication,
 }
 
 #[derive(Component, Default, Reflect)]
@@ -146,6 +147,9 @@ fn update_screens(
                             // textures.get_mut(&texture).unwrap().data = image.data;
                             textures.get_mut(texture).unwrap().data = frame.to_vec();
                         }
+                        CaptureMethod::WinDesktopDuplication => {
+
+                        }
                     }
                 }
             }
@@ -161,11 +165,13 @@ fn cycle_capture_method(mut query: Query<&mut Screen>, keyboard_input: Res<Input
                     CaptureMethod::Inhouse
                 }
                 CaptureMethod::Inhouse => {
+                    CaptureMethod::WinDesktopDuplication
+                }
+                CaptureMethod::WinDesktopDuplication => {
                     CaptureMethod::Screen
                 }
             };
             println!("Switched to {:?} method", screen.capture_method);
-
         }
     }
 }

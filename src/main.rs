@@ -8,7 +8,7 @@ use screen_backgrounds::ScreenBackgroundsPlugin;
 mod cursor_character;
 use cursor_character::{CursorCharacterPlugin, Character};
 
-mod windows_screen_capturing;
+mod capture_methods;
 
 fn main() {
     App::new()
