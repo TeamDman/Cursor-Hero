@@ -28,5 +28,6 @@ fn spawn_button(mut commands: Commands) {
             ..default()
         },
         Collider,
+        Name::new("HoverShower Button"),
     ));
 }

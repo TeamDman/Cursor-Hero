@@ -31,6 +31,7 @@ fn setup_position_text(mut commands: Commands, asset_server: Res<AssetServer>) {
             ..default()
         }),
         PositionText,
+        Name::new("Character Position Text")
     ));
 }
 

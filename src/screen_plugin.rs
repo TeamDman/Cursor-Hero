@@ -33,7 +33,7 @@ fn spawn_screens(
     mut textures: ResMut<Assets<Image>>,
     // mut capturer_resource: NonSendMut<CapturerResource>,
 ) {
-    commands.spawn((
+    let mut parent = commands.spawn((
         SpatialBundle::default(),
         ScreenParent,
         Name::new("Screen Parent"),
@@ -45,32 +45,36 @@ fn spawn_screens(
         .iter()
         .map(|monitor| monitor.info.name.clone())
         .collect::<VecDeque<String>>();
-    for screen in ScreenLib::all().unwrap().iter() {
-        let image_buf = screen.capture().unwrap();
-        let dynamic_image = DynamicImage::ImageRgba8(image_buf);
-        let image = Image::from_dynamic(dynamic_image, true);
-        let texture = textures.add(image);
-        let name = screen_names.pop_front().unwrap();
 
-        commands.spawn((
-            SpriteBundle {
-                texture,
-                transform: Transform::from_xyz(
-                    screen.display_info.x as f32 + (screen.display_info.width as f32) / 2.0,
-                    screen.display_info.y as f32 - (screen.display_info.height as f32) / 2.0,
-                    -1.0,
-                ), // Position behind the character
-                ..Default::default()
-            },
-            Screen {
-                name,
-                id: screen.display_info.id,
-                refresh_rate: Timer::from_seconds(0.1, TimerMode::Repeating),
-            },
-            InhouseThreadedCaptureTag,
-            Name::new(format!("Screen {}", screen.display_info.id)),
-        ));
-    }
+    parent.with_children(|parent| {
+        for screen in ScreenLib::all().unwrap().iter() {
+            let image_buf = screen.capture().unwrap();
+            let dynamic_image = DynamicImage::ImageRgba8(image_buf);
+            let image = Image::from_dynamic(dynamic_image, true);
+            let texture = textures.add(image);
+            let name = screen_names.pop_front().unwrap();
+    
+            parent.spawn((
+                SpriteBundle {
+                    texture,
+                    transform: Transform::from_xyz(
+                        screen.display_info.x as f32 + (screen.display_info.width as f32) / 2.0,
+                        screen.display_info.y as f32 - (screen.display_info.height as f32) / 2.0,
+                        -1.0,
+                    ), // Position behind the character
+                    ..Default::default()
+                },
+                Screen {
+                    name: name.clone(),
+                    id: screen.display_info.id,
+                    refresh_rate: Timer::from_seconds(0.1, TimerMode::Repeating),
+                },
+                InhouseThreadedCaptureTag,
+                Name::new(format!("Screen {}", name)),
+            ));
+    
+        }
+    });
 }
 
 #[derive(Component)]
