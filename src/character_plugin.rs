@@ -20,9 +20,9 @@ pub struct Character {
     pub speed: f32,
 }
 
-pub struct CursorCharacterPlugin;
+pub struct CharacterPlugin;
 
-impl Plugin for CursorCharacterPlugin {
+impl Plugin for CharacterPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(InputManagerPlugin::<CharacterAction>::default())
             .add_systems(Startup, spawn_cursor_character)

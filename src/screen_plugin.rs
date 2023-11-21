@@ -1,12 +1,11 @@
 use crate::capture_methods::inhouse::get_all_monitors;
 use bevy::prelude::*;
 use image::DynamicImage;
-use std::collections::VecDeque;
 use screenshots::Screen as ScreenLib;
+use std::collections::VecDeque;
 
-
-pub struct ScreenBackgroundsPlugin;
-impl Plugin for ScreenBackgroundsPlugin {
+pub struct ScreenPlugin;
+impl Plugin for ScreenPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_screens).add_systems(
             Update,
@@ -57,8 +56,8 @@ fn spawn_screens(
             SpriteBundle {
                 texture,
                 transform: Transform::from_xyz(
-                    screen.display_info.x as f32,
-                    screen.display_info.y as f32,
+                    screen.display_info.x as f32 + (screen.display_info.width as f32) / 2.0,
+                    screen.display_info.y as f32 - (screen.display_info.height as f32) / 2.0,
                     -1.0,
                 ), // Position behind the character
                 ..Default::default()

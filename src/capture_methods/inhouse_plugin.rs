@@ -1,16 +1,13 @@
-use std::{
-    sync::{Arc, Mutex},
-    thread, borrow::BorrowMut,
-};
+use std::sync::Arc;
 
 use crate::{
     capture_methods::inhouse::{
         get_all_monitors, get_full_monitor_capturers, get_monitor_capturer, MonitorRegionCapturer,
     },
-    screens::{InhouseCaptureTag, Screen},
+    screen_plugin::{InhouseCaptureTag, Screen},
     metrics::Metrics,
 };
-use bevy::{prelude::*, utils::HashMap};
+use bevy::prelude::*;
 use windows::Win32::Foundation::RECT;
 
 pub struct CapturerHolderResource {
@@ -43,8 +40,6 @@ fn update_screens(
         if !screen.refresh_rate.finished() {
             continue;
         }
-
-        let start = std::time::Instant::now();
 
         // find the capturer for this screen
         let capturer = capturer_resource

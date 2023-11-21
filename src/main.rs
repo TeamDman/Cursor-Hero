@@ -1,16 +1,22 @@
-use bevy::{prelude::*, input::mouse::MouseWheel};
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy::input::common_conditions::input_toggle_active;
+use bevy::prelude::*;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
-mod screens;
+mod screen_plugin;
+use camera_plugin::CameraPlugin;
 use capture_methods::screenlib_plugin::ScreenLibCapturePlugin;
-use screens::ScreenBackgroundsPlugin;
+use character_position_plugin::CharacterPositionPlugin;
+use hovershower_button_plugin::HoverShowerButtonPlugin;
+use screen_plugin::ScreenPlugin;
 
-mod cursor_character;
-use cursor_character::{CursorCharacterPlugin, Character};
+mod character_plugin;
+use character_plugin::CharacterPlugin;
 
 mod capture_methods;
+mod hovershower_button_plugin;
 mod metrics;
+mod character_position_plugin;
+mod camera_plugin;
 
 use crate::capture_methods::inhouse_plugin::InhouseCapturePlugin;
 use crate::capture_methods::inhouse_threaded_plugin::InhouseThreadedCapturePlugin;
@@ -31,31 +37,18 @@ fn main() {
                 })
                 .build(),
         )
-        .add_plugins(WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)))
-        .add_plugins((ScreenBackgroundsPlugin, CursorCharacterPlugin, InhouseCapturePlugin, InhouseThreadedCapturePlugin, ScreenLibCapturePlugin))
-        .add_systems(Startup, setup)
-        .add_systems(Update, (camera_follow_tick, camera_zoom_tick))
+        .add_plugins(
+            WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)),
+        )
+        .add_plugins((
+            ScreenPlugin, // load before character plugin to avoid stuttering 🤷‍♂️
+            CharacterPlugin,
+            InhouseCapturePlugin,
+            InhouseThreadedCapturePlugin,
+            ScreenLibCapturePlugin,
+            CameraPlugin,
+            HoverShowerButtonPlugin,
+            CharacterPositionPlugin,
+        ))
         .run();
-}
-
-fn setup(
-    mut commands: Commands,
-) {
-    commands.spawn(Camera2dBundle::default());
-}
-
-fn camera_zoom_tick(
-    mut cam: Query<&mut Transform, With<Camera>>,
-    mut scroll: EventReader<MouseWheel>,
-) {
-    for event in scroll.read() {
-        cam.single_mut().scale *= Vec3::splat(1.0 - event.y / 10.0);
-    }
-}
-
-fn camera_follow_tick(
-    mut cam: Query<&mut Transform, With<Camera>>,
-    char: Query<(&Transform, (With<Character>, Without<Camera>))>,
-) {
-    cam.single_mut().translation = char.single().0.translation;
 }

@@ -3,6 +3,12 @@
 // my changes are MPLv2, original code is Apache 2.0
 // modifications aim to reduce redundant work for successive screen capture calls
 
+// might also be interesting:
+// https://github.com/rhinostream/win_desktop_duplication/tree/master
+// https://github.com/rustdesk/rustdesk
+// https://github.com/RustBuddies/desktop-sharing
+// https://github.com/mira-screen-share/sharer/blob/main/src/capture/wgc/display.rs
+
 #[cfg(target_arch = "x86_64")]
 use std::arch::x86_64::_mm_shuffle_epi8;
 #[cfg(target_arch = "x86")]

@@ -1,17 +1,17 @@
 use std::{
     sync::{Arc, Mutex},
-    thread, borrow::BorrowMut,
+    thread,
 };
 
 use crate::{
     capture_methods::inhouse::{
-        get_all_monitors, get_full_monitor_capturers, get_monitor_capturer, MonitorRegionCapturer,
+        get_full_monitor_capturers, MonitorRegionCapturer,
     },
-    screens::{InhouseCaptureTag, Screen, InhouseThreadedCaptureTag},
+    screen_plugin::{Screen, InhouseThreadedCaptureTag},
     metrics::Metrics,
 };
 use bevy::{prelude::*, utils::HashMap};
-use windows::Win32::Foundation::RECT;
+
 
 pub struct CapturerHolderResource {
     pub capturers: Vec<MonitorRegionCapturer>,
@@ -87,7 +87,7 @@ fn update_screens(
     mut query: Query<(&mut Screen, &Handle<Image>), With<InhouseThreadedCaptureTag>>,
     mut textures: ResMut<Assets<Image>>,
     time: Res<Time>,
-    mut frames: Res<FrameHolderResource>,
+    frames: Res<FrameHolderResource>,
 ) {
     let monitor_frames = frames.frames.lock().unwrap();
     for (mut screen, texture) in &mut query {
