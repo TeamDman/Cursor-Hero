@@ -22,7 +22,7 @@ fn spawn_camera(mut commands: Commands) {
     commands.spawn((Camera2dBundle::default(), MainCamera));
 }
 
-fn camera_zoom_tick(
+pub fn camera_zoom_tick(
     mut cam: Query<&mut Transform, With<MainCamera>>,
     mut scroll: EventReader<MouseWheel>,
 ) {
