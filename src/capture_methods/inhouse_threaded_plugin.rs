@@ -110,6 +110,6 @@ fn update_screens(
         metrics.end("texture");
         
         // report metrics
-        println!("{}", metrics.report());
+        // println!("{}", metrics.report());
     }
 }

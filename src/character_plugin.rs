@@ -6,7 +6,7 @@ use bevy_inspector_egui::InspectorOptions;
 
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
-enum CharacterAction {
+pub enum CharacterAction {
     MoveUp,
     MoveDown,
     MoveLeft,
@@ -25,13 +25,13 @@ pub struct CharacterPlugin;
 impl Plugin for CharacterPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(InputManagerPlugin::<CharacterAction>::default())
-            .add_systems(Startup, spawn_cursor_character)
-            .add_systems(Update, cursor_movement_tick)
+            .add_systems(Startup, spawn_character)
+            .add_systems(Update, update_character_position)
             .register_type::<Character>();
     }
 }
 
-fn spawn_cursor_character(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn spawn_character(mut commands: Commands, asset_server: Res<AssetServer>) {
     let mut input_map = InputMap::default();
     input_map.insert(KeyCode::W, CharacterAction::MoveUp);
     input_map.insert(KeyCode::S, CharacterAction::MoveDown);
@@ -61,7 +61,7 @@ fn spawn_cursor_character(mut commands: Commands, asset_server: Res<AssetServer>
     ));
 }
 
-fn cursor_movement_tick(
+pub fn update_character_position(
     mut characters: Query<(&mut Transform, &Character, &ActionState<CharacterAction>)>,
     time: Res<Time>,
 ) {
