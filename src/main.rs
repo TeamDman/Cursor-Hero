@@ -7,19 +7,21 @@ mod screen_plugin;
 use camera_plugin::CameraPlugin;
 use capture_methods::screenlib_plugin::ScreenLibCapturePlugin;
 use click_drag_movement_plugin::ClickDragMovementPlugin;
-use position_text_plugin::PositionTextPlugin;
 use hovershower_button_plugin::HoverShowerButtonPlugin;
+use position_text_plugin::PositionTextPlugin;
 use screen_plugin::ScreenPlugin;
 
 mod character_plugin;
 use character_plugin::CharacterPlugin;
+use update_ordering::UpdateOrderingPlugin;
 
 mod camera_plugin;
 mod capture_methods;
-mod position_text_plugin;
+mod click_drag_movement_plugin;
 mod hovershower_button_plugin;
 mod metrics;
-mod click_drag_movement_plugin;
+mod position_text_plugin;
+mod update_ordering;
 
 use crate::capture_methods::inhouse_plugin::InhouseCapturePlugin;
 use crate::capture_methods::inhouse_threaded_plugin::InhouseThreadedCapturePlugin;
@@ -50,6 +52,7 @@ fn main() {
             LogDiagnosticsPlugin::default(),
         ))
         .add_plugins((
+            UpdateOrderingPlugin,
             ScreenPlugin,
             CharacterPlugin,
             InhouseCapturePlugin,
@@ -58,7 +61,7 @@ fn main() {
             CameraPlugin,
             HoverShowerButtonPlugin,
             PositionTextPlugin,
-            ClickDragMovementPlugin
+            ClickDragMovementPlugin,
         ))
         .run();
 }
