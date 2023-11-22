@@ -6,6 +6,7 @@ use bevy_inspector_egui::quick::WorldInspectorPlugin;
 mod screen_plugin;
 use camera_plugin::CameraPlugin;
 use capture_methods::screenlib_plugin::ScreenLibCapturePlugin;
+use click_drag_movement_plugin::ClickDragMovementPlugin;
 use position_text_plugin::PositionTextPlugin;
 use hovershower_button_plugin::HoverShowerButtonPlugin;
 use screen_plugin::ScreenPlugin;
@@ -18,6 +19,7 @@ mod capture_methods;
 mod position_text_plugin;
 mod hovershower_button_plugin;
 mod metrics;
+mod click_drag_movement_plugin;
 
 use crate::capture_methods::inhouse_plugin::InhouseCapturePlugin;
 use crate::capture_methods::inhouse_threaded_plugin::InhouseThreadedCapturePlugin;
@@ -56,6 +58,7 @@ fn main() {
             CameraPlugin,
             HoverShowerButtonPlugin,
             PositionTextPlugin,
+            ClickDragMovementPlugin
         ))
         .run();
 }
