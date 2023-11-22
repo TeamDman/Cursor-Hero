@@ -1,12 +1,12 @@
 use bevy::{input::mouse::MouseWheel, prelude::*};
 
-use crate::character_plugin::Character;
+use crate::character_plugin::{Character, update_character_position};
 pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_camera)
-            .add_systems(Update, (camera_follow_tick, camera_zoom_tick));
+            .add_systems(Update, (camera_follow_tick, camera_zoom_tick).after(update_character_position));
     }
 }
 
@@ -22,7 +22,10 @@ fn camera_zoom_tick(
     mut scroll: EventReader<MouseWheel>,
 ) {
     for event in scroll.read() {
-        cam.single_mut().scale *= Vec3::splat(1.0 - event.y / 10.0);
+        let mut scale = cam.single_mut().scale;
+        scale *= Vec3::splat(1.0 - event.y / 10.0);
+        scale = scale.clamp(Vec3::splat(0.1), Vec3::splat(10.0));
+        cam.single_mut().scale = scale;
     }
 }
 
