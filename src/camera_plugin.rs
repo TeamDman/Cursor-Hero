@@ -1,28 +1,82 @@
 use bevy::{input::mouse::MouseWheel, prelude::*};
+use leafwing_input_manager::{
+    action_state::ActionState, input_map::InputMap, plugin::InputManagerPlugin, Actionlike,
+    InputManagerBundle,
+};
 
 use crate::{character_plugin::Character, update_ordering::MovementSet};
 pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_camera).add_systems(
-            PostUpdate,
-            (
-                camera_follow_tick.in_set(MovementSet::AfterMovement),
-                camera_zoom_tick,
-            ),
-        );
+        app.add_plugins(InputManagerPlugin::<CameraAction>::default())
+            .add_systems(Startup, spawn_camera)
+            .add_systems(
+                Update,
+                (
+                    camera_follow_update.in_set(MovementSet::AfterMovement),
+                    update_camera_zoom,
+                    spawn_character_follow_tag.run_if(should_spawn_follow_tag),
+                    despawn_character_follow_tag.run_if(should_despawn_follow_tag),
+                ),
+            );
     }
 }
 
 #[derive(Component)]
 pub struct MainCamera;
 
-fn spawn_camera(mut commands: Commands) {
-    commands.spawn((Camera2dBundle::default(), MainCamera));
+#[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
+pub enum CameraAction {
+    ToggleFollowCharacter,
 }
 
-pub fn camera_zoom_tick(
+fn spawn_camera(mut commands: Commands) {
+    let mut input_map = InputMap::default();
+    input_map.insert(KeyCode::Space, CameraAction::ToggleFollowCharacter);
+    commands.spawn((
+        Camera2dBundle::default(),
+        MainCamera,
+        InputManagerBundle::<CameraAction> {
+            input_map,
+            action_state: ActionState::default(),
+            ..default()
+        },
+    ));
+}
+
+#[derive(Component)]
+pub struct FollowWithCamera;
+
+pub fn should_spawn_follow_tag(cam: Query<&ActionState<CameraAction>, With<MainCamera>>) -> bool {
+    cam.single().pressed(CameraAction::ToggleFollowCharacter)
+}
+
+pub fn spawn_character_follow_tag(
+    mut commands: Commands,
+    character: Query<Entity, With<Character>>,
+    mut character_sprite: Query<&mut Sprite, With<Character>>,
+) {
+    commands.entity(character.single()).insert(FollowWithCamera);
+    character_sprite.single_mut().color = Color::rgb(1.0, 1.0, 0.4);
+}
+
+pub fn should_despawn_follow_tag(cam: Query<&ActionState<CameraAction>, With<MainCamera>>) -> bool {
+    cam.single()
+        .just_released(CameraAction::ToggleFollowCharacter)
+}
+pub fn despawn_character_follow_tag(
+    mut commands: Commands,
+    character: Query<Entity, With<Character>>,
+    mut character_sprite: Query<&mut Sprite, With<Character>>,
+) {
+    commands
+        .entity(character.single())
+        .remove::<FollowWithCamera>();
+    character_sprite.single_mut().color = Color::WHITE;
+}
+
+pub fn update_camera_zoom(
     mut cam: Query<&mut Transform, With<MainCamera>>,
     mut scroll: EventReader<MouseWheel>,
 ) {
@@ -34,9 +88,13 @@ pub fn camera_zoom_tick(
     }
 }
 
-fn camera_follow_tick(
+fn camera_follow_update(
     mut cam: Query<&mut Transform, With<MainCamera>>,
-    char: Query<(&Transform, (With<Character>, Without<MainCamera>))>, // we exclude the camera to guarantee queries are disjoint
+    follow: Query<&Transform, (With<FollowWithCamera>, Without<MainCamera>)>, // we exclude the camera to guarantee queries are disjoint
 ) {
-    cam.single_mut().translation = char.single().0.translation;
+    if let Ok(follow) = follow.get_single() {
+        cam.single_mut().translation = follow.translation;
+    } else if follow.iter().len() != 0 {
+        panic!("Multiple entities with FollowWithCamera component");
+    }
 }

@@ -6,7 +6,6 @@ use bevy_inspector_egui::InspectorOptions;
 
 use crate::update_ordering::MovementSet;
 
-
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
 pub enum CharacterAction {
     MoveUp,
@@ -28,8 +27,7 @@ impl Plugin for CharacterPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(InputManagerPlugin::<CharacterAction>::default())
             .add_systems(Startup, spawn_character)
-            .add_systems(Update, update_character_position.in_set(MovementSet::Input))
-            .register_type::<Character>();
+            .add_systems(Update, update_character_position.in_set(MovementSet::Input));
     }
 }
 
@@ -51,15 +49,13 @@ fn spawn_character(mut commands: Commands, asset_server: Res<AssetServer>) {
             texture,
             ..default()
         },
-        Character {
-            speed: 400.0,
-        },
+        Character { speed: 400.0 },
         Name::new("Cursor Character"),
         InputManagerBundle::<CharacterAction> {
             input_map,
             action_state: ActionState::default(),
             ..default()
-        }
+        },
     ));
 }
 
@@ -69,7 +65,7 @@ fn update_character_position(
 ) {
     for (mut transform, char, action_state) in &mut characters {
         let movement_amount = char.speed * time.delta_seconds();
-        
+
         if action_state.pressed(CharacterAction::MoveUp) {
             transform.translation.y += movement_amount;
         }

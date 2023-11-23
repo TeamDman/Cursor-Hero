@@ -1,8 +1,9 @@
 use bevy::input::mouse::{MouseButtonInput, MouseMotion};
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
+use leafwing_input_manager::action_state::ActionState;
 
-use crate::camera_plugin::{camera_zoom_tick, MainCamera};
+use crate::camera_plugin::{update_camera_zoom, CameraAction, FollowWithCamera, MainCamera};
 use crate::character_plugin::Character;
 use crate::update_ordering::MovementSet;
 
@@ -12,47 +13,72 @@ impl Plugin for ClickDragMovementPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            update_drag
-                .in_set(MovementSet::Input)
-                .after(camera_zoom_tick),
+            (
+                mouse_drag_update
+                    .in_set(MovementSet::Input)
+                    .after(update_camera_zoom),
+                teleport_character_to_camera
+                    .in_set(MovementSet::Input)
+                    .after(mouse_drag_update)
+                    .run_if(should_teleport_character_to_camera),
+            ),
         )
         .insert_resource(MouseDragState::default());
     }
 }
 
-struct StartState {
-    drag_start_screen_position: Vec2,
+struct Anchor {
     drag_start_world_position: Vec2,
 }
 
 #[derive(Resource)]
 struct MouseDragState {
-    start_state: Option<StartState>,
+    anchor: Option<Anchor>,
     is_dragging: bool,
-    last_known_screen_position: Option<Vec2>,
 }
 
 impl Default for MouseDragState {
     fn default() -> Self {
         Self {
-            start_state: None,
+            anchor: None,
             is_dragging: false,
-            last_known_screen_position: None,
         }
     }
 }
 
-fn update_drag(
+fn should_teleport_character_to_camera(
+    query: Query<&FollowWithCamera, Added<FollowWithCamera>>,
+) -> bool {
+    for _ in query.iter() {
+        return true;
+    }
+    return false;
+}
+
+/// when the camera starts following a character while dragging, teleport the character to the camera
+fn teleport_character_to_camera(
+    mut character: Query<&mut Transform, (With<Character>, Without<MainCamera>)>,
+    camera_transform_query: Query<&Transform, (With<MainCamera>, Without<Character>)>,
+) {
+    character.single_mut().translation = camera_transform_query.single().translation;
+}
+
+fn mouse_drag_update(
     mut mouse_button_input_events: EventReader<MouseButtonInput>,
     mut mouse_drag_state: ResMut<MouseDragState>,
     mut mouse_motion_events: EventReader<MouseMotion>,
-    mut character: Query<&mut Transform, With<Character>>,
+    mut follow: Query<&mut Transform, (With<FollowWithCamera>, Without<MainCamera>)>,
     window_query: Query<&Window, With<PrimaryWindow>>,
-    camera_query: Query<(&Camera, &GlobalTransform), (With<MainCamera>, Without<Character>)>,
+    camera_query: Query<
+        (&Camera, &GlobalTransform, &ActionState<CameraAction>),
+        (With<MainCamera>, Without<Character>),
+    >,
+    mut camera_transform_query: Query<&mut Transform, (With<MainCamera>, Without<Character>)>,
 ) {
-    let (camera, camera_transform) = camera_query.single();
+    let (camera, camera_global_transform, camera_actions) = camera_query.single();
     let window = window_query.single();
 
+    // drag start and end logic
     for event in mouse_button_input_events.read() {
         match event.button {
             MouseButton::Left => {
@@ -61,20 +87,17 @@ fn update_drag(
                     // begin dragging
                     if let Some(screen_position) = window.cursor_position() {
                         if let Some(world_position) = camera
-                            .viewport_to_world(camera_transform, screen_position)
+                            .viewport_to_world(camera_global_transform, screen_position)
                             .map(|ray| ray.origin.truncate())
                         {
-                            mouse_drag_state.start_state = Some(StartState {
-                                drag_start_screen_position: screen_position,
+                            mouse_drag_state.anchor = Some(Anchor {
                                 drag_start_world_position: world_position,
                             });
-                            mouse_drag_state.last_known_screen_position = Some(screen_position);
                         }
                     }
                 } else {
                     // finish dragging
-                    mouse_drag_state.start_state = None;
-                    mouse_drag_state.last_known_screen_position = None;
+                    mouse_drag_state.anchor = None;
                 }
             }
             _ => {}
@@ -83,31 +106,39 @@ fn update_drag(
 
     if mouse_drag_state.is_dragging {
         // perform drag update
-        if let Some(start_state) = &mouse_drag_state.start_state {
+        if let Some(anchor) = &mouse_drag_state.anchor {
             if let Some(current_screen_position) = window.cursor_position() {
-                // we want the starting point to remain under the mouse as we drag
+                // mouse is inside the window, convert to world coords
                 if let Some(current_world_position) = camera
-                    .viewport_to_world(camera_transform, current_screen_position)
+                    .viewport_to_world(camera_global_transform, current_screen_position)
                     .map(|ray| ray.origin.truncate())
                 {
-                    let delta = start_state.drag_start_world_position - current_world_position;
-                    for mut transform in character.iter_mut() {
-                        transform.translation += delta.extend(0.0);
+                    // calculate delta from the anchor
+                    let delta = anchor.drag_start_world_position - current_world_position;
+                    if let Ok(mut follow) = follow.get_single_mut() {
+                        // reposition the thing the camera is following
+                        follow.translation += delta.extend(0.0);
+                    } else {
+                        // move the camera when not following something
+                        camera_transform_query.single_mut().translation += delta.extend(0.0);
                     }
-                    mouse_drag_state.start_state = Some(StartState {
-                        drag_start_screen_position: current_screen_position,
-                        drag_start_world_position: start_state.drag_start_world_position,
+                    // track info needed to keep alignment with starting point
+                    mouse_drag_state.anchor = Some(Anchor {
+                        drag_start_world_position: anchor.drag_start_world_position,
                     });
-                    mouse_drag_state.last_known_screen_position = Some(current_screen_position);
                 }
             } else {
                 // cursor is outside the window, use delta to approximate mouse position
-                let mut delta = mouse_motion_events.read().fold(Vec2::ZERO, |acc, event| {
-                    acc + event.delta
-                });
+                let mut delta = mouse_motion_events
+                    .read()
+                    .fold(Vec2::ZERO, |acc, event| acc + event.delta);
                 delta.x *= -1.0;
-                for mut transform in character.iter_mut() {
-                    transform.translation += delta.extend(0.0);
+                if let Ok(mut follow) = follow.get_single_mut() {
+                    // reposition the thing the camera is following
+                    follow.translation += delta.extend(0.0);
+                } else {
+                    // move the camera when not following something
+                    camera_transform_query.single_mut().translation += delta.extend(0.0);
                 }
             }
         }
