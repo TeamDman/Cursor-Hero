@@ -48,8 +48,14 @@ fn spawn_camera(mut commands: Commands) {
 #[derive(Component)]
 pub struct FollowWithCamera;
 
-pub fn should_spawn_follow_tag(cam: Query<&ActionState<CameraAction>, With<MainCamera>>) -> bool {
-    cam.single().pressed(CameraAction::ToggleFollowCharacter)
+pub fn should_spawn_follow_tag(
+    cam: Query<&ActionState<CameraAction>, With<MainCamera>>,
+    follow: Query<&FollowWithCamera, Without<MainCamera>>,
+) -> bool {
+    follow.iter().next().is_none()
+        && cam
+            .single()
+            .just_pressed(CameraAction::ToggleFollowCharacter)
 }
 
 pub fn spawn_character_follow_tag(
@@ -61,9 +67,14 @@ pub fn spawn_character_follow_tag(
     character_sprite.single_mut().color = Color::rgb(1.0, 1.0, 0.4);
 }
 
-pub fn should_despawn_follow_tag(cam: Query<&ActionState<CameraAction>, With<MainCamera>>) -> bool {
-    cam.single()
-        .just_released(CameraAction::ToggleFollowCharacter)
+pub fn should_despawn_follow_tag(
+    cam: Query<&ActionState<CameraAction>, With<MainCamera>>,
+    follow: Query<&FollowWithCamera, Without<MainCamera>>,
+) -> bool {
+    follow.iter().next().is_some()
+        && cam
+            .single()
+            .just_pressed(CameraAction::ToggleFollowCharacter)
 }
 pub fn despawn_character_follow_tag(
     mut commands: Commands,

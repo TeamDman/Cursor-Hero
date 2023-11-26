@@ -48,11 +48,9 @@ impl Default for MouseDragState {
 
 fn should_teleport_character_to_camera(
     query: Query<&FollowWithCamera, Added<FollowWithCamera>>,
+    mouse_drag_state: Res<MouseDragState>,
 ) -> bool {
-    for _ in query.iter() {
-        return true;
-    }
-    return false;
+    query.iter().next().is_some() && mouse_drag_state.is_dragging
 }
 
 /// when the camera starts following a character while dragging, teleport the character to the camera

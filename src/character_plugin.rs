@@ -4,6 +4,7 @@ use leafwing_input_manager::prelude::*;
 use bevy_inspector_egui::prelude::ReflectInspectorOptions;
 use bevy_inspector_egui::InspectorOptions;
 
+use crate::interaction_plugin::Interactor;
 use crate::update_ordering::MovementSet;
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
@@ -50,6 +51,7 @@ fn spawn_character(mut commands: Commands, asset_server: Res<AssetServer>) {
             ..default()
         },
         Character { speed: 400.0 },
+        Interactor,
         Name::new("Cursor Character"),
         InputManagerBundle::<CharacterAction> {
             input_map,

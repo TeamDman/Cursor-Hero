@@ -10,6 +10,7 @@ anyhow = "1.0.75"
 # bevy = { version = "0.12", features = ["dynamic_linking"] } # broken https://github.com/rust-lang/rust/issues/53014
 bevy = { version = "0.12" }
 bevy-inspector-egui = "0.21.0"
+bevy_spatial = "0.7.0"
 fxhash = "0.2.1"
 image = "0.24.7"
 indexmap = "2.1.0"

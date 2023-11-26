@@ -1,17 +1,21 @@
 use bevy::prelude::*;
 
+use crate::{interaction_plugin::{Interactable, WithinInteractionRange}, update_ordering::InteractionSet};
+
 pub struct HoverShowerButtonPlugin;
 impl Plugin for HoverShowerButtonPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_button);
+        app.add_systems(Startup, spawn_button).add_systems(
+            Update,
+            (reset_interaction_color, update_interaction_color)
+                .chain()
+                .in_set(InteractionSet::Response),
+        );
     }
 }
 
 #[derive(Component, Default, Reflect)]
-struct Collider;
-
-#[derive(Event, Default)]
-struct CollisionEvent;
+struct MyButton;
 
 fn spawn_button(mut commands: Commands) {
     commands.spawn((
@@ -27,7 +31,22 @@ fn spawn_button(mut commands: Commands) {
             },
             ..default()
         },
-        Collider,
+        MyButton,
+        Interactable,
         Name::new("HoverShower Button"),
     ));
+}
+
+fn reset_interaction_color(mut query: Query<&mut Sprite, With<MyButton>>) {
+    for mut sprite in query.iter_mut() {
+        sprite.color = Color::rgb(0.0, 0.0, 0.0);
+    }
+}
+
+fn update_interaction_color(
+    mut query: Query<&mut Sprite, (With<MyButton>, With<WithinInteractionRange>)>,
+) {
+    for mut sprite in query.iter_mut() {
+        sprite.color = Color::rgb(0.0, 1.0, 0.0);
+    }
 }

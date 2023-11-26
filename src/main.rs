@@ -8,6 +8,7 @@ use camera_plugin::CameraPlugin;
 use capture_methods::screenlib_plugin::ScreenLibCapturePlugin;
 use click_drag_movement_plugin::ClickDragMovementPlugin;
 use hovershower_button_plugin::HoverShowerButtonPlugin;
+use interaction_plugin::InteractionPlugin;
 use position_text_plugin::PositionTextPlugin;
 use screen_plugin::ScreenPlugin;
 
@@ -19,6 +20,7 @@ mod camera_plugin;
 mod capture_methods;
 mod click_drag_movement_plugin;
 mod hovershower_button_plugin;
+mod interaction_plugin;
 mod metrics;
 mod position_text_plugin;
 mod update_ordering;
@@ -55,6 +57,7 @@ fn main() {
             UpdateOrderingPlugin,
             ScreenPlugin,
             CharacterPlugin,
+            InteractionPlugin,
             InhouseCapturePlugin,
             InhouseThreadedCapturePlugin,
             ScreenLibCapturePlugin,
