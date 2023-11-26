@@ -13,7 +13,9 @@ impl Plugin for ScreenPlugin {
                 // update_screens,
                 cycle_capture_method,
             ),
-        );
+        )
+        .register_type::<Screen>()
+        .register_type::<ScreenParent>();
     }
 }
 
@@ -25,7 +27,7 @@ pub struct Screen {
     pub refresh_rate: Timer,
 }
 
-#[derive(Component)]
+#[derive(Component, Reflect)]
 pub struct ScreenParent;
 
 fn spawn_screens(

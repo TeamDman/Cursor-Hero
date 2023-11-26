@@ -1,4 +1,4 @@
-use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
+use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::input::common_conditions::input_toggle_active;
 use bevy::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
@@ -7,6 +7,7 @@ mod screen_plugin;
 use camera_plugin::CameraPlugin;
 use capture_methods::screenlib_plugin::ScreenLibCapturePlugin;
 use click_drag_movement_plugin::ClickDragMovementPlugin;
+use fps_text_plugin::FpsTextPlugin;
 use hovershower_button_plugin::HoverShowerButtonPlugin;
 use interaction_plugin::InteractionPlugin;
 use position_text_plugin::PositionTextPlugin;
@@ -24,6 +25,7 @@ mod interaction_plugin;
 mod metrics;
 mod position_text_plugin;
 mod update_ordering;
+mod fps_text_plugin;
 
 use crate::capture_methods::inhouse_plugin::InhouseCapturePlugin;
 use crate::capture_methods::inhouse_threaded_plugin::InhouseThreadedCapturePlugin;
@@ -47,13 +49,9 @@ fn main() {
         .add_plugins(
             WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)),
         )
+        .add_plugins((FrameTimeDiagnosticsPlugin,))
         .add_plugins((
-            // Adds frame time diagnostics
-            FrameTimeDiagnosticsPlugin,
-            // Adds a system that prints diagnostics to the console
-            LogDiagnosticsPlugin::default(),
-        ))
-        .add_plugins((
+            FpsTextPlugin,
             UpdateOrderingPlugin,
             ScreenPlugin,
             CharacterPlugin,

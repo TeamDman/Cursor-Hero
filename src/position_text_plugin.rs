@@ -6,15 +6,18 @@ pub struct PositionTextPlugin;
 impl Plugin for PositionTextPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup_position_text)
-            .add_systems(Update, update_position_text.in_set(MovementSet::AfterMovement));
+            .add_systems(Update, update_position_text.in_set(MovementSet::AfterMovement))
+            .register_type::<CharacterPositionText>()
+            .register_type::<MouseWorldPositionText>()
+            .register_type::<MouseScreenPositionText>();
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Reflect)]
 struct CharacterPositionText;
-#[derive(Component)]
+#[derive(Component, Reflect)]
 struct MouseWorldPositionText;
-#[derive(Component)]
+#[derive(Component, Reflect)]
 struct MouseScreenPositionText;
 
 fn setup_position_text(mut commands: Commands, asset_server: Res<AssetServer>) {

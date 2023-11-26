@@ -1,9 +1,8 @@
 use bevy::input::mouse::{MouseButtonInput, MouseMotion};
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
-use leafwing_input_manager::action_state::ActionState;
 
-use crate::camera_plugin::{update_camera_zoom, CameraAction, FollowWithCamera, MainCamera};
+use crate::camera_plugin::{update_camera_zoom, FollowWithCamera, MainCamera};
 use crate::character_plugin::Character;
 use crate::update_ordering::MovementSet;
 
@@ -23,15 +22,17 @@ impl Plugin for ClickDragMovementPlugin {
                     .run_if(should_teleport_character_to_camera),
             ),
         )
-        .insert_resource(MouseDragState::default());
+        .insert_resource(MouseDragState::default())
+        .register_type::<MouseDragState>();
     }
 }
 
+#[derive(Reflect)]
 struct Anchor {
     drag_start_world_position: Vec2,
 }
 
-#[derive(Resource)]
+#[derive(Resource, Reflect)]
 struct MouseDragState {
     anchor: Option<Anchor>,
     is_dragging: bool,
@@ -68,12 +69,12 @@ fn mouse_drag_update(
     mut follow: Query<&mut Transform, (With<FollowWithCamera>, Without<MainCamera>)>,
     window_query: Query<&Window, With<PrimaryWindow>>,
     camera_query: Query<
-        (&Camera, &GlobalTransform, &ActionState<CameraAction>),
+        (&Camera, &GlobalTransform),
         (With<MainCamera>, Without<Character>),
     >,
     mut camera_transform_query: Query<&mut Transform, (With<MainCamera>, Without<Character>)>,
 ) {
-    let (camera, camera_global_transform, camera_actions) = camera_query.single();
+    let (camera, camera_global_transform) = camera_query.single();
     let window = window_query.single();
 
     // drag start and end logic

@@ -10,7 +10,8 @@ impl Plugin for HoverShowerButtonPlugin {
             (reset_interaction_color, update_interaction_color)
                 .chain()
                 .in_set(InteractionSet::Response),
-        );
+        )
+        .register_type::<MyButton>();
     }
 }
 

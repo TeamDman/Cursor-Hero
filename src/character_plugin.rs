@@ -28,7 +28,8 @@ impl Plugin for CharacterPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(InputManagerPlugin::<CharacterAction>::default())
             .add_systems(Startup, spawn_character)
-            .add_systems(Update, update_character_position.in_set(MovementSet::Input));
+            .add_systems(Update, update_character_position.in_set(MovementSet::Input))
+            .register_type::<Character>();
     }
 }
 

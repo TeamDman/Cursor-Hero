@@ -19,11 +19,12 @@ impl Plugin for CameraPlugin {
                     spawn_character_follow_tag.run_if(should_spawn_follow_tag),
                     despawn_character_follow_tag.run_if(should_despawn_follow_tag),
                 ),
-            );
+            )
+            .register_type::<MainCamera>();
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Reflect)]
 pub struct MainCamera;
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
