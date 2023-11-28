@@ -1,5 +1,8 @@
 // mostly from 2d kinematic character example from https://github.com/Jondolf/bevy_xpbd
 
+// turns out there's an issue for this
+// https://github.com/Jondolf/bevy_xpbd/issues/211#issuecomment-1789342920
+
 use bevy::input::common_conditions::input_toggle_active;
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
@@ -29,6 +32,8 @@ fn main() {
         .insert_resource(ClearColor(Color::rgb(0.05, 0.05, 0.1)))
         .add_systems(Startup, setup)
         .add_systems(Update, camera_follow_update.after(PhysicsSet::Sync))
+        // this one fixes the problem
+        // .add_systems(PostUpdate, camera_follow_update.after(PhysicsSet::Sync).before(TransformSystem::TransformPropagate))
         .run();
 }
 

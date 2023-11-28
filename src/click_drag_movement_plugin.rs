@@ -4,7 +4,6 @@ use bevy::window::PrimaryWindow;
 
 use crate::camera_plugin::{update_camera_zoom, FollowWithCamera, MainCamera};
 use crate::character_plugin::Character;
-use crate::update_ordering::MovementSet;
 
 pub struct ClickDragMovementPlugin;
 
@@ -14,10 +13,8 @@ impl Plugin for ClickDragMovementPlugin {
             Update,
             (
                 mouse_drag_update
-                    .in_set(MovementSet::Input)
                     .after(update_camera_zoom),
                 teleport_character_to_camera
-                    .in_set(MovementSet::Input)
                     .after(mouse_drag_update)
                     .run_if(should_teleport_character_to_camera),
             ),

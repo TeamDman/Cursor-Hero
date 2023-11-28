@@ -1,4 +1,4 @@
-use crate::{camera_plugin::MainCamera, character_plugin::Character, update_ordering::MovementSet};
+use crate::{camera_plugin::MainCamera, character_plugin::Character};
 use bevy::{prelude::*, window::PrimaryWindow};
 
 pub struct PositionTextPlugin;
@@ -6,7 +6,7 @@ pub struct PositionTextPlugin;
 impl Plugin for PositionTextPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup_position_text)
-            .add_systems(Update, update_position_text.in_set(MovementSet::AfterMovement))
+            .add_systems(Update, update_position_text)
             .register_type::<CharacterPositionText>()
             .register_type::<MouseWorldPositionText>()
             .register_type::<MouseScreenPositionText>();

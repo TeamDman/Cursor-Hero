@@ -19,7 +19,6 @@ use screen_plugin::ScreenPlugin;
 
 mod character_plugin;
 use character_plugin::CharacterPlugin;
-use update_ordering::UpdateOrderingPlugin;
 
 mod active_input_state_plugin;
 mod camera_plugin;
@@ -29,7 +28,6 @@ mod fps_text_plugin;
 mod hovershower_button_plugin;
 mod metrics;
 mod position_text_plugin;
-mod update_ordering;
 
 use crate::capture_methods::inhouse_plugin::InhouseCapturePlugin;
 use crate::capture_methods::inhouse_threaded_plugin::InhouseThreadedCapturePlugin;
@@ -79,17 +77,16 @@ fn main() {
         .add_plugins((FrameTimeDiagnosticsPlugin,))
         .add_plugins((
             ActiveInputStatePlugin,
-            // FpsTextPlugin,
-            UpdateOrderingPlugin,
-            // ScreenPlugin,
+            FpsTextPlugin,
+            ScreenPlugin,
             CharacterPlugin,
-            // InhouseCapturePlugin,
-            // InhouseThreadedCapturePlugin,
-            // ScreenLibCapturePlugin,
+            InhouseCapturePlugin,
+            InhouseThreadedCapturePlugin,
+            ScreenLibCapturePlugin,
             CameraPlugin,
-            // HoverShowerButtonPlugin,
-            // PositionTextPlugin,
-            // ClickDragMovementPlugin,
+            HoverShowerButtonPlugin,
+            PositionTextPlugin,
+            ClickDragMovementPlugin,
         ))
         .run();
 }

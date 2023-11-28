@@ -1,10 +1,11 @@
-use bevy::{input::mouse::MouseWheel, prelude::*};
+use bevy::{input::mouse::MouseWheel, prelude::*, transform::TransformSystem};
+use bevy_xpbd_2d::PhysicsSet;
 use leafwing_input_manager::{
     action_state::ActionState, input_map::InputMap, plugin::InputManagerPlugin, Actionlike,
     InputManagerBundle,
 };
 
-use crate::{character_plugin::Character, update_ordering::MovementSet};
+use crate::character_plugin::Character;
 pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
@@ -14,15 +15,16 @@ impl Plugin for CameraPlugin {
             .add_systems(
                 Update,
                 (
-                    camera_follow_update.in_set(MovementSet::AfterMovement),
-                    update_camera_zoom.in_set(MovementSet::Input),
-                    spawn_character_follow_tag
-                        .in_set(MovementSet::Input)
-                        .run_if(should_spawn_follow_tag),
-                    despawn_character_follow_tag
-                        .in_set(MovementSet::Input)
-                        .run_if(should_despawn_follow_tag),
+                    update_camera_zoom,
+                    spawn_character_follow_tag.run_if(should_spawn_follow_tag),
+                    despawn_character_follow_tag.run_if(should_despawn_follow_tag),
                 ),
+            )
+            .add_systems(
+                PostUpdate,
+                camera_follow_update
+                    .after(PhysicsSet::Sync)
+                    .before(TransformSystem::TransformPropagate),
             )
             .register_type::<MainCamera>();
     }
