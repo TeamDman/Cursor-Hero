@@ -79,17 +79,17 @@ fn main() {
         .add_plugins((FrameTimeDiagnosticsPlugin,))
         .add_plugins((
             ActiveInputStatePlugin,
-            FpsTextPlugin,
+            // FpsTextPlugin,
             UpdateOrderingPlugin,
-            ScreenPlugin,
+            // ScreenPlugin,
             CharacterPlugin,
-            InhouseCapturePlugin,
-            InhouseThreadedCapturePlugin,
-            ScreenLibCapturePlugin,
+            // InhouseCapturePlugin,
+            // InhouseThreadedCapturePlugin,
+            // ScreenLibCapturePlugin,
             CameraPlugin,
-            HoverShowerButtonPlugin,
-            PositionTextPlugin,
-            ClickDragMovementPlugin,
+            // HoverShowerButtonPlugin,
+            // PositionTextPlugin,
+            // ClickDragMovementPlugin,
         ))
         .run();
 }

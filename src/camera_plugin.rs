@@ -15,9 +15,13 @@ impl Plugin for CameraPlugin {
                 Update,
                 (
                     camera_follow_update.in_set(MovementSet::AfterMovement),
-                    update_camera_zoom,
-                    spawn_character_follow_tag.run_if(should_spawn_follow_tag),
-                    despawn_character_follow_tag.run_if(should_despawn_follow_tag),
+                    update_camera_zoom.in_set(MovementSet::Input),
+                    spawn_character_follow_tag
+                        .in_set(MovementSet::Input)
+                        .run_if(should_spawn_follow_tag),
+                    despawn_character_follow_tag
+                        .in_set(MovementSet::Input)
+                        .run_if(should_despawn_follow_tag),
                 ),
             )
             .register_type::<MainCamera>();
@@ -66,7 +70,7 @@ pub fn spawn_character_follow_tag(
 ) {
     commands.entity(entity.single()).insert(FollowWithCamera);
     for mut sprite in sprites.iter_mut() {
-        sprite.color = Color::rgb(1.0,1.0,0.4);
+        sprite.color = Color::rgb(1.0, 1.0, 0.4);
     }
 }
 

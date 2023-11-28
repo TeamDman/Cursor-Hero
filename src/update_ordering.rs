@@ -5,7 +5,6 @@ use bevy_xpbd_2d::PhysicsSet;
 #[derive(Debug, Hash, PartialEq, Eq, Clone, SystemSet)]
 pub enum MovementSet {
     Input,
-    PrePhysics,
     AfterMovement,
 }
 
@@ -17,8 +16,7 @@ impl Plugin for UpdateOrderingPlugin {
             Update,
             (
                 MovementSet::Input,
-                MovementSet::PrePhysics,
-                PhysicsSet::StepSimulation,
+                PhysicsSet::Sync,
                 MovementSet::AfterMovement,
             )
                 .chain(),
