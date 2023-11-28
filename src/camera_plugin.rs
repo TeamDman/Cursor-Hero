@@ -61,11 +61,13 @@ pub fn should_spawn_follow_tag(
 
 pub fn spawn_character_follow_tag(
     mut commands: Commands,
-    character: Query<Entity, With<Character>>,
-    mut character_sprite: Query<&mut Sprite, With<Character>>,
+    entity: Query<Entity, With<Character>>,
+    mut sprites: Query<&mut Sprite, With<Character>>,
 ) {
-    commands.entity(character.single()).insert(FollowWithCamera);
-    character_sprite.single_mut().color = Color::rgb(1.0, 1.0, 0.4);
+    commands.entity(entity.single()).insert(FollowWithCamera);
+    for mut sprite in sprites.iter_mut() {
+        sprite.color = Color::rgb(1.0,1.0,0.4);
+    }
 }
 
 pub fn should_despawn_follow_tag(
@@ -80,12 +82,12 @@ pub fn should_despawn_follow_tag(
 pub fn despawn_character_follow_tag(
     mut commands: Commands,
     character: Query<Entity, With<Character>>,
-    mut character_sprite: Query<&mut Sprite, With<Character>>,
+    mut sprites: Query<&mut Sprite, With<Character>>,
 ) {
     commands
         .entity(character.single())
         .remove::<FollowWithCamera>();
-    character_sprite.single_mut().color = Color::WHITE;
+    sprites.iter_mut().for_each(|mut s| s.color = Color::WHITE);
 }
 
 pub fn update_camera_zoom(

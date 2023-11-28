@@ -4,18 +4,28 @@ use bevy::input::common_conditions::input_toggle_active;
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_xpbd_2d::{math::*, prelude::*};
-use bevy_xpbd_2d::{SubstepSchedule, SubstepSet};
 
 fn main() {
     App::new()
-        .add_plugins((
-            DefaultPlugins,
-            PhysicsPlugins::default(),
-            CharacterControllerPlugin,
-        ))
+        .add_plugins(
+            DefaultPlugins
+                .set(ImagePlugin::default_nearest())
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        title: "Cursor Hero Example - Character Movement".into(),
+                        resolution: (640.0, 480.0).into(),
+                        resizable: true,
+                        ..default()
+                    }),
+                    ..default()
+                })
+                .build(),
+        )
+        .add_plugins((PhysicsPlugins::default(), CharacterControllerPlugin))
         .add_plugins(
             WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)),
         )
+        .insert_resource(Gravity(Vector::ZERO))
         .insert_resource(ClearColor(Color::rgb(0.05, 0.05, 0.1)))
         .add_systems(Startup, setup)
         .run();
@@ -25,76 +35,118 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    asset_server: Res<AssetServer>,
 ) {
     // Player
+    let texture = asset_server.load("character.png");
+
     commands.spawn((
-        MaterialMesh2dBundle {
-            mesh: meshes
-                .add(
-                    shape::Capsule {
-                        radius: 12.5,
-                        depth: 20.0,
-                        ..default()
-                    }
-                    .into(),
-                )
-                .into(),
-            material: materials.add(ColorMaterial::from(Color::rgb(0.2, 0.7, 0.9))),
-            transform: Transform::from_xyz(0.0, -100.0, 0.0),
+        SpriteBundle {
+            sprite: Sprite {
+                custom_size: Some(Vec2::new(100.0, 100.0)),
+                ..default()
+            },
+            texture,
             ..default()
         },
-        CharacterControllerBundle::new(Collider::capsule(20.0, 12.5)).with_movement(12500.0, 0.92,400.0),
+        // MaterialMesh2dBundle {
+        //     mesh: meshes
+        //         .add(
+        //             shape::Capsule {
+        //                 radius: 12.5,
+        //                 depth: 20.0,
+        //                 ..default()
+        //             }
+        //             .into(),
+        //         )
+        //         .into(),
+        //     material: materials.add(ColorMaterial::from(Color::rgb(0.2, 0.7, 0.9))),
+        //     transform: Transform::from_xyz(0.0, -100.0, 0.0),
+        //     ..default()
+        // },
+        CharacterControllerBundle::new(Collider::capsule(20.0, 12.5))
+            .with_movement(12500.0, 0.92, 400.0),
     ));
+
+    // A cube to move around
+    commands.spawn((
+        SpriteBundle {
+            sprite: Sprite {
+                color: Color::rgb(0.0, 0.4, 0.7),
+                custom_size: Some(Vec2::new(30.0, 30.0)),
+                ..default()
+            },
+            transform: Transform::from_xyz(250.0, -100.0, 0.0),
+            ..default()
+        },
+        RigidBody::Dynamic,
+        Collider::cuboid(30.0, 30.0),
+    ));
+
+    // // A sensor to act as a pressure plate
+    // commands.spawn((
+    //     SpriteBundle {
+    //         sprite: Sprite {
+    //             color: Color::rgb(0.7, 0.4, 0.0),
+    //             custom_size: Some(Vec2::new(30.0, 30.0)),
+    //             ..default()
+    //         },
+    //         transform: Transform::from_xyz(250.0, -200.0, 0.0),
+    //         ..default()
+    //     },
+    //     Sensor,
+    //     Collider::cuboid(30.0, 30.0),
+    // ));
 
     // Camera
     commands.spawn(Camera2dBundle::default());
 }
 
+//////////////////////
+
 pub struct CharacterControllerPlugin;
 
 impl Plugin for CharacterControllerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<MovementAction>()
-            .add_systems(
-                Update,
-                (
-                    keyboard_input,
-                    gamepad_input,
-                    apply_deferred,
-                    movement,
-                    apply_movement_damping,
-                )
-                    .chain(),
+        app.add_event::<MovementAction>().add_systems(
+            Update,
+            (
+                keyboard_input,
+                gamepad_input,
+                apply_deferred,
+                movement,
+                apply_movement_damping,
             )
-            .add_systems(
-                // Run collision handling in substep schedule
-                SubstepSchedule,
-                kinematic_controller_collisions.in_set(SubstepSet::SolveUserConstraints),
-            );
+                .chain(),
+        )
+        .register_type::<CharacterController>()
+        .register_type::<MovementAcceleration>()
+        .register_type::<MovementDampingFactor>()
+        .register_type::<JumpImpulse>();
     }
 }
 
 /// An event sent for a movement input action.
-#[derive(Event, Debug)]
+#[derive(Event, Debug, Reflect)]
 pub enum MovementAction {
     Move(Vec2),
     Jump,
 }
 
 /// A marker component indicating that an entity is using a character controller.
-#[derive(Component)]
+#[derive(Component, Reflect)]
 pub struct CharacterController;
 
 /// The acceleration used for character movement.
-#[derive(Component)]
+#[derive(Component, Reflect)]
 pub struct MovementAcceleration(Scalar);
 
 /// The damping factor used for slowing down movement.
-#[derive(Component)]
+#[derive(Component, Reflect)]
 pub struct MovementDampingFactor(Scalar);
 
 /// The strength of a jump.
-#[derive(Component)]
+#[derive(Component, Reflect)]
 pub struct JumpImpulse(Scalar);
 
 /// A bundle that contains the components needed for a basic
@@ -109,7 +161,7 @@ pub struct CharacterControllerBundle {
 }
 
 /// A bundle that contains components for character movement.
-#[derive(Bundle)]
+#[derive(Bundle, Reflect)]
 pub struct MovementBundle {
     acceleration: MovementAcceleration,
     damping: MovementDampingFactor,
@@ -140,7 +192,7 @@ impl CharacterControllerBundle {
 
         Self {
             character_controller: CharacterController,
-            rigid_body: RigidBody::Kinematic,
+            rigid_body: RigidBody::Dynamic,
             collider,
             ground_caster: ShapeCaster::new(caster_shape, Vector::ZERO, 0.0, Vector::NEG_Y)
                 .with_max_time_of_impact(10.0),
@@ -241,75 +293,11 @@ fn movement(
 }
 
 /// Slows down movement in the X direction.
-fn apply_movement_damping(mut query: Query<(&MovementDampingFactor, &mut LinearVelocity)>) {
-    for (damping_factor, mut linear_velocity) in &mut query {
+fn apply_movement_damping(mut query: Query<(&MovementDampingFactor, &mut LinearVelocity, &mut AngularVelocity)>) {
+    for (damping_factor, mut linear_velocity, mut angular_velocity) in &mut query {
         // We could use `LinearDamping`, but we don't want to dampen movement along the Y axis
         linear_velocity.x *= damping_factor.0;
         linear_velocity.y *= damping_factor.0;
-    }
-}
-
-/// Kinematic bodies do not get pushed by collisions by default,
-/// so it needs to be done manually.
-///
-/// This system performs very basic collision response for kinematic
-/// character controllers by pushing them along their contact normals
-/// by the current penetration depths.
-#[allow(clippy::type_complexity)]
-fn kinematic_controller_collisions(
-    collisions: Res<Collisions>,
-    collider_parents: Query<&ColliderParent, Without<Sensor>>,
-    mut character_controllers: Query<
-        (&RigidBody, &mut Position, &Rotation, &mut LinearVelocity),
-        With<CharacterController>,
-    >,
-) {
-    // Iterate through collisions and move the kinematic body to resolve penetration
-    for contacts in collisions.iter() {
-        // If the collision didn't happen during this substep, skip the collision
-        if !contacts.during_current_substep {
-            continue;
-        }
-
-        // Get the rigid body entities of the colliders (colliders could be children)
-        let Ok([collider_parent1, collider_parent2]) =
-            collider_parents.get_many([contacts.entity1, contacts.entity2])
-        else {
-            continue;
-        };
-
-        // Get the body of the character controller and whether it is the first
-        // or second entity in the collision.
-        let is_first: bool;
-        let (rb, mut position, rotation, mut linear_velocity) =
-            if let Ok(character) = character_controllers.get_mut(collider_parent1.get()) {
-                is_first = true;
-                character
-            } else if let Ok(character) = character_controllers.get_mut(collider_parent2.get()) {
-                is_first = false;
-                character
-            } else {
-                continue;
-            };
-
-        // This system only handles collision response for kinematic character controllers
-        if !rb.is_kinematic() {
-            continue;
-        }
-
-        // Iterate through contact manifolds and their contacts.
-        // Each contact in a single manifold shares the same contact normal.
-        for manifold in contacts.manifolds.iter() {
-            let normal = if is_first {
-                -manifold.global_normal1(rotation)
-            } else {
-                -manifold.global_normal2(rotation)
-            };
-
-            // Solve each penetrating contact in the manifold
-            for contact in manifold.contacts.iter().filter(|c| c.penetration > 0.0) {
-                position.0 += normal * contact.penetration;
-            }
-        }
+        angular_velocity.0 *= damping_factor.0;
     }
 }
