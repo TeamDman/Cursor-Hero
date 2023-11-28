@@ -28,7 +28,7 @@ fn main() {
         .insert_resource(Gravity(Vector::ZERO))
         .insert_resource(ClearColor(Color::rgb(0.05, 0.05, 0.1)))
         .add_systems(Startup, setup)
-        .add_systems(Update, camera_follow_update)
+        .add_systems(Update, camera_follow_update.after(PhysicsSet::Sync))
         .run();
 }
 
