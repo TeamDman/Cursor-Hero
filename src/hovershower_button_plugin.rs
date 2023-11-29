@@ -16,18 +16,8 @@ pub struct HoverShowerButtonPlugin;
 impl Plugin for HoverShowerButtonPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_button)
-            .add_systems(
-                Update,
-                (
-                    can_interact_update,
-                    reset_interaction_color,
-                    update_interaction_color,
-                )
-                    .chain(),
-            )
-            .register_type::<MyButton>()
-            .register_type::<CanInteract>()
-            .register_type::<HashSet<Entity>>();
+            .add_systems(Update, update_colour)
+            .register_type::<MyButton>();
     }
 }
 
@@ -48,7 +38,7 @@ fn spawn_button(mut commands: Commands) {
         MyButton,
         Sensor,
         RigidBody::Static,
-        Collider::cuboid(150.0, 150.0), // make the interaction range larger than the button itself
+        Collider::cuboid(100.0, 100.0), // make the interaction range larger than the button itself
         Name::new("HoverShower Button"),
     ));
 
@@ -69,43 +59,12 @@ fn spawn_button(mut commands: Commands) {
     ));
 }
 
-#[derive(Component, Default, Reflect)]
-struct CanInteract(pub HashSet<Entity>);
-
-#[allow(clippy::type_complexity)]
-fn can_interact_update(
-    mut commands: Commands,
-    mut button_query: Query<(Entity, &CollidingEntities), With<MyButton>>,
-    mut started: EventReader<CollisionStarted>,
-    mut ended: EventReader<CollisionEnded>,
-) {
-    // print out the started and ended events
-    for event in started.read() {
-        println!("CollisionStarted: {:?}", event);
-    }
-    for event in ended.read() {
-        println!("CollisionEnded: {:?}", event);
-    }
-    for (button_entity, button_touchers) in button_query.iter_mut() {
-        // println!("button_touchers: {:?}", button_touchers.0);
-        if button_touchers.0.is_empty() {
-            commands.entity(button_entity).remove::<CanInteract>();
+fn update_colour(mut query: Query<(&mut Sprite, &CollidingEntities), With<MyButton>>) {
+    for (mut sprite, colliding_entities) in &mut query {
+        if colliding_entities.0.is_empty() {
+            sprite.color = Color::rgb(0.2, 0.7, 0.9);
         } else {
-            commands
-                .entity(button_entity)
-                .insert(CanInteract(button_touchers.0.clone()));
+            sprite.color = Color::rgb(0.9, 0.7, 0.2);
         }
-    }
-}
-
-fn reset_interaction_color(mut query: Query<&mut Sprite, With<MyButton>>) {
-    for mut sprite in query.iter_mut() {
-        sprite.color = Color::rgb(0.0, 0.0, 0.0);
-    }
-}
-
-fn update_interaction_color(mut query: Query<&mut Sprite, (With<MyButton>, With<CanInteract>)>) {
-    for mut sprite in query.iter_mut() {
-        sprite.color = Color::rgb(0.0, 1.0, 0.0);
     }
 }

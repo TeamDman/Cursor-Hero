@@ -20,13 +20,12 @@ impl Plugin for CharacterPlugin {
             .add_systems(
                 Update,
                 (
-                    player_mouse_look
-                        .run_if(in_state(ActiveInput::MouseKeyboard)),
-                    update_character_velocity
+                    player_mouse_look.run_if(in_state(ActiveInput::MouseKeyboard)),
+                    apply_movement
                         .after(player_mouse_look)
+                        .run_if(has_movement)
                         .run_if(is_character_physics_ready),
-                    apply_movement_damping
-                        .before(update_character_velocity),
+                    apply_movement_damping.before(apply_movement),
                 ),
             )
             .register_type::<Character>();
@@ -86,7 +85,7 @@ fn spawn_character(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    asset_server: Res<AssetServer>,
+    // asset_server: Res<AssetServer>,
 ) {
     commands.spawn((
         // SpriteBundle {
@@ -169,8 +168,11 @@ fn player_mouse_look(
 fn is_character_physics_ready(query: Query<&LinearVelocity, With<Character>>) -> bool {
     query.get_single().is_ok()
 }
-
-fn update_character_velocity(
+fn has_movement(action_state: Query<&ActionState<PlayerAction>, With<Character>>) -> bool {
+    action_state.single().pressed(PlayerAction::Move)
+        || action_state.single().pressed(PlayerAction::Look)
+}
+fn apply_movement(
     time: Res<Time>,
     action_state: Query<&ActionState<PlayerAction>, With<Character>>,
     mut character_query: Query<(&mut LinearVelocity, &Character)>,
@@ -207,12 +209,28 @@ fn update_character_velocity(
 }
 
 fn apply_movement_damping(
-    mut query: Query<(&Character, &mut LinearVelocity, &mut AngularVelocity)>,
+    mut query: Query<
+        (&mut LinearVelocity, &mut AngularVelocity),
+        (With<Character>, Without<Sleeping>),
+    >,
+    time: Res<Time<Physics>>,
 ) {
-    for (character, mut linear_velocity, mut angular_velocity) in &mut query {
-        // We could use `LinearDamping`, but we don't want to dampen movement along the Y axis
-        linear_velocity.x *= character.damping_factor;
-        linear_velocity.y *= character.damping_factor;
-        angular_velocity.0 *= character.damping_factor;
+    if time.is_paused() {
+        return;
+    }
+    let damping_factor = 0.95;
+    for (mut linear_velocity, mut angular_velocity) in &mut query {
+        linear_velocity.x *= damping_factor;
+        if linear_velocity.x.abs() < 0.001 {
+            linear_velocity.x = 0.0;
+        }
+        linear_velocity.y *= damping_factor;
+        if linear_velocity.y.abs() < 0.001 {
+            linear_velocity.y = 0.0;
+        }
+        angular_velocity.0 *= damping_factor;
+        if angular_velocity.0.abs() < 0.001 {
+            angular_velocity.0 = 0.0;
+        }
     }
 }

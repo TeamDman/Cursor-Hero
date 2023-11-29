@@ -1,7 +1,8 @@
 /// Test to ensure that an object at rest is still considered colliding with sensors
-
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 use bevy_xpbd_2d::{math::*, prelude::*};
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use bevy::input::common_conditions::input_toggle_active;
 
 fn main() {
     App::new()
@@ -19,6 +20,9 @@ fn main() {
                 })
                 .build(),
         )
+        .add_plugins(
+            WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)),
+        )
         .add_plugins(PhysicsPlugins::default())
         .insert_resource(Gravity(Vector::ZERO))
         .insert_resource(ClearColor(Color::rgb(0.05, 0.05, 0.1)))
@@ -29,7 +33,7 @@ fn main() {
             (
                 keyboard_input,
                 apply_deferred,
-                movement,
+                movement.run_if(has_movement), // don't mutably access the character if there is no movement
                 apply_movement_damping,
                 apply_pressure_plate_colour,
                 update_velocity_text,
@@ -73,7 +77,7 @@ fn setup(
         Character,
         RigidBody::Dynamic,
         Collider::capsule(20.0, 12.5),
-        Name::new("Character")
+        Name::new("Character"),
     ));
 
     commands.spawn((
@@ -117,17 +121,26 @@ fn setup(
 #[derive(Event, Debug, Reflect)]
 pub enum MovementAction {
     Move(Vec2),
+    Stop,
 }
 
 fn keyboard_input(
     mut movement_event_writer: EventWriter<MovementAction>,
     keyboard_input: Res<Input<KeyCode>>,
+    time: Res<Time<Physics>>,
 ) {
+    if time.is_paused() {
+        return;
+    }
     let left = keyboard_input.any_pressed([KeyCode::A, KeyCode::Left]);
     let right = keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]);
     let up = keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]);
     let down = keyboard_input.any_pressed([KeyCode::S, KeyCode::Down]);
-
+    let space = keyboard_input.pressed(KeyCode::Space);
+    if space {
+        movement_event_writer.send(MovementAction::Stop);
+        return;
+    }
     let horizontal = right as i8 - left as i8;
     let vertical = up as i8 - down as i8;
     let direction = Vec2::new(horizontal as Scalar, vertical as Scalar);
@@ -136,6 +149,9 @@ fn keyboard_input(
     }
 }
 
+fn has_movement(mut reader: EventReader<MovementAction>) -> bool {
+    !reader.read().next().is_none()
+}
 fn movement(
     time: Res<Time>,
     mut movement_event_reader: EventReader<MovementAction>,
@@ -146,6 +162,10 @@ fn movement(
     for event in movement_event_reader.read() {
         for mut linear_velocity in &mut controllers {
             match event {
+                MovementAction::Stop => {
+                    linear_velocity.x = 0.0;
+                    linear_velocity.y = 0.0;
+                }
                 MovementAction::Move(direction) => {
                     linear_velocity.x += direction.x * movement_acceleration * delta_time;
                     linear_velocity.y += direction.y * movement_acceleration * delta_time;
@@ -155,15 +175,29 @@ fn movement(
     }
 }
 
-fn apply_movement_damping(mut query: Query<(&mut LinearVelocity, &mut AngularVelocity)>) {
+fn apply_movement_damping(
+    mut query: Query<(&mut LinearVelocity, &mut AngularVelocity), (With<Character>, Without<Sleeping>)>,
+    time: Res<Time<Physics>>,
+) {
+    if time.is_paused() {
+        return;
+    }
     let damping_factor = 0.95;
     for (mut linear_velocity, mut angular_velocity) in &mut query {
         linear_velocity.x *= damping_factor;
+        if linear_velocity.x.abs() < 0.001 {
+            linear_velocity.x = 0.0;
+        }
         linear_velocity.y *= damping_factor;
+        if linear_velocity.y.abs() < 0.001 {
+            linear_velocity.y = 0.0;
+        }
         angular_velocity.0 *= damping_factor;
+        if angular_velocity.0.abs() < 0.001 {
+            angular_velocity.0 = 0.0;
+        }
     }
 }
-
 
 fn apply_pressure_plate_colour(
     mut query: Query<(&mut Sprite, &CollidingEntities), With<PressurePlate>>,
@@ -178,21 +212,22 @@ fn apply_pressure_plate_colour(
 }
 
 fn update_velocity_text(
-    character_query: Query<&LinearVelocity, With<Character>>,
+    character_query: Query<(&LinearVelocity, Has<Sleeping>), With<Character>>,
+    pressure_plate_query: Query<Has<Sleeping>, With<PressurePlate>>,
     mut text_query: Query<&mut Text, With<CharacterVelocityText>>,
 ) {
-    if let Ok(velocity) = character_query.get_single() {
+    if let (Ok((velocity, character_sleeping)), Ok(pressure_plate_sleeping)) = (
+        character_query.get_single(),
+        pressure_plate_query.get_single(),
+    ) {
         text_query.single_mut().sections[0].value = format!(
-            "Velocity: {}, {}",
-            velocity.x, velocity.y
+            "Velocity: {:.4}, {:.4}\nCharacter sleeping:{}\nPressure plate sleeping: {}",
+            velocity.x, velocity.y, character_sleeping, pressure_plate_sleeping
         );
     }
 }
 
-fn log_events(
-    mut started: EventReader<CollisionStarted>,
-    mut ended: EventReader<CollisionEnded>,
-) {
+fn log_events(mut started: EventReader<CollisionStarted>, mut ended: EventReader<CollisionEnded>) {
     // print out the started and ended events
     for event in started.read() {
         println!("CollisionStarted: {:?}", event);

@@ -10,7 +10,8 @@ anyhow = "1.0.75"
 # bevy = { version = "0.12", features = ["dynamic_linking"] } # broken https://github.com/rust-lang/rust/issues/53014
 bevy = { version = "0.12" }
 bevy-inspector-egui = "0.21.0"
-bevy_xpbd_2d = { version = "0.3.2", features = ["simd"] }
+# bevy_xpbd_2d = { version = "0.3.2", features = ["simd", "parallel"] }
+bevy_xpbd_2d = { path = "../bevy_xpbd/crates/bevy_xpbd_2d", features = ["simd", "parallel"] }
 fxhash = "0.2.1"
 image = "0.24.7"
 indexmap = "2.1.0"
