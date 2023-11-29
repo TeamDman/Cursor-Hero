@@ -202,7 +202,7 @@ fn update_character_velocity(
     }
 
     if action_state.single().just_pressed(PlayerAction::Click) {
-        println!("Click!")
+        // println!("Click!")
     }
 }
 
