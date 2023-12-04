@@ -1,3 +1,4 @@
+use bevy::audio::{AudioPlugin, SpatialScale};
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::input::common_conditions::input_toggle_active;
 use bevy::prelude::*;
@@ -28,9 +29,12 @@ mod fps_text_plugin;
 mod hovershower_button_plugin;
 mod metrics;
 mod position_text_plugin;
+mod sounds;
 
 use crate::capture_methods::inhouse_plugin::InhouseCapturePlugin;
 use crate::capture_methods::inhouse_threaded_plugin::InhouseThreadedCapturePlugin;
+
+const AUDIO_SCALE: f32 = 1. / 100.0;
 
 fn main() {
     let left_monitor = get_monitor_infos()
@@ -52,6 +56,10 @@ fn main() {
         .add_plugins(
             DefaultPlugins
                 .set(ImagePlugin::default_nearest())
+                .set(AudioPlugin {
+                    spatial_scale: SpatialScale::new_2d(AUDIO_SCALE),
+                    ..default()
+                })
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         title: "Cursor Hero".into(),

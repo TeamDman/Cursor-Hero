@@ -1,6 +1,7 @@
 use bevy::input::mouse::{MouseButtonInput, MouseMotion};
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
+use bevy_xpbd_2d::components::Position;
 
 use crate::camera_plugin::{update_camera_zoom, FollowWithCamera, MainCamera};
 use crate::character_plugin::Character;
@@ -63,7 +64,7 @@ fn mouse_drag_update(
     mut mouse_button_input_events: EventReader<MouseButtonInput>,
     mut mouse_drag_state: ResMut<MouseDragState>,
     mut mouse_motion_events: EventReader<MouseMotion>,
-    mut follow: Query<&mut Transform, (With<FollowWithCamera>, Without<MainCamera>)>,
+    mut follow: Query<&mut Position, (With<FollowWithCamera>, Without<MainCamera>)>,
     window_query: Query<&Window, With<PrimaryWindow>>,
     camera_query: Query<
         (&Camera, &GlobalTransform),
@@ -113,7 +114,7 @@ fn mouse_drag_update(
                     let delta = anchor.drag_start_world_position - current_world_position;
                     if let Ok(mut follow) = follow.get_single_mut() {
                         // reposition the thing the camera is following
-                        follow.translation += delta.extend(0.0);
+                        follow.0 += delta;
                     } else {
                         // move the camera when not following something
                         camera_transform_query.single_mut().translation += delta.extend(0.0);
@@ -131,7 +132,7 @@ fn mouse_drag_update(
                 delta.x *= -1.0;
                 if let Ok(mut follow) = follow.get_single_mut() {
                     // reposition the thing the camera is following
-                    follow.translation += delta.extend(0.0);
+                    follow.0 += delta;
                 } else {
                     // move the camera when not following something
                     camera_transform_query.single_mut().translation += delta.extend(0.0);

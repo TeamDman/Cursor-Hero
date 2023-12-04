@@ -108,7 +108,7 @@ fn spawn_character(
                 )
                 .into(),
             material: materials.add(ColorMaterial::from(Color::rgb(0.2, 0.7, 0.9))),
-            transform: Transform::from_xyz(0.0, -100.0, 1.0),
+            transform: Transform::from_xyz(0.0, -100.0, 100.0),
             ..default()
         },
         Character {
@@ -123,6 +123,7 @@ fn spawn_character(
         },
         RigidBody::Dynamic,
         Collider::capsule(20.0, 12.5),
+        SpatialListener::new(7.0),
     ));
 }
 
