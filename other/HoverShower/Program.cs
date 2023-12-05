@@ -27,15 +27,15 @@ class Program
 {
     static void Main(string[] args)
     {
-        // diagnostic mode
-        using (StreamWriter sw = new StreamWriter(Console.OpenStandardOutput()))
-        {
-            while (true)
-            {
-                PrintUnderMouse(sw);
-                Thread.Sleep(100);
-            }
-        }
+        // // diagnostic mode
+        // using (StreamWriter sw = new StreamWriter(Console.OpenStandardOutput()))
+        // {
+        //     while (true)
+        //     {
+        //         PrintUnderMouse(sw);
+        //         Thread.Sleep(100);
+        //     }
+        // }
         using (NamedPipeServerStream pipeServer = new NamedPipeServerStream("testpipe"))
         {
             Console.WriteLine("NamedPipeServerStream object created.");

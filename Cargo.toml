@@ -12,13 +12,16 @@ bevy = { version = "0.12" }
 bevy-inspector-egui = "0.21.0"
 # bevy_xpbd_2d = { version = "0.3.2", features = ["simd", "parallel"] }
 bevy_xpbd_2d = { path = "../bevy_xpbd/crates/bevy_xpbd_2d", features = ["simd", "parallel"] }
+crossbeam-channel = "0.5.8"
 fxhash = "0.2.1"
 image = "0.24.7"
 indexmap = "2.1.0"
 leafwing-input-manager = "0.11.1"
 minifb = "0.25.0"
 mouse-rs = "0.4.2"
+rand = { version = "0.8.5", features = ["std_rng"] }
 rayon = "1.8.0"
+rust_socketio = "0.4.4"
 screenshots = "0.8.4"
 widestring = "1.0.2"
 win_desktop_duplication = "0.10.7"

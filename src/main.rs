@@ -14,19 +14,21 @@ use capture_methods::inhouse::{get_monitor_infos, MonitorInfo};
 use capture_methods::screenlib_plugin::ScreenLibCapturePlugin;
 use click_drag_movement_plugin::ClickDragMovementPlugin;
 use fps_text_plugin::FpsTextPlugin;
-use hovershower_button_plugin::HoverShowerButtonPlugin;
+use pressure_plate_plugin::PressurePlatePlugin;
 use position_text_plugin::PositionTextPlugin;
+use process_communication::ProcessCommunicationPlugin;
 use screen_plugin::ScreenPlugin;
 
 mod character_plugin;
 use character_plugin::CharacterPlugin;
 
+mod process_communication;
 mod active_input_state_plugin;
 mod camera_plugin;
 mod capture_methods;
 mod click_drag_movement_plugin;
 mod fps_text_plugin;
-mod hovershower_button_plugin;
+mod pressure_plate_plugin;
 mod metrics;
 mod position_text_plugin;
 mod sounds;
@@ -92,9 +94,10 @@ fn main() {
             InhouseThreadedCapturePlugin,
             ScreenLibCapturePlugin,
             CameraPlugin,
-            HoverShowerButtonPlugin,
+            PressurePlatePlugin,
             PositionTextPlugin,
             ClickDragMovementPlugin,
+            ProcessCommunicationPlugin,
         ))
         .run();
 }
