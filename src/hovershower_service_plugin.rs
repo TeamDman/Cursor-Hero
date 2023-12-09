@@ -40,7 +40,7 @@ pub struct InterestingElement {
 
 #[derive(Debug, Deserialize, Reflect, Clone)]
 pub struct ReceivedData {
-    pub cursor_position: Vec<i32>,
+    pub cursor_position: (i32, i32),
     pub element_details: ElementDetails,
     pub interesting_elements: Vec<InterestingElement>,
 } 
@@ -99,7 +99,7 @@ fn setup(mut commands: Commands) {
                         serde_json::from_str(&line);
                     match received_data {
                         Ok(recv) => {
-                            debug!("Cursor position: {:?}", recv.cursor_position);
+                            debug!("Received data! Cursor position: {:?}", recv.cursor_position);
                             tx.send(recv).unwrap();
                         }
                         Err(e) => {

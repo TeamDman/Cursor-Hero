@@ -61,7 +61,7 @@ fn spawn_screens(
                     texture,
                     transform: Transform::from_xyz(
                         screen.display_info.x as f32 + (screen.display_info.width as f32) / 2.0,
-                        screen.display_info.y as f32 - (screen.display_info.height as f32) / 2.0,
+                        -(screen.display_info.y as f32) - (screen.display_info.height as f32) / 2.0,
                         -1.0,
                     ), // Position behind the character
                     ..Default::default()

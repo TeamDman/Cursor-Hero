@@ -153,8 +153,8 @@ fn spawn_afterimages(
                 parent.spawn((
                     SpriteBundle {
                         transform: Transform::from_xyz(
-                            event.0.cursor_position[0] as f32,
-                            -event.0.cursor_position[1] as f32,
+                            event.0.cursor_position.0 as f32,
+                            -event.0.cursor_position.1 as f32,
                             20.0,
                         ),
                         sprite: Sprite {
@@ -173,8 +173,8 @@ fn spawn_afterimages(
                 parent.spawn((
                     SpriteBundle {
                         transform: Transform::from_xyz(
-                            details.bounding_rect[0] as f32 + details.bounding_rect[2] as f32 / 2.0,
-                            -details.bounding_rect[1] as f32 - details.bounding_rect[3] as f32 / 2.0,
+                            (details.bounding_rect[0] as f32) + (details.bounding_rect[2] as f32 / 2.0),
+                            -(details.bounding_rect[1] as f32) - (details.bounding_rect[3] as f32 / 2.0),
                             20.0,
                         ),
                         sprite: Sprite {

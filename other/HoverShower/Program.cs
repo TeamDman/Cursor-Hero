@@ -50,8 +50,9 @@ class Program
             {
                 while (true)
                 {
+                    Console.WriteLine("Sending data!");
                     PrintUnderMouse(sw);
-                    Thread.Sleep(100);
+                    // Thread.Sleep(100);
                 }
             }
         }
