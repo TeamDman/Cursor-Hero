@@ -36,7 +36,7 @@ class Program
         //         Thread.Sleep(100);
         //     }
         // }
-        using (NamedPipeServerStream pipeServer = new NamedPipeServerStream("testpipe"))
+        using (NamedPipeServerStream pipeServer = new NamedPipeServerStream("hovershower"))
         {
             Console.WriteLine("NamedPipeServerStream object created.");
 

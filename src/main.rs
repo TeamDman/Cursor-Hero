@@ -16,7 +16,7 @@ use click_drag_movement_plugin::ClickDragMovementPlugin;
 use fps_text_plugin::FpsTextPlugin;
 use pressure_plate_plugin::PressurePlatePlugin;
 use position_text_plugin::PositionTextPlugin;
-use process_communication::ProcessCommunicationPlugin;
+use process_communication::HoverShowerRelayPlugin;
 use screen_plugin::ScreenPlugin;
 
 mod character_plugin;
@@ -97,7 +97,7 @@ fn main() {
             PressurePlatePlugin,
             PositionTextPlugin,
             ClickDragMovementPlugin,
-            ProcessCommunicationPlugin,
+            HoverShowerRelayPlugin,
         ))
         .run();
 }
