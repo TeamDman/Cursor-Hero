@@ -80,9 +80,9 @@ class Program
         if (element == null) return;
         var outputData = new
         {
-            cursorPosition = new int[] { cursorX, cursorY },
-            elementDetails = DetailsFor(element),
-            interestingElements = GatherInteresting(element).Select(e =>
+            cursor_position = new int[] { cursorX, cursorY },
+            element_details = DetailsFor(element),
+            interesting_elements = GatherInteresting(element).Select(e =>
             {
                 (var elem, var depth, var relationship) = e;
                 var details = DetailsFor(elem);
@@ -102,19 +102,19 @@ class Program
 
     static object DetailsFor(AutomationElement elem)
     {
-        int[] boundingRect = ((Rect)elem.GetCurrentPropertyValue(AutomationElement.BoundingRectangleProperty)).ToIntArray();
+        int[] bounding_rect = ((Rect)elem.GetCurrentPropertyValue(AutomationElement.BoundingRectangleProperty)).ToIntArray();
         string name = elem.Current.Name;
-        string controlType = elem.Current.ControlType.ProgrammaticName;
-        string className = elem.Current.ClassName;
-        string automationId = elem.Current.AutomationId;
+        string control_type = elem.Current.ControlType.ProgrammaticName;
+        string class_name = elem.Current.ClassName;
+        string automation_id = elem.Current.AutomationId;
         string value = GetValue(elem);  // Extracted value fetching to a separate method
         return new
         {
             name,
-            boundingRect,
-            controlType,
-            className,
-            automationId,
+            bounding_rect,
+            control_type,
+            class_name,
+            automation_id,
             value,
         };
     }

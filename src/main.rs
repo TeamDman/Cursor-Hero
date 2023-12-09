@@ -5,6 +5,8 @@ use bevy::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 mod screen_plugin;
+mod calibration_plugin;
+use calibration_plugin::CalibrationPlugin;
 use active_input_state_plugin::ActiveInputStatePlugin;
 use bevy_xpbd_2d::math::Vector;
 use bevy_xpbd_2d::plugins::PhysicsPlugins;
@@ -14,15 +16,16 @@ use capture_methods::inhouse::{get_monitor_infos, MonitorInfo};
 use capture_methods::screenlib_plugin::ScreenLibCapturePlugin;
 use click_drag_movement_plugin::ClickDragMovementPlugin;
 use fps_text_plugin::FpsTextPlugin;
+use hovershower_service_plugin::HoverShowerServicePlugin;
 use pressure_plate_plugin::PressurePlatePlugin;
 use position_text_plugin::PositionTextPlugin;
-use process_communication::HoverShowerRelayPlugin;
+use hovershower_relay_plugin::HoverShowerRelayPlugin;
 use screen_plugin::ScreenPlugin;
 
 mod character_plugin;
 use character_plugin::CharacterPlugin;
 
-mod process_communication;
+mod hovershower_relay_plugin;
 mod active_input_state_plugin;
 mod camera_plugin;
 mod capture_methods;
@@ -32,6 +35,9 @@ mod pressure_plate_plugin;
 mod metrics;
 mod position_text_plugin;
 mod sounds;
+mod afterimage_plugin;
+use afterimage_plugin::AfterimagePlugin;
+mod hovershower_service_plugin;
 
 use crate::capture_methods::inhouse_plugin::InhouseCapturePlugin;
 use crate::capture_methods::inhouse_threaded_plugin::InhouseThreadedCapturePlugin;
@@ -94,10 +100,13 @@ fn main() {
             InhouseThreadedCapturePlugin,
             ScreenLibCapturePlugin,
             CameraPlugin,
+            AfterimagePlugin,
             PressurePlatePlugin,
             PositionTextPlugin,
             ClickDragMovementPlugin,
             HoverShowerRelayPlugin,
+            HoverShowerServicePlugin,
+            CalibrationPlugin,
         ))
         .run();
 }
