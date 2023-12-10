@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::utils::win_mouse_utils::get_cursor_position;
+use crate::utils::win_mouse::get_cursor_position;
 
 pub struct CursorMirroringPlugin;
 impl Plugin for CursorMirroringPlugin {

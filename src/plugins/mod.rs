@@ -10,13 +10,9 @@ pub mod hover_shower_service_plugin;
 pub mod position_text_plugin;
 pub mod pressure_plate_plugin;
 pub mod screen_plugin;
+pub mod screen_update_plugin;
 
 use bevy::prelude::*;
-
-use crate::capture_methods::{
-    inhouse_plugin::InhouseCapturePlugin, inhouse_threaded_plugin::InhouseThreadedCapturePlugin,
-    screenlib_plugin::ScreenLibCapturePlugin,
-};
 
 use self::{
     active_input_state_plugin::ActiveInputStatePlugin, afterimage_plugin::AfterimagePlugin,
@@ -27,6 +23,7 @@ use self::{
     hover_shower_service_plugin::HoverShowerServicePlugin,
     position_text_plugin::PositionTextPlugin, pressure_plate_plugin::PressurePlatePlugin,
     screen_plugin::ScreenPlugin,
+    screen_update_plugin::ScreenUpdatePlugin,
 };
 
 pub struct MyPlugin;
@@ -42,12 +39,10 @@ impl Plugin for MyPlugin {
             FpsTextPlugin,
             HoverShowerRelayPlugin,
             HoverShowerServicePlugin,
-            InhouseCapturePlugin,
-            InhouseThreadedCapturePlugin,
             PositionTextPlugin,
             PressurePlatePlugin,
-            ScreenLibCapturePlugin,
             ScreenPlugin,
+            ScreenUpdatePlugin,
         ))
         .add_plugins((CursorMirroringPlugin,));
     }

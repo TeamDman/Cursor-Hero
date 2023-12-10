@@ -6,16 +6,13 @@ use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_xpbd_2d::math::Vector;
 use bevy_xpbd_2d::plugins::PhysicsPlugins;
 use bevy_xpbd_2d::resources::Gravity;
-use capture_methods::inhouse::{get_monitor_infos, MonitorInfo};
+use crate::utils::win_screen_capture::{get_monitor_infos, MonitorInfo};
 
 use crate::plugins::MyPlugin;
 
 mod data;
 mod utils;
 mod plugins;
-mod capture_methods;
-
-
 
 const AUDIO_SCALE: f32 = 1. / 100.0;
 
