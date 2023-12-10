@@ -3,8 +3,8 @@ use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy_xpbd_2d::components::Position;
 
-use crate::camera_plugin::{update_camera_zoom, FollowWithCamera, MainCamera};
-use crate::character_plugin::Character;
+use crate::plugins::camera_plugin::{update_camera_zoom, FollowWithCamera, MainCamera};
+use crate::plugins::character_plugin::Character;
 
 pub struct ClickDragMovementPlugin;
 

@@ -25,7 +25,7 @@ rust_socketio = "0.4.4"
 screenshots = "0.8.4"
 widestring = "1.0.2"
 win_desktop_duplication = "0.10.7"
-windows = { version = "0.51.1", features = ["Win32_Foundation", "Win32_Graphics_Gdi"] }
+windows = { version = "0.51.1", features = ["Win32_Foundation", "Win32_Graphics_Gdi", "Win32_UI_WindowsAndMessaging"] }
 tokio = { version = "1.32.0", features = ["net", "full"] }
 tokio-named-pipes = "0.1.0"
 serde = { version = "1.0", features = ["derive"] }

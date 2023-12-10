@@ -5,7 +5,7 @@ use leafwing_input_manager::{
     InputManagerBundle,
 };
 
-use crate::character_plugin::Character;
+use crate::plugins::character_plugin::Character;
 pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {

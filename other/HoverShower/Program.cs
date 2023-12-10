@@ -66,6 +66,27 @@ class Program
         try
         {
             element = AutomationElement.FromPoint(new Point(cursorX, cursorY));
+            if (element == null) return;
+            var outputData = new
+            {
+                cursor_position = new int[] { cursorX, cursorY },
+                element_details = DetailsFor(element),
+                interesting_elements = GatherInteresting(element).Select(e =>
+                {
+                    (var elem, var depth, var relationship) = e;
+                    var details = DetailsFor(elem);
+                    return new
+                    {
+                        details,
+                        depth,
+                        relationship,
+                    };
+                }),
+            };
+
+            string json = JsonConvert.SerializeObject(outputData);
+            sw.WriteLine(json);
+            sw.Flush();
         }
         catch (Win32Exception e)
         {
@@ -78,27 +99,10 @@ class Program
                 Console.WriteLine(e);
             }
         }
-        if (element == null) return;
-        var outputData = new
+        catch (ElementNotAvailableException e)
         {
-            cursor_position = new int[] { cursorX, cursorY },
-            element_details = DetailsFor(element),
-            interesting_elements = GatherInteresting(element).Select(e =>
-            {
-                (var elem, var depth, var relationship) = e;
-                var details = DetailsFor(elem);
-                return new
-                {
-                    details,
-                    depth,
-                    relationship,
-                };
-            }),
-        };
-
-        string json = JsonConvert.SerializeObject(outputData);
-        sw.WriteLine(json);
-        sw.Flush();
+            Console.WriteLine(e);
+        }
     }
 
     static object DetailsFor(AutomationElement elem)

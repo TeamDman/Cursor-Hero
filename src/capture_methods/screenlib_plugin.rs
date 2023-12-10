@@ -1,4 +1,4 @@
-use crate::screen_plugin::{Screen, ScreenLibCaptureTag};
+use crate::plugins::screen_plugin::{Screen, ScreenLibCaptureTag};
 use bevy::prelude::*;
 use image::DynamicImage;
 use rayon::prelude::*;

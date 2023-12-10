@@ -35,7 +35,7 @@ use windows::{
     },
 };
 
-use crate::metrics::Metrics;
+use crate::utils::metrics::Metrics;
 
 //////////////////////
 /// GET MONITOR INFOS

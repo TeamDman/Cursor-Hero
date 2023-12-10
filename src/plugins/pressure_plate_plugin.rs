@@ -76,7 +76,7 @@ fn update_plate(
                 plate.active_time += time.delta_seconds();
             } else {
                 plate.active_time += time.delta_seconds();
-                if plate.active_time > crate::sounds::PRESSURE_PLATE_ACTIVATION_DURATION {
+                if plate.active_time > crate::data::sounds::PRESSURE_PLATE_ACTIVATION_DURATION {
                     plate.active_time = 0.0;
                     plate.debounce = true;
                     activation_writer.send(PressurePlateActivationEvent(entity));
@@ -86,7 +86,7 @@ fn update_plate(
         if let Ok((mut indicator, mut indicator_sprite)) = indicator_query.get_mut(plate.indicator)
         {
             indicator.visual_progress =
-                plate.active_time / crate::sounds::PRESSURE_PLATE_ACTIVATION_DURATION;
+                plate.active_time / crate::data::sounds::PRESSURE_PLATE_ACTIVATION_DURATION;
             indicator_sprite.color = Color::rgb(0.2, 0.7, 0.9) * indicator.visual_progress;
         }
     }

@@ -4,8 +4,8 @@ use crate::{
     capture_methods::inhouse::{
         get_all_monitors, get_full_monitor_capturers, get_monitor_capturer, MonitorRegionCapturer,
     },
-    screen_plugin::{InhouseCaptureTag, Screen},
-    metrics::Metrics,
+    plugins::screen_plugin::{InhouseCaptureTag, Screen},
+    utils::metrics::Metrics,
 };
 use bevy::prelude::*;
 use windows::Win32::Foundation::RECT;

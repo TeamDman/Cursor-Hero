@@ -1,4 +1,4 @@
-use crate::{camera_plugin::MainCamera, character_plugin::Character};
+use crate::plugins::{camera_plugin::MainCamera, character_plugin::Character};
 use bevy::{prelude::*, window::PrimaryWindow};
 
 pub struct PositionTextPlugin;

@@ -7,8 +7,8 @@ use crate::{
     capture_methods::inhouse::{
         get_full_monitor_capturers, MonitorRegionCapturer,
     },
-    screen_plugin::{Screen, InhouseThreadedCaptureTag},
-    metrics::Metrics,
+    plugins::screen_plugin::{Screen, InhouseThreadedCaptureTag},
+    utils::metrics::Metrics,
 };
 use bevy::{prelude::*, utils::HashMap};
 

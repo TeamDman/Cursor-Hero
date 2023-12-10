@@ -4,9 +4,9 @@ use bevy::prelude::*;
 use bevy_xpbd_2d::components::{Collider, RigidBody, Sensor};
 use std::fmt::Display;
 
-use crate::afterimage_plugin::{Afterimage, AfterimageParent};
-use crate::hovershower_service_plugin::{ReceivedData, StreamEvent, start_service_process};
-use crate::pressure_plate_plugin::{
+use crate::plugins::afterimage_plugin::{Afterimage, AfterimageParent};
+use crate::plugins::hover_shower_service_plugin::{ReceivedData, StreamEvent, start_service_process};
+use crate::plugins::pressure_plate_plugin::{
     PressurePlate, PressurePlateActivationEvent, PressurePlateProgressIndicator,
 };
 pub struct HoverShowerRelayPlugin;

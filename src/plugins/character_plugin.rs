@@ -9,7 +9,7 @@ use bevy_inspector_egui::prelude::ReflectInspectorOptions;
 use bevy_inspector_egui::InspectorOptions;
 use leafwing_input_manager::user_input::InputKind;
 
-use crate::active_input_state_plugin::ActiveInput;
+use crate::plugins::active_input_state_plugin::ActiveInput;
 
 pub struct CharacterPlugin;
 
