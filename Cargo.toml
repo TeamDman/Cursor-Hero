@@ -11,7 +11,10 @@ anyhow = "1.0.75"
 bevy = { version = "0.12" }
 bevy-inspector-egui = "0.21.0"
 # bevy_xpbd_2d = { version = "0.3.2", features = ["simd", "parallel"] }
-bevy_xpbd_2d = { path = "../bevy_xpbd/crates/bevy_xpbd_2d", features = ["simd", "parallel"] }
+bevy_xpbd_2d = { path = "../bevy_xpbd/crates/bevy_xpbd_2d", features = [
+    "simd",
+    "parallel",
+] }
 crossbeam-channel = "0.5.8"
 fxhash = "0.2.1"
 image = "0.24.7"
@@ -25,11 +28,18 @@ rust_socketio = "0.4.4"
 screenshots = "0.8.4"
 widestring = "1.0.2"
 win_desktop_duplication = "0.10.7"
-windows = { version = "0.51.1", features = ["Win32_Foundation", "Win32_Graphics_Gdi", "Win32_UI_WindowsAndMessaging"] }
+windows = { version = "0.51.1", features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Gdi",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_System_Com",
+    "Win32_UI_Accessibility",
+] }
 tokio = { version = "1.32.0", features = ["net", "full"] }
 tokio-named-pipes = "0.1.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+uiautomation = "0.7.3"
 
 
 [profile.dev]
