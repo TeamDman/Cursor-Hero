@@ -7,6 +7,7 @@ pub mod cursor_mirroring_plugin;
 pub mod fps_text_plugin;
 pub mod hover_shower_relay_plugin;
 pub mod hover_shower_service_plugin;
+pub mod hover_ui_automation_plugin;
 pub mod position_text_plugin;
 pub mod pressure_plate_plugin;
 pub mod screen_plugin;
@@ -21,8 +22,8 @@ use self::{
     cursor_mirroring_plugin::CursorMirroringPlugin, fps_text_plugin::FpsTextPlugin,
     hover_shower_relay_plugin::HoverShowerRelayPlugin,
     hover_shower_service_plugin::HoverShowerServicePlugin,
-    position_text_plugin::PositionTextPlugin, pressure_plate_plugin::PressurePlatePlugin,
-    screen_plugin::ScreenPlugin,
+    hover_ui_automation_plugin::HoverUiAutomationPlugin, position_text_plugin::PositionTextPlugin,
+    pressure_plate_plugin::PressurePlatePlugin, screen_plugin::ScreenPlugin,
     screen_update_plugin::ScreenUpdatePlugin,
 };
 
@@ -34,16 +35,16 @@ impl Plugin for MyPlugin {
             ActiveInputStatePlugin,
             AfterimagePlugin,
             CameraPlugin,
-            CharacterPlugin,
+            // CharacterPlugin,
             ClickDragMovementPlugin,
             FpsTextPlugin,
-            HoverShowerRelayPlugin,
-            HoverShowerServicePlugin,
+            // HoverShowerRelayPlugin,
+            // HoverShowerServicePlugin,
             PositionTextPlugin,
             PressurePlatePlugin,
             ScreenPlugin,
             ScreenUpdatePlugin,
         ))
-        .add_plugins((CursorMirroringPlugin,));
+        .add_plugins((CursorMirroringPlugin, HoverUiAutomationPlugin));
     }
 }
