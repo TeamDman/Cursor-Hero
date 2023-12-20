@@ -9,7 +9,7 @@ use uiautomation::types::UIProperty;
 use uiautomation::variants::Variant;
 use uiautomation::UIAutomation;
 use uiautomation::UIElement;
-use uiautomation::UITreeWalker;
+// use uiautomation::UITreeWalker;
 use windows::{Win32::Foundation::POINT, Win32::UI::WindowsAndMessaging::GetCursorPos};
 
 use super::camera_plugin::MainCamera;

@@ -84,9 +84,14 @@ pub fn setup(
         },
     ));
     parent.with_children(|parent| {
-        info!("Found {} tools", tools.iter().count());
-        for (t_e, t_name, t) in tools.iter() {
+        let count = tools.iter().count();
+        info!("Found {} tools", count);
+        for (i, (t_e, t_name, t)) in tools.iter().enumerate() {
             info!("Adding toolbar entry: {}", t_name.as_str());
+            let angle = 360.0 / (count as f32) * i as f32;
+            let dist = 250.0;
+            let x = angle.to_radians().cos() * dist;
+            let y = angle.to_radians().sin() * dist;
             parent.spawn((
                 ToolbarEntry(t_e),
                 Name::new(format!("Toolbar Entry - {}", t_name.as_str())),
@@ -95,6 +100,7 @@ pub fn setup(
                         custom_size: Some(Vec2::new(100.0, 100.0)),
                         ..default()
                     },
+                    transform: Transform::from_translation(Vec3::new(x, y, 200.0)),
                     texture: t.0.clone(),
                     ..default()
                 },
