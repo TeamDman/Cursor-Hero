@@ -38,7 +38,7 @@ fn setup(
     asset_server: Res<AssetServer>,
 ) {
     // Player
-    let texture = asset_server.load("character.png");
+    let texture = asset_server.load("textures/cursor.png");
 
     commands.spawn((
         SpriteBundle {

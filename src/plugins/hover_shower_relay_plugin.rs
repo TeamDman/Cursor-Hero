@@ -161,7 +161,7 @@ fn spawn_afterimages(
                             custom_size: Some(Vec2::new(20.0, 20.0)),
                             ..default()
                         },
-                        texture: asset_server.load("character.png"),
+                        texture: asset_server.load("textures/cursor.png"),
                         ..default()
                     },
                     Afterimage { life_remaining: 50 },

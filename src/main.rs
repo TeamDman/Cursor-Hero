@@ -40,6 +40,7 @@ fn main() {
     let log_plugin = LogPlugin {
         level: bevy::log::Level::DEBUG,
         filter: "info,wgpu_core=warn,wgpu_hal=warn,bevy_ecs=info,cursor_hero=debug".into(),
+        // filter: "debug,wgpu_core=warn,wgpu_hal=warn,bevy_ecs=info,cursor_hero=debug".into(),
     };
 
     // this code is compiled only if debug assertions are disabled (release mode)

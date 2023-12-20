@@ -12,6 +12,7 @@ pub mod position_text_plugin;
 pub mod pressure_plate_plugin;
 pub mod screen_plugin;
 pub mod screen_update_plugin;
+pub mod tools;
 
 use bevy::prelude::*;
 
@@ -24,7 +25,7 @@ use self::{
     hover_shower_service_plugin::HoverShowerServicePlugin,
     hover_ui_automation_plugin::HoverUiAutomationPlugin, position_text_plugin::PositionTextPlugin,
     pressure_plate_plugin::PressurePlatePlugin, screen_plugin::ScreenPlugin,
-    screen_update_plugin::ScreenUpdatePlugin,
+    screen_update_plugin::ScreenUpdatePlugin, tools::ToolsPlugin,
 };
 
 pub struct MyPlugin;
@@ -35,7 +36,7 @@ impl Plugin for MyPlugin {
             ActiveInputStatePlugin,
             AfterimagePlugin,
             CameraPlugin,
-            // CharacterPlugin,
+            CharacterPlugin,
             ClickDragMovementPlugin,
             FpsTextPlugin,
             // HoverShowerRelayPlugin,
@@ -45,6 +46,6 @@ impl Plugin for MyPlugin {
             ScreenPlugin,
             ScreenUpdatePlugin,
         ))
-        .add_plugins((CursorMirroringPlugin, HoverUiAutomationPlugin));
+        .add_plugins((CursorMirroringPlugin, HoverUiAutomationPlugin, ToolsPlugin));
     }
 }

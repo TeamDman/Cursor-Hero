@@ -26,7 +26,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 custom_size: Some(Vec2::new(20.0, 20.0)),
                 ..default()
             },
-            texture: asset_server.load("character.png"),
+            texture: asset_server.load("textures/cursor.png"),
             ..default()
         },
         CursorMirror,

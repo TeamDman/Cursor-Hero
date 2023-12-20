@@ -57,6 +57,29 @@ struct ElementInfo {
     // value: Option<String>,
 }
 
+fn get_element_info(element: UIElement) -> Result<ElementInfo, uiautomation::errors::Error> {
+    let name = element.get_name()?;
+    let bb = element.get_bounding_rectangle()?;
+    let class_name = element.get_classname()?;
+    let automation_id = element.get_automation_id()?;
+    // let value = element.get_property_value().unwrap();
+
+    let info = ElementInfo {
+        name,
+        bounding_rect: Rect::new(
+            bb.get_left() as f32,
+            bb.get_top() as f32,
+            bb.get_right() as f32,
+            bb.get_bottom() as f32,
+        ),
+        control_type: class_name.clone(),
+        class_name,
+        automation_id,
+        // value,
+    };
+    return Ok(info);
+}
+
 fn setup(mut commands: Commands) {
     let (tx, rx) = bounded::<_>(10);
     commands.insert_resource(ScreenHoveredBridge(rx));
@@ -77,27 +100,8 @@ fn setup(mut commands: Commands) {
             if let Ok(root) = automation
                 .element_from_point(uiautomation::types::Point::new(cursor_pos.x, cursor_pos.y))
             {
-                // print_element(&walker, &root, 0).unwrap();
-                let name = root.get_name().unwrap();
-                let bb = root.get_bounding_rectangle().unwrap();
-                let class_name = root.get_classname().unwrap();
-                let automation_id = root.get_automation_id().unwrap();
-                // let value = root.get_property_value().unwrap();
-
-                let info = ElementInfo {
-                    name,
-                    bounding_rect: Rect::new(
-                        bb.get_left() as f32,
-                        bb.get_top() as f32,
-                        bb.get_right() as f32,
-                        bb.get_bottom() as f32,
-                    ),
-                    control_type: class_name.clone(),
-                    class_name,
-                    automation_id,
-                    // value,
-                };
-                tx.send(Some(info)).unwrap();
+                let info = get_element_info(root);
+                tx.send(info.ok()).unwrap();
             }
             std::thread::sleep(std::time::Duration::from_millis(50));
         }
@@ -139,27 +143,8 @@ fn setup(mut commands: Commands) {
                 cursor_pos.0 as i32,
                 cursor_pos.1 as i32,
             )) {
-                // print_element(&walker, &root, 0).unwrap();
-                let name = root.get_name().unwrap();
-                let bb = root.get_bounding_rectangle().unwrap();
-                let class_name = root.get_classname().unwrap();
-                let automation_id = root.get_automation_id().unwrap();
-                // let value = root.get_property_value().unwrap();
-
-                let info = ElementInfo {
-                    name,
-                    bounding_rect: Rect::new(
-                        bb.get_left() as f32,
-                        bb.get_top() as f32,
-                        bb.get_right() as f32,
-                        bb.get_bottom() as f32,
-                    ),
-                    control_type: class_name.clone(),
-                    class_name,
-                    automation_id,
-                    // value,
-                };
-                game_tx.send(Some(info)).unwrap();
+                let info = get_element_info(root);
+                game_tx.send(info.ok()).unwrap();
             }
             std::thread::sleep(std::time::Duration::from_millis(50));
         }
@@ -250,6 +235,7 @@ fn show_hovered_rect(
                 },
                 ..default()
             },
+            Name::new("Screen Hovered Indicator"),
             ScreenHoveredIndicatorTag,
         ));
     }
@@ -286,6 +272,7 @@ fn show_hovered_rect(
                 },
                 ..default()
             },
+            Name::new("Game Hovered Indicator"),
             GameHoveredIndicatorTag,
         ));
     }
