@@ -15,6 +15,7 @@ use crate::plugins::active_input_state_plugin::ActiveInput;
 
 pub enum CharacterSystemSet {
     Spawn,
+    Position,
 }
 
 pub struct CharacterPlugin;
@@ -22,12 +23,20 @@ pub struct CharacterPlugin;
 impl Plugin for CharacterPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(InputManagerPlugin::<PlayerAction>::default())
-            .add_systems(Startup, (spawn_character.in_set(CharacterSystemSet::Spawn), apply_deferred).chain())
+            .add_systems(
+                Startup,
+                (
+                    spawn_character.in_set(CharacterSystemSet::Spawn),
+                    apply_deferred,
+                )
+                    .chain(),
+            )
             .add_systems(
                 Update,
                 (
                     player_mouse_look.run_if(in_state(ActiveInput::MouseKeyboard)),
                     apply_movement
+                        .in_set(CharacterSystemSet::Position)
                         .after(player_mouse_look)
                         .run_if(has_movement)
                         .run_if(is_character_physics_ready),

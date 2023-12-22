@@ -1,6 +1,6 @@
 use bevy::prelude::*;
-use bevy_xpbd_2d::constraints::DistanceJoint;
-use bevy_xpbd_2d::{math::*, prelude::*};
+use bevy::transform::TransformSystem;
+use bevy_xpbd_2d::prelude::*;
 use leafwing_input_manager::prelude::*;
 
 use super::character_plugin::{Character, CharacterSystemSet, PlayerAction};
@@ -14,7 +14,12 @@ impl Plugin for PointerPlugin {
                 Startup,
                 (apply_deferred, setup.after(CharacterSystemSet::Spawn)).chain(),
             )
-            .add_systems(Update, (apply_movement, apply_movement_damping).chain());
+            .add_systems(
+                PostUpdate,
+                apply_movement
+                    .after(PhysicsSet::Sync)
+                    .before(TransformSystem::TransformPropagate),
+            );
     }
 }
 
@@ -54,71 +59,25 @@ fn setup(
                 MassPropertiesBundle::new_computed(&Collider::cuboid(10.0, 10.0), 1.0),
             ))
             .id();
-
-        info!(
-            "Spawning pointer distance joint for character '{}'",
-            name.as_str()
-        );
-        commands.spawn(
-            DistanceJoint::new(character_entity, pointer_entity)
-                .with_local_anchor_1(Vector::ZERO)
-                .with_local_anchor_2(Vector::ZERO)
-                .with_rest_length(200.0)
-                .with_linear_velocity_damping(0.1)
-                .with_angular_velocity_damping(1.0)
-                // .with_limits(30.0, 300.0)
-                .with_compliance(0.00000001),
-        );
     }
 }
 
 fn apply_movement(
-    time: Res<Time>,
-    character_query: Query<&ActionState<PlayerAction>, (With<Character>, Without<Pointer>)>,
-    mut pointer_query: Query<(&mut LinearVelocity, &Pointer), Without<Character>>,
+    character_query: Query<(&Transform, &ActionState<PlayerAction>), With<Character>>,
+    mut pointer_query: Query<(&mut Transform, &Pointer), Without<Character>>,
 ) {
-    let delta_time = time.delta_seconds_f64().adjust_precision();
-    for (mut p_vel, p) in pointer_query.iter_mut() {
-        if let Ok(c_act) = character_query.get(p.character_id) {   
+    for (mut pointer_transform, p) in pointer_query.iter_mut() {
+        if let Ok((character_transform, c_act)) = character_query.get(p.character_id) {
             if c_act.pressed(PlayerAction::Look) {
-                let look = c_act
-                    .axis_pair(PlayerAction::Look)
-                    .unwrap()
-                    .xy();
+                let look = c_act.axis_pair(PlayerAction::Look).unwrap().xy();
                 if look.x.is_nan() || look.y.is_nan() {
                     continue;
                 }
-                println!("look: {:?}, delta_time: {:?}, speed: {:?}", look, delta_time, p.speed);
-                p_vel.x = look.x * delta_time * p.speed;
-                p_vel.y = look.y * delta_time * p.speed;
-            }
-        }
-    }
-}
 
-fn apply_movement_damping(
-    mut query: Query<
-        (&mut LinearVelocity, &mut AngularVelocity),
-        (With<Pointer>, Without<Sleeping>),
-    >,
-    time: Res<Time<Physics>>,
-) {
-    if time.is_paused() {
-        return;
-    }
-    let damping_factor = 0.95;
-    for (mut linear_velocity, mut angular_velocity) in &mut query {
-        linear_velocity.x *= damping_factor;
-        if linear_velocity.x.abs() < 0.001 {
-            linear_velocity.x = 0.0;
-        }
-        linear_velocity.y *= damping_factor;
-        if linear_velocity.y.abs() < 0.001 {
-            linear_velocity.y = 0.0;
-        }
-        angular_velocity.0 *= damping_factor;
-        if angular_velocity.0.abs() < 0.001 {
-            angular_velocity.0 = 0.0;
+                let desired_position = character_transform.translation + look.extend(0.0) * 200.0; // * p.distance;
+
+                pointer_transform.translation = desired_position;
+            }
         }
     }
 }
