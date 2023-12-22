@@ -1,7 +1,10 @@
-use bevy::prelude::*;
 use bevy::transform::TransformSystem;
+use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_xpbd_2d::prelude::*;
 use leafwing_input_manager::prelude::*;
+
+use crate::utils::win_mouse::set_cursor_position;
+use crate::utils::win_window::{get_title_bar_height, get_window_bounds_from_title};
 
 use super::character_plugin::{Character, CharacterSystemSet, PlayerAction};
 
@@ -10,13 +13,18 @@ pub struct PointerPlugin;
 impl Plugin for PointerPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<Pointer>()
+            .register_type::<SnapMouseToPointer>()
             .add_systems(
                 Startup,
                 (apply_deferred, setup.after(CharacterSystemSet::Spawn)).chain(),
             )
             .add_systems(
                 PostUpdate,
-                apply_movement
+                (
+                    apply_movement,
+                    snap_mouse_to_pointer.run_if(should_snap_mouse),
+                )
+                    .chain()
                     .after(PhysicsSet::Sync)
                     .before(TransformSystem::TransformPropagate),
             );
@@ -29,36 +37,40 @@ pub struct Pointer {
     speed: f32,
 }
 
+#[derive(Component, Reflect, Debug)]
+pub struct SnapMouseToPointer;
+
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     character: Query<(Entity, &Transform, &Character, &Name)>,
 ) {
     assert!(character.iter().count() > 0, "No characters found");
-    for (character_entity, transform, _character, name) in character.iter() {
+    for (i, (character_entity, transform, _character, name)) in character.iter().enumerate() {
         info!("Creating pointer for character '{}'", name.as_str());
-        let pointer_entity = commands
-            .spawn((
-                Pointer {
-                    character_id: character_entity.clone(),
-                    speed: 100_000.0,
+        let mut pointer = commands.spawn((
+            Pointer {
+                character_id: character_entity.clone(),
+                speed: 100_000.0,
+            },
+            Name::new(format!("Pointer for {}", name.as_str())),
+            SpriteBundle {
+                transform: Transform::from_translation(
+                    transform.translation + Vec3::new(200.0, 0.0, 0.5),
+                ),
+                texture: asset_server.load("textures/cursor.png"),
+                sprite: Sprite {
+                    color: Color::rgb(0.2, 0.7, 0.9),
+                    ..default()
                 },
-                Name::new(format!("Pointer for {}", name.as_str())),
-                SpriteBundle {
-                    transform: Transform::from_translation(
-                        transform.translation + Vec3::new(200.0, 0.0, 0.5),
-                    ),
-                    texture: asset_server.load("textures/cursor.png"),
-                    sprite: Sprite {
-                        color: Color::rgb(0.2, 0.7, 0.9),
-                        ..default()
-                    },
-                    ..Default::default()
-                },
-                RigidBody::Dynamic,
-                MassPropertiesBundle::new_computed(&Collider::cuboid(10.0, 10.0), 1.0),
-            ))
-            .id();
+                ..Default::default()
+            },
+            RigidBody::Dynamic,
+            MassPropertiesBundle::new_computed(&Collider::cuboid(10.0, 10.0), 1.0),
+        ));
+        if i == 0 {
+            pointer.insert(SnapMouseToPointer);
+        }
     }
 }
 
@@ -79,5 +91,42 @@ fn apply_movement(
                 pointer_transform.translation = desired_position;
             }
         }
+    }
+}
+
+fn should_snap_mouse(
+    character: Query<Ref<GlobalTransform>, With<Character>>,
+    pointer: Query<(&Pointer, Ref<GlobalTransform>), With<SnapMouseToPointer>>,
+) -> bool {
+    if let Ok((p, p_pos)) = pointer.get_single() {
+        if let Ok(c_pos) = character.get(p.character_id) {
+            return p_pos.is_changed() || c_pos.is_changed();
+        }
+    }
+    return false;
+}
+fn snap_mouse_to_pointer(
+    camera_query: Query<(&GlobalTransform, &Camera)>,
+    window_query: Query<&Window, With<PrimaryWindow>>,
+    pointer_query: Query<&GlobalTransform, With<SnapMouseToPointer>>,
+) {
+    let window = window_query.get_single().expect("Need a single window");
+    let window_position =
+        get_window_bounds_from_title(window.title.as_str()).expect("Need a window position");
+
+    let (camera_transform, camera) = camera_query.get_single().expect("Need a single camera");
+    let pointer = pointer_query.get_single().expect("Need a single pointer");
+    let pointer_position = pointer.translation();
+    if let Some(viewport_position) = camera.world_to_viewport(camera_transform, pointer_position) {
+        let mut pos: Vec2 = Vec2::ZERO;
+        pos.x += window_position.left as f32 + viewport_position.x;
+        pos.y += window_position.top as f32 + viewport_position.y;
+        pos.y += get_title_bar_height() as f32;
+        // pos.y *= -1.0;
+        // println!(
+        //     "window: {:?}, viewport: {:?}, pointer: {:?}",
+        //     window_position, viewport_position, pos
+        // );
+        let _ = set_cursor_position(pos.x as i32, pos.y as i32);
     }
 }
