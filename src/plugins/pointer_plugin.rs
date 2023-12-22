@@ -87,7 +87,7 @@ fn apply_movement(
                 }
 
                 let desired_position = character_transform.translation + look.extend(0.0) * 200.0; // * p.distance;
-
+                                                                                                   // debug!("look: {:?}, desired_position: {:?}", look, desired_position);
                 pointer_transform.translation = desired_position;
             }
         }
@@ -97,7 +97,20 @@ fn apply_movement(
 fn should_snap_mouse(
     character: Query<Ref<GlobalTransform>, With<Character>>,
     pointer: Query<(&Pointer, Ref<GlobalTransform>), With<SnapMouseToPointer>>,
+    window_query: Query<&Window, With<PrimaryWindow>>,
+    mut ready: Local<bool>,
 ) -> bool {
+    if !*ready
+        && window_query
+            .get_single()
+            .map(|window| get_window_bounds_from_title(window.title.as_str()).is_ok())
+            .unwrap_or(false)
+    {
+        *ready = true;
+    }
+    if !*ready {
+        return false;
+    }
     if let Ok((p, p_pos)) = pointer.get_single() {
         if let Ok(c_pos) = character.get(p.character_id) {
             return p_pos.is_changed() || c_pos.is_changed();
