@@ -3,9 +3,14 @@ use bevy::{prelude::*, transform::TransformSystem};
 use bevy_xpbd_2d::PhysicsSet;
 use leafwing_input_manager::{prelude::*, user_input::InputKind};
 
-use crate::plugins::character_plugin::Character;
+use crate::plugins::character_plugin::{Character, CharacterSystemSet};
 
 pub struct ToolbarPlugin;
+
+#[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ToolbarSystemSet {
+    Spawn,
+}
 
 impl Plugin for ToolbarPlugin {
     fn build(&self, app: &mut App) {
@@ -13,7 +18,10 @@ impl Plugin for ToolbarPlugin {
             .register_type::<Tool>()
             .register_type::<ToolbarEntry>()
             .add_plugins(InputManagerPlugin::<ToolbarAction>::default())
-            .add_systems(Startup, (apply_deferred, setup).chain())
+            .add_systems(
+                Startup,
+                (apply_deferred, setup.in_set(ToolbarSystemSet::Spawn).after(CharacterSystemSet::Spawn)).chain(),
+            )
             .add_systems(Update, toolbar_visibility)
             .add_systems(
                 PostUpdate,
@@ -65,7 +73,7 @@ pub struct ToolbarEntry(Entity);
 #[derive(Component, Reflect)]
 pub struct Tool(pub Handle<Image>);
 
-pub fn setup(
+fn setup(
     mut commands: Commands,
     tools: Query<(Entity, &Name, &Tool)>,
     character: Query<Entity, With<Character>>,
@@ -113,9 +121,10 @@ pub fn setup(
     commands
         .entity(character.single())
         .insert(Toolbelt(toolbar_id));
+    info!("Toolbar setup complete");
 }
 
-pub fn toolbar_visibility(
+fn toolbar_visibility(
     mut query: Query<&mut Visibility, With<Toolbar>>,
     toolbar_actions: Query<&ActionState<ToolbarAction>>,
 ) {
@@ -134,7 +143,7 @@ pub fn toolbar_visibility(
     }
 }
 
-pub fn toolbar_follow(
+fn toolbar_follow(
     mut query: Query<&mut Transform, (With<Toolbar>, Without<Toolbelt>)>,
     follow: Query<(&Toolbelt, &Transform), Without<Toolbar>>,
 ) {

@@ -2,7 +2,7 @@ use bevy::{input::mouse::MouseWheel, prelude::*, transform::TransformSystem};
 use bevy_xpbd_2d::PhysicsSet;
 use leafwing_input_manager::{
     action_state::ActionState, input_map::InputMap, plugin::InputManagerPlugin, Actionlike,
-    InputManagerBundle,
+    InputManagerBundle, user_input::InputKind,
 };
 
 use crate::plugins::character_plugin::Character;
@@ -41,6 +41,10 @@ pub enum CameraAction {
 fn spawn_camera(mut commands: Commands) {
     let mut input_map = InputMap::default();
     input_map.insert(KeyCode::Space, CameraAction::ToggleFollowCharacter);
+    input_map.insert(
+        InputKind::GamepadButton(GamepadButtonType::North),
+        CameraAction::ToggleFollowCharacter,
+    );
     commands.spawn((
         Camera2dBundle::default(),
         MainCamera,

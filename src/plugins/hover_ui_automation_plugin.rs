@@ -95,13 +95,14 @@ fn setup(mut commands: Commands) {
         // let walker = automation.filter_tree_walker(filter).unwrap(); //automation.get_control_view_walker().unwrap();
 
         loop {
-            let cursor_pos = get_cursor_position().expect("Failed to get cursor position");
-            // println!("Cursor position: {:?}", cursor_pos);
-            if let Ok(root) = automation
-                .element_from_point(uiautomation::types::Point::new(cursor_pos.x, cursor_pos.y))
-            {
-                let info = get_element_info(root);
-                tx.send(info.ok()).unwrap();
+            if let Ok(cursor_pos) = get_cursor_position() {
+                // println!("Cursor position: {:?}", cursor_pos);
+                if let Ok(root) = automation
+                    .element_from_point(uiautomation::types::Point::new(cursor_pos.x, cursor_pos.y))
+                {
+                    let info = get_element_info(root);
+                    tx.send(info.ok()).unwrap();
+                }
             }
             std::thread::sleep(std::time::Duration::from_millis(50));
         }

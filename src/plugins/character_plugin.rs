@@ -11,12 +11,18 @@ use leafwing_input_manager::user_input::InputKind;
 
 use crate::plugins::active_input_state_plugin::ActiveInput;
 
+#[derive(SystemSet, Clone, Hash, Debug, PartialEq, Eq)]
+
+pub enum CharacterSystemSet {
+    Spawn,
+}
+
 pub struct CharacterPlugin;
 
 impl Plugin for CharacterPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(InputManagerPlugin::<PlayerAction>::default())
-            .add_systems(Startup, spawn_character)
+            .add_systems(Startup, (spawn_character.in_set(CharacterSystemSet::Spawn), apply_deferred).chain())
             .add_systems(
                 Update,
                 (
@@ -121,10 +127,11 @@ fn spawn_character(
             action_state: ActionState::default(),
             ..default()
         },
-        RigidBody::Dynamic,
+        RigidBody::Kinematic,
         Collider::capsule(20.0, 12.5),
         SpatialListener::new(7.0),
     ));
+    info!("Character spawn command issued");
 }
 
 /// Note that we handle the action_state mutation differently here than in the `mouse_position`
@@ -194,15 +201,15 @@ fn apply_movement(
         player_velocity.y += move_delta.y * character.speed;
     }
 
-    if action_state.single().pressed(PlayerAction::Look) {
-        let look = action_state
-            .single()
-            .axis_pair(PlayerAction::Look)
-            .unwrap()
-            .xy()
-            .normalize();
-        println!("Player looking in direction: {}", look);
-    }
+    // if action_state.single().pressed(PlayerAction::Look) {
+    //     let look = action_state
+    //         .single()
+    //         .axis_pair(PlayerAction::Look)
+    //         .unwrap()
+    //         .xy()
+    //         .normalize();
+    //     println!("Player looking in direction: {}", look);
+    // }
 
     if action_state.single().just_pressed(PlayerAction::Click) {
         // println!("Click!")
