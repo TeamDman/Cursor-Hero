@@ -34,10 +34,10 @@ impl Plugin for CharacterPlugin {
             .add_systems(
                 Update,
                 (
-                    player_mouse_look.run_if(in_state(ActiveInput::MouseKeyboard)),
+                    // player_mouse_look.run_if(in_state(ActiveInput::MouseKeyboard)),
                     apply_movement
                         .in_set(CharacterSystemSet::Position)
-                        .after(player_mouse_look)
+                        // .after(player_mouse_look)
                         .run_if(has_movement)
                         .run_if(is_character_physics_ready),
                     apply_movement_damping.before(apply_movement),
@@ -130,7 +130,7 @@ fn spawn_character(
             speed: 5000.0,
             damping_factor: 0.95,
         },
-        Name::new("Cursor Character"),
+        Name::new("Character"),
         InputManagerBundle::<PlayerAction> {
             input_map: PlayerAction::default_input_map(),
             action_state: ActionState::default(),
@@ -143,44 +143,44 @@ fn spawn_character(
     info!("Character spawn command issued");
 }
 
-/// Note that we handle the action_state mutation differently here than in the `mouse_position`
-/// example. Here we don't use an `ActionDriver`, but change the action data directly.
-fn player_mouse_look(
-    camera_query: Query<(&GlobalTransform, &Camera)>,
-    mut player_query: Query<(&Transform, &mut ActionState<PlayerAction>), With<Character>>,
-    window_query: Query<&Window, With<PrimaryWindow>>,
-) {
-    // Update each actionstate with the mouse position from the window
-    // by using the referenced entities in ActionStateDriver and the stored action as
-    // a key into the action data
-    let (camera_transform, camera) = camera_query.get_single().expect("Need a single camera");
-    let (player_transform, mut action_state) =
-        player_query.get_single_mut().expect("Need a single player");
-    let window = window_query
-        .get_single()
-        .expect("Need a single primary window");
+// /// Note that we handle the action_state mutation differently here than in the `mouse_position`
+// /// example. Here we don't use an `ActionDriver`, but change the action data directly.
+// fn player_mouse_look(
+//     camera_query: Query<(&GlobalTransform, &Camera)>,
+//     mut player_query: Query<(&Transform, &mut ActionState<PlayerAction>), With<Character>>,
+//     window_query: Query<&Window, With<PrimaryWindow>>,
+// ) {
+//     // Update each actionstate with the mouse position from the window
+//     // by using the referenced entities in ActionStateDriver and the stored action as
+//     // a key into the action data
+//     let (camera_transform, camera) = camera_query.get_single().expect("Need a single camera");
+//     let (player_transform, mut action_state) =
+//         player_query.get_single_mut().expect("Need a single player");
+//     let window = window_query
+//         .get_single()
+//         .expect("Need a single primary window");
 
-    // Many steps can fail here, so we'll wrap in an option pipeline
-    // First check if cursor is in window
-    // Then check if the ray intersects the plane defined by the player
-    // Then finally compute the point along the ray to look at
-    if let Some(p) = window
-        .cursor_position()
-        .and_then(|cursor| camera.viewport_to_world(camera_transform, cursor))
-        .and_then(|ray| Some(ray).zip(ray.intersect_plane(player_transform.translation, Vec3::Y)))
-        .map(|(ray, p)| ray.get_point(p))
-    {
-        let diff = (p - player_transform.translation).xz();
-        if diff.length_squared() > 1e-3f32 {
-            // Press the look action, so we can check that it is active
-            action_state.press(PlayerAction::Look);
-            // Modify the action data to set the axis
-            let action_data = action_state.action_data_mut(PlayerAction::Look);
-            // Flipping y sign here to be consistent with gamepad input. We could also invert the gamepad y axis
-            action_data.axis_pair = Some(DualAxisData::from_xy(Vec2::new(diff.x, -diff.y)));
-        }
-    }
-}
+//     // Many steps can fail here, so we'll wrap in an option pipeline
+//     // First check if cursor is in window
+//     // Then check if the ray intersects the plane defined by the player
+//     // Then finally compute the point along the ray to look at
+//     if let Some(p) = window
+//         .cursor_position()
+//         .and_then(|cursor| camera.viewport_to_world(camera_transform, cursor))
+//         .and_then(|ray| Some(ray).zip(ray.intersect_plane(player_transform.translation, Vec3::Y)))
+//         .map(|(ray, p)| ray.get_point(p))
+//     {
+//         let diff = (p - player_transform.translation).xz();
+//         if diff.length_squared() > 1e-3f32 {
+//             // Press the look action, so we can check that it is active
+//             action_state.press(PlayerAction::Look);
+//             // Modify the action data to set the axis
+//             let action_data = action_state.action_data_mut(PlayerAction::Look);
+//             // Flipping y sign here to be consistent with gamepad input. We could also invert the gamepad y axis
+//             action_data.axis_pair = Some(DualAxisData::from_xy(Vec2::new(diff.x, -diff.y)));
+//         }
+//     }
+// }
 
 fn is_character_physics_ready(query: Query<&LinearVelocity, With<Character>>) -> bool {
     query.get_single().is_ok()
@@ -238,15 +238,15 @@ fn apply_movement_damping(
     let damping_factor = 0.95;
     for (mut linear_velocity, mut angular_velocity) in &mut query {
         linear_velocity.x *= damping_factor;
-        if linear_velocity.x.abs() < 0.001 {
+        if linear_velocity.x.abs() < 10.0 {
             linear_velocity.x = 0.0;
         }
         linear_velocity.y *= damping_factor;
-        if linear_velocity.y.abs() < 0.001 {
+        if linear_velocity.y.abs() < 10.0 {
             linear_velocity.y = 0.0;
         }
         angular_velocity.0 *= damping_factor;
-        if angular_velocity.0.abs() < 0.001 {
+        if angular_velocity.0.abs() < 10.0 {
             angular_velocity.0 = 0.0;
         }
     }

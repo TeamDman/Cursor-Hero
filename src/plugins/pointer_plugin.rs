@@ -4,7 +4,7 @@ use bevy_xpbd_2d::prelude::*;
 use leafwing_input_manager::prelude::*;
 
 use crate::utils::win_mouse::set_cursor_position;
-use crate::utils::win_window::{get_title_bar_height, get_window_bounds_from_title};
+use crate::utils::win_window::{get_window_bounds_from_title, get_window_inner_offset};
 
 use super::character_plugin::{Character, CharacterSystemSet, PlayerAction};
 
@@ -100,16 +100,18 @@ fn should_snap_mouse(
     window_query: Query<&Window, With<PrimaryWindow>>,
     mut ready: Local<bool>,
 ) -> bool {
-    if !*ready
-        && window_query
-            .get_single()
-            .map(|window| get_window_bounds_from_title(window.title.as_str()).is_ok())
-            .unwrap_or(false)
-    {
-        *ready = true;
-    }
     if !*ready {
-        return false;
+        let title = get_window_bounds_from_title(window_query.single().title.as_str());
+        match title {
+            Ok(title) => {
+                debug!("Got window title: {:?}", title);
+                *ready = true;
+            }
+            Err(e) => {
+                debug!("Failed to get window title: {:?}", e);
+                return false;
+            }
+        }
     }
     if let Ok((p, p_pos)) = pointer.get_single() {
         if let Ok(c_pos) = character.get(p.character_id) {
@@ -134,12 +136,13 @@ fn snap_mouse_to_pointer(
         let mut pos: Vec2 = Vec2::ZERO;
         pos.x += window_position.left as f32 + viewport_position.x;
         pos.y += window_position.top as f32 + viewport_position.y;
-        pos.y += get_title_bar_height() as f32;
-        // pos.y *= -1.0;
-        // println!(
-        //     "window: {:?}, viewport: {:?}, pointer: {:?}",
-        //     window_position, viewport_position, pos
-        // );
-        let _ = set_cursor_position(pos.x as i32, pos.y as i32);
+        let offset = get_window_inner_offset();
+        pos.x += offset.0 as f32;
+        pos.y += offset.1 as f32;
+
+        let result = set_cursor_position(pos.x as i32, pos.y as i32);
+        if let Err(e) = result {
+            warn!("Failed to set cursor position: {}", e);
+        }
     }
 }
