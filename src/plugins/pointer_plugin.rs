@@ -1,3 +1,4 @@
+use bevy::sprite::Anchor;
 use bevy::transform::TransformSystem;
 use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_xpbd_2d::prelude::*;
@@ -50,7 +51,7 @@ fn setup(
         info!("Creating pointer for character '{}'", name.as_str());
         let mut pointer = commands.spawn((
             Pointer {
-                character_id: character_entity.clone(),
+                character_id: character_entity,
                 speed: 100_000.0,
             },
             Name::new(format!("Pointer for {}", name.as_str())),
@@ -61,6 +62,7 @@ fn setup(
                 texture: asset_server.load("textures/cursor.png"),
                 sprite: Sprite {
                     color: Color::rgb(0.2, 0.7, 0.9),
+                    anchor: Anchor::TopLeft,
                     ..default()
                 },
                 ..Default::default()
@@ -101,14 +103,15 @@ fn should_snap_mouse(
     mut ready: Local<bool>,
 ) -> bool {
     if !*ready {
-        let title = get_window_bounds_from_title(window_query.single().title.as_str());
-        match title {
-            Ok(title) => {
-                debug!("Got window title: {:?}", title);
+        let title = window_query.single().title.as_str();
+        let bounds = get_window_bounds_from_title(title);
+        match bounds {
+            Ok(bounds) => {
+                debug!("Got window bounds with title \"{}\": {:?}", title, bounds);
                 *ready = true;
             }
             Err(e) => {
-                debug!("Failed to get window title: {:?}", e);
+                debug!("Failed to get window with title \"{}\": {:?}", title, e);
                 return false;
             }
         }
@@ -118,7 +121,7 @@ fn should_snap_mouse(
             return p_pos.is_changed() || c_pos.is_changed();
         }
     }
-    return false;
+    false
 }
 fn snap_mouse_to_pointer(
     camera_query: Query<(&GlobalTransform, &Camera)>,

@@ -68,12 +68,13 @@ fn capture_frames(capturers: Arc<Mutex<CapturerHolderResource>>) -> HashMap<u32,
         .capturers
         .iter_mut()
         .map(|capturer| {
-            let mut metrics = Metrics::default();
-            let frame = capturer.capture(&mut metrics).unwrap();
+            // let mut metrics = Metrics::default();
+            // let frame = capturer.capture(&mut Some(metrics)).unwrap();
+            let frame = capturer.capture(&mut None).unwrap();
             let frame = CapturedFrame {
                 data: frame.to_vec(),
             };
-            return (capturer.monitor.info.id, frame);
+            (capturer.monitor.info.id, frame)
         })
         .collect::<HashMap<u32, CapturedFrame>>()
 }

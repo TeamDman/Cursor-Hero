@@ -13,8 +13,7 @@ impl Plugin for ClickDragMovementPlugin {
         app.add_systems(
             Update,
             (
-                mouse_drag_update
-                    .after(update_camera_zoom),
+                mouse_drag_update.after(update_camera_zoom),
                 teleport_character_to_camera
                     .after(mouse_drag_update)
                     .run_if(should_teleport_character_to_camera),
@@ -30,20 +29,12 @@ struct Anchor {
     drag_start_world_position: Vec2,
 }
 
-#[derive(Resource, Reflect)]
+#[derive(Resource, Reflect, Default)]
 struct MouseDragState {
     anchor: Option<Anchor>,
     is_dragging: bool,
 }
 
-impl Default for MouseDragState {
-    fn default() -> Self {
-        Self {
-            anchor: None,
-            is_dragging: false,
-        }
-    }
-}
 
 fn should_teleport_character_to_camera(
     query: Query<&FollowWithCamera, Added<FollowWithCamera>>,
@@ -60,16 +51,14 @@ fn teleport_character_to_camera(
     character.single_mut().translation = camera_transform_query.single().translation;
 }
 
+#[allow(clippy::type_complexity)]
 fn mouse_drag_update(
     mut mouse_button_input_events: EventReader<MouseButtonInput>,
     mut mouse_drag_state: ResMut<MouseDragState>,
     mut mouse_motion_events: EventReader<MouseMotion>,
     mut follow: Query<&mut Position, (With<FollowWithCamera>, Without<MainCamera>)>,
     window_query: Query<&Window, With<PrimaryWindow>>,
-    camera_query: Query<
-        (&Camera, &GlobalTransform),
-        (With<MainCamera>, Without<Character>),
-    >,
+    camera_query: Query<(&Camera, &GlobalTransform), (With<MainCamera>, Without<Character>)>,
     mut camera_transform_query: Query<&mut Transform, (With<MainCamera>, Without<Character>)>,
 ) {
     let (camera, camera_global_transform) = camera_query.single();
@@ -77,27 +66,24 @@ fn mouse_drag_update(
 
     // drag start and end logic
     for event in mouse_button_input_events.read() {
-        match event.button {
-            MouseButton::Left => {
-                mouse_drag_state.is_dragging = event.state.is_pressed();
-                if mouse_drag_state.is_dragging {
-                    // begin dragging
-                    if let Some(screen_position) = window.cursor_position() {
-                        if let Some(world_position) = camera
-                            .viewport_to_world(camera_global_transform, screen_position)
-                            .map(|ray| ray.origin.truncate())
-                        {
-                            mouse_drag_state.anchor = Some(Anchor {
-                                drag_start_world_position: world_position,
-                            });
-                        }
+        if event.button == MouseButton::Left {
+            mouse_drag_state.is_dragging = event.state.is_pressed();
+            if mouse_drag_state.is_dragging {
+                // begin dragging
+                if let Some(screen_position) = window.cursor_position() {
+                    if let Some(world_position) = camera
+                        .viewport_to_world(camera_global_transform, screen_position)
+                        .map(|ray| ray.origin.truncate())
+                    {
+                        mouse_drag_state.anchor = Some(Anchor {
+                            drag_start_world_position: world_position,
+                        });
                     }
-                } else {
-                    // finish dragging
-                    mouse_drag_state.anchor = None;
                 }
+            } else {
+                // finish dragging
+                mouse_drag_state.anchor = None;
             }
-            _ => {}
         }
     }
 

@@ -54,7 +54,7 @@ impl ToolbarAction {
         let mut input_map = InputMap::default();
 
         for variant in ToolbarAction::variants() {
-            input_map.insert(variant.default_mkb_binding(), variant.clone());
+            input_map.insert(variant.default_mkb_binding(), variant);
             input_map.insert(variant.default_gamepad_binding(), variant);
         }
         input_map
@@ -117,7 +117,6 @@ fn setup(
     });
 
     let toolbar_id = parent.id();
-    drop(parent);
     commands
         .entity(character.single())
         .insert(Toolbelt(toolbar_id));

@@ -51,7 +51,6 @@ fn spawn_camera(mut commands: Commands) {
         InputManagerBundle::<CameraAction> {
             input_map,
             action_state: ActionState::default(),
-            ..default()
         },
     ));
 }

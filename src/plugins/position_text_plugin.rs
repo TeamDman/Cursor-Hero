@@ -77,6 +77,7 @@ fn setup_position_text(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 }
 
+#[allow(clippy::type_complexity)]
 fn update_position_text(
     character_query: Query<(&Character, &Transform), With<Character>>,
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,

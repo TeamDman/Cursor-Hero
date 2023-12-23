@@ -110,7 +110,7 @@ fn spawn_text(
     };
     commands.entity(parent.single()).with_children(|parent| {
         for (per_frame, _event) in reader.read().enumerate() {
-            let mut text_pos = plate_pos.get_single().unwrap().clone();
+            let mut text_pos = *plate_pos.get_single().unwrap();
             // Adjust the position directly
             text_pos.translation += Vec3::new(per_frame as f32 * 100.0, 300.0, 0.0);
             parent.spawn((

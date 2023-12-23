@@ -4,12 +4,8 @@ use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use crossbeam_channel::Sender;
 use crossbeam_channel::{bounded, Receiver};
-use uiautomation::controls::ControlType;
-use uiautomation::types::UIProperty;
-use uiautomation::variants::Variant;
 use uiautomation::UIAutomation;
 use uiautomation::UIElement;
-// use uiautomation::UITreeWalker;
 use windows::{Win32::Foundation::POINT, Win32::UI::WindowsAndMessaging::GetCursorPos};
 
 use super::camera_plugin::MainCamera;
@@ -48,6 +44,7 @@ struct HoverInfo {
     game_element: Option<ElementInfo>,
 }
 
+#[allow(dead_code)]
 struct ElementInfo {
     name: String,
     bounding_rect: Rect,
@@ -77,7 +74,7 @@ fn get_element_info(element: UIElement) -> Result<ElementInfo, uiautomation::err
         automation_id,
         // value,
     };
-    return Ok(info);
+    Ok(info)
 }
 
 fn setup(mut commands: Commands) {
@@ -85,15 +82,6 @@ fn setup(mut commands: Commands) {
     commands.insert_resource(ScreenHoveredBridge(rx));
     thread::spawn(move || {
         let automation = UIAutomation::new().unwrap();
-        let filter = automation
-            .create_property_condition(
-                UIProperty::ControlType,
-                Variant::from(ControlType::Pane as i32),
-                None,
-            )
-            .unwrap();
-        // let walker = automation.filter_tree_walker(filter).unwrap(); //automation.get_control_view_walker().unwrap();
-
         loop {
             if let Ok(cursor_pos) = get_cursor_position() {
                 // println!("Cursor position: {:?}", cursor_pos);
@@ -117,15 +105,6 @@ fn setup(mut commands: Commands) {
     });
     thread::spawn(move || {
         let automation = UIAutomation::new().unwrap();
-        let filter = automation
-            .create_property_condition(
-                UIProperty::ControlType,
-                Variant::from(ControlType::Pane as i32),
-                None,
-            )
-            .unwrap();
-        // let walker = automation.filter_tree_walker(filter).unwrap(); //automation.get_control_view_walker().unwrap();
-
         loop {
             // Block until at least one message is available
             let mut latest_position = thread_rx.recv().unwrap();
@@ -186,6 +165,7 @@ struct ScreenHoveredIndicatorTag;
 #[derive(Component, Reflect, Debug)]
 struct GameHoveredIndicatorTag;
 
+#[allow(clippy::type_complexity)]
 fn show_hovered_rect(
     mut screen_indicator: Query<
         (Entity, &mut Sprite, &mut Transform),

@@ -104,7 +104,7 @@ fn setup(mut commands: Commands) {
                         }
                         Err(e) => {
                             warn!("Couldn't deserialize data: {}", e);
-                            if line == "" {
+                            if line.is_empty() {
                                 println!("Pipe closed");
                                 continue 'new_connection;
                             }

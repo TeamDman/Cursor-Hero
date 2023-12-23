@@ -9,12 +9,14 @@
 // https://github.com/RustBuddies/desktop-sharing
 // https://github.com/mira-screen-share/sharer/blob/main/src/capture/wgc/display.rs
 
-#[cfg(target_arch = "x86_64")]
-use std::arch::x86_64::_mm_shuffle_epi8;
 #[cfg(target_arch = "x86")]
 use std::arch::x86::_mm_shuffle_epi8;
-use std::{arch::x86_64::{__m128i, _mm_setr_epi8, _mm_loadu_si128, _mm_storeu_si128}, sync::Arc};
-
+#[cfg(target_arch = "x86_64")]
+use std::arch::x86_64::_mm_shuffle_epi8;
+use std::{
+    arch::x86_64::{__m128i, _mm_loadu_si128, _mm_setr_epi8, _mm_storeu_si128},
+    sync::Arc,
+};
 
 use anyhow::{anyhow, Result};
 // use display_info::DisplayInfo;
@@ -27,8 +29,8 @@ use windows::{
     Win32::{
         Foundation::{BOOL, LPARAM, RECT},
         Graphics::Gdi::{
-            CreateCompatibleBitmap, CreateCompatibleDC, CreateDCW, DeleteDC, DeleteObject,
-            EnumDisplayMonitors, GetDIBits, GetMonitorInfoW, GetObjectW, SelectObject, BitBlt,
+            BitBlt, CreateCompatibleBitmap, CreateCompatibleDC, CreateDCW, DeleteDC, DeleteObject,
+            EnumDisplayMonitors, GetDIBits, GetMonitorInfoW, GetObjectW, SelectObject,
             SetStretchBltMode, StretchBlt, BITMAP, BITMAPINFO, BITMAPINFOHEADER, DIB_RGB_COLORS,
             HBITMAP, HDC, HMONITOR, MONITORINFOEXW, RGBQUAD, SRCCOPY, STRETCH_HALFTONE,
         },
@@ -133,14 +135,8 @@ pub fn get_all_monitors() -> Result<Vec<Monitor>> {
         let a = U16CString::from_str(&monitor_info.name)?;
         let b = a.as_ptr();
         let name_pcwstr = PCWSTR(b);
-        let device_context = unsafe {
-            CreateDCW(
-                name_pcwstr,
-                name_pcwstr,
-                PCWSTR(ptr::null()),
-                None,
-            )
-        };
+        let device_context =
+            unsafe { CreateDCW(name_pcwstr, name_pcwstr, PCWSTR(ptr::null()), None) };
 
         monitors.push(Monitor {
             info: monitor_info,
@@ -169,7 +165,7 @@ pub fn get_full_monitor_capturers() -> Result<Vec<MonitorRegionCapturer>> {
     let mut capturers = Vec::new();
 
     for monitor in monitors {
-        let region = monitor.info.rect.clone();
+        let region = monitor.info.rect;
         let capturer = get_monitor_capturer(Arc::new(monitor), region);
         capturers.push(capturer);
     }
@@ -195,7 +191,7 @@ pub fn get_monitor_capturer(monitor: Arc<Monitor>, region: RECT) -> MonitorRegio
         bitmap,
         capture_region: region,
         width,
-        height
+        height,
     }
 }
 
@@ -209,10 +205,12 @@ impl Drop for MonitorRegionCapturer {
 }
 impl MonitorRegionCapturer {
     // pub fn capture(&self) -> Result<RgbaImage> {
-    pub fn capture(&self, metrics: &mut Metrics) -> Result<RgbaImage> {
+    pub fn capture(&self, metrics: &mut Option<Metrics>) -> Result<RgbaImage> {
         // todo: try https://learn.microsoft.com/en-us/windows/win32/api/dxgi1_2/nf-dxgi1_2-idxgioutputduplication-acquirenextframe
         unsafe {
-            metrics.begin("blit");
+            if let Some(metrics) = metrics {
+                metrics.begin("blit");
+            }
             StretchBlt(
                 self.device_context,
                 0,
@@ -220,13 +218,16 @@ impl MonitorRegionCapturer {
                 self.width,
                 self.height,
                 self.monitor.device_context,
-                self.monitor.info.rect.left -  self.capture_region.left,
+                self.monitor.info.rect.left - self.capture_region.left,
                 self.monitor.info.rect.top - self.capture_region.top,
                 self.width,
                 self.height,
                 SRCCOPY,
-            ).ok()?;
-            metrics.end("blut");
+            )
+            .ok()?;
+            if let Some(metrics) = metrics {
+                metrics.end("blit");
+            }
         };
 
         let mut bitmap_info = BITMAPINFO {
@@ -249,7 +250,9 @@ impl MonitorRegionCapturer {
         let data = vec![0u8; (self.width * self.height) as usize * 4];
         let buf_prt = data.as_ptr() as *mut _;
 
-        metrics.begin("getdibits");
+        if let Some(metrics) = metrics {
+            metrics.begin("getdibits");
+        }
         let is_success = unsafe {
             GetDIBits(
                 self.device_context,
@@ -261,7 +264,9 @@ impl MonitorRegionCapturer {
                 DIB_RGB_COLORS,
             ) == 0
         };
-        metrics.end("getdibits");
+        if let Some(metrics) = metrics {
+            metrics.end("getdibits");
+        }
 
         if is_success {
             return Err(anyhow!("Get RGBA data failed"));
@@ -270,7 +275,9 @@ impl MonitorRegionCapturer {
         let mut bitmap = BITMAP::default();
         let bitmap_ptr = <*mut _>::cast(&mut bitmap);
 
-        metrics.begin("getobject");
+        if let Some(metrics) = metrics {
+            metrics.begin("getobject");
+        }
         unsafe {
             // Get the BITMAP from the HBITMAP.
             GetObjectW(
@@ -279,25 +286,34 @@ impl MonitorRegionCapturer {
                 Some(bitmap_ptr),
             );
         }
-        metrics.end("getobject");
-        
+        if let Some(metrics) = metrics {
+            metrics.end("getobject");
+        }
+
         // Rotate the image; the image data is inverted.
-        metrics.begin("reverse");
-        let mut data = data.chunks(self.width as usize * 4)
+        if let Some(metrics) = metrics {
+            metrics.begin("reverse");
+        }
+        let mut data = data
+            .chunks(self.width as usize * 4)
             .map(|x| x.to_vec())
             .collect::<Vec<Vec<u8>>>();
         data.reverse();
         let mut data = data.concat();
-        metrics.end("reverse");
+        if let Some(metrics) = metrics {
+            metrics.end("reverse");
+        }
 
         // The shuffle mask for converting BGRA -> RGBA
-        metrics.begin("shuffle");
+        if let Some(metrics) = metrics {
+            metrics.begin("shuffle");
+        }
         let mask: __m128i = unsafe {
             _mm_setr_epi8(
-                2, 1, 0, 3,  // First pixel
-                6, 5, 4, 7,  // Second pixel
-                10, 9, 8, 11,  // Third pixel
-                14, 13, 12, 15  // Fourth pixel
+                2, 1, 0, 3, // First pixel
+                6, 5, 4, 7, // Second pixel
+                10, 9, 8, 11, // Third pixel
+                14, 13, 12, 15, // Fourth pixel
             )
         };
         // For each 16-byte chunk in your data
@@ -306,11 +322,13 @@ impl MonitorRegionCapturer {
             vector = unsafe { _mm_shuffle_epi8(vector, mask) };
             unsafe { _mm_storeu_si128(chunk.as_mut_ptr() as *mut __m128i, vector) };
         }
-        metrics.end("shuffle");
-        
+        if let Some(metrics) = metrics {
+            metrics.end("shuffle");
+        }
+
         let data = RgbaImage::from_vec(self.width as u32, self.height as u32, data);
         data.ok_or_else(|| anyhow!("Invalid image data"))
-    } 
+    }
 }
 
 #[cfg(test)]
@@ -331,7 +349,7 @@ mod tests {
         std::fs::create_dir_all("target/capture").unwrap();
 
         capturers.iter().for_each(|capturer| {
-            let capture = capturer.capture().unwrap();
+            let capture = capturer.capture(&mut None).unwrap();
             let mon_name_good = capturer.monitor.info.name.replace(r"\\.\", "");
             let path = format!("target/capture/full-{}.png", mon_name_good);
             capture.save(path).unwrap();
@@ -342,7 +360,7 @@ mod tests {
     fn region_screenshots() {
         let monitors = get_all_monitors().unwrap();
         let mut capturers = Vec::new();
-    
+
         for monitor in monitors {
             let region = RECT {
                 left: monitor.info.rect.left,
@@ -356,7 +374,7 @@ mod tests {
         std::fs::create_dir_all("target/capture").unwrap();
 
         capturers.iter().for_each(|capturer| {
-            let capture = capturer.capture().unwrap();
+            let capture = capturer.capture(&mut None).unwrap();
             let mon_name_good = capturer.monitor.info.name.replace(r"\\.\", "");
             let path = format!("target/capture/region-{}.png", mon_name_good);
             capture.save(path).unwrap();
@@ -370,7 +388,7 @@ mod tests {
 
         for i in 0..100 {
             capturers.iter().for_each(|capturer| {
-                let capture = capturer.capture().unwrap();
+                let capture = capturer.capture(&mut None).unwrap();
                 let (mut tot_r, mut tot_g, mut tot_b) = (0, 0, 0);
 
                 for pixel in capture.enumerate_pixels() {
@@ -380,14 +398,17 @@ mod tests {
                     tot_b += *b as u64;
                 }
                 let size = capture.iter().count() as u64;
-                print!("{} -- avg: {:?}\t",capturer.monitor.info.name,  (tot_r / size, tot_g / size, tot_b / size));
+                print!(
+                    "{} -- avg: {:?}\t",
+                    capturer.monitor.info.name,
+                    (tot_r / size, tot_g / size, tot_b / size)
+                );
             });
             print!("\n");
             std::thread::sleep(std::time::Duration::from_millis(100));
         }
     }
 
-    
     #[test]
     fn screenshot_speed() {
         let capturers = get_full_monitor_capturers().unwrap();
@@ -395,7 +416,7 @@ mod tests {
         for _ in 0..100 {
             capturers.iter().for_each(|capturer| {
                 let start = std::time::Instant::now();
-                let _ = capturer.capture().unwrap();
+                let _ = capturer.capture(&mut None).unwrap();
                 let duration = start.elapsed();
                 durations.push(duration.as_millis());
             });

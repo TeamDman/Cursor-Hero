@@ -35,35 +35,23 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    asset_server: Res<AssetServer>,
 ) {
-    // Player
-    let texture = asset_server.load("textures/cursor.png");
-
     commands.spawn((
-        SpriteBundle {
-            sprite: Sprite {
-                custom_size: Some(Vec2::new(100.0, 100.0)),
-                ..default()
-            },
-            texture,
+        MaterialMesh2dBundle {
+            mesh: meshes
+                .add(
+                    shape::Capsule {
+                        radius: 12.5,
+                        depth: 20.0,
+                        ..default()
+                    }
+                    .into(),
+                )
+                .into(),
+            material: materials.add(ColorMaterial::from(Color::rgb(0.2, 0.7, 0.9))),
+            transform: Transform::from_xyz(0.0, -100.0, 0.0),
             ..default()
         },
-        // MaterialMesh2dBundle {
-        //     mesh: meshes
-        //         .add(
-        //             shape::Capsule {
-        //                 radius: 12.5,
-        //                 depth: 20.0,
-        //                 ..default()
-        //             }
-        //             .into(),
-        //         )
-        //         .into(),
-        //     material: materials.add(ColorMaterial::from(Color::rgb(0.2, 0.7, 0.9))),
-        //     transform: Transform::from_xyz(0.0, -100.0, 0.0),
-        //     ..default()
-        // },
         CharacterControllerBundle::new(Collider::capsule(20.0, 12.5))
             .with_movement(12500.0, 0.92, 400.0),
     ));
@@ -83,46 +71,30 @@ fn setup(
         Collider::cuboid(30.0, 30.0),
     ));
 
-    // // A sensor to act as a pressure plate
-    // commands.spawn((
-    //     SpriteBundle {
-    //         sprite: Sprite {
-    //             color: Color::rgb(0.7, 0.4, 0.0),
-    //             custom_size: Some(Vec2::new(30.0, 30.0)),
-    //             ..default()
-    //         },
-    //         transform: Transform::from_xyz(250.0, -200.0, 0.0),
-    //         ..default()
-    //     },
-    //     Sensor,
-    //     Collider::cuboid(30.0, 30.0),
-    // ));
-
     // Camera
     commands.spawn(Camera2dBundle::default());
 }
-
-//////////////////////
 
 pub struct CharacterControllerPlugin;
 
 impl Plugin for CharacterControllerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<MovementAction>().add_systems(
-            Update,
-            (
-                keyboard_input,
-                gamepad_input,
-                apply_deferred,
-                movement,
-                apply_movement_damping,
+        app.add_event::<MovementAction>()
+            .add_systems(
+                Update,
+                (
+                    keyboard_input,
+                    gamepad_input,
+                    apply_deferred,
+                    movement,
+                    apply_movement_damping,
+                )
+                    .chain(),
             )
-                .chain(),
-        )
-        .register_type::<CharacterController>()
-        .register_type::<MovementAcceleration>()
-        .register_type::<MovementDampingFactor>()
-        .register_type::<JumpImpulse>();
+            .register_type::<CharacterController>()
+            .register_type::<MovementAcceleration>()
+            .register_type::<MovementDampingFactor>()
+            .register_type::<JumpImpulse>();
     }
 }
 
@@ -293,7 +265,13 @@ fn movement(
 }
 
 /// Slows down movement in the X direction.
-fn apply_movement_damping(mut query: Query<(&MovementDampingFactor, &mut LinearVelocity, &mut AngularVelocity)>) {
+fn apply_movement_damping(
+    mut query: Query<(
+        &MovementDampingFactor,
+        &mut LinearVelocity,
+        &mut AngularVelocity,
+    )>,
+) {
     for (damping_factor, mut linear_velocity, mut angular_velocity) in &mut query {
         // We could use `LinearDamping`, but we don't want to dampen movement along the Y axis
         linear_velocity.x *= damping_factor.0;

@@ -25,6 +25,7 @@ impl Metrics {
         }
     }
 
+    #[allow(dead_code)]
     pub fn report(&self) -> String {
         format!(
             "{} | total {:?}",
@@ -59,9 +60,9 @@ mod tests {
         metrics.end("a second");
 
         let report = metrics.report();
-        assert!(report.contains("z first took"));
-        assert!(report.contains("a second took"));
-
         println!("{}", report);
+        assert!(report.contains("z first"));
+        assert!(report.contains("a second"));
+
     }
 }

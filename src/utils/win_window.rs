@@ -31,3 +31,53 @@ pub fn get_window_inner_offset() -> (i32, i32) {
         (frame_height, caption_height + frame_height * 2)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use bevy_inspector_egui::egui::TextBuffer;
+    use windows::Win32::{
+        Foundation::{BOOL, HWND, LPARAM},
+        UI::WindowsAndMessaging::{EnumWindows, GetWindowTextA, IsWindowVisible},
+    };
+
+    unsafe extern "system" fn enum_windows_proc(hwnd: HWND, _lp: LPARAM) -> BOOL {
+        if IsWindowVisible(hwnd).as_bool() {
+            let mut title = [0u8; 256];
+            let title_length = GetWindowTextA(hwnd, &mut title);
+
+            if title_length > 0 {
+                let title = String::from_utf8_lossy(&title[..title_length as usize]);
+                println!("Window title: \"{}\"", &title);
+                match get_window_bounds_from_title(title.as_str()) {
+                    Ok(rect) => {
+                        println!("Window bounds: {:?}", rect);
+                    }
+                    Err(err) => {
+                        eprintln!("Error: {:?}", err);
+                        panic!("Error: {:?}", err);
+                    }
+                }
+            }
+        }
+        BOOL::from(true) // Continue enumeration
+    }
+
+    #[test]
+    fn enum_windows() {
+        unsafe {
+            EnumWindows(Some(enum_windows_proc), LPARAM(0)).unwrap();
+        }
+    }
+
+    #[test]
+    fn test_get_window_bounds_from_title() {
+        let title = "Cursor Hero";
+        let result = get_window_bounds_from_title(title);
+        assert!(result.is_ok());
+        let rect = result.unwrap();
+        assert!(rect.left < rect.right);
+        assert!(rect.top < rect.bottom);
+    }
+}

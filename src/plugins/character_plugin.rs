@@ -1,15 +1,10 @@
 use bevy::prelude::*;
 use bevy::sprite::MaterialMesh2dBundle;
-use bevy::window::PrimaryWindow;
 use bevy_xpbd_2d::{math::*, prelude::*};
-use leafwing_input_manager::axislike::DualAxisData;
 use leafwing_input_manager::prelude::*;
-
 use bevy_inspector_egui::prelude::ReflectInspectorOptions;
 use bevy_inspector_egui::InspectorOptions;
 use leafwing_input_manager::user_input::InputKind;
-
-use crate::plugins::active_input_state_plugin::ActiveInput;
 
 #[derive(SystemSet, Clone, Hash, Debug, PartialEq, Eq)]
 
@@ -80,7 +75,7 @@ impl PlayerAction {
         let mut input_map = InputMap::default();
 
         for variant in PlayerAction::variants() {
-            input_map.insert(variant.default_mkb_binding(), variant.clone());
+            input_map.insert(variant.default_mkb_binding(), variant);
             input_map.insert(variant.default_gamepad_binding(), variant);
         }
         input_map
@@ -134,7 +129,6 @@ fn spawn_character(
         InputManagerBundle::<PlayerAction> {
             input_map: PlayerAction::default_input_map(),
             action_state: ActionState::default(),
-            ..default()
         },
         RigidBody::Kinematic,
         Collider::capsule(20.0, 12.5),
@@ -225,6 +219,7 @@ fn apply_movement(
     }
 }
 
+#[allow(clippy::type_complexity)]
 fn apply_movement_damping(
     mut query: Query<
         (&mut LinearVelocity, &mut AngularVelocity),

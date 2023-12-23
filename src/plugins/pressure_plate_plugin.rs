@@ -35,6 +35,7 @@ impl PressurePlate {
     }
 }
 
+#[allow(clippy::type_complexity)]
 fn update_plate(
     asset_server: Res<AssetServer>,
     mut commands: Commands,
@@ -70,7 +71,6 @@ fn update_plate(
                 let bundle = AudioBundle {
                     source: asset_server.load("sounds/pressure plate activation.ogg"),
                     settings: PlaybackSettings::REMOVE.with_spatial(true),
-                    ..default()
                 };
                 commands.entity(entity).insert(bundle);
                 plate.active_time += time.delta_seconds();
