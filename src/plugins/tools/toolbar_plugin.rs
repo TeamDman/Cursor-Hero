@@ -1,6 +1,6 @@
-use bevy::{prelude::*, transform::TransformSystem};
+use bevy::{prelude::*, transform::TransformSystem, input::gamepad::{GamepadConnectionEvent, GamepadSettings, ButtonSettings}};
 
-use bevy_xpbd_2d::{components::LinearVelocity, PhysicsSet};
+use bevy_xpbd_2d::{components::LinearVelocity, plugins::debug, PhysicsSet};
 use leafwing_input_manager::{prelude::*, user_input::InputKind};
 
 use crate::plugins::character_plugin::{Character, CharacterSystemSet};
@@ -36,7 +36,7 @@ impl Plugin for ToolbarPlugin {
             .add_systems(
                 Update,
                 (
-                    (toolbar_visibility, toolbar_hover, tool_hover_visuals).chain(),
+                    (update_gamepad_settings, toolbar_visibility, toolbar_hover, tool_hover_visuals).chain(),
                     circle_radius_update,
                 ),
             )
@@ -63,7 +63,7 @@ impl ToolbarAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
             Self::Show => {
-                UserInput::Single(InputKind::GamepadButton(GamepadButtonType::LeftTrigger))
+                GamepadButtonType::LeftTrigger2.into()
             }
         }
     }
@@ -86,10 +86,16 @@ pub struct Toolbar {
 #[derive(Component, Reflect, Clone, Copy)]
 pub struct CirclularDistributionProperties {
     radius: f32,
+    min_radius: f32,
+    max_radius: f32,
 }
 impl Default for CirclularDistributionProperties {
     fn default() -> Self {
-        Self { radius: 200.0 }
+        Self {
+            radius: 200.0,
+            min_radius: 50.0,
+            max_radius: 200.0,
+        }
     }
 }
 
@@ -166,21 +172,56 @@ fn setup(
     info!("Toolbar setup complete");
 }
 
-fn toolbar_visibility(
-    mut query: Query<&mut Visibility, With<Toolbar>>,
-    toolbar_actions: Query<&ActionState<ToolbarAction>>,
+
+/// Responsible for updating the trigger thresholds for Mining Laser
+/// https://github.com/Leafwing-Studios/leafwing-input-manager/issues/405
+pub fn update_gamepad_settings(
+    mut gamepad_events: EventReader<GamepadConnectionEvent>,
+    mut gamepad_settings: ResMut<GamepadSettings>,
 ) {
-    if let Ok(action_state) = toolbar_actions.get_single() {
-        if action_state.just_pressed(ToolbarAction::Show) {
-            info!("Show toolbar");
-            for mut visibility in query.iter_mut() {
-                *visibility = Visibility::Visible;
+    gamepad_events.iter().for_each(|event| {
+        info!("Updating Gamepad Settings");
+
+        gamepad_settings.button_settings.insert(
+            GamepadButton {
+                gamepad: event.gamepad,
+                button_type: GamepadButtonType::RightTrigger2,
+            },
+            ButtonSettings::new(0.1, 0.08).unwrap(), //Ok because this would be programmer error
+        );
+
+        gamepad_settings.button_settings.insert(
+            GamepadButton {
+                gamepad: event.gamepad,
+                button_type: GamepadButtonType::LeftTrigger2,
+            },
+            ButtonSettings::new(0.1, 0.08).unwrap(), //Ok because this would be programmer error
+        );
+    });
+}
+
+fn toolbar_visibility(
+    mut query: Query<
+        (
+            &ActionState<ToolbarAction>,
+            &mut Visibility,
+            &mut CirclularDistributionProperties,
+        ),
+        With<Toolbar>,
+    >,
+) {
+    for (actions, mut visibility, mut circle) in query.iter_mut() {
+        if actions.pressed(ToolbarAction::Show) {
+            *visibility = Visibility::Visible;
+            let open = actions.value(ToolbarAction::Show);
+            // debug!("open: {}", open);
+            circle.radius = circle.min_radius + (circle.max_radius - circle.min_radius) * open;
+            if actions.just_pressed(ToolbarAction::Show) {
+                info!("Show toolbar");
             }
-        } else if action_state.just_released(ToolbarAction::Show) {
+        } else if actions.just_released(ToolbarAction::Show) {
+            *visibility = Visibility::Hidden;
             info!("Hide toolbar");
-            for mut visibility in query.iter_mut() {
-                *visibility = Visibility::Hidden;
-            }
         }
     }
 }
@@ -197,8 +238,6 @@ fn toolbar_follow(
         }
     }
 }
-
-
 
 fn normalize_angle(angle: f32) -> f32 {
     let two_pi = std::f32::consts::PI * 2.0;
@@ -225,19 +264,25 @@ fn toolbar_hover(
             if let Some(follow_id) = t.follow {
                 if let Ok(follow_vel) = follow.get(follow_id) {
                     let mut closest = None;
-                    if follow_vel.x != 0.0 || follow_vel.y != 0.0 {
+                    if follow_vel.x.abs() > 25.0 || follow_vel.y.abs() > 25.0 {
                         // we want to find the toolbar entry that is closest to the direction of the movement of the follow entity
                         // find the angle between the follow entity and each toolbar entry
                         // find the angle of the direction of travel
                         // find the tool with the smallest difference between the two angles
-                        let travel_angle = normalize_angle(follow_vel.0.angle_between(Vec2::new(1.0, 0.0)));
+                        let travel_angle =
+                            normalize_angle(follow_vel.0.angle_between(Vec2::new(1.0, 0.0)));
                         let mut closest_angle = std::f32::consts::PI; // Initialized to the max angle difference (180 degrees)
-                        
+
                         for kid in t_kids.iter() {
                             if let Ok((kid_transform, _hovered_status)) = tools.get(*kid) {
-                                let kid_angle = normalize_angle(kid_transform.translation.xy().angle_between(Vec2::new(1.0, 0.0)));
+                                let kid_angle = normalize_angle(
+                                    kid_transform
+                                        .translation
+                                        .xy()
+                                        .angle_between(Vec2::new(1.0, 0.0)),
+                                );
                                 let diff = angular_diff(kid_angle, travel_angle);
-                        
+
                                 if diff < closest_angle {
                                     closest = Some(*kid);
                                     closest_angle = diff;
