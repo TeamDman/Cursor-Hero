@@ -20,6 +20,8 @@ impl Plugin for ToolbarPlugin {
             .register_type::<CirclularDistributionProperties>()
             .register_type::<ActiveToolTag>()
             .register_type::<HoveredToolTag>()
+            .add_event::<ToolbarHoverEvent>()
+            .add_event::<ToolbarActivationEvent>()
             .add_plugins(InputManagerPlugin::<ToolbarAction>::default())
             .add_systems(
                 Startup,
@@ -34,7 +36,7 @@ impl Plugin for ToolbarPlugin {
             .add_systems(
                 Update,
                 (
-                    (toolbar_visibility, toolbar_hover).chain(),
+                    (toolbar_visibility, toolbar_hover, tool_hover_visuals).chain(),
                     circle_radius_update,
                 ),
             )
@@ -102,6 +104,18 @@ pub struct ActiveToolTag;
 
 #[derive(Component, Reflect)]
 pub struct HoveredToolTag;
+
+#[derive(Event, Debug, Reflect)]
+pub enum ToolbarHoverEvent {
+    HoverStart(Entity),
+    HoverEnd(Entity),
+}
+
+#[derive(Event, Debug, Reflect)]
+pub enum ToolbarActivationEvent {
+    Activate(Entity),
+    Deactivate(Entity),
+}
 
 fn setup(
     mut commands: Commands,
@@ -184,11 +198,101 @@ fn toolbar_follow(
     }
 }
 
-fn toolbar_hover(toolbars: Query<(&Toolbar, &Visibility)>, follow: Query<&LinearVelocity>) {
-    for (t, t_vis) in toolbars.iter() {
+
+
+fn normalize_angle(angle: f32) -> f32 {
+    let two_pi = std::f32::consts::PI * 2.0;
+    (angle + two_pi) % two_pi
+}
+
+fn angular_diff(angle1: f32, angle2: f32) -> f32 {
+    let diff = (angle1 - angle2).abs();
+    if diff > std::f32::consts::PI {
+        std::f32::consts::PI * 2.0 - diff
+    } else {
+        diff
+    }
+}
+fn toolbar_hover(
+    mut commands: Commands,
+    toolbars: Query<(&Toolbar, &Visibility, &Children)>,
+    follow: Query<&LinearVelocity>,
+    tools: Query<(&Transform, Option<&HoveredToolTag>), With<ToolbarEntry>>,
+    mut events: EventWriter<ToolbarHoverEvent>,
+) {
+    for (t, t_vis, t_kids) in toolbars.iter() {
         if t_vis == &Visibility::Visible {
             if let Some(follow_id) = t.follow {
-                if let Ok(follow_vel) = follow.get(follow_id) {}
+                if let Ok(follow_vel) = follow.get(follow_id) {
+                    let mut closest = None;
+                    if follow_vel.x != 0.0 || follow_vel.y != 0.0 {
+                        // we want to find the toolbar entry that is closest to the direction of the movement of the follow entity
+                        // find the angle between the follow entity and each toolbar entry
+                        // find the angle of the direction of travel
+                        // find the tool with the smallest difference between the two angles
+                        let angle = normalize_angle(follow_vel.0.angle_between(Vec2::new(1.0, 0.0)));
+                        debug!("Follow angle: {}", angle);
+                        let mut closest_angle = std::f32::consts::PI; // Initialized to the max angle difference (180 degrees)
+                        
+                        for kid in t_kids.iter() {
+                            if let Ok((kid_transform, _hovered_status)) = tools.get(*kid) {
+                                let kid_angle = normalize_angle(kid_transform.translation.xy().angle_between(Vec2::new(1.0, 0.0)));
+                                let diff = angular_diff(kid_angle, angle);
+                        
+                                if diff < closest_angle {
+                                    closest = Some(*kid);
+                                    closest_angle = diff;
+                                }
+                            }
+                        }
+                        
+                    }
+                    // remove the follow tag from the unhovered tools
+                    for kid in t_kids.iter() {
+                        if Some(*kid) != closest {
+                            if let Ok((_, hovered_status)) = tools.get(*kid) {
+                                if hovered_status.is_some() {
+                                    commands.entity(*kid).remove::<HoveredToolTag>();
+                                    events.send(ToolbarHoverEvent::HoverEnd(*kid));
+                                }
+                            }
+                        }
+                    }
+                    if let Some(closest) = closest {
+                        // add the follow tag to the closest tool
+                        // if the closest tool already has the follow tag, do nothing
+                        if let Ok((_, hovered_status)) = tools.get(closest) {
+                            if hovered_status.is_none() {
+                                commands.entity(closest).insert(HoveredToolTag);
+                                events.send(ToolbarHoverEvent::HoverStart(closest));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn tool_hover_visuals(
+    mut query: Query<&mut Sprite, With<ToolbarEntry>>,
+    mut events: EventReader<ToolbarHoverEvent>,
+) {
+    for event in events.read() {
+        match event {
+            ToolbarHoverEvent::HoverStart(entity) => {
+                debug!("Hovering over tool: {:?}", entity);
+                if let Ok(mut sprite) = query.get_mut(*entity) {
+                    debug!("Setting color to purple");
+                    sprite.color = Color::rgb(0.5, 0.0, 0.5);
+                }
+            }
+            ToolbarHoverEvent::HoverEnd(entity) => {
+                debug!("No longer hovering over tool: {:?}", entity);
+                if let Ok(mut sprite) = query.get_mut(*entity) {
+                    debug!("Setting color to white");
+                    sprite.color = Color::WHITE;
+                }
             }
         }
     }
