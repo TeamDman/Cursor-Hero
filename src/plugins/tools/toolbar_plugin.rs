@@ -1,6 +1,6 @@
 use bevy::{prelude::*, transform::TransformSystem};
 
-use bevy_xpbd_2d::PhysicsSet;
+use bevy_xpbd_2d::{components::LinearVelocity, PhysicsSet};
 use leafwing_input_manager::{prelude::*, user_input::InputKind};
 
 use crate::plugins::character_plugin::{Character, CharacterSystemSet};
@@ -17,12 +17,27 @@ impl Plugin for ToolbarPlugin {
         app.register_type::<Toolbar>()
             .register_type::<Tool>()
             .register_type::<ToolbarEntry>()
+            .register_type::<CirclularDistributionProperties>()
+            .register_type::<ActiveToolTag>()
+            .register_type::<HoveredToolTag>()
             .add_plugins(InputManagerPlugin::<ToolbarAction>::default())
             .add_systems(
                 Startup,
-                (apply_deferred, setup.in_set(ToolbarSystemSet::Spawn).after(CharacterSystemSet::Spawn)).chain(),
+                (
+                    apply_deferred,
+                    setup
+                        .in_set(ToolbarSystemSet::Spawn)
+                        .after(CharacterSystemSet::Spawn),
+                )
+                    .chain(),
             )
-            .add_systems(Update, toolbar_visibility)
+            .add_systems(
+                Update,
+                (
+                    (toolbar_visibility, toolbar_hover).chain(),
+                    circle_radius_update,
+                ),
+            )
             .add_systems(
                 PostUpdate,
                 toolbar_follow
@@ -62,28 +77,48 @@ impl ToolbarAction {
 }
 
 #[derive(Component, Reflect)]
-pub struct Toolbar;
+pub struct Toolbar {
+    follow: Option<Entity>,
+}
+
+#[derive(Component, Reflect, Clone, Copy)]
+pub struct CirclularDistributionProperties {
+    radius: f32,
+}
+impl Default for CirclularDistributionProperties {
+    fn default() -> Self {
+        Self { radius: 200.0 }
+    }
+}
 
 #[derive(Component, Reflect)]
-pub struct Toolbelt(Entity);
+pub struct Tool(pub Handle<Image>);
 
 #[derive(Component, Reflect)]
 pub struct ToolbarEntry(Entity);
 
 #[derive(Component, Reflect)]
-pub struct Tool(pub Handle<Image>);
+pub struct ActiveToolTag;
+
+#[derive(Component, Reflect)]
+pub struct HoveredToolTag;
 
 fn setup(
     mut commands: Commands,
     tools: Query<(Entity, &Name, &Tool)>,
     character: Query<Entity, With<Character>>,
 ) {
+    let character_id = character.single();
+    let circle = CirclularDistributionProperties::default();
     let mut parent = commands.spawn((
         SpatialBundle {
             visibility: Visibility::Hidden,
             ..default()
         },
-        Toolbar,
+        Toolbar {
+            follow: Some(character_id),
+        },
+        circle,
         Name::new("Toolbar"),
         InputManagerBundle::<ToolbarAction> {
             input_map: ToolbarAction::default_input_map(),
@@ -97,9 +132,8 @@ fn setup(
         for (i, (t_e, t_name, t)) in tools.iter().enumerate() {
             info!("Adding toolbar entry: {}", t_name.as_str());
             let angle = 360.0 / (count as f32) * i as f32;
-            let dist = 250.0;
-            let x = angle.to_radians().cos() * dist;
-            let y = angle.to_radians().sin() * dist;
+            let x = angle.to_radians().cos() * circle.radius;
+            let y = angle.to_radians().sin() * circle.radius;
             parent.spawn((
                 ToolbarEntry(t_e),
                 Name::new(format!("Toolbar Entry - {}", t_name.as_str())),
@@ -115,11 +149,6 @@ fn setup(
             ));
         }
     });
-
-    let toolbar_id = parent.id();
-    commands
-        .entity(character.single())
-        .insert(Toolbelt(toolbar_id));
     info!("Toolbar setup complete");
 }
 
@@ -143,13 +172,43 @@ fn toolbar_visibility(
 }
 
 fn toolbar_follow(
-    mut query: Query<&mut Transform, (With<Toolbar>, Without<Toolbelt>)>,
-    follow: Query<(&Toolbelt, &Transform), Without<Toolbar>>,
+    mut toolbars: Query<(&mut Transform, &Toolbar)>,
+    follow: Query<&Transform, Without<Toolbar>>,
 ) {
-    for f in follow.iter() {
-        let target = f.0 .0;
-        for t in query.get_mut(target).iter_mut() {
-            t.translation = f.1.translation;
+    for (mut toolbar_transform, toolbar) in toolbars.iter_mut() {
+        if let Some(follow_id) = toolbar.follow {
+            if let Ok(follow_transform) = follow.get(follow_id) {
+                toolbar_transform.translation = follow_transform.translation;
+            }
+        }
+    }
+}
+
+fn toolbar_hover(toolbars: Query<(&Toolbar, &Visibility)>, follow: Query<&LinearVelocity>) {
+    for (t, t_vis) in toolbars.iter() {
+        if t_vis == &Visibility::Visible {
+            if let Some(follow_id) = t.follow {
+                if let Ok(follow_vel) = follow.get(follow_id) {}
+            }
+        }
+    }
+}
+
+fn circle_radius_update(
+    toolbars: Query<(Ref<CirclularDistributionProperties>, &Children), With<Toolbar>>,
+    mut tools: Query<&mut Transform, With<ToolbarEntry>>,
+) {
+    for (circle, children) in toolbars.iter() {
+        if circle.is_changed() {
+            let count = children.iter().count();
+            for (i, tool) in children.iter().enumerate() {
+                let angle = 360.0 / (count as f32) * i as f32;
+                let x = angle.to_radians().cos() * circle.radius;
+                let y = angle.to_radians().sin() * circle.radius;
+                if let Ok(mut tool_transform) = tools.get_mut(*tool) {
+                    tool_transform.translation = Vec3::new(x, y, 200.0);
+                }
+            }
         }
     }
 }
