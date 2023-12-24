@@ -230,14 +230,13 @@ fn toolbar_hover(
                         // find the angle between the follow entity and each toolbar entry
                         // find the angle of the direction of travel
                         // find the tool with the smallest difference between the two angles
-                        let angle = normalize_angle(follow_vel.0.angle_between(Vec2::new(1.0, 0.0)));
-                        debug!("Follow angle: {}", angle);
+                        let travel_angle = normalize_angle(follow_vel.0.angle_between(Vec2::new(1.0, 0.0)));
                         let mut closest_angle = std::f32::consts::PI; // Initialized to the max angle difference (180 degrees)
                         
                         for kid in t_kids.iter() {
                             if let Ok((kid_transform, _hovered_status)) = tools.get(*kid) {
                                 let kid_angle = normalize_angle(kid_transform.translation.xy().angle_between(Vec2::new(1.0, 0.0)));
-                                let diff = angular_diff(kid_angle, angle);
+                                let diff = angular_diff(kid_angle, travel_angle);
                         
                                 if diff < closest_angle {
                                     closest = Some(*kid);
@@ -245,7 +244,6 @@ fn toolbar_hover(
                                 }
                             }
                         }
-                        
                     }
                     // remove the follow tag from the unhovered tools
                     for kid in t_kids.iter() {
