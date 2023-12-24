@@ -23,7 +23,7 @@ impl Plugin for PointerPlugin {
             .add_systems(
                 PostUpdate,
                 (
-                    apply_movement,
+                    update_pointer_position,
                     snap_mouse_to_pointer.run_if(should_snap_mouse),
                 )
                     .chain()
@@ -77,7 +77,7 @@ fn setup(
     }
 }
 
-fn apply_movement(
+fn update_pointer_position(
     character_query: Query<(&Transform, &ActionState<PlayerAction>), With<Character>>,
     mut pointer_query: Query<(&mut Transform, &Pointer), Without<Character>>,
 ) {
