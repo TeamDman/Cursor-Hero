@@ -1,5 +1,5 @@
 use windows::core::PCSTR;
-use windows::Win32::Foundation::{RECT, HWND};
+use windows::Win32::Foundation::{HWND, RECT};
 use windows::Win32::UI::WindowsAndMessaging::{FindWindowA, GetWindowRect};
 use windows::Win32::UI::WindowsAndMessaging::{GetSystemMetrics, SM_CYCAPTION, SM_CYFRAME};
 
@@ -9,6 +9,7 @@ pub enum WindowBoundsError {
     WindowsError(windows::core::Error),
 }
 
+#[allow(dead_code)]
 pub fn get_window_bounds_from_title(title: &str) -> Result<RECT, WindowBoundsError> {
     unsafe {
         let hwnd = FindWindowA(PCSTR::null(), PCSTR(title.as_ptr() as _));
