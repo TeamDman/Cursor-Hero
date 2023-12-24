@@ -1,11 +1,12 @@
 use bevy::sprite::Anchor;
 use bevy::transform::TransformSystem;
+use bevy::window::RawHandleWrapper;
 use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_xpbd_2d::prelude::*;
 use leafwing_input_manager::prelude::*;
 
 use crate::utils::win_mouse::set_cursor_position;
-use crate::utils::win_window::{get_window_bounds_from_title, get_window_inner_offset};
+use crate::utils::win_window::{get_window_bounds, get_window_inner_offset};
 
 use super::character_plugin::{Character, CharacterSystemSet, PlayerAction};
 
@@ -100,22 +101,22 @@ fn should_snap_mouse(
     character: Query<Ref<GlobalTransform>, With<Character>>,
     pointer: Query<(&Pointer, Ref<GlobalTransform>), With<SnapMouseToPointer>>,
     window_query: Query<&Window, With<PrimaryWindow>>,
-    mut ready: Local<bool>,
+    // mut ready: Local<bool>,
 ) -> bool {
-    if !*ready {
-        let title = window_query.single().title.as_str();
-        let bounds = get_window_bounds_from_title(title);
-        match bounds {
-            Ok(bounds) => {
-                debug!("Got window bounds with title \"{}\": {:?}", title, bounds);
-                *ready = true;
-            }
-            Err(e) => {
-                debug!("Failed to get window with title \"{}\": {:?}", title, e);
-                return false;
-            }
-        }
-    }
+    // if !*ready {
+    //     let title = window_query.single().title.as_str();
+    //     let bounds = get_window_bounds_from_title(title);
+    //     match bounds {
+    //         Ok(bounds) => {
+    //             debug!("Got window bounds with title \"{}\": {:?}", title, bounds);
+    //             *ready = true;
+    //         }
+    //         Err(e) => {
+    //             debug!("Failed to get window with title \"{}\": {:?}", title, e);
+    //             return false;
+    //         }
+    //     }
+    // }
     if let Ok((p, p_pos)) = pointer.get_single() {
         if let Ok(c_pos) = character.get(p.character_id) {
             return p_pos.is_changed() || c_pos.is_changed();
@@ -125,12 +126,15 @@ fn should_snap_mouse(
 }
 fn snap_mouse_to_pointer(
     camera_query: Query<(&GlobalTransform, &Camera)>,
-    window_query: Query<&Window, With<PrimaryWindow>>,
+    window_query: Query<&RawHandleWrapper, With<PrimaryWindow>>,
     pointer_query: Query<&GlobalTransform, With<SnapMouseToPointer>>,
 ) {
-    let window = window_query.get_single().expect("Need a single window");
-    let window_position =
-        get_window_bounds_from_title(window.title.as_str()).expect("Need a window position");
+    let window_handle = window_query.get_single().expect("Need a single window");
+    let win32handle = match window_handle.window_handle {
+        raw_window_handle::RawWindowHandle::Win32(handle) => handle,
+        _ => panic!("Unsupported window handle"),
+    };
+    let window_position = get_window_bounds(win32handle.hwnd as _).expect("Need a window position");
 
     let (camera_transform, camera) = camera_query.get_single().expect("Need a single camera");
     let pointer = pointer_query.get_single().expect("Need a single pointer");

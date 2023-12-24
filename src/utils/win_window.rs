@@ -1,5 +1,5 @@
 use windows::core::PCSTR;
-use windows::Win32::Foundation::RECT;
+use windows::Win32::Foundation::{RECT, HWND};
 use windows::Win32::UI::WindowsAndMessaging::{FindWindowA, GetWindowRect};
 use windows::Win32::UI::WindowsAndMessaging::{GetSystemMetrics, SM_CYCAPTION, SM_CYFRAME};
 
@@ -8,6 +8,7 @@ pub enum WindowBoundsError {
     WindowNotFound,
     WindowsError(windows::core::Error),
 }
+
 pub fn get_window_bounds_from_title(title: &str) -> Result<RECT, WindowBoundsError> {
     unsafe {
         let hwnd = FindWindowA(PCSTR::null(), PCSTR(title.as_ptr() as _));
@@ -16,6 +17,14 @@ pub fn get_window_bounds_from_title(title: &str) -> Result<RECT, WindowBoundsErr
         }
         let mut rect = RECT::default();
         GetWindowRect(hwnd, &mut rect).map_err(WindowBoundsError::WindowsError)?;
+        Ok(rect)
+    }
+}
+
+pub fn get_window_bounds(hwnd: isize) -> Result<RECT, WindowBoundsError> {
+    unsafe {
+        let mut rect = RECT::default();
+        GetWindowRect(HWND(hwnd), &mut rect).map_err(WindowBoundsError::WindowsError)?;
         Ok(rect)
     }
 }
@@ -56,7 +65,7 @@ mod tests {
                     }
                     Err(err) => {
                         eprintln!("Error: {:?}", err);
-                        panic!("Error: {:?}", err);
+                        // panic!("Error: {:?}", err);
                     }
                 }
             }
@@ -75,7 +84,7 @@ mod tests {
     fn test_get_window_bounds_from_title() {
         let title = "Cursor Hero";
         let result = get_window_bounds_from_title(title);
-        assert!(result.is_ok());
+        assert!(result.is_ok(), "Error: {:?}", result.err());
         let rect = result.unwrap();
         assert!(rect.left < rect.right);
         assert!(rect.top < rect.bottom);

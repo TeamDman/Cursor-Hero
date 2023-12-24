@@ -1827,6 +1827,7 @@ dependencies = [
  "minifb",
  "mouse-rs",
  "rand",
+ "raw-window-handle 0.5.2",
  "rayon",
  "rust_socketio",
  "screenshots",

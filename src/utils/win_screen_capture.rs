@@ -386,7 +386,7 @@ mod tests {
         let capturers = get_full_monitor_capturers().unwrap();
         std::fs::create_dir_all("target/capture").unwrap();
 
-        for i in 0..100 {
+        for _ in 0..100 {
             capturers.iter().for_each(|capturer| {
                 let capture = capturer.capture(&mut None).unwrap();
                 let (mut tot_r, mut tot_g, mut tot_b) = (0, 0, 0);
