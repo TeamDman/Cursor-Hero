@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_xpbd_2d::prelude::*;
 use leafwing_input_manager::prelude::*;
 
-use crate::plugins::{character_plugin::Character, pointer_plugin::Pointer};
+use crate::plugins::{character_plugin::Character, pointer_plugin::Pointer, damping_plugin::MovementDamping};
 
 use super::super::toolbelt::types::*;
 
@@ -129,6 +129,9 @@ fn handle_input(
             info!("Spawn Cube");
             commands.spawn((
                 SpawnedCube,
+                MovementDamping {
+                    factor: 0.98,
+                },
                 SpriteBundle {
                     sprite: Sprite {
                         custom_size: Some(Vec2::new(15.0, 15.0)),
@@ -165,7 +168,7 @@ fn handle_input(
             // add a force to all cubes towards the pointer
             for (_, c_t, mut c_v) in cubes.iter_mut() {
                 let diff = pointer.translation() - c_t.translation();
-                let force = diff.normalize() * diff.length().sqrt();
+                let force = diff.normalize() * 100.0;
                 c_v.x += force.x;
                 c_v.y += force.y;
             }

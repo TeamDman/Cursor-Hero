@@ -15,6 +15,7 @@ pub mod screen_plugin;
 pub mod screen_update_plugin;
 pub mod toolbelt;
 pub mod tools;
+pub mod damping_plugin;
 
 use bevy::prelude::*;
 
@@ -36,6 +37,7 @@ use self::{
     screen_update_plugin::ScreenUpdatePlugin,
     toolbelt::toolbelt_plugin::ToolbeltPlugin,
     tools::tools_plugin::ToolsPlugin,
+    damping_plugin::DampingPlugin,
 };
 
 pub struct MyPlugin;
@@ -62,6 +64,7 @@ impl Plugin for MyPlugin {
             ToolsPlugin,
             ToolbeltPlugin,
             PointerPlugin,
+            DampingPlugin,
         ));
     }
 }

@@ -1,13 +1,16 @@
 use bevy::prelude::*;
 use bevy::sprite::MaterialMesh2dBundle;
-use bevy_xpbd_2d::{math::*, prelude::*};
-use leafwing_input_manager::prelude::*;
 use bevy_inspector_egui::prelude::ReflectInspectorOptions;
 use bevy_inspector_egui::InspectorOptions;
+use bevy_xpbd_2d::{math::*, prelude::*};
+use leafwing_input_manager::prelude::*;
 use leafwing_input_manager::user_input::InputKind;
 
-#[derive(SystemSet, Clone, Hash, Debug, PartialEq, Eq)]
+use crate::plugins::damping_plugin::MovementDamping;
 
+use super::damping_plugin::DampingSystemSet;
+
+#[derive(SystemSet, Clone, Hash, Debug, PartialEq, Eq)]
 pub enum CharacterSystemSet {
     Spawn,
     Position,
@@ -34,8 +37,8 @@ impl Plugin for CharacterPlugin {
                         .in_set(CharacterSystemSet::Position)
                         // .after(player_mouse_look)
                         .run_if(has_movement)
-                        .run_if(is_character_physics_ready),
-                    apply_movement_damping.before(apply_movement),
+                        .run_if(is_character_physics_ready)
+                        .after(DampingSystemSet::Dampen),
                 ),
             )
             .register_type::<Character>();
@@ -87,8 +90,6 @@ impl PlayerAction {
 pub struct Character {
     #[inspector(min = 0.0)]
     pub speed: f32,
-    #[inspector(min = 0.5, max = 0.999)]
-    pub damping_factor: f32,
 }
 
 fn spawn_character(
@@ -121,10 +122,8 @@ fn spawn_character(
             transform: Transform::from_xyz(0.0, -100.0, 100.0),
             ..default()
         },
-        Character {
-            speed: 5000.0,
-            damping_factor: 0.95,
-        },
+        Character { speed: 5000.0 },
+        MovementDamping::default(),
         Name::new("Character"),
         InputManagerBundle::<PlayerAction> {
             input_map: PlayerAction::default_input_map(),
@@ -202,47 +201,5 @@ fn apply_movement(
                 .xy();
         player_velocity.x += move_delta.x * character.speed;
         player_velocity.y += move_delta.y * character.speed;
-    }
-
-    // if action_state.single().pressed(PlayerAction::Look) {
-    //     let look = action_state
-    //         .single()
-    //         .axis_pair(PlayerAction::Look)
-    //         .unwrap()
-    //         .xy()
-    //         .normalize();
-    //     println!("Player looking in direction: {}", look);
-    // }
-
-    if action_state.single().just_pressed(PlayerAction::Click) {
-        // println!("Click!")
-    }
-}
-
-#[allow(clippy::type_complexity)]
-fn apply_movement_damping(
-    mut query: Query<
-        (&mut LinearVelocity, &mut AngularVelocity),
-        (With<Character>, Without<Sleeping>),
-    >,
-    time: Res<Time<Physics>>,
-) {
-    if time.is_paused() {
-        return;
-    }
-    let damping_factor = 0.95;
-    for (mut linear_velocity, mut angular_velocity) in &mut query {
-        linear_velocity.x *= damping_factor;
-        if linear_velocity.x.abs() < 10.0 {
-            linear_velocity.x = 0.0;
-        }
-        linear_velocity.y *= damping_factor;
-        if linear_velocity.y.abs() < 10.0 {
-            linear_velocity.y = 0.0;
-        }
-        angular_velocity.0 *= damping_factor;
-        if angular_velocity.0.abs() < 10.0 {
-            angular_velocity.0 = 0.0;
-        }
     }
 }
