@@ -13,6 +13,7 @@ pub mod position_text_plugin;
 pub mod pressure_plate_plugin;
 pub mod screen_plugin;
 pub mod screen_update_plugin;
+pub mod toolbelt;
 pub mod tools;
 
 use bevy::prelude::*;
@@ -33,7 +34,8 @@ use self::{
     pressure_plate_plugin::PressurePlatePlugin,
     screen_plugin::ScreenPlugin,
     screen_update_plugin::ScreenUpdatePlugin,
-    tools::ToolsPlugin,
+    toolbelt::toolbelt_plugin::ToolbeltPlugin,
+    tools::tools_plugin::ToolsPlugin,
 };
 
 pub struct MyPlugin;
@@ -58,6 +60,7 @@ impl Plugin for MyPlugin {
             CursorMirroringPlugin,
             HoverUiAutomationPlugin,
             ToolsPlugin,
+            ToolbeltPlugin,
             PointerPlugin,
         ));
     }

@@ -100,7 +100,7 @@ fn update_pointer_position(
 fn should_snap_mouse(
     character: Query<Ref<GlobalTransform>, With<Character>>,
     pointer: Query<(&Pointer, Ref<GlobalTransform>), With<SnapMouseToPointer>>,
-    window_query: Query<&Window, With<PrimaryWindow>>,
+    // window_query: Query<&Window, With<PrimaryWindow>>,
     // mut ready: Local<bool>,
 ) -> bool {
     // if !*ready {
