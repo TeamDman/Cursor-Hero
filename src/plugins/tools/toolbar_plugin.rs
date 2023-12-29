@@ -1,6 +1,12 @@
-use bevy::{prelude::*, transform::TransformSystem, input::gamepad::{GamepadConnectionEvent, GamepadSettings, ButtonSettings}};
+use itertools::Itertools;
 
-use bevy_xpbd_2d::{components::LinearVelocity, plugins::debug, PhysicsSet};
+use bevy::{
+    input::gamepad::{ButtonSettings, GamepadConnectionEvent, GamepadSettings},
+    prelude::*,
+    transform::TransformSystem,
+};
+
+use bevy_xpbd_2d::{components::LinearVelocity, PhysicsSet};
 use leafwing_input_manager::{prelude::*, user_input::InputKind};
 
 use crate::plugins::character_plugin::{Character, CharacterSystemSet};
@@ -36,7 +42,15 @@ impl Plugin for ToolbarPlugin {
             .add_systems(
                 Update,
                 (
-                    (update_gamepad_settings, toolbar_visibility, toolbar_hover, tool_hover_visuals).chain(),
+                    (
+                        update_gamepad_settings,
+                        toolbar_visibility,
+                        tool_hover_update,
+                        tool_hover_visuals,
+                        tool_active_toggle,
+                        tool_active_visuals,
+                    )
+                        .chain(),
                     circle_radius_update,
                 ),
             )
@@ -62,9 +76,7 @@ impl ToolbarAction {
     }
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
-            Self::Show => {
-                GamepadButtonType::LeftTrigger2.into()
-            }
+            Self::Show => GamepadButtonType::LeftTrigger2.into(),
         }
     }
     fn default_input_map() -> InputMap<ToolbarAction> {
@@ -78,7 +90,7 @@ impl ToolbarAction {
     }
 }
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Debug)]
 pub struct Toolbar {
     follow: Option<Entity>,
 }
@@ -99,16 +111,21 @@ impl Default for CirclularDistributionProperties {
     }
 }
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Debug)]
 pub struct Tool(pub Handle<Image>);
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Debug)]
 pub struct ToolbarEntry(Entity);
+impl ToolbarEntry {
+    pub fn belongs_to(&self, toolbar: Entity) -> bool {
+        self.0 == toolbar
+    }
+}
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Debug)]
 pub struct ActiveToolTag;
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Debug)]
 pub struct HoveredToolTag;
 
 #[derive(Event, Debug, Reflect)]
@@ -146,6 +163,7 @@ fn setup(
             ..Default::default()
         },
     ));
+    let toolbar_id = parent.id();
     parent.with_children(|parent| {
         let count = tools.iter().count();
         info!("Found {} tools", count);
@@ -155,7 +173,7 @@ fn setup(
             let x = angle.to_radians().cos() * circle.radius;
             let y = angle.to_radians().sin() * circle.radius;
             parent.spawn((
-                ToolbarEntry(t_e),
+                ToolbarEntry(toolbar_id),
                 Name::new(format!("Toolbar Entry - {}", t_name.as_str())),
                 SpriteBundle {
                     sprite: Sprite {
@@ -171,7 +189,6 @@ fn setup(
     });
     info!("Toolbar setup complete");
 }
-
 
 /// Responsible for updating the trigger thresholds for Mining Laser
 /// https://github.com/Leafwing-Studios/leafwing-input-manager/issues/405
@@ -252,7 +269,7 @@ fn angular_diff(angle1: f32, angle2: f32) -> f32 {
         diff
     }
 }
-fn toolbar_hover(
+fn tool_hover_update(
     mut commands: Commands,
     toolbars: Query<(&Toolbar, &Visibility, &Children)>,
     follow: Query<&LinearVelocity>,
@@ -324,16 +341,68 @@ fn tool_hover_visuals(
     for event in events.read() {
         match event {
             ToolbarHoverEvent::HoverStart(entity) => {
-                debug!("Hovering over tool: {:?}", entity);
                 if let Ok(mut sprite) = query.get_mut(*entity) {
-                    debug!("Setting color to purple");
+                    debug!("Applying hovered tool visuals: {:?}", entity);
                     sprite.color = Color::rgb(0.5, 0.0, 0.5);
                 }
             }
             ToolbarHoverEvent::HoverEnd(entity) => {
-                debug!("No longer hovering over tool: {:?}", entity);
                 if let Ok(mut sprite) = query.get_mut(*entity) {
-                    debug!("Setting color to white");
+                    debug!("Removing hovered tool visuals: {:?}", entity);
+                    sprite.color = Color::WHITE;
+                }
+            }
+        }
+    }
+}
+
+fn tool_active_toggle(
+    mut commands: Commands,
+    hovered: Query<(Entity, &ToolbarEntry, Option<&ActiveToolTag>), With<HoveredToolTag>>,
+    toolbars: Query<(Entity, &Toolbar, &ActionState<ToolbarAction>)>,
+    mut events: EventWriter<ToolbarActivationEvent>,
+) {
+    for (t_e, t, t_act) in toolbars.iter() {
+        // when closing a toolbar
+        if t_act.just_released(ToolbarAction::Show) {
+            debug!("Closing toolbar, toggling active tool for: {:?}", t_e);
+            // toggle active for each hovered tool
+            let found = hovered
+            .iter()
+            .filter(|(_h, h_te, _h_active)| h_te.belongs_to(t_e)).collect_vec();
+            dbg!(t_e, hovered.iter().collect_vec(), &found);
+            for (h, _h_te, h_active) in found
+            {
+                dbg!("h: {:?}, h_te: {:?}, h_active: {:?}", h, _h_te, h_active);
+                if h_active.is_some() {
+                    commands.entity(h).remove::<ActiveToolTag>();
+                    events.send(ToolbarActivationEvent::Deactivate(h));
+                    info!("Deactivating tool: {:?}", h);
+                } else {
+                    commands.entity(h).insert(ActiveToolTag);
+                    events.send(ToolbarActivationEvent::Activate(h));
+                    info!("Activating tool: {:?}", h);
+                }
+            }
+        }
+    }
+}
+
+fn tool_active_visuals( 
+    mut query: Query<&mut Sprite, With<ToolbarEntry>>,
+    mut events: EventReader<ToolbarActivationEvent>,
+) {
+    for event in events.read() {
+        match event {
+            ToolbarActivationEvent::Activate(entity) => {
+                if let Ok(mut sprite) = query.get_mut(*entity) {
+                    debug!("Applying active tool visuals: {:?}", entity);
+                    sprite.color = Color::rgb(0.0, 0.5, 0.0);
+                }
+            }
+            ToolbarActivationEvent::Deactivate(entity) => {
+                if let Ok(mut sprite) = query.get_mut(*entity) {
+                    debug!("Removing active tool visuals: {:?}", entity);
                     sprite.color = Color::WHITE;
                 }
             }
