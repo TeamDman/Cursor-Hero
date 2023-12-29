@@ -28,7 +28,7 @@ impl Plugin for PointerPlugin {
                 )
                     .chain()
                     .after(PhysicsSet::Sync)
-                    .before(TransformSystem::TransformPropagate),
+                    .after(TransformSystem::TransformPropagate),
             );
     }
 }
@@ -123,13 +123,14 @@ fn snap_mouse_to_pointer(
     let pointer = pointer_query.get_single().expect("Need a single pointer");
     let pointer_position = pointer.translation();
     if let Some(viewport_position) = camera.world_to_viewport(camera_transform, pointer_position) {
+        debug!("viewport_position: {:?}", viewport_position);
         let mut pos: Vec2 = Vec2::ZERO;
         pos.x += window_position.left as f32 + viewport_position.x;
         pos.y += window_position.top as f32 + viewport_position.y;
         let offset = get_window_inner_offset();
         pos.x += offset.0 as f32;
         pos.y += offset.1 as f32;
-
+        // debug!("Setting cursor position to {:?}", pos);
         let result = set_cursor_position(pos.x as i32, pos.y as i32);
         if let Err(e) = result {
             warn!("Failed to set cursor position: {}", e);
