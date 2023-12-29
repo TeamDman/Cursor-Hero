@@ -1,5 +1,8 @@
 use bevy::prelude::*;
+use bevy_xpbd_2d::prelude::*;
 use leafwing_input_manager::prelude::*;
+
+use crate::plugins::{character_plugin::Character, pointer_plugin::Pointer};
 
 use super::super::toolbelt::types::*;
 
@@ -8,6 +11,7 @@ pub struct CubeToolPlugin;
 impl Plugin for CubeToolPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<CubeTool>()
+            .register_type::<SpawnedCube>()
             .add_plugins(InputManagerPlugin::<CubeToolAction>::default())
             .add_systems(
                 Update,
@@ -89,22 +93,82 @@ fn spawn_tool_event_responder_update_system(
     }
 }
 
+#[derive(Component, Reflect)]
+pub struct SpawnedCube;
+
 fn handle_input(
-    // mut commands: Commands,
-    actors: Query<(&ActionState<CubeToolAction>, Option<&ToolActiveTag>)>,
+    mut commands: Commands,
+    tools: Query<(
+        &ActionState<CubeToolAction>,
+        Option<&ToolActiveTag>,
+        &Parent,
+    )>,
+    toolbelts: Query<&Parent, With<Toolbelt>>,
+    characters: Query<&Children, With<Character>>,
+    pointers: Query<&GlobalTransform, With<Pointer>>,
+    mut cubes: Query<(Entity, &GlobalTransform, &mut LinearVelocity), With<SpawnedCube>>,
 ) {
-    for (action_state, active_tool_tag) in actors.iter() {
-        if active_tool_tag.is_none() {
+    for (t_act, t_enabled, t_parent) in tools.iter() {
+        if t_enabled.is_none() {
             continue;
         }
-        if action_state.just_pressed(CubeToolAction::SpawnCube) {
-            info!("Just pressed Spawn Cube");
+        let c_kids = characters
+            .get(
+                toolbelts
+                    .get(t_parent.get())
+                    .expect("Toolbelt should have a parent")
+                    .get(),
+            )
+            .expect("Toolbelt should have a character");
+        let pointer = c_kids
+            .iter()
+            .filter_map(|x| pointers.get(*x).ok())
+            .next()
+            .expect("Character should have a pointer");
+        if t_act.just_pressed(CubeToolAction::SpawnCube) {
+            info!("Spawn Cube");
+            commands.spawn((
+                SpawnedCube,
+                SpriteBundle {
+                    sprite: Sprite {
+                        custom_size: Some(Vec2::new(15.0, 15.0)),
+                        ..default()
+                    },
+                    transform: Transform::from_translation(pointer.translation()),
+                    ..default()
+                },
+                RigidBody::Dynamic,
+                Collider::cuboid(15.0, 15.0),
+                Name::new("Cube"),
+            ));
         }
-        if action_state.just_pressed(CubeToolAction::RemoveCube) {
-            info!("Just pressed Remove Cube");
+        if t_act.just_pressed(CubeToolAction::RemoveCube) {
+            info!("Remove Cube");
+            // remove the cube closest to the pointer
+            let mut closest_cube = None;
+            let mut closest_dist = f32::MAX;
+            for (c_e, c_t, _) in cubes.iter() {
+                let dist = c_t.translation().distance(pointer.translation());
+                if dist < closest_dist {
+                    closest_cube = Some(c_e);
+                    closest_dist = dist;
+                }
+            }
+            if let Some(cube) = closest_cube {
+                commands.entity(cube).despawn_recursive();
+            }
         }
-        if action_state.just_pressed(CubeToolAction::AttractCube) {
-            info!("Just pressed Attract Cube");
+        if t_act.pressed(CubeToolAction::AttractCube) {
+            if t_act.just_pressed(CubeToolAction::AttractCube) {
+                info!("Attract Cube");
+            }
+            // add a force to all cubes towards the pointer
+            for (_, c_t, mut c_v) in cubes.iter_mut() {
+                let diff = pointer.translation() - c_t.translation();
+                let force = diff.normalize() * diff.length().sqrt();
+                c_v.x += force.x;
+                c_v.y += force.y;
+            }
         }
     }
 }

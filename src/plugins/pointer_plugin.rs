@@ -45,35 +45,35 @@ pub struct SnapMouseToPointer;
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    character: Query<(Entity, &Transform, &Character, &Name)>,
+    character: Query<(Entity, &Transform), With<Character>>,
 ) {
     assert!(character.iter().count() > 0, "No characters found");
-    for (i, (character_entity, transform, _character, name)) in character.iter().enumerate() {
-        info!("Creating pointer for character '{}'", name.as_str());
-        let mut pointer = commands.spawn((
-            Pointer {
-                character_id: character_entity,
-                speed: 100_000.0,
-            },
-            Name::new(format!("Pointer for {}", name.as_str())),
-            SpriteBundle {
-                transform: Transform::from_translation(
-                    transform.translation + Vec3::new(200.0, 0.0, 0.5),
-                ),
-                texture: asset_server.load("textures/cursor.png"),
-                sprite: Sprite {
-                    color: Color::rgb(0.2, 0.7, 0.9),
-                    anchor: Anchor::TopLeft,
-                    ..default()
+    for (i, (c_e, c_pos)) in character.iter().enumerate() {
+        info!("Creating pointer for character '{:?}'", c_e);
+        commands.entity(c_e).with_children(|c_commands| {
+            let mut pointer = c_commands.spawn((
+                Pointer {
+                    character_id: c_e,
+                    speed: 100_000.0,
                 },
-                ..Default::default()
-            },
-            RigidBody::Dynamic,
-            MassPropertiesBundle::new_computed(&Collider::cuboid(10.0, 10.0), 1.0),
-        ));
-        if i == 0 {
-            pointer.insert(SnapMouseToPointer);
-        }
+                Name::new("Pointer"),
+                SpriteBundle {
+                    transform: Transform::from_translation(Vec3::new(200.0, 0.0, 0.5)),
+                    texture: asset_server.load("textures/cursor.png"),
+                    sprite: Sprite {
+                        color: Color::rgb(0.2, 0.7, 0.9),
+                        anchor: Anchor::TopLeft,
+                        ..default()
+                    },
+                    ..Default::default()
+                },
+                RigidBody::Dynamic,
+                MassPropertiesBundle::new_computed(&Collider::cuboid(10.0, 10.0), 1.0),
+            ));
+            if i == 0 {
+                pointer.insert(SnapMouseToPointer);
+            }
+        });
     }
 }
 
@@ -89,8 +89,7 @@ fn update_pointer_position(
                     continue;
                 }
 
-                let desired_position = character_transform.translation + look.extend(0.0) * 200.0; // * p.distance;
-                                                                                                   // debug!("look: {:?}, desired_position: {:?}", look, desired_position);
+                let desired_position = look.extend(0.0) * 200.0;
                 pointer_transform.translation = desired_position;
             }
         }
@@ -100,23 +99,7 @@ fn update_pointer_position(
 fn should_snap_mouse(
     character: Query<Ref<GlobalTransform>, With<Character>>,
     pointer: Query<(&Pointer, Ref<GlobalTransform>), With<SnapMouseToPointer>>,
-    // window_query: Query<&Window, With<PrimaryWindow>>,
-    // mut ready: Local<bool>,
 ) -> bool {
-    // if !*ready {
-    //     let title = window_query.single().title.as_str();
-    //     let bounds = get_window_bounds_from_title(title);
-    //     match bounds {
-    //         Ok(bounds) => {
-    //             debug!("Got window bounds with title \"{}\": {:?}", title, bounds);
-    //             *ready = true;
-    //         }
-    //         Err(e) => {
-    //             debug!("Failed to get window with title \"{}\": {:?}", title, e);
-    //             return false;
-    //         }
-    //     }
-    // }
     if let Ok((p, p_pos)) = pointer.get_single() {
         if let Ok(c_pos) = character.get(p.character_id) {
             return p_pos.is_changed() || c_pos.is_changed();
