@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use leafwing_input_manager::{
+    prelude::*,
     action_state::ActionState, input_map::InputMap, user_input::UserInput, Actionlike,
     InputManagerBundle,
 };
@@ -9,10 +10,12 @@ pub struct PlaceholderToolPlugin;
 
 impl Plugin for PlaceholderToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<PlaceholderTool>().add_systems(
-            Update,
-            (spawn_tool_event_responder_update_system, handle_input),
-        );
+        app.register_type::<PlaceholderTool>()
+            .add_plugins(InputManagerPlugin::<PlaceholderToolAction>::default())
+            .add_systems(
+                Update,
+                (spawn_tool_event_responder_update_system, handle_input),
+            );
     }
 }
 

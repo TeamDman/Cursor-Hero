@@ -1,4 +1,4 @@
-use bevy::{prelude::*, render::view::visibility};
+use bevy::prelude::*;
 use leafwing_input_manager::{prelude::*, user_input::InputKind};
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
@@ -63,13 +63,10 @@ pub enum ToolbeltSystemSet {
     Spawn,
 }
 
-
 #[derive(Event, Debug, Reflect)]
 pub enum ToolbeltEvent {
     Populate(Entity),
 }
-
-
 
 #[derive(Component, Reflect, Clone, Copy)]
 pub struct CirclularDistributionProperties {
@@ -86,7 +83,6 @@ impl Default for CirclularDistributionProperties {
         }
     }
 }
-
 
 #[derive(Component, Reflect, Clone, Copy, Debug)]
 pub struct Tool;

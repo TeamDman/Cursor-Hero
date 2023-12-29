@@ -7,10 +7,12 @@ pub struct CubeToolPlugin;
 
 impl Plugin for CubeToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<CubeTool>().add_systems(
-            Update,
-            (spawn_tool_event_responder_update_system, handle_input),
-        );
+        app.register_type::<CubeTool>()
+            .add_plugins(InputManagerPlugin::<CubeToolAction>::default())
+            .add_systems(
+                Update,
+                (spawn_tool_event_responder_update_system, handle_input),
+            );
     }
 }
 
