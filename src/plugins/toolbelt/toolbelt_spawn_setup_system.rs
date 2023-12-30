@@ -10,7 +10,7 @@ pub fn toolbelt_spawn_setup_system(
 ) {
     let character_id = character.single();
     commands.entity(character_id).with_children(|c_commands| {
-        let mut toolbelt = c_commands.spawn(ToolbeltBundle::default());
+        let toolbelt = c_commands.spawn(ToolbeltBundle::default());
         writer.send(ToolbeltEvent::Populate(toolbelt.id()));
     });
 

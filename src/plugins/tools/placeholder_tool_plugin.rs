@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use leafwing_input_manager::{
-    prelude::*,
-    action_state::ActionState, input_map::InputMap, user_input::UserInput, Actionlike,
+    action_state::ActionState, input_map::InputMap, prelude::*, user_input::UserInput, Actionlike,
     InputManagerBundle,
 };
 
@@ -66,11 +65,10 @@ fn spawn_tool_event_responder_update_system(
         match e {
             ToolbeltEvent::Populate(toolbelt_id) => {
                 commands.entity(*toolbelt_id).with_children(|t_commands| {
-                    for i in 0..7 {
+                    for i in 0..3 {
                         t_commands.spawn((
                             PlaceholderTool,
                             ToolBundle {
-                                tool: Tool,
                                 name: Name::new(format!("Placeholder Tool {}", i)),
                                 sprite_bundle: SpriteBundle {
                                     sprite: Sprite {
@@ -80,10 +78,11 @@ fn spawn_tool_event_responder_update_system(
                                     texture: asset_server.load("textures/tool_placeholder.png"),
                                     ..default()
                                 },
-                                input_manager: InputManagerBundle::<PlaceholderToolAction> {
-                                    input_map: PlaceholderToolAction::default_input_map(),
-                                    ..default()
-                                },
+                                ..default()
+                            },
+                            InputManagerBundle::<PlaceholderToolAction> {
+                                input_map: PlaceholderToolAction::default_input_map(),
+                                ..default()
                             },
                         ));
                     }

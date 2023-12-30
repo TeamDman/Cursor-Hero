@@ -2,7 +2,9 @@ use bevy::prelude::*;
 use bevy_xpbd_2d::prelude::*;
 use leafwing_input_manager::prelude::*;
 
-use crate::plugins::{character_plugin::Character, pointer_plugin::Pointer, damping_plugin::MovementDamping};
+use crate::plugins::{
+    character_plugin::Character, damping_plugin::MovementDamping, pointer_plugin::Pointer,
+};
 
 use super::super::toolbelt::types::*;
 
@@ -35,7 +37,7 @@ impl CubeToolAction {
         match self {
             Self::SpawnCube => GamepadButtonType::South.into(),
             Self::RemoveCube => GamepadButtonType::East.into(),
-            Self::AttractCube => GamepadButtonType::West.into(),
+            Self::AttractCube => GamepadButtonType::LeftTrigger.into(),
         }
     }
 
@@ -69,12 +71,7 @@ fn spawn_tool_event_responder_update_system(
                 commands.entity(*toolbelt_id).with_children(|t_commands| {
                     t_commands.spawn((
                         ToolBundle {
-                            tool: Tool,
                             name: Name::new(format!("Cube Tool")),
-                            input_manager: InputManagerBundle::<CubeToolAction> {
-                                input_map: CubeToolAction::default_input_map(),
-                                ..default()
-                            },
                             sprite_bundle: SpriteBundle {
                                 sprite: Sprite {
                                     custom_size: Some(Vec2::new(100.0, 100.0)),
@@ -83,6 +80,11 @@ fn spawn_tool_event_responder_update_system(
                                 texture: asset_server.load("textures/tool_bulb.png"),
                                 ..default()
                             },
+                            ..default()
+                        },
+                        InputManagerBundle::<CubeToolAction> {
+                            input_map: CubeToolAction::default_input_map(),
+                            ..default()
                         },
                         CubeTool,
                     ));
@@ -129,9 +131,7 @@ fn handle_input(
             info!("Spawn Cube");
             commands.spawn((
                 SpawnedCube,
-                MovementDamping {
-                    factor: 0.98,
-                },
+                MovementDamping { factor: 0.98 },
                 SpriteBundle {
                     sprite: Sprite {
                         custom_size: Some(Vec2::new(15.0, 15.0)),

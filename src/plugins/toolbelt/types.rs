@@ -88,11 +88,25 @@ impl Default for CirclularDistributionProperties {
 pub struct Tool;
 
 #[derive(Bundle)]
-pub struct ToolBundle<A: Actionlike> {
+pub struct ToolBundle {
     pub name: Name,
     pub tool: Tool,
-    pub input_manager: InputManagerBundle<A>,
     pub sprite_bundle: SpriteBundle,
+}
+impl Default for ToolBundle {
+    fn default() -> Self {
+        Self {
+            name: Name::new("Unnamed Tool"),
+            tool: Tool,
+            sprite_bundle: SpriteBundle {
+                sprite: Sprite {
+                    custom_size: Some(Vec2::new(100.0, 100.0)),
+                    ..default()
+                },
+                ..default()
+            },
+        }
+    }
 }
 
 #[derive(Component, Reflect, Debug)]

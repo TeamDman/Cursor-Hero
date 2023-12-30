@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, sprite::Anchor};
 
 use crate::utils::win_mouse::get_cursor_position;
 
@@ -24,8 +24,10 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             transform: Transform::from_xyz(0.0, 0.0, 20.0),
             sprite: Sprite {
                 custom_size: Some(Vec2::new(20.0, 20.0)),
+                anchor: Anchor::TopLeft,
                 ..default()
             },
+
             texture: asset_server.load("textures/cursor.png"),
             ..default()
         },

@@ -34,6 +34,7 @@ windows = { version = "0.51.1", features = [
     "Win32_UI_WindowsAndMessaging",
     "Win32_System_Com",
     "Win32_UI_Accessibility",
+    "Win32_UI_Input_KeyboardAndMouse",
 ] }
 tokio = { version = "1.32.0", features = ["net", "full"] }
 tokio-named-pipes = "0.1.0"
