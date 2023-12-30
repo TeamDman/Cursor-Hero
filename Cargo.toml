@@ -1,4 +1,4 @@
-workspace = { members = ["other/gamepad_hell"] }
+workspace = { members = ["other/gamepad_hell", "other/uparrow-enter"] }
 [package]
 name = "cursor-hero"
 version = "0.1.0"
@@ -9,8 +9,9 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.75"
 # bevy = { version = "0.12", features = ["dynamic_linking"] } # broken https://github.com/rust-lang/rust/issues/53014
-bevy = { version = "0.12" }
-bevy-inspector-egui = "0.21.0"
+# bevy = { version = "0.12" }
+bevy = { path = "../bevy" }
+bevy-inspector-egui = { path = "../bevy-inspector-egui/crates/bevy-inspector-egui" }
 # bevy_xpbd_2d = { version = "0.3.2", features = ["simd", "parallel"] }
 bevy_xpbd_2d = { path = "../bevy_xpbd/crates/bevy_xpbd_2d", features = [
     "simd",
@@ -20,7 +21,7 @@ crossbeam-channel = "0.5.8"
 fxhash = "0.2.1"
 image = "0.24.7"
 indexmap = "2.1.0"
-leafwing-input-manager = "0.11.1"
+leafwing-input-manager = { path = "../leafwing-input-manager"}
 minifb = "0.25.0"
 mouse-rs = "0.4.2"
 rand = { version = "0.8.5", features = ["std_rng"] }
@@ -46,7 +47,7 @@ serde_json = "1.0"
 uiautomation = "0.7.3"
 raw-window-handle = "0.5.2"
 itertools = "0.12.0"
-gilrs = "0.10.4"
+gilrs = {version = "0.10.4", features = ["xinput"], default_features = false}
 
 [profile.dev]
 opt-level = 1

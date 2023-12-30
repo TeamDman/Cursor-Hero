@@ -85,10 +85,12 @@ impl PlayerAction {
     }
 }
 
-#[derive(Component, InspectorOptions, Default, Reflect)]
-#[reflect(Component, InspectorOptions)]
+#[derive(Component, Default, Reflect)]
+#[reflect(Component)]
+// #[derive(Component, InspectorOptions, Default, Reflect)]
+// #[reflect(Component, InspectorOptions)]
 pub struct Character {
-    #[inspector(min = 0.0)]
+    // #[inspector(min = 0.0)]
     pub speed: f32,
 }
 

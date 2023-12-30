@@ -79,7 +79,7 @@ fn main() {
     )
     .add_plugins(PhysicsPlugins::default())
     .insert_resource(Gravity(Vector::ZERO))
-    .add_plugins(WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)))
+    // .add_plugins(WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)))
     .add_plugins((FrameTimeDiagnosticsPlugin,))
     .add_plugins(MyPlugin);
     app.run();
