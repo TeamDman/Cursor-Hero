@@ -4,7 +4,7 @@ use super::{
     click_tool_plugin::ClickToolPlugin, cube_tool_plugin::CubeToolPlugin,
     placeholder_tool_plugin::PlaceholderToolPlugin,
     pointer_screen_position_tool::PointerScreenPositionToolPlugin,
-    pointer_window_position_tool::PointerWindowPositionToolPlugin,
+    pointer_window_position_tool::PointerWindowPositionToolPlugin, talk_tool::TalkToolPlugin,
 };
 
 pub struct ToolsPlugin;
@@ -16,6 +16,7 @@ impl Plugin for ToolsPlugin {
             ClickToolPlugin,
             PointerWindowPositionToolPlugin,
             PointerScreenPositionToolPlugin,
+            TalkToolPlugin,
         ));
     }
 }

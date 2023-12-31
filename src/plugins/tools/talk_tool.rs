@@ -7,19 +7,19 @@ use crate::{
     plugins::{character_plugin::Character, pointer_plugin::Pointer},
     utils::win_mouse::{
         left_click, left_mouse_down, left_mouse_up, right_click, right_mouse_up, ui_left_click,
-        ui_right_click, right_mouse_down,
+        ui_right_click, right_mouse_down, press_f23_key, release_f23_key,
     },
 };
 use crossbeam_channel::{bounded, Receiver, Sender};
 
 use super::super::toolbelt::types::*;
 
-pub struct ClickToolPlugin;
+pub struct TalkToolPlugin;
 
-impl Plugin for ClickToolPlugin {
+impl Plugin for TalkToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<ClickTool>()
-            .add_plugins(InputManagerPlugin::<ClickToolAction>::default())
+        app.register_type::<TalkTool>()
+            .add_plugins(InputManagerPlugin::<ToolAction>::default())
             .add_systems(Startup, spawn_worker_thread)
             .add_systems(
                 Update,
@@ -29,12 +29,11 @@ impl Plugin for ClickToolPlugin {
 }
 
 #[derive(Component, Reflect)]
-pub struct ClickTool;
+pub struct TalkTool;
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
-pub enum ClickToolAction {
-    LeftClick,
-    RightClick,
+pub enum ToolAction {
+    Listen,
 }
 
 #[derive(Debug)]
@@ -44,35 +43,32 @@ enum Motion {
 }
 
 #[derive(Debug)]
-enum ClickThreadMessage {
-    LeftMouse(Motion),
-    RightMouse(Motion),
+enum ThreadMessage {
+    ListenButton(Motion),
 }
 
 #[derive(Resource)]
-struct ClickBridge {
-    pub sender: Sender<(ClickThreadMessage, i32, i32)>,
+struct Bridge {
+    pub sender: Sender<ThreadMessage>,
 }
 
-impl ClickToolAction {
+impl ToolAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
-            Self::LeftClick => GamepadButtonType::RightTrigger.into(),
-            Self::RightClick => GamepadButtonType::LeftTrigger.into(),
+            Self::Listen => GamepadButtonType::West.into(),
         }
     }
 
     fn default_mkb_binding(&self) -> UserInput {
         match self {
-            Self::LeftClick => KeyCode::ControlLeft.into(),
-            Self::RightClick => KeyCode::ControlRight.into(),
+            Self::Listen => KeyCode::ShiftRight.into(),
         }
     }
 
-    fn default_input_map() -> InputMap<ClickToolAction> {
+    fn default_input_map() -> InputMap<ToolAction> {
         let mut input_map = InputMap::default();
 
-        for variant in ClickToolAction::variants() {
+        for variant in ToolAction::variants() {
             input_map.insert(variant.default_mkb_binding(), variant);
             input_map.insert(variant.default_gamepad_binding(), variant);
         }
@@ -82,15 +78,13 @@ impl ClickToolAction {
 
 fn spawn_worker_thread(mut commands: Commands) {
     let (tx, rx) = bounded::<_>(10);
-    commands.insert_resource(ClickBridge { sender: tx });
+    commands.insert_resource(Bridge { sender: tx });
     thread::spawn(move || loop {
-        let (action, x, y) = rx.recv().unwrap();
-        debug!("Worker received click: {:?} {} {}", action, x, y);
+        let action = rx.recv().unwrap();
+        debug!("Worker received thread message: {:?}", action);
         match (match action {
-            ClickThreadMessage::LeftMouse(Motion::Down) => left_mouse_down(),
-            ClickThreadMessage::LeftMouse(Motion::Up) => left_mouse_up(),
-            ClickThreadMessage::RightMouse(Motion::Down) => right_mouse_down(),
-            ClickThreadMessage::RightMouse(Motion::Up) => right_mouse_up(),
+            ThreadMessage::ListenButton(Motion::Down) => press_f23_key(),
+            ThreadMessage::ListenButton(Motion::Up) => release_f23_key(),
         }) {
             Ok(_) => {}
             Err(e) => {
@@ -111,26 +105,26 @@ fn spawn_tool_event_responder_update_system(
                 commands.entity(*toolbelt_id).with_children(|t_commands| {
                     t_commands.spawn((
                         ToolBundle {
-                            name: Name::new(format!("Click Tool")),
+                            name: Name::new(format!("Talk Tool")),
                             sprite_bundle: SpriteBundle {
                                 sprite: Sprite {
                                     custom_size: Some(Vec2::new(100.0, 100.0)),
                                     ..default()
                                 },
-                                texture: asset_server.load("textures/tool_mouse.png"),
+                                texture: asset_server.load("textures/tool_talk.png"),
                                 ..default()
                             },
                             ..default()
                         },
-                        InputManagerBundle::<ClickToolAction> {
-                            input_map: ClickToolAction::default_input_map(),
+                        InputManagerBundle::<ToolAction> {
+                            input_map: ToolAction::default_input_map(),
                             ..default()
                         },
                         ToolActiveTag,
-                        ClickTool,
+                        TalkTool,
                     ));
                 });
-                info!("Added click tool to toolbelt {:?}", toolbelt_id);
+                info!("Added talk tool to toolbelt {:?}", toolbelt_id);
             }
         }
     }
@@ -138,7 +132,7 @@ fn spawn_tool_event_responder_update_system(
 
 fn handle_input(
     tools: Query<(
-        &ActionState<ClickToolAction>,
+        &ActionState<ToolAction>,
         Option<&ToolActiveTag>,
         &Parent,
     )>,
@@ -147,7 +141,7 @@ fn handle_input(
     pointers: Query<&GlobalTransform, With<Pointer>>,
     window: Query<(Entity, &Window), With<PrimaryWindow>>,
     winit_windows: NonSendMut<WinitWindows>,
-    mut bridge: ResMut<ClickBridge>,
+    mut bridge: ResMut<Bridge>,
 ) {
     for (t_act, t_enabled, t_parent) in tools.iter() {
         if t_enabled.is_none() {
@@ -167,57 +161,29 @@ fn handle_input(
             .next()
             .expect("Character should have a pointer");
         let p_pos = p.translation();
-        if t_act.just_pressed(ClickToolAction::LeftClick) {
-            info!("Left click pressed");
+        if t_act.just_pressed(ToolAction::Listen) {
+            info!("Listen button pressed");
             match bridge
                 .sender
-                .send((ClickThreadMessage::LeftMouse(Motion::Down), p_pos.x as i32, -p_pos.y as i32))
+                .send(ThreadMessage::ListenButton(Motion::Down))
             {
                 Ok(_) => {}
                 Err(e) => {
-                    error!("Failed to send click: {:?}", e);
+                    error!("Failed to send thread message: {:?}", e);
                 }
             }
         }
-        if t_act.just_released(ClickToolAction::LeftClick) {
-            info!("Left click released");
+        if t_act.just_released(ToolAction::Listen) {
+            info!("Listen button released");
             match bridge
                 .sender
-                .send((ClickThreadMessage::LeftMouse(Motion::Up), p_pos.x as i32, -p_pos.y as i32))
+                .send(ThreadMessage::ListenButton(Motion::Up))
             {
                 Ok(_) => {}
                 Err(e) => {
-                    error!("Failed to send click: {:?}", e);
+                    error!("Failed to send thread message: {:?}", e);
                 }
             }
         }
-        if t_act.just_pressed(ClickToolAction::RightClick) {
-            info!("Right click pressed");
-            match bridge
-                .sender
-                .send((ClickThreadMessage::RightMouse(Motion::Down), p_pos.x as i32, -p_pos.y as i32))
-            {
-                Ok(_) => {}
-                Err(e) => {
-                    error!("Failed to send click: {:?}", e);
-                }
-            }
-        }
-        if t_act.just_released(ClickToolAction::RightClick) {
-            info!("Right click released");
-            match bridge
-                .sender
-                .send((ClickThreadMessage::RightMouse(Motion::Up), p_pos.x as i32, -p_pos.y as i32))
-            {
-                Ok(_) => {}
-                Err(e) => {
-                    error!("Failed to send click: {:?}", e);
-                }
-            }
-        }
-        
-        // winit_windows
-        //     .get_window(window.single().0)
-        //     .map(|w| w.focus_window());
     }
 }

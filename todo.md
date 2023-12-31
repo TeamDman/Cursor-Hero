@@ -1,0 +1,2 @@
+- indicator out of bounds when OBS is not recording / status lights for OBS
+- detect periods of waiting and replace progress spinners / cargo build logs / chatgpt still typing a response with a video from my watch later, my move in a chess game, a chess puzzle, an email -- predict the length of the time spinning to pick a thing to that will take that amount of time, 

@@ -65,7 +65,7 @@ fn spawn_tool_event_responder_update_system(
         match e {
             ToolbeltEvent::Populate(toolbelt_id) => {
                 commands.entity(*toolbelt_id).with_children(|t_commands| {
-                    for i in 0..3 {
+                    for i in 0..1 {
                         t_commands.spawn((
                             PlaceholderTool,
                             ToolBundle {
