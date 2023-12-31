@@ -138,7 +138,7 @@ fn is_character_physics_ready(query: Query<&LinearVelocity, With<Character>>) ->
 }
 fn has_movement(action_state: Query<(&ActionState<PlayerAction>, &Character)>) -> bool {
     let (act, character) = action_state.single();
-    act.pressed(PlayerAction::Move) || act.pressed(PlayerAction::Look) || character.speed > 5000.0
+    act.pressed(PlayerAction::Move) || character.speed > 5000.0
 }
 
 // fn apply_movement(
