@@ -8,11 +8,15 @@ pub fn toolbelt_spawn_setup_system(
     character: Query<Entity, With<Character>>,
     mut writer: EventWriter<ToolbeltEvent>,
 ) {
-    let character_id = character.single();
-    commands.entity(character_id).with_children(|c_commands| {
-        let toolbelt = c_commands.spawn(ToolbeltBundle::default());
-        writer.send(ToolbeltEvent::Populate(toolbelt.id()));
-    });
-
-    info!("Toolbelt setup complete");
+    if let Ok(character_id) = character.get_single() {
+        commands.entity(character_id).with_children(|c_commands| {
+            let toolbelt = c_commands.spawn(ToolbeltBundle::default());
+            writer.send(ToolbeltEvent::Populate(toolbelt.id()));
+        });
+    
+        info!("Toolbelt setup complete");
+    } else {
+        unreachable!("Toolbelt setup system is configured to only run after the character is spawned.")
+    }
+    
 }

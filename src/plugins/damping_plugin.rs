@@ -20,10 +20,10 @@ impl Plugin for DampingPlugin {
 }
 
 /// The damping factor used for slowing down movement.
-#[derive(Component, Reflect, Debug)]
-#[reflect(Component)]
-// #[derive(Component, Reflect, InspectorOptions, Debug)]
-// #[reflect(Component, InspectorOptions)]
+// #[derive(Component, Reflect, Debug)]
+// #[reflect(Component)]
+#[derive(Component, Reflect, InspectorOptions, Debug)]
+#[reflect(Component, InspectorOptions)]
 pub struct MovementDamping {
     // #[inspector(min = 0.5, max = 0.999)]
     pub factor: Scalar,

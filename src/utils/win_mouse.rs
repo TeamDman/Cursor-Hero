@@ -1,7 +1,4 @@
-use std::thread;
-
 use uiautomation::UIAutomation;
-use uiautomation::UIElement;
 use windows::Win32::UI::Input::KeyboardAndMouse::KEYBDINPUT;
 use windows::Win32::UI::Input::KeyboardAndMouse::KEYBD_EVENT_FLAGS;
 use windows::Win32::UI::Input::KeyboardAndMouse::VIRTUAL_KEY;

@@ -1,7 +1,6 @@
 use bevy::{
     prelude::*,
     transform::TransformSystem,
-    window::{PrimaryWindow, RawHandleWrapper},
 };
 use bevy_xpbd_2d::prelude::*;
 use itertools::Itertools;
@@ -11,10 +10,7 @@ use crate::{
         character_plugin::Character,
         pointer_plugin::{Pointer, PointerSystemSet},
     },
-    utils::{
-        win_mouse::set_cursor_position,
-        win_window::{get_window_bounds, get_window_inner_offset},
-    },
+    utils::win_mouse::set_cursor_position,
 };
 
 use super::super::toolbelt::types::*;
@@ -55,7 +51,8 @@ fn spawn_tool_event_responder_update_system(
                                     custom_size: Some(Vec2::new(100.0, 100.0)),
                                     ..default()
                                 },
-                                texture: asset_server.load("textures/pointer_window_position_tool.png"),
+                                texture: asset_server
+                                    .load("textures/pointer_window_position_tool.png"),
                                 ..default()
                             },
                             ..default()
@@ -71,8 +68,6 @@ fn spawn_tool_event_responder_update_system(
 }
 
 fn snap_mouse_to_pointer(
-    camera_query: Query<(&GlobalTransform, &Camera)>,
-    window_query: Query<&RawHandleWrapper, With<PrimaryWindow>>,
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<(Ref<GlobalTransform>, &Children), With<Character>>,
     pointers: Query<Ref<GlobalTransform>, With<Pointer>>,

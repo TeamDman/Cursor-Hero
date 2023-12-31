@@ -16,6 +16,7 @@ pub mod screen_plugin;
 pub mod screen_update_plugin;
 pub mod toolbelt;
 pub mod tools;
+pub mod level_bounds_plugin;
 
 use bevy::prelude::*;
 
@@ -38,6 +39,7 @@ use self::{
     screen_update_plugin::ScreenUpdatePlugin,
     toolbelt::toolbelt_plugin::ToolbeltPlugin,
     tools::tools_plugin::ToolsPlugin,
+    level_bounds_plugin::LevelBoundsPlugin,
 };
 
 pub struct MyPlugin;
@@ -61,6 +63,7 @@ impl Plugin for MyPlugin {
             .add_plugins(ToolsPlugin)
             .add_plugins(ToolbeltPlugin)
             .add_plugins(PointerPlugin)
-            .add_plugins(DampingPlugin);
+            .add_plugins(DampingPlugin)
+            .add_plugins(LevelBoundsPlugin);
     }
 }

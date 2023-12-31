@@ -1,16 +1,12 @@
 use std::thread;
 
-use bevy::{prelude::*, window::PrimaryWindow, winit::WinitWindows};
+use bevy::prelude::*;
 use leafwing_input_manager::prelude::*;
 
-use crate::{
-    plugins::{character_plugin::Character, pointer_plugin::Pointer},
-    utils::win_mouse::{
-        left_click, left_mouse_down, left_mouse_up, right_click, right_mouse_up, ui_left_click,
-        ui_right_click, right_mouse_down, press_f23_key, release_f23_key,
-    },
-};
-use crossbeam_channel::{bounded, Receiver, Sender};
+use crate::
+    utils::win_mouse::{press_f23_key, release_f23_key}
+;
+use crossbeam_channel::{bounded, Sender};
 
 use super::super::toolbelt::types::*;
 
@@ -82,10 +78,10 @@ fn spawn_worker_thread(mut commands: Commands) {
     thread::spawn(move || loop {
         let action = rx.recv().unwrap();
         debug!("Worker received thread message: {:?}", action);
-        match (match action {
+        match match action {
             ThreadMessage::ListenButton(Motion::Down) => press_f23_key(),
             ThreadMessage::ListenButton(Motion::Up) => release_f23_key(),
-        }) {
+        } {
             Ok(_) => {}
             Err(e) => {
                 error!("Failed to handle event {:?}: {:?}", action, e);
@@ -131,36 +127,13 @@ fn spawn_tool_event_responder_update_system(
 }
 
 fn handle_input(
-    tools: Query<(
-        &ActionState<ToolAction>,
-        Option<&ToolActiveTag>,
-        &Parent,
-    )>,
-    toolbelts: Query<&Parent, With<Toolbelt>>,
-    characters: Query<&Children, With<Character>>,
-    pointers: Query<&GlobalTransform, With<Pointer>>,
-    window: Query<(Entity, &Window), With<PrimaryWindow>>,
-    winit_windows: NonSendMut<WinitWindows>,
-    mut bridge: ResMut<Bridge>,
+    tools: Query<(&ActionState<ToolAction>, Option<&ToolActiveTag>)>,
+    bridge: ResMut<Bridge>,
 ) {
-    for (t_act, t_enabled, t_parent) in tools.iter() {
+    for (t_act, t_enabled) in tools.iter() {
         if t_enabled.is_none() {
             continue;
         }
-        let c_kids = characters
-            .get(
-                toolbelts
-                    .get(t_parent.get())
-                    .expect("Toolbelt should have a parent")
-                    .get(),
-            )
-            .expect("Toolbelt should have a character");
-        let p = c_kids
-            .iter()
-            .filter_map(|x| pointers.get(*x).ok())
-            .next()
-            .expect("Character should have a pointer");
-        let p_pos = p.translation();
         if t_act.just_pressed(ToolAction::Listen) {
             info!("Listen button pressed");
             match bridge
@@ -175,10 +148,7 @@ fn handle_input(
         }
         if t_act.just_released(ToolAction::Listen) {
             info!("Listen button released");
-            match bridge
-                .sender
-                .send(ThreadMessage::ListenButton(Motion::Up))
-            {
+            match bridge.sender.send(ThreadMessage::ListenButton(Motion::Up)) {
                 Ok(_) => {}
                 Err(e) => {
                     error!("Failed to send thread message: {:?}", e);

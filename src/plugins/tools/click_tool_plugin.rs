@@ -1,16 +1,13 @@
 use std::thread;
 
-use bevy::{prelude::*, window::PrimaryWindow, winit::WinitWindows};
+use bevy::prelude::*;
 use leafwing_input_manager::prelude::*;
 
 use crate::{
     plugins::{character_plugin::Character, pointer_plugin::Pointer},
-    utils::win_mouse::{
-        left_click, left_mouse_down, left_mouse_up, right_click, right_mouse_up, ui_left_click,
-        ui_right_click, right_mouse_down,
-    },
+    utils::win_mouse::{left_mouse_down, left_mouse_up, right_mouse_down, right_mouse_up},
 };
-use crossbeam_channel::{bounded, Receiver, Sender};
+use crossbeam_channel::{bounded, Sender};
 
 use super::super::toolbelt::types::*;
 
@@ -86,12 +83,12 @@ fn spawn_worker_thread(mut commands: Commands) {
     thread::spawn(move || loop {
         let (action, x, y) = rx.recv().unwrap();
         debug!("Worker received click: {:?} {} {}", action, x, y);
-        match (match action {
+        match match action {
             ClickThreadMessage::LeftMouse(Motion::Down) => left_mouse_down(),
             ClickThreadMessage::LeftMouse(Motion::Up) => left_mouse_up(),
             ClickThreadMessage::RightMouse(Motion::Down) => right_mouse_down(),
             ClickThreadMessage::RightMouse(Motion::Up) => right_mouse_up(),
-        }) {
+        } {
             Ok(_) => {}
             Err(e) => {
                 error!("Failed to handle event {:?}: {:?}", action, e);
@@ -145,9 +142,9 @@ fn handle_input(
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<&Children, With<Character>>,
     pointers: Query<&GlobalTransform, With<Pointer>>,
-    window: Query<(Entity, &Window), With<PrimaryWindow>>,
-    winit_windows: NonSendMut<WinitWindows>,
-    mut bridge: ResMut<ClickBridge>,
+    // window: Query<(Entity, &Window), With<PrimaryWindow>>,
+    // winit_windows: NonSendMut<WinitWindows>,
+    bridge: ResMut<ClickBridge>,
 ) {
     for (t_act, t_enabled, t_parent) in tools.iter() {
         if t_enabled.is_none() {
@@ -169,10 +166,11 @@ fn handle_input(
         let p_pos = p.translation();
         if t_act.just_pressed(ClickToolAction::LeftClick) {
             info!("Left click pressed");
-            match bridge
-                .sender
-                .send((ClickThreadMessage::LeftMouse(Motion::Down), p_pos.x as i32, -p_pos.y as i32))
-            {
+            match bridge.sender.send((
+                ClickThreadMessage::LeftMouse(Motion::Down),
+                p_pos.x as i32,
+                -p_pos.y as i32,
+            )) {
                 Ok(_) => {}
                 Err(e) => {
                     error!("Failed to send click: {:?}", e);
@@ -181,10 +179,11 @@ fn handle_input(
         }
         if t_act.just_released(ClickToolAction::LeftClick) {
             info!("Left click released");
-            match bridge
-                .sender
-                .send((ClickThreadMessage::LeftMouse(Motion::Up), p_pos.x as i32, -p_pos.y as i32))
-            {
+            match bridge.sender.send((
+                ClickThreadMessage::LeftMouse(Motion::Up),
+                p_pos.x as i32,
+                -p_pos.y as i32,
+            )) {
                 Ok(_) => {}
                 Err(e) => {
                     error!("Failed to send click: {:?}", e);
@@ -193,10 +192,11 @@ fn handle_input(
         }
         if t_act.just_pressed(ClickToolAction::RightClick) {
             info!("Right click pressed");
-            match bridge
-                .sender
-                .send((ClickThreadMessage::RightMouse(Motion::Down), p_pos.x as i32, -p_pos.y as i32))
-            {
+            match bridge.sender.send((
+                ClickThreadMessage::RightMouse(Motion::Down),
+                p_pos.x as i32,
+                -p_pos.y as i32,
+            )) {
                 Ok(_) => {}
                 Err(e) => {
                     error!("Failed to send click: {:?}", e);
@@ -205,17 +205,18 @@ fn handle_input(
         }
         if t_act.just_released(ClickToolAction::RightClick) {
             info!("Right click released");
-            match bridge
-                .sender
-                .send((ClickThreadMessage::RightMouse(Motion::Up), p_pos.x as i32, -p_pos.y as i32))
-            {
+            match bridge.sender.send((
+                ClickThreadMessage::RightMouse(Motion::Up),
+                p_pos.x as i32,
+                -p_pos.y as i32,
+            )) {
                 Ok(_) => {}
                 Err(e) => {
                     error!("Failed to send click: {:?}", e);
                 }
             }
         }
-        
+
         // winit_windows
         //     .get_window(window.single().0)
         //     .map(|w| w.focus_window());

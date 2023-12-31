@@ -4,12 +4,20 @@ use image::DynamicImage;
 use screenshots::Screen as ScreenLib;
 use std::collections::VecDeque;
 
+use super::level_bounds_plugin::{LevelBounds, LevelBoundsParent, LevelBoundsSystemSet};
+
 pub struct ScreenPlugin;
 impl Plugin for ScreenPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_screens)
-            .register_type::<Screen>()
-            .register_type::<ScreenParent>();
+        app.add_systems(
+            Startup,
+            (
+                apply_deferred,
+                spawn_screens.after(LevelBoundsSystemSet::Spawn),
+            ),
+        )
+        .register_type::<Screen>()
+        .register_type::<ScreenParent>();
     }
 }
 
@@ -27,9 +35,10 @@ pub struct ScreenParent;
 fn spawn_screens(
     mut commands: Commands,
     mut textures: ResMut<Assets<Image>>,
-    // mut capturer_resource: NonSendMut<CapturerResource>,
+    level_bounds_parent_query: Query<Entity, With<LevelBoundsParent>>,
 ) {
-    let mut parent = commands.spawn((
+    info!("Spawning screens");
+    let mut screen_parent_commands = commands.spawn((
         SpatialBundle::default(),
         ScreenParent,
         Name::new("Screen Parent"),
@@ -42,7 +51,9 @@ fn spawn_screens(
         .map(|monitor| monitor.info.name.clone())
         .collect::<VecDeque<String>>();
 
-    parent.with_children(|parent| {
+    let mut bounds = vec![];
+
+    screen_parent_commands.with_children(|screen_parent| {
         for screen in ScreenLib::all().unwrap().iter() {
             let image_buf = screen.capture().unwrap();
             let dynamic_image = DynamicImage::ImageRgba8(image_buf);
@@ -50,14 +61,14 @@ fn spawn_screens(
             let texture = textures.add(image);
             let name = screen_names.pop_front().unwrap();
 
-            parent.spawn((
+            screen_parent.spawn((
                 SpriteBundle {
                     texture,
                     transform: Transform::from_xyz(
                         screen.display_info.x as f32 + (screen.display_info.width as f32) / 2.0,
                         -(screen.display_info.y as f32) - (screen.display_info.height as f32) / 2.0,
                         -1.0,
-                    ), // Position behind the character
+                    ),
                     ..Default::default()
                 },
                 Screen {
@@ -67,6 +78,34 @@ fn spawn_screens(
                 },
                 Name::new(format!("Screen {}", name)),
             ));
+            bounds.push((
+                screen.display_info.x,
+                screen.display_info.y,
+                screen.display_info.width,
+                screen.display_info.height,
+            ));
         }
     });
+    if let Ok(level_bounds_parent) = level_bounds_parent_query.get_single() {
+        commands
+            .entity(level_bounds_parent)
+            .with_children(|level_bounds_parent| {
+                for (x, y, width, height) in bounds {
+                    level_bounds_parent.spawn((
+                        SpatialBundle {
+                            transform: Transform::from_xyz(
+                                x as f32 + (width as f32) / 2.0,
+                                -(y as f32) - (height as f32) / 2.0,
+                                0.0,
+                            ),
+                            ..Default::default()
+                        },
+                        LevelBounds,
+                        Name::new(format!("Level Bounds")),
+                    ));
+                }
+            });
+    } else {
+        unreachable!("Level bounds parent should exist by now");
+    }
 }
