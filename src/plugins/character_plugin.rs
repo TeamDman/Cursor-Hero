@@ -22,14 +22,9 @@ pub struct CharacterPlugin;
 impl Plugin for CharacterPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(InputManagerPlugin::<PlayerAction>::default())
-            .add_systems(
-                Startup,
-                (
-                    spawn_character.in_set(CharacterSystemSet::Spawn),
-                    apply_deferred,
-                )
-                    .chain(),
-            )
+            .configure_sets(Startup, CharacterSystemSet::Spawn)
+            .configure_sets(Update, CharacterSystemSet::Position)
+            .add_systems(Startup, spawn_character.in_set(CharacterSystemSet::Spawn))
             .add_systems(
                 Update,
                 (
@@ -124,9 +119,7 @@ fn spawn_character(
             ..default()
         },
         Character { speed: 5000.0 },
-        MovementDamping {
-            factor: 0.90,
-        },
+        MovementDamping { factor: 0.90 },
         Name::new("Character"),
         InputManagerBundle::<PlayerAction> {
             input_map: PlayerAction::default_input_map(),
@@ -145,7 +138,7 @@ fn is_character_physics_ready(query: Query<&LinearVelocity, With<Character>>) ->
 }
 fn has_movement(action_state: Query<(&ActionState<PlayerAction>, &Character)>) -> bool {
     let (act, character) = action_state.single();
-    act.pressed(PlayerAction::Move)|| act.pressed(PlayerAction::Look) || character.speed > 5000.0
+    act.pressed(PlayerAction::Move) || act.pressed(PlayerAction::Look) || character.speed > 5000.0
 }
 
 // fn apply_movement(
@@ -178,7 +171,6 @@ fn apply_movement(
     let (mut player_velocity, mut character) = character_query.single_mut();
     let delta_time = time.delta_seconds_f64().adjust_precision();
     if action_state.single().pressed(PlayerAction::Move) {
-
         let move_delta = delta_time
             * action_state
                 .single()
@@ -196,7 +188,7 @@ fn apply_movement(
 
         // Increment speed if continuously moving
         // character.speed += character.speed_increment;
-        
+
         character.speed += 1000.0;
         player_velocity.x += move_delta.x * character.speed;
         player_velocity.y += move_delta.y * character.speed;

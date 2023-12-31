@@ -24,15 +24,13 @@ impl Plugin for ToolbeltPlugin {
             .add_event::<ToolHoveredEvent>()
             .add_event::<ToolActivationEvent>()
             .add_plugins(InputManagerPlugin::<ToolbeltAction>::default())
+            .configure_sets(
+                Startup,
+                ToolbeltSystemSet::Spawn.after(CharacterSystemSet::Spawn),
+            )
             .add_systems(
                 Startup,
-                (
-                    apply_deferred,
-                    toolbelt_spawn_setup_system
-                        .in_set(ToolbeltSystemSet::Spawn)
-                        .after(CharacterSystemSet::Spawn),
-                )
-                    .chain(),
+                toolbelt_spawn_setup_system.in_set(ToolbeltSystemSet::Spawn).after(apply_deferred),
             )
             .add_systems(
                 Update,

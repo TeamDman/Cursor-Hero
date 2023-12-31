@@ -18,5 +18,4 @@ pub fn toolbelt_spawn_setup_system(
     } else {
         unreachable!("Toolbelt setup system is configured to only run after the character is spawned.")
     }
-    
 }

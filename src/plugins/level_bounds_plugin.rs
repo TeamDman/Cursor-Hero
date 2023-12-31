@@ -13,7 +13,9 @@ pub enum LevelBoundsSystemSet {
 impl Plugin for LevelBoundsPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<LevelBounds>()
-            .add_systems(Startup, (spawn_parent.in_set(LevelBoundsSystemSet::Spawn), apply_deferred).chain())
+            .configure_sets(Startup, LevelBoundsSystemSet::Spawn)
+            .configure_sets(Update, LevelBoundsSystemSet::Enforce)
+            .add_systems(Startup, spawn_parent.in_set(LevelBoundsSystemSet::Spawn))
             .add_systems(Update, enforce.in_set(LevelBoundsSystemSet::Enforce));
     }
 }

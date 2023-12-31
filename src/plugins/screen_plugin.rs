@@ -6,16 +6,19 @@ use std::collections::VecDeque;
 
 use super::level_bounds_plugin::{LevelBounds, LevelBoundsParent, LevelBoundsSystemSet};
 
+#[derive(SystemSet, Clone, Hash, Debug, PartialEq, Eq)]
+pub enum ScreenSystemSet {
+    Spawn,
+}
+
 pub struct ScreenPlugin;
 impl Plugin for ScreenPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(
+        app.configure_sets(
             Startup,
-            (
-                apply_deferred,
-                spawn_screens.after(LevelBoundsSystemSet::Spawn),
-            ),
+            ScreenSystemSet::Spawn.after(LevelBoundsSystemSet::Spawn),
         )
+        .add_systems(Startup, spawn_screens.in_set(ScreenSystemSet::Spawn).after(apply_deferred))
         .register_type::<Screen>()
         .register_type::<ScreenParent>();
     }
