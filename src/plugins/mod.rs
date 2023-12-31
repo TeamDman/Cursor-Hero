@@ -4,6 +4,7 @@ pub mod camera_plugin;
 pub mod character_plugin;
 pub mod click_drag_movement_plugin;
 pub mod cursor_mirroring_plugin;
+pub mod damping_plugin;
 pub mod fps_text_plugin;
 pub mod hover_shower_relay_plugin;
 pub mod hover_shower_service_plugin;
@@ -15,7 +16,6 @@ pub mod screen_plugin;
 pub mod screen_update_plugin;
 pub mod toolbelt;
 pub mod tools;
-pub mod damping_plugin;
 
 use bevy::prelude::*;
 
@@ -26,6 +26,7 @@ use self::{
     character_plugin::CharacterPlugin,
     click_drag_movement_plugin::ClickDragMovementPlugin,
     cursor_mirroring_plugin::CursorMirroringPlugin,
+    damping_plugin::DampingPlugin,
     fps_text_plugin::FpsTextPlugin,
     // hover_shower_relay_plugin::HoverShowerRelayPlugin,
     // hover_shower_service_plugin::HoverShowerServicePlugin,
@@ -37,34 +38,29 @@ use self::{
     screen_update_plugin::ScreenUpdatePlugin,
     toolbelt::toolbelt_plugin::ToolbeltPlugin,
     tools::tools_plugin::ToolsPlugin,
-    damping_plugin::DampingPlugin,
 };
 
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins((
-            ActiveInputStatePlugin,
-            AfterimagePlugin,
-            CameraPlugin,
-            CharacterPlugin,
-            ClickDragMovementPlugin,
-            FpsTextPlugin,
-            // HoverShowerRelayPlugin,
-            // HoverShowerServicePlugin,
-            PositionTextPlugin,
-            PressurePlatePlugin,
-            ScreenPlugin,
-            ScreenUpdatePlugin,
-        ))
-        .add_plugins((
-            CursorMirroringPlugin,
-            HoverUiAutomationPlugin,
-            ToolsPlugin,
-            ToolbeltPlugin,
-            PointerPlugin,
-            DampingPlugin,
-        ));
+        app.add_plugins(ActiveInputStatePlugin)
+            .add_plugins(AfterimagePlugin)
+            .add_plugins(CameraPlugin)
+            .add_plugins(CharacterPlugin)
+            .add_plugins(ClickDragMovementPlugin)
+            .add_plugins(FpsTextPlugin)
+            // .add_plugins(HoverShowerRelayPlugin)
+            // .add_plugins(HoverShowerServicePlugin)
+            .add_plugins(PositionTextPlugin)
+            .add_plugins(PressurePlatePlugin)
+            .add_plugins(ScreenPlugin)
+            .add_plugins(ScreenUpdatePlugin)
+            .add_plugins(CursorMirroringPlugin)
+            .add_plugins(HoverUiAutomationPlugin)
+            .add_plugins(ToolsPlugin)
+            .add_plugins(ToolbeltPlugin)
+            .add_plugins(PointerPlugin)
+            .add_plugins(DampingPlugin);
     }
 }
