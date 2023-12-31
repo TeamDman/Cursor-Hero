@@ -77,6 +77,7 @@ pub fn left_mouse_up() -> Result<(), windows::core::Error> {
     Ok(())
 }
 
+#[allow(dead_code)]
 pub fn left_click() -> Result<(), windows::core::Error> {
     left_mouse_down()?;
     left_mouse_up()?;
@@ -129,12 +130,14 @@ pub fn right_mouse_up() -> Result<(), windows::core::Error> {
     Ok(())
 }
 
+#[allow(dead_code)]
 pub fn right_click() -> Result<(), windows::core::Error> {
     right_mouse_down()?;
     right_mouse_up()?;
     Ok(())
 }
 
+#[allow(dead_code)]
 pub fn ui_left_click(x: i32, y: i32) -> Result<(), uiautomation::Error> {
     let automation = UIAutomation::new().unwrap();
     if let Ok(root) = automation.element_from_point(uiautomation::types::Point::new(x, y)) {
@@ -143,6 +146,7 @@ pub fn ui_left_click(x: i32, y: i32) -> Result<(), uiautomation::Error> {
     Ok(())
 }
 
+#[allow(dead_code)]
 pub fn ui_right_click(x: i32, y: i32) -> Result<(), uiautomation::Error> {
     let automation = UIAutomation::new()?;
     if let Ok(root) = automation.element_from_point(uiautomation::types::Point::new(x, y)) {

@@ -10,6 +10,7 @@ use crate::plugins::camera_plugin::FollowWithCamera;
 use crate::plugins::damping_plugin::MovementDamping;
 
 use super::damping_plugin::DampingSystemSet;
+use super::screen_plugin::Screen;
 
 #[derive(SystemSet, Clone, Hash, Debug, PartialEq, Eq)]
 pub enum CharacterSystemSet {
@@ -194,7 +195,7 @@ fn apply_movement(
             debug!("Resetting to base speed");
             character.speed = 5000.0;
         } else {
-            debug!("Movement detected, {:?}", move_delta);
+            // debug!("Movement detected, {:?}", move_delta);
         }
 
         // Increment speed if continuously moving
@@ -212,49 +213,46 @@ fn apply_movement(
 }
 
 fn snap_to_nearest_screen(
-    character_query: Query<&Transform, With<Character>>,
-    screen_query: Query<(&Transform, &Screen)>,
+    mut character_query: Query<(Entity, &mut Transform), (With<Character>, Without<Screen>)>,
+    screen_query: Query<(&Transform, &Handle<Image>), (With<Screen>, Without<Character>)>,
+    images: Res<Assets<Image>>,
     mut commands: Commands,
 ) {
-    let threshold_distance: f32 = 100.0; // Threshold distance from screen edge
+    let threshold_distance: f32 = 100000.0;
 
-    if let Ok(character_transform) = character_query.get_single() {
+    for (character_entity, mut character_transform) in character_query.iter_mut() {
         let character_pos = character_transform.translation;
-
-        // Initialize variables to track the closest edge
         let mut closest_distance = f32::MAX;
         let mut target_position = character_pos;
 
-        for (screen_transform, screen) in screen_query.iter() {
-            let screen_pos = screen_transform.translation;
-            let screen_size = Vec2::new(screen.width as f32, screen.height as f32);
+        for (screen_transform, image_handle) in screen_query.iter() {
+            if let Some(image) = images.get(image_handle) {
+                let screen_size = Vec2::new(image.texture_descriptor.size.width as f32, image.texture_descriptor.size.height as f32);
+                let screen_pos = screen_transform.translation;
 
-            // Define screen edges
-            let left_edge = screen_pos.x;
-            let right_edge = screen_pos.x + screen_size.x;
-            let bottom_edge = screen_pos.y;
-            let top_edge = screen_pos.y + screen_size.y;
+                let left_edge = screen_pos.x;
+                let right_edge = screen_pos.x + screen_size.x;
+                let bottom_edge = screen_pos.y;
+                let top_edge = screen_pos.y + screen_size.y;
 
-            // Calculate distances to each edge
-            let distances = [
-                (character_pos.x - left_edge, Vec3::new(left_edge + threshold_distance, character_pos.y, character_pos.z)),  // Left edge
-                (right_edge - character_pos.x, Vec3::new(right_edge - threshold_distance, character_pos.y, character_pos.z)), // Right edge
-                (character_pos.y - bottom_edge, Vec3::new(character_pos.x, bottom_edge + threshold_distance, character_pos.z)), // Bottom edge
-                (top_edge - character_pos.y, Vec3::new(character_pos.x, top_edge - threshold_distance, character_pos.z)),  // Top edge
-            ];
+                let distances = [
+                    (character_pos.x - left_edge, Vec3::new(left_edge + threshold_distance, character_pos.y, character_pos.z)),
+                    (right_edge - character_pos.x, Vec3::new(right_edge - threshold_distance, character_pos.y, character_pos.z)),
+                    (character_pos.y - bottom_edge, Vec3::new(character_pos.x, bottom_edge + threshold_distance, character_pos.z)),
+                    (top_edge - character_pos.y, Vec3::new(character_pos.x, top_edge - threshold_distance, character_pos.z)),
+                ];
 
-            // Check for the closest edge
-            for (distance, pos) in distances {
-                if distance < closest_distance && distance > threshold_distance {
-                    closest_distance = distance;
-                    target_position = pos;
+                for (distance, pos) in distances {
+                    if distance < closest_distance && distance > threshold_distance {
+                        closest_distance = distance;
+                        target_position = pos;
+                    }
                 }
             }
         }
 
-        // If closest edge is beyond threshold, snap character to target position
         if closest_distance > threshold_distance {
-            commands.entity(character_query.single().id()).insert(Transform::from_translation(target_position));
+            character_transform.translation = target_position;
         }
     }
 }

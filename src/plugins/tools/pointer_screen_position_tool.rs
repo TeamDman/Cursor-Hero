@@ -61,7 +61,7 @@ fn spawn_tool_event_responder_update_system(
                             ..default()
                         },
                         PointerScreenPositionTool,
-                        ToolActiveTag,
+                        // ToolActiveTag,
                     ));
                 });
                 info!("Added click tool to toolbelt {:?}", toolbelt_id);
