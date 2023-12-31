@@ -39,7 +39,7 @@ fn enforce(
     screen_query: Query<(&Transform, &Handle<Image>), (With<Screen>, Without<Character>)>,
     images: Res<Assets<Image>>,
 ) {
-    let threshold_distance: f32 = 100000.0;
+    let threshold_distance: f32 = 3000.0;
 
     for mut character_transform in character_query.iter_mut() {
         let character_pos = character_transform.translation;
