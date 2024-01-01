@@ -3,17 +3,20 @@ use std::thread;
 use bevy::prelude::*;
 use leafwing_input_manager::prelude::*;
 
-use crate::utils::win_mouse::{press_f23_key, release_f23_key};
+use crate::{
+    plugins::{character_plugin::Character, pointer_plugin::Pointer},
+    utils::win_mouse::{left_mouse_down, left_mouse_up, right_mouse_down, right_mouse_up, print_under_mouse},
+};
 use crossbeam_channel::{bounded, Sender};
 
 use super::super::toolbelt::types::*;
 
-pub struct TalkToolPlugin;
+pub struct InspectToolPlugin;
 
-impl Plugin for TalkToolPlugin {
+impl Plugin for InspectToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<TalkTool>()
-            .add_plugins(InputManagerPlugin::<ToolAction>::default())
+        app.register_type::<InspectTool>()
+            .add_plugins(InputManagerPlugin::<InspectToolAction>::default())
             .add_systems(Startup, spawn_worker_thread)
             .add_systems(
                 Update,
@@ -23,46 +26,40 @@ impl Plugin for TalkToolPlugin {
 }
 
 #[derive(Component, Reflect)]
-pub struct TalkTool;
+pub struct InspectTool;
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
-pub enum ToolAction {
-    Listen,
-}
-
-#[derive(Debug)]
-enum Motion {
-    Up,
-    Down,
+pub enum InspectToolAction {
+    PrintUnderMouse,
 }
 
 #[derive(Debug)]
 enum ThreadMessage {
-    ListenButton(Motion),
+    PrintUnderMouse,
 }
 
 #[derive(Resource)]
 struct Bridge {
-    pub sender: Sender<ThreadMessage>,
+    pub sender: Sender<(ThreadMessage, i32, i32)>,
 }
 
-impl ToolAction {
+impl InspectToolAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
-            Self::Listen => GamepadButtonType::Select.into(),
+            Self::PrintUnderMouse => GamepadButtonType::RightTrigger.into(),
         }
     }
 
     fn default_mkb_binding(&self) -> UserInput {
         match self {
-            Self::Listen => KeyCode::ShiftRight.into(),
+            Self::PrintUnderMouse => KeyCode::ControlLeft.into(),
         }
     }
 
-    fn default_input_map() -> InputMap<ToolAction> {
+    fn default_input_map() -> InputMap<InspectToolAction> {
         let mut input_map = InputMap::default();
 
-        for variant in ToolAction::variants() {
+        for variant in InspectToolAction::variants() {
             input_map.insert(variant.default_mkb_binding(), variant);
             input_map.insert(variant.default_gamepad_binding(), variant);
         }
@@ -74,11 +71,12 @@ fn spawn_worker_thread(mut commands: Commands) {
     let (tx, rx) = bounded::<_>(10);
     commands.insert_resource(Bridge { sender: tx });
     thread::spawn(move || loop {
-        let action = rx.recv().unwrap();
-        debug!("Worker received thread message: {:?}", action);
+        let (action, x, y) = rx.recv().unwrap();
+        debug!("Worker received click: {:?} {} {}", action, x, y);
         match match action {
-            ThreadMessage::ListenButton(Motion::Down) => press_f23_key(),
-            ThreadMessage::ListenButton(Motion::Up) => release_f23_key(),
+            ThreadMessage::PrintUnderMouse => {
+                print_under_mouse(x,y)
+            }
         } {
             Ok(_) => {}
             Err(e) => {
@@ -99,23 +97,23 @@ fn spawn_tool_event_responder_update_system(
                 commands.entity(*toolbelt_id).with_children(|t_commands| {
                     t_commands.spawn((
                         ToolBundle {
-                            name: Name::new(format!("Talk Tool")),
+                            name: Name::new(format!("Inspect Tool")),
                             sprite_bundle: SpriteBundle {
                                 sprite: Sprite {
                                     custom_size: Some(Vec2::new(100.0, 100.0)),
                                     ..default()
                                 },
-                                texture: asset_server.load("textures/tool_talk.png"),
+                                texture: asset_server.load("textures/inspect_tool.png"),
                                 ..default()
                             },
                             ..default()
                         },
-                        InputManagerBundle::<ToolAction> {
-                            input_map: ToolAction::default_input_map(),
+                        InputManagerBundle::<InspectToolAction> {
+                            input_map: InspectToolAction::default_input_map(),
                             ..default()
                         },
                         ToolActiveTag,
-                        TalkTool,
+                        InspectTool,
                     ));
                 });
                 info!("Added tool to toolbelt {:?}", toolbelt_id);
@@ -125,31 +123,46 @@ fn spawn_tool_event_responder_update_system(
 }
 
 fn handle_input(
-    tools: Query<(&ActionState<ToolAction>, Option<&ToolActiveTag>)>,
+    tools: Query<(
+        &ActionState<InspectToolAction>,
+        Option<&ToolActiveTag>,
+        &Parent,
+    )>,
+    toolbelts: Query<&Parent, With<Toolbelt>>,
+    characters: Query<&Children, With<Character>>,
+    pointers: Query<&GlobalTransform, With<Pointer>>,
+    // window: Query<(Entity, &Window), With<PrimaryWindow>>,
+    // winit_windows: NonSendMut<WinitWindows>,
     bridge: ResMut<Bridge>,
 ) {
-    for (t_act, t_enabled) in tools.iter() {
+    for (t_act, t_enabled, t_parent) in tools.iter() {
         if t_enabled.is_none() {
             continue;
         }
-        if t_act.just_pressed(ToolAction::Listen) {
-            info!("Listen button pressed");
-            match bridge
-                .sender
-                .send(ThreadMessage::ListenButton(Motion::Down))
-            {
+        let c_kids = characters
+            .get(
+                toolbelts
+                    .get(t_parent.get())
+                    .expect("Toolbelt should have a parent")
+                    .get(),
+            )
+            .expect("Toolbelt should have a character");
+        let p = c_kids
+            .iter()
+            .filter_map(|x| pointers.get(*x).ok())
+            .next()
+            .expect("Character should have a pointer");
+        let p_pos = p.translation();
+        if t_act.just_pressed(InspectToolAction::PrintUnderMouse) {
+            info!("PrintUnderMouse button");
+            match bridge.sender.send((
+                ThreadMessage::PrintUnderMouse,
+                p_pos.x as i32,
+                -p_pos.y as i32,
+            )) {
                 Ok(_) => {}
                 Err(e) => {
-                    error!("Failed to send thread message: {:?}", e);
-                }
-            }
-        }
-        if t_act.just_released(ToolAction::Listen) {
-            info!("Listen button released");
-            match bridge.sender.send(ThreadMessage::ListenButton(Motion::Up)) {
-                Ok(_) => {}
-                Err(e) => {
-                    error!("Failed to send thread message: {:?}", e);
+                    error!("Failed to send click: {:?}", e);
                 }
             }
         }

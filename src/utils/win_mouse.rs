@@ -1,7 +1,9 @@
+use bevy::prelude::*;
 use bevy::math::Vec2;
 use uiautomation::UIAutomation;
 use windows::Win32::UI::Input::KeyboardAndMouse::KEYBDINPUT;
 use windows::Win32::UI::Input::KeyboardAndMouse::KEYBD_EVENT_FLAGS;
+use windows::Win32::UI::Input::KeyboardAndMouse::MOUSE_EVENT_FLAGS;
 use windows::Win32::UI::Input::KeyboardAndMouse::VIRTUAL_KEY;
 use windows::{
     Win32::Foundation::POINT,
@@ -193,5 +195,66 @@ pub fn release_f23_key() -> Result<(), windows::core::Error> {
 
     unsafe { SendInput(&[input], std::mem::size_of::<INPUT>() as i32) };
 
+    Ok(())
+}
+
+
+// Constants for mouse wheel
+const MOUSEEVENTF_WHEEL: u32 = 0x0800;
+// const WHEEL_DELTA: i32 = 120;
+const WHEEL_DELTA: i32 = 12;
+
+pub fn scroll_wheel_up() -> Result<(), windows::core::Error> {
+    // Prepare a mouse input for scrolling up
+    let mouse_input = MOUSEINPUT {
+        dx: 0,
+        dy: 0,
+        mouseData: WHEEL_DELTA,
+        dwFlags: MOUSE_EVENT_FLAGS(MOUSEEVENTF_WHEEL),
+        time: 0,
+        dwExtraInfo: 0,
+    };
+
+    // Prepare an INPUT structure for the scroll event
+    let input = INPUT {
+        r#type: INPUT_MOUSE,
+        Anonymous: INPUT_0 { mi: mouse_input },
+    };
+
+    // Send the input for scroll up
+    unsafe { SendInput(&[input], std::mem::size_of::<INPUT>() as i32) };
+
+    Ok(())
+}
+
+pub fn scroll_wheel_down() -> Result<(), windows::core::Error> {
+    // Prepare a mouse input for scrolling down
+    let mouse_input = MOUSEINPUT {
+        dx: 0,
+        dy: 0,
+        mouseData: -(WHEEL_DELTA),
+        dwFlags: MOUSE_EVENT_FLAGS(MOUSEEVENTF_WHEEL),
+        time: 0,
+        dwExtraInfo: 0,
+    };
+
+    // Prepare an INPUT structure for the scroll event
+    let input = INPUT {
+        r#type: INPUT_MOUSE,
+        Anonymous: INPUT_0 { mi: mouse_input },
+    };
+
+    // Send the input for scroll down
+    unsafe { SendInput(&[input], std::mem::size_of::<INPUT>() as i32) };
+
+    Ok(())
+}
+
+
+pub fn print_under_mouse(x: i32, y: i32) -> Result<(), uiautomation::Error> {
+    let automation = UIAutomation::new().unwrap();
+    if let Ok(element) = automation.element_from_point(uiautomation::types::Point::new(x, y)) {
+        info!("{} - {}", element.get_classname()?, element.get_name()?);
+    }
     Ok(())
 }

@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 use leafwing_input_manager::prelude::*;
 
-use crate::plugins::camera_plugin::MainCamera;
+use crate::{
+    plugins::camera_plugin::MainCamera,
+    utils::win_mouse::{scroll_wheel_down, scroll_wheel_up},
+};
 
 use super::super::toolbelt::types::*;
 
@@ -25,6 +28,8 @@ pub struct ZoomTool;
 pub enum ToolAction {
     ZoomIn,
     ZoomOut,
+    ScrollUp,
+    ScrollDown,
 }
 
 impl ToolAction {
@@ -32,6 +37,8 @@ impl ToolAction {
         match self {
             Self::ZoomIn => GamepadButtonType::East.into(),
             Self::ZoomOut => GamepadButtonType::North.into(),
+            Self::ScrollUp => GamepadButtonType::West.into(),
+            Self::ScrollDown => GamepadButtonType::South.into(),
         }
     }
 
@@ -39,6 +46,8 @@ impl ToolAction {
         match self {
             Self::ZoomIn => KeyCode::PageDown.into(),
             Self::ZoomOut => KeyCode::PageUp.into(),
+            Self::ScrollUp => KeyCode::Up.into(),
+            Self::ScrollDown => KeyCode::Down.into(),
         }
     }
 
@@ -70,7 +79,7 @@ fn spawn_tool_event_responder_update_system(
                                     custom_size: Some(Vec2::new(100.0, 100.0)),
                                     ..default()
                                 },
-                                texture: asset_server.load("textures/zoom.png"),
+                                texture: asset_server.load("textures/zoom_tool.png"),
                                 ..default()
                             },
                             ..default()
@@ -113,6 +122,28 @@ fn handle_input(
             cam.single_mut().scale = scale;
             if t_act.just_pressed(ToolAction::ZoomOut) {
                 info!("Zooming out");
+            }
+        }
+        if t_act.pressed(ToolAction::ScrollUp) {
+            match scroll_wheel_up() {
+                Ok(_) => {}
+                Err(e) => {
+                    error!("Error scrolling up: {:?}", e);
+                }
+            }
+            if t_act.just_pressed(ToolAction::ScrollUp) {
+                info!("Scrolling up");
+            }
+        }
+        if t_act.pressed(ToolAction::ScrollDown) {
+            match scroll_wheel_down() {
+                Ok(_) => {}
+                Err(e) => {
+                    error!("Error scrolling down: {:?}", e);
+                }
+            }
+            if t_act.just_pressed(ToolAction::ScrollDown) {
+                info!("Scrolling down");
             }
         }
     }

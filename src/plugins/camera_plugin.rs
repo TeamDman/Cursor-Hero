@@ -56,7 +56,7 @@ pub fn update_camera_zoom(
 ) {
     for event in scroll.read() {
         let mut scale = cam.single_mut().scale;
-        scale *= Vec3::splat(1.0 - event.y / 10.0);
+        scale *= Vec2::splat(1.0 - event.y / 10.0).extend(1.0);
         scale = scale.clamp(Vec3::splat(0.1), Vec3::splat(10.0));
         cam.single_mut().scale = scale;
     }

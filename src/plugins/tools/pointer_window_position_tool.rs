@@ -55,7 +55,7 @@ fn spawn_tool_event_responder_update_system(
                                     custom_size: Some(Vec2::new(100.0, 100.0)),
                                     ..default()
                                 },
-                                texture: asset_server.load("textures/tool_ripples.png"),
+                                texture: asset_server.load("textures/pointer_local.png"),
                                 ..default()
                             },
                             ..default()

@@ -49,7 +49,7 @@ fn spawn_tool_event_responder_update_system(
                                     ..default()
                                 },
                                 texture: asset_server
-                                    .load("textures/pointer_window_position_tool.png"),
+                                    .load("textures/pointer_global.png"),
                                 ..default()
                             },
                             ..default()

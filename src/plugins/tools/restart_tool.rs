@@ -1,4 +1,4 @@
-use std::{path::PathBuf, os::windows::process::CommandExt};
+use std::{os::windows::process::CommandExt, path::PathBuf};
 
 use bevy::prelude::*;
 use leafwing_input_manager::prelude::*;
@@ -106,6 +106,22 @@ fn handle_input(tools: Query<(&ActionState<ToolAction>, Option<&ToolActiveTag>, 
 
             let mut path = PathBuf::from(CURSOR_HERO_GIT_DIR);
             path.push("target/release/uparrow-enter.exe");
+
+            // if it doesn't exist
+            if !path.exists() {
+                let mut other_project_path = PathBuf::from(CURSOR_HERO_GIT_DIR);
+                other_project_path.push("other/uparrow-enter");
+                // run cargo build --release
+                match std::process::Command::new("cargo")
+                    .arg("build")
+                    .arg("--release")
+                    .current_dir(other_project_path)
+                    .spawn()
+                {
+                    Ok(_) => info!("Successfully ran cargo build --release"),
+                    Err(e) => error!("Failed to run cargo build --release: {}", e),
+                }
+            }
 
             match std::process::Command::new(path)
                 .creation_flags(CREATE_NEW_PROCESS_GROUP.0)

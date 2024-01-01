@@ -8,3 +8,4 @@ pub mod talk_tool;
 pub mod tools_plugin;
 pub mod zoom_tool;
 pub mod restart_tool;
+pub mod inspect_tool;
