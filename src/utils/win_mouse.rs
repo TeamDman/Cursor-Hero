@@ -1,3 +1,4 @@
+use bevy::math::Vec2;
 use uiautomation::UIAutomation;
 use windows::Win32::UI::Input::KeyboardAndMouse::KEYBDINPUT;
 use windows::Win32::UI::Input::KeyboardAndMouse::KEYBD_EVENT_FLAGS;
@@ -13,11 +14,11 @@ use windows::{
     },
 };
 
-pub fn get_cursor_position() -> Result<(i32, i32), windows::core::Error> {
+pub fn get_cursor_position() -> Result<Vec2, windows::core::Error> {
     unsafe {
         let mut point = POINT::default();
         GetCursorPos(&mut point)?;
-        Ok((point.x, point.y))
+        Ok(Vec2::new(point.x as f32, point.y as f32))
     }
 }
 

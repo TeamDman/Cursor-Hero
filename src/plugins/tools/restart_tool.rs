@@ -1,18 +1,24 @@
+use std::{path::PathBuf, os::windows::process::CommandExt};
+
 use bevy::prelude::*;
 use leafwing_input_manager::prelude::*;
 
-use crate::plugins::{
-    camera_plugin::FollowWithCamera,
-    character_plugin::{Character, CharacterColor},
+use crate::{
+    data::paths::CURSOR_HERO_GIT_DIR,
+    plugins::{
+        camera_plugin::FollowWithCamera,
+        character_plugin::{Character, CharacterColor},
+    },
 };
+use windows::Win32::System::Threading::CREATE_NEW_PROCESS_GROUP;
 
 use super::super::toolbelt::types::*;
 
-pub struct FocusToolPlugin;
+pub struct RestartToolPlugin;
 
-impl Plugin for FocusToolPlugin {
+impl Plugin for RestartToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<FocusTool>()
+        app.register_type::<RestartTool>()
             .add_plugins(InputManagerPlugin::<ToolAction>::default())
             .add_systems(
                 Update,
@@ -22,23 +28,23 @@ impl Plugin for FocusToolPlugin {
 }
 
 #[derive(Component, Reflect)]
-pub struct FocusTool;
+pub struct RestartTool;
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
 pub enum ToolAction {
-    ToggleFollowCharacter,
+    CancelAndRunPreviousTerminalCommand,
 }
 
 impl ToolAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
-            Self::ToggleFollowCharacter => GamepadButtonType::LeftThumb.into(),
+            Self::CancelAndRunPreviousTerminalCommand => GamepadButtonType::Start.into(),
         }
     }
 
     fn default_mkb_binding(&self) -> UserInput {
         match self {
-            Self::ToggleFollowCharacter => KeyCode::Backslash.into(),
+            Self::CancelAndRunPreviousTerminalCommand => KeyCode::Return.into(),
         }
     }
 
@@ -64,13 +70,13 @@ fn spawn_tool_event_responder_update_system(
                 commands.entity(*toolbelt_id).with_children(|t_commands| {
                     t_commands.spawn((
                         ToolBundle {
-                            name: Name::new(format!("Focus Tool")),
+                            name: Name::new(format!("Restart Tool")),
                             sprite_bundle: SpriteBundle {
                                 sprite: Sprite {
                                     custom_size: Some(Vec2::new(100.0, 100.0)),
                                     ..default()
                                 },
-                                texture: asset_server.load("textures/target.png"),
+                                texture: asset_server.load("textures/restart_tool.png"),
                                 ..default()
                             },
                             ..default()
@@ -79,7 +85,7 @@ fn spawn_tool_event_responder_update_system(
                             input_map: ToolAction::default_input_map(),
                             ..default()
                         },
-                        FocusTool,
+                        RestartTool,
                         ToolActiveTag,
                     ));
                 });
@@ -90,44 +96,23 @@ fn spawn_tool_event_responder_update_system(
 }
 
 #[allow(clippy::type_complexity)]
-fn handle_input(
-    tools: Query<(&ActionState<ToolAction>, Option<&ToolActiveTag>, &Parent)>,
-    toolbelts: Query<&Parent, With<Toolbelt>>,
-    mut characters: Query<
-        (
-            Entity,
-            Option<&FollowWithCamera>,
-            &mut Handle<ColorMaterial>,
-        ),
-        With<Character>,
-    >,
-    mut commands: Commands,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-) {
+fn handle_input(tools: Query<(&ActionState<ToolAction>, Option<&ToolActiveTag>, &Parent)>) {
     for (t_act, t_enabled, t_parent) in tools.iter() {
         if t_enabled.is_none() {
             continue;
         }
-        if t_act.just_pressed(ToolAction::ToggleFollowCharacter) {
-            info!("Toggle follow character");
-            let toolbelt = toolbelts
-                .get(t_parent.get())
-                .expect("Toolbelt should have a parent");
-            let character = characters
-                .get_mut(toolbelt.get())
-                .expect("Toolbelt should have a character");
-            let (character_entity, character_is_followed, mut material) = character;
+        if t_act.just_pressed(ToolAction::CancelAndRunPreviousTerminalCommand) {
+            // run target/release/uparrow-enter.exe
 
-            if character_is_followed.is_none() {
-                commands.entity(character_entity).insert(FollowWithCamera);
-                *material = materials.add(CharacterColor::FocusedWithCamera.as_material());
-                info!("now following");
-            } else {
-                commands
-                    .entity(character_entity)
-                    .remove::<FollowWithCamera>();
-                *material = materials.add(CharacterColor::Unfocused.as_material());
-                info!("no longer following");
+            let mut path = PathBuf::from(CURSOR_HERO_GIT_DIR);
+            path.push("target/release/uparrow-enter.exe");
+
+            match std::process::Command::new(path)
+                .creation_flags(CREATE_NEW_PROCESS_GROUP.0)
+                .spawn()
+            {
+                Ok(_) => info!("Successfully ran uparrow-enter.exe"),
+                Err(e) => error!("Failed to run uparrow-enter.exe: {}", e),
             }
         }
     }

@@ -8,6 +8,7 @@ use leafwing_input_manager::user_input::InputKind;
 
 use crate::plugins::camera_plugin::FollowWithCamera;
 use crate::plugins::damping_plugin::MovementDamping;
+use crate::utils::win_mouse::get_cursor_position;
 
 use super::damping_plugin::DampingSystemSet;
 
@@ -117,7 +118,7 @@ fn spawn_character(
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     let default_material = materials.add(CharacterColor::FocusedWithCamera.as_material());
-
+    let os_cursor_pos = get_cursor_position().expect("Should be able to fetch cursor pos from OS");
     let mut character = commands.spawn((
         MaterialMesh2dBundle {
             mesh: meshes
@@ -131,7 +132,7 @@ fn spawn_character(
                 )
                 .into(),
             material: default_material,
-            transform: Transform::from_xyz(0.0, -100.0, 100.0),
+            transform: Transform::from_xyz(os_cursor_pos.x, -os_cursor_pos.y, 100.0),
             ..default()
         },
         Character { speed: 5000.0 },

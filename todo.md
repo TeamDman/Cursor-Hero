@@ -1,5 +1,5 @@
 - restart program too
-
+- zoom tool to simulate scroll wheel inputs in windows, combine with right-stick-focus to zoom in the game quickly
 - show tools which have conflicting keys in red
 - tool to focus the game window and maximize it on the monitors with dpad
 

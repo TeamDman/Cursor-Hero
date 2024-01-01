@@ -52,8 +52,8 @@ fn setup(
                 Pointer,
                 Name::new("Pointer"),
                 SpriteBundle {
-                    transform: Transform::from_translation(Vec3::new(200.0, 0.0, 0.5)),
                     texture: asset_server.load("textures/cursor.png"),
+                    transform: Transform::from_xyz(0.0, 0.0, 1.0),
                     sprite: Sprite {
                         color: CharacterColor::default().as_color(),
                         anchor: Anchor::TopLeft,
@@ -71,6 +71,7 @@ fn setup(
 fn update_pointer_position(
     character_query: Query<&ActionState<PlayerAction>, With<Character>>,
     mut pointer_query: Query<(&mut Transform, &Parent), With<Pointer>>,
+    mut debounce: Local<bool>,
 ) {
     for (mut pointer_transform, p_parent) in pointer_query.iter_mut() {
         if let Ok(c_act) = character_query.get(p_parent.get()) {
@@ -82,6 +83,11 @@ fn update_pointer_position(
 
                 let desired_position = look.extend(0.0) * 200.0;
                 pointer_transform.translation = desired_position;
+                *debounce = false;
+            } else if !*debounce {
+                pointer_transform.translation.x = 0.0;
+                pointer_transform.translation.y = 0.0;
+                *debounce = true;
             }
         }
     }

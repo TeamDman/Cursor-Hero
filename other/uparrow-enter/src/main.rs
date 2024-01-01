@@ -6,16 +6,22 @@ use std::time::Duration;
 
 fn main() {
     let mut enigo = Enigo::new();
+    
+    enigo.key_down(Key::LControl);
+    thread::sleep(Duration::from_millis(10));
+    enigo.key_down(Key::C);
+    thread::sleep(Duration::from_millis(50));
+    enigo.key_up(Key::C);
+    enigo.key_up(Key::LControl);
 
-    // Simulate pressing the up arrow key
+    thread::sleep(Duration::from_millis(400));
+
     enigo.key_down(Key::UpArrow);
-    thread::sleep(Duration::from_millis(100));
+    thread::sleep(Duration::from_millis(50));
     enigo.key_up(Key::UpArrow);
 
-    // Wait a bit between keys
-    thread::sleep(Duration::from_millis(100));
+    thread::sleep(Duration::from_millis(50));
 
-    // Simulate pressing the enter key
     enigo.key_down(Key::Return);
     thread::sleep(Duration::from_millis(100));
     enigo.key_up(Key::Return);

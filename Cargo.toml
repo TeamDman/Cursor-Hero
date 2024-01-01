@@ -39,6 +39,7 @@ windows = { version = "0.51.1", features = [
     "Win32_UI_Input_KeyboardAndMouse",
     "Gaming_Input",
     "Win32_Gaming",
+    "Win32_System_Threading"
 ] }
 tokio = { version = "1.32.0", features = ["net", "full"] }
 tokio-named-pipes = "0.1.0"
