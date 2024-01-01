@@ -4,11 +4,14 @@ use bevy::transform::TransformSystem;
 use bevy_xpbd_2d::prelude::*;
 use leafwing_input_manager::prelude::*;
 
+use crate::plugins::character_plugin::CharacterColor;
+
 use super::character_plugin::{Character, CharacterSystemSet, PlayerAction};
 
 pub struct PointerPlugin;
 #[derive(SystemSet, Clone, Hash, Debug, PartialEq, Eq)]
 pub enum PointerSystemSet {
+    Spawn,
     Position,
 }
 
@@ -18,7 +21,7 @@ impl Plugin for PointerPlugin {
         .configure_sets(Update, PointerSystemSet::Position)
             .add_systems(
                 Startup,
-                (apply_deferred, setup.after(CharacterSystemSet::Spawn)).chain(),
+                (apply_deferred, setup).chain().in_set(PointerSystemSet::Spawn).after(CharacterSystemSet::Spawn),
             )
             .add_systems(
                 PostUpdate,
@@ -49,7 +52,7 @@ fn setup(
                     transform: Transform::from_translation(Vec3::new(200.0, 0.0, 0.5)),
                     texture: asset_server.load("textures/cursor.png"),
                     sprite: Sprite {
-                        color: Color::rgb(0.2, 0.7, 0.9),
+                        color: CharacterColor::default().as_color(),
                         anchor: Anchor::TopLeft,
                         ..default()
                     },

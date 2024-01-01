@@ -26,11 +26,15 @@ impl Plugin for ToolbeltPlugin {
             .add_plugins(InputManagerPlugin::<ToolbeltAction>::default())
             .configure_sets(
                 Startup,
-                ToolbeltSystemSet::Spawn.after(CharacterSystemSet::Spawn),
+                ToolbeltSystemSet::Spawn,
             )
             .add_systems(
                 Startup,
-                toolbelt_spawn_setup_system.in_set(ToolbeltSystemSet::Spawn).after(apply_deferred),
+                (
+                    apply_deferred,
+                    toolbelt_spawn_setup_system,
+                )
+                    .chain().in_set(ToolbeltSystemSet::Spawn).after(CharacterSystemSet::Spawn),
             )
             .add_systems(
                 Update,

@@ -89,17 +89,22 @@ pub struct Character {
 }
 
 
-
+#[derive(Component, Reflect, Eq, PartialEq, Debug)]
 pub enum CharacterColor {
-    Default,
-    FollowingWithCamera,
+    Unfocused,
+    FocusedWithCamera,
+}
+impl Default for CharacterColor {
+    fn default() -> Self {
+        Self::FocusedWithCamera
+    }
 }
 
 impl CharacterColor {
     pub fn as_color(self) -> Color {
         match self {
-            Self::Default => Color::rgb(0.2, 0.7, 0.9),
-            Self::FollowingWithCamera => Color::rgb(0.863, 0.804, 0.475),
+            Self::Unfocused => Color::rgb(0.2, 0.7, 0.9),
+            Self::FocusedWithCamera => Color::rgb(0.149, 0.549, 0.184),
         }
     }
     pub fn as_material(self) -> ColorMaterial {
@@ -112,9 +117,9 @@ fn spawn_character(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    let default_material = materials.add(CharacterColor::Default.as_material());
+    let default_material = materials.add(CharacterColor::FocusedWithCamera.as_material());
 
-    commands.spawn((
+    let mut character = commands.spawn((
         MaterialMesh2dBundle {
             mesh: meshes
                 .add(
@@ -140,8 +145,10 @@ fn spawn_character(
         RigidBody::Kinematic,
         Collider::capsule(20.0, 12.5),
         SpatialListener::new(7.0),
-        FollowWithCamera,
     ));
+    if CharacterColor::default() == CharacterColor::FocusedWithCamera {
+        character.insert(FollowWithCamera);
+    }
     info!("Character spawn command issued");
 }
 

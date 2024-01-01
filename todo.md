@@ -1,5 +1,3 @@
-
-- finish level bounds implementation
 - restart program too
 
 - show tools which have conflicting keys in red
@@ -16,6 +14,8 @@
   - bind: voice prompt with instructions on file name preference, include txt of tree output next to the cursor in the vscode file explorer
   - bind: hit enter
 
+
+heuristics!
 
 add a binding to the voice tool for hitting the enter button.Add a binding.for the Ctrl-S hotkey.add a hotkey to thefor inserting a new line.Add a camera tool to own the hotkey for fire.following the character.- tool selection wheel show on rstick click, left stick to pick item in the wheel - is the toolbelt a tool?
 - teleport tool - rstick in maps left stick to full screen coords. Full left stick places cursor as far left, across all screens, as possible
@@ -69,4 +69,13 @@ to be combined in non-conflicting keys
 - copy to clipboard
 - append to selection
 - remove from selection
+
+# use case - slider hub
+
+volume slider hub
+
+Master slider
+Audio mixer slider per app
+App slider - game master volume slider, music/sfx slider; youtube video slider, mpv volume slider
+control all from single location - can use browser extension to control youtube without bringing the video to the front
 

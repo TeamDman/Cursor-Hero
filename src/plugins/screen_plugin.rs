@@ -1,10 +1,10 @@
+use super::level_bounds_plugin::{LevelBounds, LevelBoundsParent, LevelBoundsSystemSet};
 use crate::utils::win_screen_capture::get_all_monitors;
 use bevy::prelude::*;
+use bevy_xpbd_2d::prelude::*;
 use image::DynamicImage;
 use screenshots::Screen as ScreenLib;
 use std::collections::VecDeque;
-use bevy_xpbd_2d::prelude::*;
-use super::level_bounds_plugin::{LevelBounds, LevelBoundsParent, LevelBoundsSystemSet};
 
 #[derive(SystemSet, Clone, Hash, Debug, PartialEq, Eq)]
 pub enum ScreenSystemSet {
@@ -14,18 +14,16 @@ pub enum ScreenSystemSet {
 pub struct ScreenPlugin;
 impl Plugin for ScreenPlugin {
     fn build(&self, app: &mut App) {
-        app.configure_sets(
-            Startup,
-            ScreenSystemSet::Spawn.after(LevelBoundsSystemSet::Spawn).after(apply_deferred),
-        )
-        .add_systems(
-            Startup,
-            spawn_screens
-                .in_set(ScreenSystemSet::Spawn)
-                .after(apply_deferred),
-        )
-        .register_type::<Screen>()
-        .register_type::<ScreenParent>();
+        app.configure_sets(Startup, ScreenSystemSet::Spawn)
+            .add_systems(
+                Startup,
+                (apply_deferred, spawn_screens)
+                    .chain()
+                    .in_set(ScreenSystemSet::Spawn)
+                    .after(LevelBoundsSystemSet::Spawn),
+            )
+            .register_type::<Screen>()
+            .register_type::<ScreenParent>();
     }
 }
 
@@ -99,10 +97,7 @@ fn spawn_screens(
             .entity(level_bounds_parent)
             .with_children(|level_bounds_parent| {
                 for (x, y, width, height) in screen_sizes {
-                    let size = Vec2::new(
-                        width as f32 + 800.0,
-                        height as f32 + 800.0,
-                    );
+                    let size = Vec2::new(width as f32 + 800.0, height as f32 + 800.0);
                     level_bounds_parent.spawn((
                         SpriteBundle {
                             sprite: Sprite {
@@ -115,6 +110,7 @@ fn spawn_screens(
                                 -(y as f32) - (height as f32) / 2.0,
                                 -2.0,
                             ),
+                            visibility: Visibility::Hidden,
                             ..default()
                         },
                         Sensor,

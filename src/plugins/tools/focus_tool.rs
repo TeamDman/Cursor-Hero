@@ -8,11 +8,11 @@ use crate::plugins::{
 
 use super::super::toolbelt::types::*;
 
-pub struct FollowToolPlugin;
+pub struct FocusToolPlugin;
 
-impl Plugin for FollowToolPlugin {
+impl Plugin for FocusToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<FollowTool>()
+        app.register_type::<FocusTool>()
             .add_plugins(InputManagerPlugin::<ToolAction>::default())
             .add_systems(
                 Update,
@@ -22,7 +22,7 @@ impl Plugin for FollowToolPlugin {
 }
 
 #[derive(Component, Reflect)]
-pub struct FollowTool;
+pub struct FocusTool;
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
 pub enum ToolAction {
@@ -32,13 +32,13 @@ pub enum ToolAction {
 impl ToolAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
-            Self::ToggleFollowCharacter => GamepadButtonType::North.into(),
+            Self::ToggleFollowCharacter => GamepadButtonType::LeftThumb.into(),
         }
     }
 
     fn default_mkb_binding(&self) -> UserInput {
         match self {
-            Self::ToggleFollowCharacter => KeyCode::Numpad1.into(),
+            Self::ToggleFollowCharacter => KeyCode::Backslash.into(),
         }
     }
 
@@ -64,7 +64,7 @@ fn spawn_tool_event_responder_update_system(
                 commands.entity(*toolbelt_id).with_children(|t_commands| {
                     t_commands.spawn((
                         ToolBundle {
-                            name: Name::new(format!("Follow Tool")),
+                            name: Name::new(format!("Focus Tool")),
                             sprite_bundle: SpriteBundle {
                                 sprite: Sprite {
                                     custom_size: Some(Vec2::new(100.0, 100.0)),
@@ -79,7 +79,8 @@ fn spawn_tool_event_responder_update_system(
                             input_map: ToolAction::default_input_map(),
                             ..default()
                         },
-                        FollowTool,
+                        FocusTool,
+                        ToolActiveTag,
                     ));
                 });
                 info!("Added tool to toolbelt {:?}", toolbelt_id);
@@ -120,11 +121,11 @@ fn handle_input(
 
             if character_is_followed.is_none() {
                 commands.entity(character_entity).insert(FollowWithCamera);
-                *material = materials.add(CharacterColor::FollowingWithCamera.as_material());
+                *material = materials.add(CharacterColor::FocusedWithCamera.as_material());
                 info!("now following");
             } else {
                 commands.entity(character_entity).remove::<FollowWithCamera>();
-                *material = materials.add(CharacterColor::Default.as_material());
+                *material = materials.add(CharacterColor::Unfocused.as_material());
                 info!("no longer following");
             }
         }

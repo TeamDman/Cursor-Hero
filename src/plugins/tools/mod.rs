@@ -6,4 +6,4 @@ pub mod pointer_window_position_tool;
 pub mod pointer_screen_position_tool;
 pub mod talk_tool;
 pub mod zoom_tool;
-pub mod follow_tool;
+pub mod focus_tool;
