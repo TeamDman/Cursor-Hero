@@ -1,10 +1,16 @@
-use bevy::{prelude::*, window::{RawHandleWrapper, PrimaryWindow}};
+use bevy::{
+    prelude::*,
+    window::{PrimaryWindow, RawHandleWrapper},
+};
 use leafwing_input_manager::prelude::*;
 
-use crate::{plugins::{
-    camera_plugin::FollowWithCamera,
-    character_plugin::{Character, CharacterColor},
-}, utils::win_window::focus_window};
+use crate::{
+    plugins::{
+        camera_plugin::FollowWithCamera,
+        character_plugin::{Character, CharacterColor},
+    },
+    utils::win_window::focus_window,
+};
 
 use super::super::toolbelt::types::*;
 

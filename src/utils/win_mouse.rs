@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use bevy::math::Vec2;
+use bevy::prelude::*;
 use uiautomation::UIAutomation;
 use windows::Win32::UI::Input::KeyboardAndMouse::KEYBDINPUT;
 use windows::Win32::UI::Input::KeyboardAndMouse::KEYBD_EVENT_FLAGS;
@@ -198,7 +198,6 @@ pub fn release_f23_key() -> Result<(), windows::core::Error> {
     Ok(())
 }
 
-
 // Constants for mouse wheel
 const MOUSEEVENTF_WHEEL: u32 = 0x0800;
 // const WHEEL_DELTA: i32 = 120;
@@ -249,7 +248,6 @@ pub fn scroll_wheel_down() -> Result<(), windows::core::Error> {
 
     Ok(())
 }
-
 
 pub fn print_under_mouse(x: i32, y: i32) -> Result<(), uiautomation::Error> {
     let automation = UIAutomation::new().unwrap();

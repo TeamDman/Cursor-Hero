@@ -1,2 +1,2 @@
-pub mod sounds;
 pub mod paths;
+pub mod sounds;

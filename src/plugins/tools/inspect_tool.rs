@@ -5,7 +5,9 @@ use leafwing_input_manager::prelude::*;
 
 use crate::{
     plugins::{character_plugin::Character, pointer_plugin::Pointer},
-    utils::win_mouse::{left_mouse_down, left_mouse_up, right_mouse_down, right_mouse_up, print_under_mouse},
+    utils::win_mouse::{
+        left_mouse_down, left_mouse_up, print_under_mouse, right_mouse_down, right_mouse_up,
+    },
 };
 use crossbeam_channel::{bounded, Sender};
 
@@ -74,9 +76,7 @@ fn spawn_worker_thread(mut commands: Commands) {
         let (action, x, y) = rx.recv().unwrap();
         debug!("Worker received click: {:?} {} {}", action, x, y);
         match match action {
-            ThreadMessage::PrintUnderMouse => {
-                print_under_mouse(x,y)
-            }
+            ThreadMessage::PrintUnderMouse => print_under_mouse(x, y),
         } {
             Ok(_) => {}
             Err(e) => {

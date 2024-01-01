@@ -6,7 +6,7 @@ use std::time::Duration;
 
 fn main() {
     let mut enigo = Enigo::new();
-    
+
     enigo.key_down(Key::LControl);
     thread::sleep(Duration::from_millis(10));
     enigo.key_down(Key::C);
