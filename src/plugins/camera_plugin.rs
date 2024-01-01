@@ -5,7 +5,6 @@ use leafwing_input_manager::{
     InputManagerBundle, user_input::InputKind,
 };
 
-use crate::plugins::character_plugin::Character;
 pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
@@ -16,8 +15,6 @@ impl Plugin for CameraPlugin {
                 Update,
                 (
                     update_camera_zoom,
-                    spawn_character_follow_tag.run_if(should_spawn_follow_tag),
-                    despawn_character_follow_tag.run_if(should_despawn_follow_tag),
                 ),
             )
             .add_systems(
@@ -57,47 +54,6 @@ fn spawn_camera(mut commands: Commands) {
 
 #[derive(Component)]
 pub struct FollowWithCamera;
-
-pub fn should_spawn_follow_tag(
-    cam: Query<&ActionState<CameraAction>, With<MainCamera>>,
-    follow: Query<&FollowWithCamera, Without<MainCamera>>,
-) -> bool {
-    follow.iter().next().is_none()
-        && cam
-            .single()
-            .just_pressed(CameraAction::ToggleFollowCharacter)
-}
-
-pub fn spawn_character_follow_tag(
-    mut commands: Commands,
-    entity: Query<Entity, With<Character>>,
-    mut sprites: Query<&mut Sprite, With<Character>>,
-) {
-    commands.entity(entity.single()).insert(FollowWithCamera);
-    for mut sprite in sprites.iter_mut() {
-        sprite.color = Color::rgb(1.0, 1.0, 0.4);
-    }
-}
-
-pub fn should_despawn_follow_tag(
-    cam: Query<&ActionState<CameraAction>, With<MainCamera>>,
-    follow: Query<&FollowWithCamera, Without<MainCamera>>,
-) -> bool {
-    follow.iter().next().is_some()
-        && cam
-            .single()
-            .just_pressed(CameraAction::ToggleFollowCharacter)
-}
-pub fn despawn_character_follow_tag(
-    mut commands: Commands,
-    character: Query<Entity, With<Character>>,
-    mut sprites: Query<&mut Sprite, With<Character>>,
-) {
-    commands
-        .entity(character.single())
-        .remove::<FollowWithCamera>();
-    sprites.iter_mut().for_each(|mut s| s.color = Color::WHITE);
-}
 
 pub fn update_camera_zoom(
     mut cam: Query<&mut Transform, With<MainCamera>>,

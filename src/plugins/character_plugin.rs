@@ -88,21 +88,33 @@ pub struct Character {
     pub speed: f32,
 }
 
+
+
+pub enum CharacterColor {
+    Default,
+    FollowingWithCamera,
+}
+
+impl CharacterColor {
+    pub fn as_color(self) -> Color {
+        match self {
+            Self::Default => Color::rgb(0.2, 0.7, 0.9),
+            Self::FollowingWithCamera => Color::rgb(0.863, 0.804, 0.475),
+        }
+    }
+    pub fn as_material(self) -> ColorMaterial {
+        ColorMaterial::from(self.as_color())
+    }
+}
+
 fn spawn_character(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    // asset_server: Res<AssetServer>,
 ) {
+    let default_material = materials.add(CharacterColor::Default.as_material());
+
     commands.spawn((
-        // SpriteBundle {
-        //     sprite: Sprite {
-        //         custom_size: Some(Vec2::new(100.0, 100.0)),
-        //         ..default()
-        //     },
-        //     texture: asset_server.load("textures/cursor.png"),
-        //     ..default()
-        // },
         MaterialMesh2dBundle {
             mesh: meshes
                 .add(
@@ -114,7 +126,7 @@ fn spawn_character(
                     .into(),
                 )
                 .into(),
-            material: materials.add(ColorMaterial::from(Color::rgb(0.2, 0.7, 0.9))),
+            material: default_material,
             transform: Transform::from_xyz(0.0, -100.0, 100.0),
             ..default()
         },
@@ -140,28 +152,6 @@ fn has_movement(action_state: Query<(&ActionState<PlayerAction>, &Character)>) -
     let (act, character) = action_state.single();
     act.pressed(PlayerAction::Move) || character.speed > 5000.0
 }
-
-// fn apply_movement(
-//     time: Res<Time>,
-//     action_state: Query<&ActionState<PlayerAction>, With<Character>>,
-//     mut character_query: Query<(&mut LinearVelocity, &Character)>,
-// ) {
-//     let (mut player_velocity, character) = character_query.single_mut();
-//     let delta_time = time.delta_seconds_f64().adjust_precision();
-
-//     if action_state.single().pressed(PlayerAction::Move) {
-//         // Note: In a real game we'd feed this into an actual player controller
-//         // and respects the camera extrinsics to ensure the direction is correct
-//         let move_delta = delta_time
-//             * action_state
-//                 .single()
-//                 .clamped_axis_pair(PlayerAction::Move)
-//                 .unwrap()
-//                 .xy();
-//         player_velocity.x += move_delta.x * character.speed;
-//         player_velocity.y += move_delta.y * character.speed;
-//     }
-// }
 
 fn apply_movement(
     time: Res<Time>,

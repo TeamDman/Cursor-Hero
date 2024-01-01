@@ -1,3 +1,22 @@
+
+- finish level bounds implementation
+- restart program too
+
+- show tools which have conflicting keys in red
+- tool to focus the game window and maximize it on the monitors with dpad
+
+- new tool tool
+  - bind: type "plug"
+  - bind: press tab
+  - bind: rename symbol refactor hotkey (Shift+F6)
+  - bind: voice2text
+  - bind: enter
+- new file tool
+  - bind: left click (on folder -> new file)
+  - bind: voice prompt with instructions on file name preference, include txt of tree output next to the cursor in the vscode file explorer
+  - bind: hit enter
+
+
 add a binding to the voice tool for hitting the enter button.Add a binding.for the Ctrl-S hotkey.add a hotkey to thefor inserting a new line.Add a camera tool to own the hotkey for fire.following the character.- tool selection wheel show on rstick click, left stick to pick item in the wheel - is the toolbelt a tool?
 - teleport tool - rstick in maps left stick to full screen coords. Full left stick places cursor as far left, across all screens, as possible
 - find way to overlay on top of other windows without drawing the screens
@@ -12,7 +31,6 @@ add a binding to the voice tool for hitting the enter button.Add a binding.for t
 - zoom tool - right trigger to control zoom
 - type tool - send keyboard inputs according to the text buffer
 - d-pad quick toggle tool system
-- restart program tool
 - timestamp marking tool - save to file with note
 - describe hovered element tool
 - llm inference for arbitrary string payloads

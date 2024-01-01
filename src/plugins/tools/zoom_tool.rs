@@ -1,22 +1,16 @@
-use std::thread;
-
 use bevy::prelude::*;
 use leafwing_input_manager::prelude::*;
 
-use crate::
-    utils::win_mouse::{press_f23_key, release_f23_key}
-;
-use crossbeam_channel::{bounded, Sender};
+use crate::plugins::camera_plugin::MainCamera;
 
 use super::super::toolbelt::types::*;
 
-pub struct TalkToolPlugin;
+pub struct ZoomToolPlugin;
 
-impl Plugin for TalkToolPlugin {
+impl Plugin for ZoomToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<TalkTool>()
+        app.register_type::<ZoomTool>()
             .add_plugins(InputManagerPlugin::<ToolAction>::default())
-            .add_systems(Startup, spawn_worker_thread)
             .add_systems(
                 Update,
                 (spawn_tool_event_responder_update_system, handle_input),
@@ -25,39 +19,26 @@ impl Plugin for TalkToolPlugin {
 }
 
 #[derive(Component, Reflect)]
-pub struct TalkTool;
+pub struct ZoomTool;
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
 pub enum ToolAction {
-    Listen,
-}
-
-#[derive(Debug)]
-enum Motion {
-    Up,
-    Down,
-}
-
-#[derive(Debug)]
-enum ThreadMessage {
-    ListenButton(Motion),
-}
-
-#[derive(Resource)]
-struct Bridge {
-    pub sender: Sender<ThreadMessage>,
+    ZoomIn,
+    ZoomOut,
 }
 
 impl ToolAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
-            Self::Listen => GamepadButtonType::West.into(),
+            Self::ZoomIn => GamepadButtonType::East.into(),
+            Self::ZoomOut => GamepadButtonType::North.into(),
         }
     }
 
     fn default_mkb_binding(&self) -> UserInput {
         match self {
-            Self::Listen => KeyCode::ShiftRight.into(),
+            Self::ZoomIn => KeyCode::PageDown.into(),
+            Self::ZoomOut => KeyCode::PageUp.into(),
         }
     }
 
@@ -72,24 +53,6 @@ impl ToolAction {
     }
 }
 
-fn spawn_worker_thread(mut commands: Commands) {
-    let (tx, rx) = bounded::<_>(10);
-    commands.insert_resource(Bridge { sender: tx });
-    thread::spawn(move || loop {
-        let action = rx.recv().unwrap();
-        debug!("Worker received thread message: {:?}", action);
-        match match action {
-            ThreadMessage::ListenButton(Motion::Down) => press_f23_key(),
-            ThreadMessage::ListenButton(Motion::Up) => release_f23_key(),
-        } {
-            Ok(_) => {}
-            Err(e) => {
-                error!("Failed to handle event {:?}: {:?}", action, e);
-            }
-        }
-    });
-}
-
 fn spawn_tool_event_responder_update_system(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -101,13 +64,13 @@ fn spawn_tool_event_responder_update_system(
                 commands.entity(*toolbelt_id).with_children(|t_commands| {
                     t_commands.spawn((
                         ToolBundle {
-                            name: Name::new(format!("Talk Tool")),
+                            name: Name::new(format!("Zoom Tool")),
                             sprite_bundle: SpriteBundle {
                                 sprite: Sprite {
                                     custom_size: Some(Vec2::new(100.0, 100.0)),
                                     ..default()
                                 },
-                                texture: asset_server.load("textures/tool_talk.png"),
+                                texture: asset_server.load("textures/zoom.png"),
                                 ..default()
                             },
                             ..default()
@@ -117,7 +80,7 @@ fn spawn_tool_event_responder_update_system(
                             ..default()
                         },
                         ToolActiveTag,
-                        TalkTool,
+                        ZoomTool,
                     ));
                 });
                 info!("Added tool to toolbelt {:?}", toolbelt_id);
@@ -128,31 +91,28 @@ fn spawn_tool_event_responder_update_system(
 
 fn handle_input(
     tools: Query<(&ActionState<ToolAction>, Option<&ToolActiveTag>)>,
-    bridge: ResMut<Bridge>,
+    mut cam: Query<&mut Transform, With<MainCamera>>,
 ) {
     for (t_act, t_enabled) in tools.iter() {
         if t_enabled.is_none() {
             continue;
         }
-        if t_act.just_pressed(ToolAction::Listen) {
-            info!("Listen button pressed");
-            match bridge
-                .sender
-                .send(ThreadMessage::ListenButton(Motion::Down))
-            {
-                Ok(_) => {}
-                Err(e) => {
-                    error!("Failed to send thread message: {:?}", e);
-                }
+        if t_act.pressed(ToolAction::ZoomIn) {
+            let mut scale = cam.single_mut().scale;
+            scale *= Vec2::splat(1.1).extend(1.0);
+            scale = scale.clamp(Vec3::splat(0.1), Vec3::splat(10.0));
+            cam.single_mut().scale = scale;
+            if t_act.just_pressed(ToolAction::ZoomIn) {
+                info!("Zooming in");
             }
         }
-        if t_act.just_released(ToolAction::Listen) {
-            info!("Listen button released");
-            match bridge.sender.send(ThreadMessage::ListenButton(Motion::Up)) {
-                Ok(_) => {}
-                Err(e) => {
-                    error!("Failed to send thread message: {:?}", e);
-                }
+        if t_act.pressed(ToolAction::ZoomOut) {
+            let mut scale = cam.single_mut().scale;
+            scale *= Vec2::splat(0.9).extend(1.0);
+            scale = scale.clamp(Vec3::splat(0.1), Vec3::splat(10.0));
+            cam.single_mut().scale = scale;
+            if t_act.just_pressed(ToolAction::ZoomOut) {
+                info!("Zooming out");
             }
         }
     }

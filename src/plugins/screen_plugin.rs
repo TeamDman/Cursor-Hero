@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use image::DynamicImage;
 use screenshots::Screen as ScreenLib;
 use std::collections::VecDeque;
-
+use bevy_xpbd_2d::prelude::*;
 use super::level_bounds_plugin::{LevelBounds, LevelBoundsParent, LevelBoundsSystemSet};
 
 #[derive(SystemSet, Clone, Hash, Debug, PartialEq, Eq)]
@@ -16,9 +16,14 @@ impl Plugin for ScreenPlugin {
     fn build(&self, app: &mut App) {
         app.configure_sets(
             Startup,
-            ScreenSystemSet::Spawn.after(LevelBoundsSystemSet::Spawn),
+            ScreenSystemSet::Spawn.after(LevelBoundsSystemSet::Spawn).after(apply_deferred),
         )
-        .add_systems(Startup, spawn_screens.in_set(ScreenSystemSet::Spawn).after(apply_deferred))
+        .add_systems(
+            Startup,
+            spawn_screens
+                .in_set(ScreenSystemSet::Spawn)
+                .after(apply_deferred),
+        )
         .register_type::<Screen>()
         .register_type::<ScreenParent>();
     }
@@ -54,7 +59,7 @@ fn spawn_screens(
         .map(|monitor| monitor.info.name.clone())
         .collect::<VecDeque<String>>();
 
-    let mut bounds = vec![];
+    let mut screen_sizes = vec![];
 
     screen_parent_commands.with_children(|screen_parent| {
         for screen in ScreenLib::all().unwrap().iter() {
@@ -81,7 +86,7 @@ fn spawn_screens(
                 },
                 Name::new(format!("Screen {}", name)),
             ));
-            bounds.push((
+            screen_sizes.push((
                 screen.display_info.x,
                 screen.display_info.y,
                 screen.display_info.width,
@@ -93,16 +98,28 @@ fn spawn_screens(
         commands
             .entity(level_bounds_parent)
             .with_children(|level_bounds_parent| {
-                for (x, y, width, height) in bounds {
+                for (x, y, width, height) in screen_sizes {
+                    let size = Vec2::new(
+                        width as f32 + 800.0,
+                        height as f32 + 800.0,
+                    );
                     level_bounds_parent.spawn((
-                        SpatialBundle {
+                        SpriteBundle {
+                            sprite: Sprite {
+                                custom_size: Some(size),
+                                color: Color::ORANGE,
+                                ..default()
+                            },
                             transform: Transform::from_xyz(
                                 x as f32 + (width as f32) / 2.0,
                                 -(y as f32) - (height as f32) / 2.0,
-                                0.0,
+                                -2.0,
                             ),
-                            ..Default::default()
+                            ..default()
                         },
+                        Sensor,
+                        RigidBody::Static,
+                        Collider::cuboid(size.x, size.y),
                         LevelBounds,
                         Name::new(format!("Level Bounds")),
                     ));

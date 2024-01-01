@@ -9,6 +9,7 @@ pub mod fps_text_plugin;
 pub mod hover_shower_relay_plugin;
 pub mod hover_shower_service_plugin;
 pub mod hover_ui_automation_plugin;
+pub mod level_bounds_plugin;
 pub mod pointer_plugin;
 pub mod position_text_plugin;
 pub mod pressure_plate_plugin;
@@ -16,7 +17,6 @@ pub mod screen_plugin;
 pub mod screen_update_plugin;
 pub mod toolbelt;
 pub mod tools;
-pub mod level_bounds_plugin;
 
 use bevy::prelude::*;
 
@@ -32,6 +32,7 @@ use self::{
     // hover_shower_relay_plugin::HoverShowerRelayPlugin,
     // hover_shower_service_plugin::HoverShowerServicePlugin,
     hover_ui_automation_plugin::HoverUiAutomationPlugin,
+    level_bounds_plugin::LevelBoundsPlugin,
     pointer_plugin::PointerPlugin,
     position_text_plugin::PositionTextPlugin,
     pressure_plate_plugin::PressurePlatePlugin,
@@ -39,14 +40,14 @@ use self::{
     screen_update_plugin::ScreenUpdatePlugin,
     toolbelt::toolbelt_plugin::ToolbeltPlugin,
     tools::tools_plugin::ToolsPlugin,
-    level_bounds_plugin::LevelBoundsPlugin,
 };
 
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(ActiveInputStatePlugin)
+        app/*¶*/
+            .add_plugins(ActiveInputStatePlugin)
             .add_plugins(AfterimagePlugin)
             .add_plugins(CameraPlugin)
             .add_plugins(CharacterPlugin)
@@ -64,6 +65,7 @@ impl Plugin for MyPlugin {
             .add_plugins(ToolbeltPlugin)
             .add_plugins(PointerPlugin)
             .add_plugins(DampingPlugin)
-            .add_plugins(LevelBoundsPlugin);
+            .add_plugins(LevelBoundsPlugin)
+            /*¶*/;
     }
 }

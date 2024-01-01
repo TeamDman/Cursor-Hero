@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_xpbd_2d::components::{CollidingEntities, LinearVelocity};
 
 use super::{character_plugin::Character, screen_plugin::Screen};
 
@@ -17,7 +18,7 @@ impl Plugin for LevelBoundsPlugin {
             .configure_sets(Startup, LevelBoundsSystemSet::Spawn)
             .configure_sets(Update, LevelBoundsSystemSet::Enforce)
             .add_systems(Startup, spawn_parent.in_set(LevelBoundsSystemSet::Spawn))
-            // .add_systems(Update, enforce.in_set(LevelBoundsSystemSet::Enforce))
+            .add_systems(Update, enforce.in_set(LevelBoundsSystemSet::Enforce))
             /*¶*/
             ;
     }
@@ -37,77 +38,45 @@ fn spawn_parent(mut commands: Commands) {
     ));
 }
 
+#[allow(clippy::type_complexity)]
 fn enforce(
-    mut character_query: Query<&mut Transform, (With<Character>, Without<Screen>)>,
-    screen_query: Query<(&Transform, &Handle<Image>), (With<Screen>, Without<Character>)>,
+    mut character_query: Query<
+        (Entity, &Transform, &mut LinearVelocity),
+        (With<Character>, Without<Screen>, Without<LevelBounds>),
+    >,
+    level_bounds: Query<
+        (&Transform, &Sprite, &CollidingEntities),
+        (With<LevelBounds>, Without<Screen>, Without<Character>),
+    >,
+    screen_query: Query<
+        (&Transform, &Handle<Image>),
+        (With<Screen>, Without<Character>, Without<LevelBounds>),
+    >,
     images: Res<Assets<Image>>,
 ) {
-    let threshold_distance: f32 = 3000.0;
-
-    for mut character_transform in character_query.iter_mut() {
-        let character_pos = character_transform.translation;
-        let mut closest_distance = f32::MAX;
-        let mut target_position = character_pos;
-
-        for (screen_transform, image_handle) in screen_query.iter() {
-            if let Some(image) = images.get(image_handle) {
-                let screen_size = Vec2::new(
-                    image.texture_descriptor.size.width as f32,
-                    image.texture_descriptor.size.height as f32,
-                );
-                let screen_pos = screen_transform.translation;
-
-                let left_edge = screen_pos.x;
-                let right_edge = screen_pos.x + screen_size.x;
-                let bottom_edge = screen_pos.y;
-                let top_edge = screen_pos.y + screen_size.y;
-
-                let distances = [
-                    (
-                        character_pos.x - left_edge,
-                        Vec3::new(
-                            left_edge + threshold_distance,
-                            character_pos.y,
-                            character_pos.z,
-                        ),
-                    ),
-                    (
-                        right_edge - character_pos.x,
-                        Vec3::new(
-                            right_edge - threshold_distance,
-                            character_pos.y,
-                            character_pos.z,
-                        ),
-                    ),
-                    (
-                        character_pos.y - bottom_edge,
-                        Vec3::new(
-                            character_pos.x,
-                            bottom_edge + threshold_distance,
-                            character_pos.z,
-                        ),
-                    ),
-                    (
-                        top_edge - character_pos.y,
-                        Vec3::new(
-                            character_pos.x,
-                            top_edge - threshold_distance,
-                            character_pos.z,
-                        ),
-                    ),
-                ];
-
-                for (distance, pos) in distances {
-                    if distance < closest_distance && distance > threshold_distance {
-                        closest_distance = distance;
-                        target_position = pos;
-                    }
-                }
+    for (character_entity, character_transform, mut character_velocity) in character_query.iter_mut() {
+        let mut is_in_bounds = false;
+        for bounds in level_bounds.iter() {
+            if bounds.2.0.contains(&character_entity) {
+                is_in_bounds = true;
+                break;
             }
         }
-
-        if closest_distance > threshold_distance {
-            character_transform.translation = target_position;
+        if !is_in_bounds {
+            // apply a force to to the character in the direction of the nearest boundary
+            let mut nearest_boundary = None;
+            let mut nearest_boundary_distance = f32::MAX;
+            for bounds in level_bounds.iter() {
+                let distance = character_transform.translation.distance(bounds.0.translation);
+                if distance < nearest_boundary_distance {
+                    nearest_boundary_distance = distance;
+                    nearest_boundary = Some(bounds.0.translation);
+                }
+            }
+            if let Some(nearest_boundary) = nearest_boundary {
+                let direction = nearest_boundary - character_transform.translation;
+                character_velocity.0 += direction.normalize().xy() * direction.length_squared()/1000.0;
+            }
         }
     }
 }

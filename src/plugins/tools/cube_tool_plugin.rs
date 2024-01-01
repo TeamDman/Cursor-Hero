@@ -89,7 +89,7 @@ fn spawn_tool_event_responder_update_system(
                         CubeTool,
                     ));
                 });
-                info!("Added cube tool to toolbelt {:?}", toolbelt_id);
+                info!("Added tool to toolbelt {:?}", toolbelt_id);
             }
         }
     }

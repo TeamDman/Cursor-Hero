@@ -61,7 +61,7 @@ fn spawn_tool_event_responder_update_system(
                         // ToolActiveTag,
                     ));
                 });
-                info!("Added click tool to toolbelt {:?}", toolbelt_id);
+                info!("Added tool to toolbelt {:?}", toolbelt_id);
             }
         }
     }
