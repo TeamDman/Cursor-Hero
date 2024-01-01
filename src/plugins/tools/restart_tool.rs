@@ -1,10 +1,10 @@
-use bevy::{prelude::*, window::{RawHandleWrapper, PrimaryWindow}};
+use bevy::prelude::*;
 use leafwing_input_manager::prelude::*;
 
-use crate::{plugins::{
+use crate::plugins::{
     camera_plugin::FollowWithCamera,
     character_plugin::{Character, CharacterColor},
-}, utils::win_window::focus_window};
+};
 
 use super::super::toolbelt::types::*;
 
@@ -27,21 +27,18 @@ pub struct FocusTool;
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
 pub enum ToolAction {
     ToggleFollowCharacter,
-    FocusMainWindow,
 }
 
 impl ToolAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
             Self::ToggleFollowCharacter => GamepadButtonType::LeftThumb.into(),
-            Self::FocusMainWindow => GamepadButtonType::RightThumb.into(),
         }
     }
 
     fn default_mkb_binding(&self) -> UserInput {
         match self {
             Self::ToggleFollowCharacter => KeyCode::Backslash.into(),
-            Self::FocusMainWindow => KeyCode::Home.into(),
         }
     }
 
@@ -73,7 +70,7 @@ fn spawn_tool_event_responder_update_system(
                                     custom_size: Some(Vec2::new(100.0, 100.0)),
                                     ..default()
                                 },
-                                texture: asset_server.load("textures/focus.png"),
+                                texture: asset_server.load("textures/target.png"),
                                 ..default()
                             },
                             ..default()
@@ -106,7 +103,6 @@ fn handle_input(
     >,
     mut commands: Commands,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    window_query: Query<&RawHandleWrapper, With<PrimaryWindow>>,
 ) {
     for (t_act, t_enabled, t_parent) in tools.iter() {
         if t_enabled.is_none() {
@@ -133,15 +129,6 @@ fn handle_input(
                 *material = materials.add(CharacterColor::Unfocused.as_material());
                 info!("no longer following");
             }
-        }
-        if t_act.just_pressed(ToolAction::FocusMainWindow) {
-            info!("Focus main window");
-            let window_handle = window_query.get_single().expect("Need a single window");
-            let win32handle = match window_handle.window_handle {
-                raw_window_handle::RawWindowHandle::Win32(handle) => handle,
-                _ => panic!("Unsupported window handle"),
-            };
-            focus_window(win32handle.hwnd as isize);
         }
     }
 }

@@ -1,7 +1,11 @@
 use windows::core::PCSTR;
-use windows::Win32::Foundation::{HWND, RECT};
-use windows::Win32::UI::WindowsAndMessaging::{FindWindowA, GetWindowRect};
-use windows::Win32::UI::WindowsAndMessaging::{GetSystemMetrics, SM_CYCAPTION, SM_CYFRAME};
+use windows::Win32::{
+    Foundation::{HWND, RECT},
+    UI::WindowsAndMessaging::{
+        FindWindowA, GetSystemMetrics, GetWindowRect, IsWindowVisible, SetForegroundWindow,
+        ShowWindow, SM_CYCAPTION, SM_CYFRAME, SW_RESTORE,
+    },
+};
 
 #[derive(Debug)]
 pub enum WindowBoundsError {
@@ -39,6 +43,21 @@ pub fn get_window_inner_offset() -> (i32, i32) {
         let frame_height = GetSystemMetrics(SM_CYFRAME);
 
         (frame_height, caption_height + frame_height * 2)
+    }
+}
+
+pub fn focus_window(hwnd: isize) {
+    unsafe {
+        // Convert the isize to HWND
+        let hwnd = HWND(hwnd);
+
+        // If the window is minimized, restore it before setting it to the foreground.
+        if !IsWindowVisible(hwnd).as_bool() {
+            ShowWindow(hwnd, SW_RESTORE);
+        }
+
+        // Bring the window to the foreground
+        SetForegroundWindow(hwnd);
     }
 }
 
