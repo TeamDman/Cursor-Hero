@@ -1,6 +1,6 @@
+use super::types::*;
 use bevy::prelude::*;
 use bevy_xpbd_2d::components::LinearVelocity;
-use super::types::*;
 
 pub fn tool_hovered_tag_update_system(
     mut commands: Commands,
@@ -20,8 +20,7 @@ pub fn tool_hovered_tag_update_system(
                 // find the angle between the follow entity and each toolbelt entry
                 // find the angle of the direction of travel
                 // find the tool with the smallest difference between the two angles
-                let travel_angle =
-                    normalize_angle(follow_vel.0.angle_between(Vec2::new(1.0, 0.0)));
+                let travel_angle = normalize_angle(follow_vel.0.angle_between(Vec2::new(1.0, 0.0)));
                 let mut closest_angle = std::f32::consts::PI; // Initialized to the max angle difference (180 degrees)
 
                 for kid in t_kids.iter() {

@@ -1,13 +1,17 @@
 extern crate gilrs;
 
-use gilrs::{Gilrs, Axis, Event, EventType};
+use gilrs::{Axis, Event, EventType, Gilrs};
 
 fn main() {
     let mut gilrs = Gilrs::new().unwrap();
 
     // Iterate over all connected gamepads
     for (_id, gamepad) in gilrs.gamepads() {
-        println!("Connected: {} is {:?}", gamepad.name(), gamepad.power_info());
+        println!(
+            "Connected: {} is {:?}",
+            gamepad.name(),
+            gamepad.power_info()
+        );
     }
 
     loop {
@@ -20,7 +24,10 @@ fn main() {
         for (id, gamepad) in gilrs.gamepads() {
             let left_stick_x = gamepad.value(Axis::LeftStickX);
             let left_stick_y = gamepad.value(Axis::LeftStickY);
-            println!("{:?} Left Stick X: {}, Left Stick Y: {}", id, left_stick_x, left_stick_y);
+            println!(
+                "{:?} Left Stick X: {}, Left Stick Y: {}",
+                id, left_stick_x, left_stick_y
+            );
         }
 
         // Sleep for a short duration to avoid spamming

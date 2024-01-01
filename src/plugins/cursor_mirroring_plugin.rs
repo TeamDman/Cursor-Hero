@@ -36,9 +36,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 }
 
-
 fn update_cursor_position(mut res: ResMut<CursorPosition>) {
-    if let Ok((x,y)) = get_cursor_position() {
+    if let Ok((x, y)) = get_cursor_position() {
         res.0.x = x as f32;
         res.0.y = y as f32;
     }

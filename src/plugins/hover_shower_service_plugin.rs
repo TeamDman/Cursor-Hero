@@ -1,10 +1,10 @@
 use bevy::prelude::*;
 use crossbeam_channel::{bounded, Receiver};
-use tokio::net::windows::named_pipe::ClientOptions;
-use tokio::io::{AsyncBufReadExt, BufReader};
 use serde::Deserialize;
-use std::time::Duration;
 use std::thread;
+use std::time::Duration;
+use tokio::io::{AsyncBufReadExt, BufReader};
+use tokio::net::windows::named_pipe::ClientOptions;
 
 pub struct HoverShowerServicePlugin;
 impl Plugin for HoverShowerServicePlugin {
@@ -43,7 +43,7 @@ pub struct ReceivedData {
     pub cursor_position: (i32, i32),
     pub element_details: ElementDetails,
     pub interesting_elements: Vec<InterestingElement>,
-} 
+}
 
 pub fn start_service_process() -> Result<(), std::io::Error> {
     // spawn the dotnet process

@@ -88,7 +88,6 @@ pub struct Character {
     pub speed: f32,
 }
 
-
 #[derive(Component, Reflect, Eq, PartialEq, Debug)]
 pub enum CharacterColor {
     Unfocused,

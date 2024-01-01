@@ -13,9 +13,11 @@ pub fn toolbelt_spawn_setup_system(
             let toolbelt = c_commands.spawn(ToolbeltBundle::default());
             writer.send(ToolbeltEvent::Populate(toolbelt.id()));
         });
-    
+
         info!("Toolbelt setup complete");
     } else {
-        unreachable!("Toolbelt setup system is configured to only run after the character is spawned.")
+        unreachable!(
+            "Toolbelt setup system is configured to only run after the character is spawned."
+        )
     }
 }

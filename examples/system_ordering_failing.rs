@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 fn main() {
-    App::new().add_plugins((CharacterPlugin,HatPlugin)).run();
+    App::new().add_plugins((CharacterPlugin, HatPlugin)).run();
 }
 
 struct CharacterPlugin;
@@ -9,7 +9,12 @@ impl Plugin for CharacterPlugin {
     fn build(&self, app: &mut App) {
         println!("Building CharacterPlugin");
         app.configure_sets(Startup, CharacterSystemSet::Spawn)
-            .add_systems(Startup, spawn_character.in_set(CharacterSystemSet::Spawn).before(apply_deferred)); // without using chain, apply_deferred isn't actually called
+            .add_systems(
+                Startup,
+                spawn_character
+                    .in_set(CharacterSystemSet::Spawn)
+                    .before(apply_deferred),
+            ); // without using chain, apply_deferred isn't actually called
     }
 }
 
@@ -49,7 +54,11 @@ pub enum HatSystemSet {
 #[derive(Component, Default, Reflect)]
 struct Hat;
 
-fn spawn_hat(mut commands: Commands, all: Query<Entity>, characters: Query<Entity, With<Character>>) {
+fn spawn_hat(
+    mut commands: Commands,
+    all: Query<Entity>,
+    characters: Query<Entity, With<Character>>,
+) {
     println!("Found {:?} entities", all.iter().count());
     for entity in all.iter() {
         println!("Entity: {:?}", entity);

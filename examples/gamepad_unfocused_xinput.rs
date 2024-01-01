@@ -3,7 +3,8 @@ use windows::{
     Win32::{
         Foundation::{BOOL, ERROR_DEVICE_NOT_CONNECTED, ERROR_SUCCESS},
         Gaming::XInput::{
-            XInputGetCapabilities, XInputGetState, XINPUT_CAPABILITIES, XINPUT_GAMEPAD, XINPUT_STATE,
+            XInputGetCapabilities, XInputGetState, XINPUT_CAPABILITIES, XINPUT_GAMEPAD,
+            XINPUT_STATE,
         },
     },
 };
@@ -31,7 +32,7 @@ fn main() -> Result<()> {
             if unsafe { XInputGetState(i as u32, &mut state) } == ERROR_SUCCESS.0 {
                 let gamepad: XINPUT_GAMEPAD = state.Gamepad;
                 let left_thumb_x = gamepad.sThumbLX;
-                
+
                 println!("Controller {}: Left Thumb X = {}", i, left_thumb_x);
             }
         }

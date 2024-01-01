@@ -63,6 +63,5 @@ mod tests {
         println!("{}", report);
         assert!(report.contains("z first"));
         assert!(report.contains("a second"));
-
     }
 }

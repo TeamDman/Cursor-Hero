@@ -3,9 +3,7 @@ use std::thread;
 use bevy::prelude::*;
 use leafwing_input_manager::prelude::*;
 
-use crate::
-    utils::win_mouse::{press_f23_key, release_f23_key}
-;
+use crate::utils::win_mouse::{press_f23_key, release_f23_key};
 use crossbeam_channel::{bounded, Sender};
 
 use super::super::toolbelt::types::*;

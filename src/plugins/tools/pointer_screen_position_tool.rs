@@ -1,7 +1,4 @@
-use bevy::{
-    prelude::*,
-    transform::TransformSystem,
-};
+use bevy::{prelude::*, transform::TransformSystem};
 use bevy_xpbd_2d::prelude::*;
 use itertools::Itertools;
 

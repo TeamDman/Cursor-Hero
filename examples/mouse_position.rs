@@ -1,7 +1,4 @@
-use windows::{
-    Win32::Foundation::POINT,
-    Win32::UI::WindowsAndMessaging::GetCursorPos,
-};
+use windows::{Win32::Foundation::POINT, Win32::UI::WindowsAndMessaging::GetCursorPos};
 
 fn main() {
     loop {
@@ -10,7 +7,7 @@ fn main() {
     }
 }
 
-fn get_cursor_position() -> Result<POINT,windows::core::Error> {
+fn get_cursor_position() -> Result<POINT, windows::core::Error> {
     unsafe {
         let mut point = POINT::default();
         GetCursorPos(&mut point)?;

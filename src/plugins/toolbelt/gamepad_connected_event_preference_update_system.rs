@@ -1,4 +1,7 @@
-use bevy::{prelude::*, input::gamepad::{GamepadConnectionEvent, GamepadSettings, ButtonSettings}};
+use bevy::{
+    input::gamepad::{ButtonSettings, GamepadConnectionEvent, GamepadSettings},
+    prelude::*,
+};
 
 /// Responsible for updating the trigger thresholds for Mining Laser
 /// https://github.com/Leafwing-Studios/leafwing-input-manager/issues/405

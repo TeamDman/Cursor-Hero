@@ -11,16 +11,10 @@ pub struct Afterimage {
 pub struct AfterimagePlugin;
 impl Plugin for AfterimagePlugin {
     fn build(&self, app: &mut App) {
-        app
-            .register_type::<AfterimageParent>()
+        app.register_type::<AfterimageParent>()
             .register_type::<Afterimage>()
             .add_systems(Startup, setup)
-            .add_systems(
-                Update,
-                (
-                    tick_afterimages,
-                ),
-            );
+            .add_systems(Update, (tick_afterimages,));
     }
 }
 fn setup(mut commands: Commands) {

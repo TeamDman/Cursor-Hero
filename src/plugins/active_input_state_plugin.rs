@@ -1,7 +1,4 @@
-use bevy::{
-    input::gamepad::GamepadEvent, input::keyboard::KeyboardInput, prelude::*,
-};
-
+use bevy::{input::gamepad::GamepadEvent, input::keyboard::KeyboardInput, prelude::*};
 
 pub struct ActiveInputStatePlugin;
 

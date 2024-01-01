@@ -116,15 +116,16 @@ fn handle_input(
             let character = characters
                 .get_mut(toolbelt.get())
                 .expect("Toolbelt should have a character");
-            let (character_entity , character_is_followed, mut material) =
-                character;
+            let (character_entity, character_is_followed, mut material) = character;
 
             if character_is_followed.is_none() {
                 commands.entity(character_entity).insert(FollowWithCamera);
                 *material = materials.add(CharacterColor::FocusedWithCamera.as_material());
                 info!("now following");
             } else {
-                commands.entity(character_entity).remove::<FollowWithCamera>();
+                commands
+                    .entity(character_entity)
+                    .remove::<FollowWithCamera>();
                 *material = materials.add(CharacterColor::Unfocused.as_material());
                 info!("no longer following");
             }

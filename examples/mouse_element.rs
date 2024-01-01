@@ -23,7 +23,7 @@ fn main() -> Result<()> {
         let mut point = POINT::default();
         GetCursorPos(&mut point).unwrap();
         let element: IUIAutomationElement = automation.ElementFromPoint(point)?;
-        
+
         let element_name = element.CurrentName()?.to_string();
 
         println!("Element Name: {}", element_name);

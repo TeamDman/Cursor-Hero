@@ -1,3 +1,4 @@
+pub mod gamepad_connected_event_preference_update_system;
 pub mod tool_activated_tag_update_system;
 pub mod tool_hovered_tag_update_system;
 pub mod tool_visual_update_system;
@@ -6,4 +7,3 @@ pub mod toolbelt_plugin;
 pub mod toolbelt_spawn_setup_system;
 pub mod toolbelt_visibility_update_system;
 pub mod types;
-pub mod gamepad_connected_event_preference_update_system;

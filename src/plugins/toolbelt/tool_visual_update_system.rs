@@ -1,11 +1,8 @@
-use bevy::prelude::*;
 use super::types::*;
+use bevy::prelude::*;
 
 pub fn tool_visual_update_system(
-    mut query: Query<
-        (&mut Sprite, Option<&ToolHoveredTag>, Option<&ToolActiveTag>),
-        With<Tool>,
-    >,
+    mut query: Query<(&mut Sprite, Option<&ToolHoveredTag>, Option<&ToolActiveTag>), With<Tool>>,
 ) {
     // when a tool is updated, update the visuals for the tool
     // we read the events just to know when a change happens, we use the query optionals to determine desired state

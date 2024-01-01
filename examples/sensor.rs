@@ -1,8 +1,8 @@
+use bevy::input::common_conditions::input_toggle_active;
 /// Test to ensure that an object at rest is still considered colliding with sensors
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
-use bevy_xpbd_2d::{math::*, prelude::*};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use bevy::input::common_conditions::input_toggle_active;
+use bevy_xpbd_2d::{math::*, prelude::*};
 
 fn main() {
     App::new()
@@ -176,7 +176,10 @@ fn movement(
 }
 
 fn apply_movement_damping(
-    mut query: Query<(&mut LinearVelocity, &mut AngularVelocity), (With<Character>, Without<Sleeping>)>,
+    mut query: Query<
+        (&mut LinearVelocity, &mut AngularVelocity),
+        (With<Character>, Without<Sleeping>),
+    >,
     time: Res<Time<Physics>>,
 ) {
     if time.is_paused() {

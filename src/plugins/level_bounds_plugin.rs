@@ -54,10 +54,12 @@ fn enforce(
     >,
     images: Res<Assets<Image>>,
 ) {
-    for (character_entity, character_transform, mut character_velocity) in character_query.iter_mut() {
+    for (character_entity, character_transform, mut character_velocity) in
+        character_query.iter_mut()
+    {
         let mut is_in_bounds = false;
         for bounds in level_bounds.iter() {
-            if bounds.2.0.contains(&character_entity) {
+            if bounds.2 .0.contains(&character_entity) {
                 is_in_bounds = true;
                 break;
             }
@@ -67,7 +69,9 @@ fn enforce(
             let mut nearest_boundary = None;
             let mut nearest_boundary_distance = f32::MAX;
             for bounds in level_bounds.iter() {
-                let distance = character_transform.translation.distance(bounds.0.translation);
+                let distance = character_transform
+                    .translation
+                    .distance(bounds.0.translation);
                 if distance < nearest_boundary_distance {
                     nearest_boundary_distance = distance;
                     nearest_boundary = Some(bounds.0.translation);
@@ -75,7 +79,8 @@ fn enforce(
             }
             if let Some(nearest_boundary) = nearest_boundary {
                 let direction = nearest_boundary - character_transform.translation;
-                character_velocity.0 += direction.normalize().xy() * direction.length_squared()/1000.0;
+                character_velocity.0 +=
+                    direction.normalize().xy() * direction.length_squared() / 1000.0;
             }
         }
     }

@@ -1,3 +1,4 @@
+use crate::utils::win_screen_capture::{get_monitor_infos, MonitorInfo};
 use bevy::audio::{AudioPlugin, SpatialScale};
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::input::common_conditions::input_toggle_active;
@@ -6,13 +7,12 @@ use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_xpbd_2d::math::Vector;
 use bevy_xpbd_2d::plugins::PhysicsPlugins;
 use bevy_xpbd_2d::resources::Gravity;
-use crate::utils::win_screen_capture::{get_monitor_infos, MonitorInfo};
 
 use crate::plugins::MyPlugin;
 
 mod data;
-mod utils;
 mod plugins;
+mod utils;
 
 const AUDIO_SCALE: f32 = 1. / 100.0;
 

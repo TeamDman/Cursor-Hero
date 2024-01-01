@@ -5,7 +5,9 @@ use bevy_xpbd_2d::components::{Collider, RigidBody, Sensor};
 use std::fmt::Display;
 
 use crate::plugins::afterimage_plugin::{Afterimage, AfterimageParent};
-use crate::plugins::hover_shower_service_plugin::{ReceivedData, StreamEvent, start_service_process};
+use crate::plugins::hover_shower_service_plugin::{
+    start_service_process, ReceivedData, StreamEvent,
+};
 use crate::plugins::pressure_plate_plugin::{
     PressurePlate, PressurePlateActivationEvent, PressurePlateProgressIndicator,
 };
@@ -18,12 +20,7 @@ impl Plugin for HoverShowerRelayPlugin {
             .add_systems(Startup, setup)
             .add_systems(
                 Update,
-                (
-                    handle_activation,
-                    spawn_text,
-                    move_text,
-                    spawn_afterimages,
-                ),
+                (handle_activation, spawn_text, move_text, spawn_afterimages),
             );
     }
 }
@@ -173,8 +170,10 @@ fn spawn_afterimages(
                 parent.spawn((
                     SpriteBundle {
                         transform: Transform::from_xyz(
-                            (details.bounding_rect[0] as f32) + (details.bounding_rect[2] as f32 / 2.0),
-                            -(details.bounding_rect[1] as f32) - (details.bounding_rect[3] as f32 / 2.0),
+                            (details.bounding_rect[0] as f32)
+                                + (details.bounding_rect[2] as f32 / 2.0),
+                            -(details.bounding_rect[1] as f32)
+                                - (details.bounding_rect[3] as f32 / 2.0),
                             20.0,
                         ),
                         sprite: Sprite {

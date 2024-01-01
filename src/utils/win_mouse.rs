@@ -152,7 +152,6 @@ pub fn ui_right_click(x: i32, y: i32) -> Result<(), uiautomation::Error> {
     Ok(())
 }
 
-
 // Constants
 const INPUT_KEYBOARD: u32 = 1;
 const VK_F23: u16 = 0x86;

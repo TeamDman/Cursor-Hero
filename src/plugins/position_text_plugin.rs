@@ -129,7 +129,8 @@ fn update_position_text(
             world_position.x, world_position.y,
         );
     } else {
-        mouse_world_position_text_query.single_mut().sections[0].value = "Mouse world: None".to_string();
+        mouse_world_position_text_query.single_mut().sections[0].value =
+            "Mouse world: None".to_string();
     }
     if let Some(cursor_position) = window.cursor_position() {
         mouse_screen_position_text_query.single_mut().sections[0].value = format!(
@@ -137,6 +138,7 @@ fn update_position_text(
             cursor_position.x, cursor_position.y,
         );
     } else {
-        mouse_screen_position_text_query.single_mut().sections[0].value = "Mouse screen: None".to_string();
+        mouse_screen_position_text_query.single_mut().sections[0].value =
+            "Mouse screen: None".to_string();
     }
 }

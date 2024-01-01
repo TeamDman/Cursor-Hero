@@ -35,7 +35,6 @@ struct MouseDragState {
     is_dragging: bool,
 }
 
-
 fn should_teleport_character_to_camera(
     query: Query<&FollowWithCamera, Added<FollowWithCamera>>,
     mouse_drag_state: Res<MouseDragState>,

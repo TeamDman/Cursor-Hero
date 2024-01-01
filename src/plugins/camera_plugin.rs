@@ -1,8 +1,8 @@
 use bevy::{input::mouse::MouseWheel, prelude::*, transform::TransformSystem};
 use bevy_xpbd_2d::PhysicsSet;
 use leafwing_input_manager::{
-    action_state::ActionState, input_map::InputMap, plugin::InputManagerPlugin, Actionlike,
-    InputManagerBundle, user_input::InputKind,
+    action_state::ActionState, input_map::InputMap, plugin::InputManagerPlugin,
+    user_input::InputKind, Actionlike, InputManagerBundle,
 };
 
 pub struct CameraPlugin;
@@ -11,12 +11,7 @@ impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(InputManagerPlugin::<CameraAction>::default())
             .add_systems(Startup, spawn_camera)
-            .add_systems(
-                Update,
-                (
-                    update_camera_zoom,
-                ),
-            )
+            .add_systems(Update, (update_camera_zoom,))
             .add_systems(
                 PostUpdate,
                 camera_follow_update

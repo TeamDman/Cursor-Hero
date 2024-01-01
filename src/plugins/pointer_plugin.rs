@@ -18,10 +18,13 @@ pub enum PointerSystemSet {
 impl Plugin for PointerPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<Pointer>()
-        .configure_sets(Update, PointerSystemSet::Position)
+            .configure_sets(Update, PointerSystemSet::Position)
             .add_systems(
                 Startup,
-                (apply_deferred, setup).chain().in_set(PointerSystemSet::Spawn).after(CharacterSystemSet::Spawn),
+                (apply_deferred, setup)
+                    .chain()
+                    .in_set(PointerSystemSet::Spawn)
+                    .after(CharacterSystemSet::Spawn),
             )
             .add_systems(
                 PostUpdate,
