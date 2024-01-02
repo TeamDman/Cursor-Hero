@@ -8,8 +8,8 @@ edition = "2021"
 [dependencies]
 cursor_hero_metrics = { path = "../metrics" }
 cursor_hero_level_bounds = { path = "../level_bounds" }
-cursor_hero_winutils = { path = "../winutils" }
-bevy = { path = "../../../bevy" } # features = ["dynamic_linking"]
+cursor_hero_winutils = { workspace = true}
+bevy = { workspace = true }
 bevy-inspector-egui = { path = "../../../bevy-inspector-egui/crates/bevy-inspector-egui" }
 bevy_xpbd_2d = { path = "../../../bevy_xpbd/crates/bevy_xpbd_2d", features = [
     "simd",

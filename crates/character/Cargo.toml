@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 cursor_hero_camera = { path = "../camera" }
 cursor_hero_physics = { path = "../physics" }
-cursor_hero_winutils = { path = "../winutils" }
+cursor_hero_winutils = { workspace = true}
 bevy-inspector-egui = { workspace = true}
 bevy = { workspace = true }
 bevy_xpbd_2d = { workspace = true }

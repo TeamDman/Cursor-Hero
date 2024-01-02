@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 cursor_hero_camera = { path = "../camera" }
 cursor_hero_character = { path = "../character" }
-bevy = { path = "../../../bevy" } # features = ["dynamic_linking"]
+bevy = { workspace = true }
 bevy_xpbd_2d = { path = "../../../bevy_xpbd/crates/bevy_xpbd_2d", features = [
     "simd",
     "parallel",

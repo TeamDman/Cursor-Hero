@@ -6,5 +6,5 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cursor_hero_winutils = { path = "../winutils" }
-bevy = { path = "../../../bevy" } # features = ["dynamic_linking"]
+cursor_hero_winutils = { workspace = true}
+bevy = { workspace = true }

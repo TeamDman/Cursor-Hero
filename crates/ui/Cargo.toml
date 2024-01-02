@@ -12,7 +12,7 @@ anyhow = "1.0.75"
 # use local copy of bevy, we will need to point things
 # that depend on bevy also to local copies which we modify
 # their Cargo.toml to also point to our copy of bevy
-bevy = { path = "../../../bevy" } # features = ["dynamic_linking"]
+bevy = { workspace = true }
 bevy-inspector-egui = { path = "../../../bevy-inspector-egui/crates/bevy-inspector-egui" }
 bevy_xpbd_2d = { path = "../../../bevy_xpbd/crates/bevy_xpbd_2d", features = [
     "simd",
