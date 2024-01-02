@@ -8,7 +8,7 @@ members = ["crates/*", "other/gamepad_hell", "other/uparrow-enter"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
+[workspace.dependencies]
 cursor_hero_cursor_mirror = { path = "./crates/cursor_mirror" }
 cursor_hero_hover = { path = "./crates/hover" }
 cursor_hero_pressure_plate = { path = "./crates/pressure_plate" }
@@ -33,6 +33,34 @@ bevy_xpbd_2d = { path = "../bevy_xpbd/crates/bevy_xpbd_2d", features = [
   "simd",
   "parallel",
 ] }
+crossbeam-channel = "0.5.8"
+itertools = "0.12.0"
+raw-window-handle = "0.5.2"
+leafwing-input-manager = { path = "../leafwing-input-manager" }
+windows = "0.51.1"
+
+[dependencies]
+cursor_hero_cursor_mirror = {workspace = true}
+cursor_hero_hover = {workspace = true}
+cursor_hero_pressure_plate = {workspace = true}
+cursor_hero_level_bounds = {workspace = true}
+cursor_hero_input = {workspace = true}
+cursor_hero_camera = {workspace = true}
+cursor_hero_character = {workspace = true}
+cursor_hero_data = {workspace = true}
+cursor_hero_metrics = {workspace = true}
+cursor_hero_movement = {workspace = true}
+cursor_hero_physics = {workspace = true}
+cursor_hero_pointer = {workspace = true}
+cursor_hero_screen = {workspace = true}
+cursor_hero_toolbelt = {workspace = true}
+cursor_hero_tools = {workspace = true}
+cursor_hero_ui = {workspace = true}
+cursor_hero_winutils = {workspace = true}
+anyhow = {workspace = true}
+bevy = {workspace = true}
+bevy-inspector-egui = {workspace = true}
+bevy_xpbd_2d = {workspace = true}
 
 [profile.dev]
 opt-level = 1

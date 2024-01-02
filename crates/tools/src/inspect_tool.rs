@@ -7,11 +7,7 @@ use crossbeam_channel::bounded;
 use crossbeam_channel::Sender;
 use cursor_hero_character::character_plugin::Character;
 use cursor_hero_pointer::pointer_plugin::Pointer;
-use cursor_hero_winutils::win_mouse::left_mouse_down;
-use cursor_hero_winutils::win_mouse::left_mouse_up;
 use cursor_hero_winutils::win_mouse::print_under_mouse;
-use cursor_hero_winutils::win_mouse::right_mouse_down;
-use cursor_hero_winutils::win_mouse::right_mouse_up;
 
 use cursor_hero_toolbelt::types::*;
 

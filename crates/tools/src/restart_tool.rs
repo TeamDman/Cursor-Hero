@@ -6,13 +6,8 @@ use leafwing_input_manager::prelude::*;
 
 use windows::Win32::System::Threading::CREATE_NEW_PROCESS_GROUP;
 
-use cursor_hero_camera::camera_plugin::FollowWithCamera;
-use cursor_hero_character::character_plugin::Character;
-use cursor_hero_character::character_plugin::CharacterColor;
 use cursor_hero_data::paths::CURSOR_HERO_GIT_DIR;
 use cursor_hero_toolbelt::types::*;
-use cursor_hero_winutils::win_mouse::scroll_wheel_down;
-use cursor_hero_winutils::win_mouse::scroll_wheel_up;
 pub struct RestartToolPlugin;
 
 impl Plugin for RestartToolPlugin {
@@ -95,8 +90,8 @@ fn spawn_tool_event_responder_update_system(
 }
 
 #[allow(clippy::type_complexity)]
-fn handle_input(tools: Query<(&ActionState<ToolAction>, Option<&ToolActiveTag>, &Parent)>) {
-    for (t_act, t_enabled, t_parent) in tools.iter() {
+fn handle_input(tools: Query<(&ActionState<ToolAction>, Option<&ToolActiveTag>)>) {
+    for (t_act, t_enabled) in tools.iter() {
         if t_enabled.is_none() {
             continue;
         }

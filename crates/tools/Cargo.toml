@@ -6,25 +6,22 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cursor_hero_toolbelt = { path = "../toolbelt" }
-cursor_hero_pointer = { path = "../pointer" }
-cursor_hero_winutils = { path = "../winutils" }
-cursor_hero_camera = { path = "../camera" }
-cursor_hero_character = { path = "../character" }
-cursor_hero_data = { path = "../data" }
-cursor_hero_movement = { path = "../movement" }
-cursor_hero_physics = { path = "../physics" }
-bevy = { path = "../../../bevy" } # features = ["dynamic_linking"]
-bevy-inspector-egui = { path = "../../../bevy-inspector-egui/crates/bevy-inspector-egui" }
-bevy_xpbd_2d = { path = "../../../bevy_xpbd/crates/bevy_xpbd_2d", features = [
-    "simd",
-    "parallel",
-] }
-crossbeam-channel = "0.5.8"
-itertools = "0.12.0"
-leafwing-input-manager = { path = "../../../leafwing-input-manager" }
-
-windows = { version = "0.51.1", features = [
+cursor_hero_toolbelt = { workspace = true }
+cursor_hero_pointer = { workspace = true }
+cursor_hero_winutils = { workspace = true }
+cursor_hero_camera = { workspace = true }
+cursor_hero_character = { workspace = true }
+cursor_hero_data = { workspace = true }
+cursor_hero_movement = { workspace = true }
+cursor_hero_physics = { workspace = true }
+bevy = { workspace = true }
+bevy-inspector-egui = { workspace = true }
+bevy_xpbd_2d = { workspace = true }
+crossbeam-channel = {workspace = true }
+itertools = {workspace = true }
+raw-window-handle = {workspace = true }
+leafwing-input-manager = { workspace = true }
+windows = { workspace = true, features = [
     "Win32_Foundation",
     "Win32_Graphics_Gdi",
     "Win32_UI_WindowsAndMessaging",
@@ -35,4 +32,3 @@ windows = { version = "0.51.1", features = [
     "Win32_Gaming",
     "Win32_System_Threading",
 ] }
-raw-window-handle = "0.5.2"

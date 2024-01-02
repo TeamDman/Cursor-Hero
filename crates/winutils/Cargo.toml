@@ -6,8 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cursor_hero_metrics = { path = "../metrics" }
-bevy = { path = "../../../bevy" } # features = ["dynamic_linking"]
+cursor_hero_metrics = { workspace = true }
+bevy = { workspace = true }
 windows = { version = "0.51.1", features = [
     "Win32_Foundation",
     "Win32_UI_WindowsAndMessaging",
