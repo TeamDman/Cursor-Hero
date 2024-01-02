@@ -7,8 +7,5 @@ edition = "2021"
 
 [dependencies]
 bevy = { workspace = true }
-bevy-inspector-egui = { path = "../../../bevy-inspector-egui/crates/bevy-inspector-egui" }
-bevy_xpbd_2d = { path = "../../../bevy_xpbd/crates/bevy_xpbd_2d", features = [
-    "simd",
-    "parallel",
-] }
+bevy-inspector-egui = { workspace = true }
+bevy_xpbd_2d = { workspace = true }

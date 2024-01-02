@@ -6,10 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cursor_hero_character = { path = "../character" }
+cursor_hero_character = { workspace = true }
 bevy = { workspace = true }
-leafwing-input-manager = { path = "../../../leafwing-input-manager" }
-bevy_xpbd_2d = { path = "../../../bevy_xpbd/crates/bevy_xpbd_2d", features = [
-    "simd",
-    "parallel",
-] }
+leafwing-input-manager = { workspace = true }
+bevy_xpbd_2d = { workspace = true }
