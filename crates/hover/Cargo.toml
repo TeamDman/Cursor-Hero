@@ -1,0 +1,33 @@
+[package]
+name = "cursor_hero_hover"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+cursor_hero_pressure_plate = { path = "../pressure_plate" }
+cursor_hero_camera = { path = "../camera" }
+cursor_hero_winutils = { path = "../winutils" }
+bevy = { path = "../../../bevy" } # features = ["dynamic_linking"]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uiautomation = "0.7.3"
+windows = { version = "0.51.1", features = [
+  "Win32_Foundation",
+  "Win32_Graphics_Gdi",
+  "Win32_UI_WindowsAndMessaging",
+  "Win32_System_Com",
+  "Win32_UI_Accessibility",
+  "Win32_UI_Input_KeyboardAndMouse",
+  "Gaming_Input",
+  "Win32_Gaming",
+  "Win32_System_Threading",
+] }
+crossbeam-channel = "0.5.8"
+tokio = { version = "1.32.0", features = ["net", "full"] }
+tokio-named-pipes = "0.1.0"
+bevy_xpbd_2d = { path = "../../../bevy_xpbd/crates/bevy_xpbd_2d", features = [
+  "simd",
+  "parallel",
+] }

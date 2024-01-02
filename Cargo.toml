@@ -1,12 +1,31 @@
-workspace = { members = ["other/gamepad_hell", "other/uparrow-enter"] }
 [package]
-name = "cursor-hero"
+name = "cursor_hero"
 version = "0.1.0"
 edition = "2021"
+
+[workspace]
+members = ["crates/*", "other/gamepad_hell", "other/uparrow-enter"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+cursor_hero_cursor_mirror = { path = "./crates/cursor_mirror" }
+cursor_hero_hover = { path = "./crates/hover" }
+cursor_hero_pressure_plate = { path = "./crates/pressure_plate" }
+cursor_hero_level_bounds = { path = "./crates/level_bounds" }
+cursor_hero_input = { path = "./crates/input" }
+cursor_hero_camera = { path = "./crates/camera" }
+cursor_hero_character = { path = "./crates/character" }
+cursor_hero_data = { path = "./crates/data" }
+cursor_hero_metrics = { path = "./crates/metrics" }
+cursor_hero_movement = { path = "./crates/movement" }
+cursor_hero_physics = { path = "./crates/physics" }
+cursor_hero_pointer = { path = "./crates/pointer" }
+cursor_hero_screen = { path = "./crates/screen" }
+cursor_hero_toolbelt = { path = "./crates/toolbelt" }
+cursor_hero_tools = { path = "./crates/tools" }
+cursor_hero_ui = { path = "./crates/ui" }
+cursor_hero_winutils = { path = "./crates/winutils" }
 anyhow = "1.0.75"
 # use local copy of bevy, we will need to point things
 # that depend on bevy also to local copies which we modify
@@ -14,13 +33,12 @@ anyhow = "1.0.75"
 bevy = { path = "../bevy" } # features = ["dynamic_linking"]
 bevy-inspector-egui = { path = "../bevy-inspector-egui/crates/bevy-inspector-egui" }
 bevy_xpbd_2d = { path = "../bevy_xpbd/crates/bevy_xpbd_2d", features = [
-    "simd",
-    "parallel",
+  "simd",
+  "parallel",
 ] }
 crossbeam-channel = "0.5.8"
 fxhash = "0.2.1"
 image = "0.24.7"
-indexmap = "2.1.0"
 leafwing-input-manager = { path = "../leafwing-input-manager" }
 minifb = "0.25.0"
 mouse-rs = "0.4.2"
@@ -30,7 +48,17 @@ rust_socketio = "0.4.4"
 screenshots = "0.8.4"
 widestring = "1.0.2"
 win_desktop_duplication = "0.10.7"
-windows = { version = "0.51.1", features = ["Win32_Foundation", "Win32_Graphics_Gdi", "Win32_UI_WindowsAndMessaging", "Win32_System_Com", "Win32_UI_Accessibility", "Win32_UI_Input_KeyboardAndMouse", "Gaming_Input", "Win32_Gaming", "Win32_System_Threading"] }
+windows = { version = "0.51.1", features = [
+  "Win32_Foundation",
+  "Win32_Graphics_Gdi",
+  "Win32_UI_WindowsAndMessaging",
+  "Win32_System_Com",
+  "Win32_UI_Accessibility",
+  "Win32_UI_Input_KeyboardAndMouse",
+  "Gaming_Input",
+  "Win32_Gaming",
+  "Win32_System_Threading",
+] }
 tokio = { version = "1.32.0", features = ["net", "full"] }
 tokio-named-pipes = "0.1.0"
 serde = { version = "1.0", features = ["derive"] }

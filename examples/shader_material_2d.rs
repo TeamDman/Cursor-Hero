@@ -1,11 +1,12 @@
 //! A shader and a material that uses it.
 
-use bevy::{
-    prelude::*,
-    reflect::TypePath,
-    render::render_resource::{AsBindGroup, ShaderRef},
-    sprite::{Material2d, Material2dPlugin, MaterialMesh2dBundle},
-};
+use bevy::prelude::*;
+use bevy::reflect::TypePath;
+use bevy::render::render_resource::AsBindGroup;
+use bevy::render::render_resource::ShaderRef;
+use bevy::sprite::Material2d;
+use bevy::sprite::Material2dPlugin;
+use bevy::sprite::MaterialMesh2dBundle;
 
 fn main() {
     App::new()

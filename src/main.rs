@@ -1,5 +1,5 @@
-use crate::utils::win_screen_capture::{get_monitor_infos, MonitorInfo};
-use bevy::audio::{AudioPlugin, SpatialScale};
+use bevy::audio::AudioPlugin;
+use bevy::audio::SpatialScale;
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::input::common_conditions::input_toggle_active;
 use bevy::prelude::*;
@@ -7,12 +7,11 @@ use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_xpbd_2d::math::Vector;
 use bevy_xpbd_2d::plugins::PhysicsPlugins;
 use bevy_xpbd_2d::resources::Gravity;
+use cursor_hero_winutils::win_screen_capture::get_monitor_infos;
+use cursor_hero_winutils::win_screen_capture::MonitorInfo;
 
 use crate::plugins::MyPlugin;
-
-mod data;
 mod plugins;
-mod utils;
 
 const AUDIO_SCALE: f32 = 1. / 100.0;
 
@@ -81,6 +80,7 @@ fn main() {
     .insert_resource(Gravity(Vector::ZERO))
     .add_plugins(WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)))
     .add_plugins((FrameTimeDiagnosticsPlugin,))
-    .add_plugins(MyPlugin);
+    .add_plugins(MyPlugin)
+    /*¶*/;
     app.run();
 }

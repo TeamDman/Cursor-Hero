@@ -1,8 +1,9 @@
 use itertools::Itertools;
-use windows::Gaming::Input::{
-    GameControllerSwitchPosition, Gamepad as WgiGamepad, GamepadButtons, GamepadReading,
-    RawGameController,
-};
+use windows::Gaming::Input::GameControllerSwitchPosition;
+use windows::Gaming::Input::Gamepad as WgiGamepad;
+use windows::Gaming::Input::GamepadButtons;
+use windows::Gaming::Input::GamepadReading;
+use windows::Gaming::Input::RawGameController;
 
 fn main() -> Result<(), windows::core::Error> {
     let raw_game_controllers = RawGameController::RawGameControllers()?;

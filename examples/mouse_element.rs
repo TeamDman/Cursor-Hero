@@ -1,13 +1,14 @@
-use windows::Win32::System::Com::{CoCreateInstance, CLSCTX_ALL};
-use windows::{
-    core::Result,
-    Win32::{
-        Foundation::POINT,
-        System::Com::{CoInitializeEx, CoUninitialize, COINIT_APARTMENTTHREADED},
-        UI::Accessibility::{CUIAutomation, IUIAutomation, IUIAutomationElement},
-        UI::WindowsAndMessaging::GetCursorPos,
-    },
-};
+use windows::core::Result;
+use windows::Win32::Foundation::POINT;
+use windows::Win32::System::Com::CoCreateInstance;
+use windows::Win32::System::Com::CoInitializeEx;
+use windows::Win32::System::Com::CoUninitialize;
+use windows::Win32::System::Com::CLSCTX_ALL;
+use windows::Win32::System::Com::COINIT_APARTMENTTHREADED;
+use windows::Win32::UI::Accessibility::CUIAutomation;
+use windows::Win32::UI::Accessibility::IUIAutomation;
+use windows::Win32::UI::Accessibility::IUIAutomationElement;
+use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
 
 fn main() -> Result<()> {
     unsafe {

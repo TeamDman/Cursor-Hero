@@ -1,13 +1,12 @@
-use windows::{
-    core::Result,
-    Win32::{
-        Foundation::{BOOL, ERROR_DEVICE_NOT_CONNECTED, ERROR_SUCCESS},
-        Gaming::XInput::{
-            XInputGetCapabilities, XInputGetState, XINPUT_CAPABILITIES, XINPUT_GAMEPAD,
-            XINPUT_STATE,
-        },
-    },
-};
+use windows::core::Result;
+use windows::Win32::Foundation::BOOL;
+use windows::Win32::Foundation::ERROR_DEVICE_NOT_CONNECTED;
+use windows::Win32::Foundation::ERROR_SUCCESS;
+use windows::Win32::Gaming::XInput::XInputGetCapabilities;
+use windows::Win32::Gaming::XInput::XInputGetState;
+use windows::Win32::Gaming::XInput::XINPUT_CAPABILITIES;
+use windows::Win32::Gaming::XInput::XINPUT_GAMEPAD;
+use windows::Win32::Gaming::XInput::XINPUT_STATE;
 
 fn main() -> Result<()> {
     const MAX_CONTROLLERS: usize = 4; // XInput supports up to 4 controllers

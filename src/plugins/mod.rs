@@ -1,56 +1,34 @@
-pub mod active_input_state_plugin;
-pub mod afterimage_plugin;
-pub mod camera_plugin;
-pub mod character_plugin;
-pub mod click_drag_movement_plugin;
-pub mod cursor_mirroring_plugin;
-pub mod damping_plugin;
-pub mod fps_text_plugin;
-pub mod hover_shower_relay_plugin;
-pub mod hover_shower_service_plugin;
-pub mod hover_ui_automation_plugin;
-pub mod level_bounds_plugin;
-pub mod pointer_plugin;
-pub mod position_text_plugin;
-pub mod pressure_plate_plugin;
-pub mod screen_plugin;
-pub mod screen_update_plugin;
-pub mod toolbelt;
-pub mod tools;
-
 use bevy::prelude::*;
 
-use self::{
-    active_input_state_plugin::ActiveInputStatePlugin,
-    afterimage_plugin::AfterimagePlugin,
-    camera_plugin::CameraPlugin,
-    character_plugin::CharacterPlugin,
-    click_drag_movement_plugin::ClickDragMovementPlugin,
-    cursor_mirroring_plugin::CursorMirroringPlugin,
-    damping_plugin::DampingPlugin,
-    fps_text_plugin::FpsTextPlugin,
-    // hover_shower_relay_plugin::HoverShowerRelayPlugin,
-    // hover_shower_service_plugin::HoverShowerServicePlugin,
-    hover_ui_automation_plugin::HoverUiAutomationPlugin,
-    level_bounds_plugin::LevelBoundsPlugin,
-    pointer_plugin::PointerPlugin,
-    position_text_plugin::PositionTextPlugin,
-    pressure_plate_plugin::PressurePlatePlugin,
-    screen_plugin::ScreenPlugin,
-    screen_update_plugin::ScreenUpdatePlugin,
-    toolbelt::toolbelt_plugin::ToolbeltPlugin,
-    tools::tools_plugin::ToolsPlugin,
-};
+use cursor_hero_camera::camera_plugin::CameraPlugin;
+use cursor_hero_character::character_plugin::CharacterPlugin;
+use cursor_hero_input::active_input_state_plugin::ActiveInputStatePlugin;
+use cursor_hero_level_bounds::level_bounds_plugin::LevelBoundsPlugin;
+use cursor_hero_movement::click_drag_movement_plugin::ClickDragMovementPlugin;
+use cursor_hero_physics::damping_plugin::DampingPlugin;
+use cursor_hero_pointer::pointer_plugin::PointerPlugin;
+use cursor_hero_pressure_plate::pressure_plate_plugin::PressurePlatePlugin;
+use cursor_hero_screen::screen_plugin::ScreenPlugin;
+use cursor_hero_screen::screen_update_plugin::ScreenUpdatePlugin;
+use cursor_hero_toolbelt::ToolbeltPlugin;
+use cursor_hero_tools::ToolsPlugin;
+use cursor_hero_ui::fps_text_plugin::FpsTextPlugin;
+use cursor_hero_ui::position_text_plugin::PositionTextPlugin;
+use cursor_hero_hover::hover_ui_automation_plugin::HoverUiAutomationPlugin;
+use cursor_hero_cursor_mirror::cursor_mirroring_plugin::CursorMirroringPlugin;
+use cursor_hero_hover::afterimage_plugin::AfterimagePlugin;
 
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
         app/*¶*/
+            .add_plugins(ToolsPlugin)
+            .add_plugins(ToolbeltPlugin)
+            .add_plugins(CharacterPlugin)
             .add_plugins(ActiveInputStatePlugin)
             .add_plugins(AfterimagePlugin)
             .add_plugins(CameraPlugin)
-            .add_plugins(CharacterPlugin)
             .add_plugins(ClickDragMovementPlugin)
             .add_plugins(FpsTextPlugin)
             // .add_plugins(HoverShowerRelayPlugin)
@@ -61,8 +39,6 @@ impl Plugin for MyPlugin {
             .add_plugins(ScreenUpdatePlugin)
             .add_plugins(CursorMirroringPlugin)
             .add_plugins(HoverUiAutomationPlugin)
-            .add_plugins(ToolsPlugin)
-            .add_plugins(ToolbeltPlugin)
             .add_plugins(PointerPlugin)
             .add_plugins(DampingPlugin)
             .add_plugins(LevelBoundsPlugin)

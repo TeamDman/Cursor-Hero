@@ -1,8 +1,11 @@
 use bevy::input::common_conditions::input_toggle_active;
 /// Test to ensure that an object at rest is still considered colliding with sensors
-use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
+use bevy::prelude::*;
+/// Test to ensure that an object at rest is still considered colliding with sensors
+use bevy::sprite::MaterialMesh2dBundle;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use bevy_xpbd_2d::{math::*, prelude::*};
+use bevy_xpbd_2d::math::*;
+use bevy_xpbd_2d::prelude::*;
 
 fn main() {
     App::new()

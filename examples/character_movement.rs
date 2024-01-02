@@ -1,9 +1,11 @@
 // mostly from 2d kinematic character example from https://github.com/Jondolf/bevy_xpbd
 
 use bevy::input::common_conditions::input_toggle_active;
-use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
+use bevy::prelude::*;
+use bevy::sprite::MaterialMesh2dBundle;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use bevy_xpbd_2d::{math::*, prelude::*};
+use bevy_xpbd_2d::math::*;
+use bevy_xpbd_2d::prelude::*;
 
 fn main() {
     App::new()
