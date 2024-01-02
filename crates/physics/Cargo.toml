@@ -6,45 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.75"
-# use local copy of bevy, we will need to point things
-# that depend on bevy also to local copies which we modify
-# their Cargo.toml to also point to our copy of bevy
 bevy = { path = "../../../bevy" } # features = ["dynamic_linking"]
 bevy-inspector-egui = { path = "../../../bevy-inspector-egui/crates/bevy-inspector-egui" }
 bevy_xpbd_2d = { path = "../../../bevy_xpbd/crates/bevy_xpbd_2d", features = [
     "simd",
     "parallel",
 ] }
-crossbeam-channel = "0.5.8"
-fxhash = "0.2.1"
-image = "0.24.7"
-indexmap = "2.1.0"
-leafwing-input-manager = { path = "../../../leafwing-input-manager" }
-minifb = "0.25.0"
-mouse-rs = "0.4.2"
-rand = { version = "0.8.5", features = ["std_rng"] }
-rayon = "1.8.0"
-rust_socketio = "0.4.4"
-screenshots = "0.8.4"
-widestring = "1.0.2"
-win_desktop_duplication = "0.10.7"
-windows = { version = "0.51.1", features = [
-    "Win32_Foundation",
-    "Win32_Graphics_Gdi",
-    "Win32_UI_WindowsAndMessaging",
-    "Win32_System_Com",
-    "Win32_UI_Accessibility",
-    "Win32_UI_Input_KeyboardAndMouse",
-    "Gaming_Input",
-    "Win32_Gaming",
-    "Win32_System_Threading",
-] }
-tokio = { version = "1.32.0", features = ["net", "full"] }
-tokio-named-pipes = "0.1.0"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-uiautomation = "0.7.3"
-raw-window-handle = "0.5.2"
-itertools = "0.12.0"
-gilrs = { version = "0.10.4", features = ["xinput"], default_features = false }
