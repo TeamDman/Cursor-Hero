@@ -6,14 +6,14 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cursor_hero_pressure_plate = { path = "../pressure_plate" }
-cursor_hero_camera = { path = "../camera" }
+cursor_hero_pressure_plate = { workspace = true}
+cursor_hero_camera = { workspace = true}
 cursor_hero_winutils = { workspace = true}
 bevy = { workspace = true }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-uiautomation = "0.7.3"
-windows = { version = "0.51.1", features = [
+serde = { workspace = true }
+serde_json = { workspace = true }
+uiautomation = { workspace = true }
+windows = { workspace = true, features = [
   "Win32_Foundation",
   "Win32_Graphics_Gdi",
   "Win32_UI_WindowsAndMessaging",
@@ -24,10 +24,7 @@ windows = { version = "0.51.1", features = [
   "Win32_Gaming",
   "Win32_System_Threading",
 ] }
-crossbeam-channel = "0.5.8"
-tokio = { version = "1.32.0", features = ["net", "full"] }
-tokio-named-pipes = "0.1.0"
-bevy_xpbd_2d = { path = "../../../bevy_xpbd/crates/bevy_xpbd_2d", features = [
-  "simd",
-  "parallel",
-] }
+crossbeam-channel = { workspace = true }
+tokio = { workspace = true, features = ["net", "full"] }
+tokio-named-pipes = { workspace = true }
+bevy_xpbd_2d = { workspace = true }

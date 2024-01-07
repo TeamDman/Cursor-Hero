@@ -70,19 +70,19 @@ fn setup(
 }
 
 fn update_pointer_position(
-    character_query: Query<&ActionState<PlayerAction>, With<Character>>,
+    character_query: Query<(&ActionState<PlayerAction>, &Character)>,
     mut pointer_query: Query<(&mut Transform, &Parent), With<Pointer>>,
     mut debounce: Local<bool>,
 ) {
     for (mut pointer_transform, p_parent) in pointer_query.iter_mut() {
-        if let Ok(c_act) = character_query.get(p_parent.get()) {
+        if let Ok((c_act, c)) = character_query.get(p_parent.get()) {
             if c_act.pressed(PlayerAction::Look) {
                 let look = c_act.axis_pair(PlayerAction::Look).unwrap().xy();
                 if look.x.is_nan() || look.y.is_nan() {
                     continue;
                 }
 
-                let desired_position = look.extend(0.0) * 200.0;
+                let desired_position = look.extend(0.0) * c.reach;
                 pointer_transform.translation = desired_position;
                 *debounce = false;
             } else if !*debounce {

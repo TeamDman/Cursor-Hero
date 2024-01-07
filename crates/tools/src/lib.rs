@@ -6,6 +6,7 @@ pub mod placeholder_tool_plugin;
 pub mod pointer_screen_position_tool;
 pub mod pointer_window_position_tool;
 pub mod restart_tool;
+pub mod sprint_tool_plugin;
 pub mod talk_tool;
 pub mod zoom_tool;
 use bevy::prelude::*;
@@ -18,6 +19,7 @@ use crate::placeholder_tool_plugin::PlaceholderToolPlugin;
 use crate::pointer_screen_position_tool::PointerScreenPositionToolPlugin;
 use crate::pointer_window_position_tool::PointerWindowPositionToolPlugin;
 use crate::restart_tool::RestartToolPlugin;
+use crate::sprint_tool_plugin::SprintToolPlugin;
 use crate::talk_tool::TalkToolPlugin;
 use crate::zoom_tool::ZoomToolPlugin;
 
@@ -26,7 +28,7 @@ impl Plugin for ToolsPlugin {
     fn build(&self, app: &mut App) {
         app/*¶*/
             .add_plugins(CubeToolPlugin)
-            .add_plugins(PlaceholderToolPlugin)
+            // .add_plugins(PlaceholderToolPlugin)
             .add_plugins(ClickToolPlugin)
             .add_plugins(PointerWindowPositionToolPlugin)
             .add_plugins(PointerScreenPositionToolPlugin)
@@ -35,6 +37,7 @@ impl Plugin for ToolsPlugin {
             .add_plugins(FocusToolPlugin)
             .add_plugins(RestartToolPlugin)
             .add_plugins(InspectToolPlugin)
+            .add_plugins(SprintToolPlugin)
             /*¶*/
         ;
     }

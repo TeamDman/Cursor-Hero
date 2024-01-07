@@ -82,11 +82,33 @@ impl PlayerAction {
     }
 }
 
-#[derive(Component, InspectorOptions, Default, Reflect)]
+#[derive(Component, InspectorOptions, Reflect)]
 #[reflect(Component, InspectorOptions)]
 pub struct Character {
     #[inspector(min = 0.0)]
     pub speed: f32,
+    #[inspector(min = 0.0)]
+    pub default_speed: f32,
+    #[inspector(min = 0.0)]
+    pub sprint_speed: f32,
+    #[inspector(min = 0.0)]
+    pub reach: f32,
+    #[inspector(min = 0.0)]
+    pub default_reach: f32,
+    #[inspector(min = 0.0)]
+    pub sprint_reach: f32,
+}
+impl Default for Character {
+    fn default() -> Self {
+        Self {
+            speed: 5000.0,
+            default_speed: 5000.0,
+            sprint_speed: 1000.0,
+            reach: 200.0,
+            default_reach: 200.0,
+            sprint_reach: 50.0,
+        }
+    }
 }
 
 #[derive(Component, Reflect, Eq, PartialEq, Debug)]
@@ -135,7 +157,7 @@ fn spawn_character(
             transform: Transform::from_xyz(os_cursor_pos.x, -os_cursor_pos.y, 100.0),
             ..default()
         },
-        Character { speed: 5000.0 },
+        Character::default(),
         MovementDamping { factor: 0.90 },
         Name::new("Character"),
         InputManagerBundle::<PlayerAction> {
