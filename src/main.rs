@@ -61,13 +61,23 @@ fn main() {
                 primary_window: Some(Window {
                     title: "Cursor Hero".into(),
                     resolution: (
-                        (left_monitor.work_area.right - left_monitor.work_area.left - 100) as f32,
-                        (left_monitor.work_area.bottom - left_monitor.work_area.top - 100) as f32,
+                        // (left_monitor.work_area.right - left_monitor.work_area.left - 100) as f32,
+                        // (left_monitor.work_area.bottom - left_monitor.work_area.top - 100) as f32,
+                        // %BEGIN_RESOLUTION%
+                        1301.0,
+                        912.0
+                        // %END_RESOLUTION%
                     )
                         .into(),
                     resizable: true,
                     position: WindowPosition::At(
-                        (left_monitor.rect.left, left_monitor.rect.top + 10).into(),
+                        (
+                        // %BEGIN_POSITION%
+                        2011,
+                        55
+                        // %END_POSITION%
+                        ).into(),
+                        // (left_monitor.rect.left, left_monitor.rect.top + 10).into(),
                     ),
                     ..default()
                 }),

@@ -65,11 +65,23 @@ pub fn focus_window(hwnd: isize) {
     }
 }
 
+pub fn note_window_info(hwnd: isize) -> Result<RECT, WindowBoundsError> {
+    unsafe {
+        let hwnd = HWND(hwnd);
+
+        // Get the window's size and location
+        let mut rect = RECT::default();
+        GetWindowRect(hwnd, &mut rect).map_err(WindowBoundsError::WindowsError)?;
+        Ok(rect)
+    }
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    use bevy_inspector_egui::egui::TextBuffer;
+    // use bevy_inspector_egui::egui::TextBuffer;
     use windows::Win32::Foundation::BOOL;
     use windows::Win32::Foundation::HWND;
     use windows::Win32::Foundation::LPARAM;
