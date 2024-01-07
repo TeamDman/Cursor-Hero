@@ -1662,6 +1662,7 @@ dependencies = [
  "cursor_hero_tools",
  "cursor_hero_ui",
  "cursor_hero_winutils",
+ "proc-macro2",
  "quote",
  "syn 2.0.48",
 ]

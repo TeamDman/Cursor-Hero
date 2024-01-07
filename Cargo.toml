@@ -75,6 +75,7 @@ bevy-inspector-egui = {workspace = true}
 bevy_xpbd_2d = {workspace = true}
 syn = {workspace = true}
 quote = {workspace = true}
+proc-macro2 = "1.0.76"
 
 [profile.dev]
 opt-level = 1
