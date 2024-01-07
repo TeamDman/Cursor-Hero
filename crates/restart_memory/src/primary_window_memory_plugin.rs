@@ -15,24 +15,46 @@ impl Plugin for PrimaryWindowMemoryPlugin {
 
 #[derive(Debug, Resource)]
 pub struct PrimaryWindowMemoryConfig {
-    pub capture_window: bool,
+    pub save_bounds: bool,
     pub timer: Timer,
 }
 impl Default for PrimaryWindowMemoryConfig {
     fn default() -> Self {
         Self {
-            capture_window: true,
-            timer: Timer::from_seconds(5.0, TimerMode::Repeating),
+            save_bounds: true,
+            timer: Timer::from_seconds(0.5, TimerMode::Repeating),
         }
     }
 }
+
+
+#[derive(Debug)]
+enum PersistError {
+    Io(std::io::Error),
+    WindowBounds(cursor_hero_winutils::win_window::WindowBoundsError),
+    StringFormatting,
+}
+
+
+#[derive(Debug)]
+enum PersistSuccess {
+    WritePerformed,
+    Debounce,
+    Cooldown,
+    Disabled,
+}
+
 fn note_window_info(
     mut config: ResMut<PrimaryWindowMemoryConfig>,
     time: Res<Time>,
     window_query: Query<&RawHandleWrapper, With<PrimaryWindow>>,
-) -> Result<(), PersistError> {
+    mut debounce: Local<(Vec2, IVec2)>,
+) -> Result<PersistSuccess, PersistError> {
     if !config.timer.tick(time.delta()).just_finished() {
-        return Ok(()); // No update needed, return early
+        return Ok(PersistSuccess::Cooldown);
+    }
+    if !config.save_bounds {
+        return Ok(PersistSuccess::Disabled);
     }
 
     let window_handle = window_query.get_single().map_err(|_| PersistError::StringFormatting)?;
@@ -49,21 +71,21 @@ fn note_window_info(
     let position = IVec2::new(window_position.left as i32, window_position.top as i32);
 
     // Call the function that persists the window bounds and position
-    persist_window_bounds(resolution, position)
+    if (*debounce).0 != resolution || (*debounce).1 != position {
+        persist_window_bounds(resolution, position)?;
+        *debounce = (resolution, position);
+        return Ok(PersistSuccess::WritePerformed)
+    }
+    Ok(PersistSuccess::Debounce)
 }
-fn handle_persist_errors(In(result): In<Result<(),PersistError>>) {
+fn handle_persist_errors(In(result): In<Result<PersistSuccess,PersistError>>) {
     if let Err(e) = result {
-        eprintln!("persist error occurred: {:?}", e);
+        error!("persist error occurred: {:?}", e);
+    } else if let Ok(PersistSuccess::WritePerformed) = result {
+        info!("persisted window bounds");
     }
 }
 
-// The error types that can occur while persisting window bounds.
-#[derive(Debug)]
-enum PersistError {
-    Io(std::io::Error),
-    WindowBounds(cursor_hero_winutils::win_window::WindowBoundsError),
-    StringFormatting,
-}
 
 // The function that persists the window bounds and position to a file.
 fn persist_window_bounds(resolution: Vec2, position: IVec2) -> Result<(), PersistError> {
