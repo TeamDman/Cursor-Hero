@@ -62,15 +62,15 @@ fn main() {
                     title: "Cursor Hero".into(),
                     resolution: (
                         // %BEGIN_RESOLUTION%
-                        1397.0,
-                        904.0
+                        1621.0,
+                        1003.0
                         // %END_RESOLUTION%
                     ).into(),
                     resizable: true,
                     position: WindowPosition::At((
                         // %BEGIN_POSITION%
-                        1962,
-                        76
+                        -1761,
+                        -15
                         // %END_POSITION%
                     ).into()),
                     ..default()

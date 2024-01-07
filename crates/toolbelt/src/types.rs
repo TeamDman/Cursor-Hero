@@ -15,7 +15,7 @@ impl ToolbeltAction {
     }
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
-            Self::Show => GamepadButtonType::LeftTrigger2.into(),
+            Self::Show => GamepadButtonType::RightTrigger2.into(),
         }
     }
     pub fn default_input_map() -> InputMap<ToolbeltAction> {

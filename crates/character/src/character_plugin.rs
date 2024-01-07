@@ -101,12 +101,12 @@ pub struct Character {
 impl Default for Character {
     fn default() -> Self {
         Self {
-            speed: 5000.0,
-            default_speed: 5000.0,
-            sprint_speed: 1000.0,
-            reach: 200.0,
-            default_reach: 200.0,
-            sprint_reach: 50.0,
+            speed: 1000.0,
+            default_speed: 1000.0,
+            sprint_speed: 80000.0,
+            reach: 50.0,
+            default_reach: 50.0,
+            sprint_reach: 2000.0,
         }
     }
 }
@@ -208,7 +208,7 @@ fn apply_movement(
         // Increment speed if continuously moving
         // character.speed += character.speed_increment;
 
-        character.speed += 1000.0;
+        // character.speed += 1000.0;
         player_velocity.x += move_delta.x * character.speed;
         player_velocity.y += move_delta.y * character.speed;
     } else {

@@ -1,15 +1,20 @@
 use windows::core::PCSTR;
 use windows::Win32::Foundation::HWND;
+use windows::Win32::Foundation::LPARAM;
 use windows::Win32::Foundation::RECT;
+use windows::Win32::Foundation::WPARAM;
+use windows::Win32::UI::Input::KeyboardAndMouse::ReleaseCapture;
 use windows::Win32::UI::WindowsAndMessaging::FindWindowA;
 use windows::Win32::UI::WindowsAndMessaging::GetSystemMetrics;
 use windows::Win32::UI::WindowsAndMessaging::GetWindowRect;
 use windows::Win32::UI::WindowsAndMessaging::IsWindowVisible;
+use windows::Win32::UI::WindowsAndMessaging::SendMessageW;
 use windows::Win32::UI::WindowsAndMessaging::SetForegroundWindow;
 use windows::Win32::UI::WindowsAndMessaging::ShowWindow;
 use windows::Win32::UI::WindowsAndMessaging::SM_CYCAPTION;
 use windows::Win32::UI::WindowsAndMessaging::SM_CYFRAME;
 use windows::Win32::UI::WindowsAndMessaging::SW_RESTORE;
+use windows::Win32::UI::WindowsAndMessaging::WM_NCLBUTTONDOWN;
 
 #[derive(Debug)]
 pub enum WindowBoundsError {
@@ -35,6 +40,22 @@ pub fn get_window_bounds(hwnd: isize) -> Result<RECT, WindowBoundsError> {
         let mut rect = RECT::default();
         GetWindowRect(HWND(hwnd), &mut rect).map_err(WindowBoundsError::WindowsError)?;
         Ok(rect)
+    }
+}
+
+pub fn get_window_title_bar_center_position(hwnd: isize) -> Result<(i32, i32), WindowBoundsError> {
+    unsafe {
+        let bounds = get_window_bounds(hwnd)?;
+
+        // SM_CYCAPTION includes the height of the title bar
+        let caption_height = GetSystemMetrics(SM_CYCAPTION);
+
+        // SM_CYFRAME includes the height of the window frame (border)
+        let frame_height = GetSystemMetrics(SM_CYFRAME);
+
+        let x = bounds.left + (bounds.right - bounds.left) / 2;
+        let y = bounds.top + caption_height / 2 + frame_height;
+        Ok((x, y))
     }
 }
 
@@ -75,7 +96,6 @@ pub fn note_window_info(hwnd: isize) -> Result<RECT, WindowBoundsError> {
         Ok(rect)
     }
 }
-
 
 #[cfg(test)]
 mod tests {

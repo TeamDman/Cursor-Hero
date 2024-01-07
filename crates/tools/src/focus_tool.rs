@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy::window::RawHandleWrapper;
+use cursor_hero_winutils::win_mouse::set_cursor_position;
+use cursor_hero_winutils::win_window::get_window_title_bar_center_position;
 use leafwing_input_manager::prelude::*;
 
 use cursor_hero_camera::camera_plugin::FollowWithCamera;
@@ -144,6 +146,12 @@ fn handle_input(
                 _ => panic!("Unsupported window handle"),
             };
             focus_window(win32handle.hwnd as isize);
+            if let Ok((x,y)) = get_window_title_bar_center_position(win32handle.hwnd as isize) {
+                match set_cursor_position(x, y) {
+                    Ok(_) => info!("Moved cursor to window title bar"),
+                    Err(e) => error!("Failed to move cursor to window title bar: {:?}", e),
+                }
+            }
         }
     }
 }

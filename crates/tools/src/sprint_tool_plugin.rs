@@ -33,7 +33,7 @@ pub enum SprintToolAction {
 impl SprintToolAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
-            Self::Sprint => GamepadButtonType::RightTrigger2.into(),
+            Self::Sprint => GamepadButtonType::LeftTrigger2.into(),
         }
     }
 
@@ -115,7 +115,10 @@ fn handle_input(
             .expect("Toolbelt should have a character");
         if t_act.pressed(SprintToolAction::Sprint) {
             let open = t_act.value(SprintToolAction::Sprint);
-            character.speed = character.sprint_speed + (character.default_speed - character.sprint_speed) * (1.0 - open);
+            let new_speed = character.sprint_speed + (character.default_speed - character.sprint_speed) * (1.0 - open);
+            // if character.speed < new_speed {
+                character.speed = new_speed;
+            // }
             character.reach = character.default_reach + (character.sprint_reach - character.default_reach) * open;
         } else {
             character.reach = character.default_reach;
