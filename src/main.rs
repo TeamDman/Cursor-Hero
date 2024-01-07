@@ -64,8 +64,8 @@ fn main() {
                         // (left_monitor.work_area.right - left_monitor.work_area.left - 100) as f32,
                         // (left_monitor.work_area.bottom - left_monitor.work_area.top - 100) as f32,
                         // %BEGIN_RESOLUTION%
-                        1237.0,
-                        899.0
+                        1397.0,
+                        904.0
                         // %END_RESOLUTION%
                     )
                         .into(),
@@ -73,8 +73,8 @@ fn main() {
                     position: WindowPosition::At(
                         (
                         // %BEGIN_POSITION%
-                        2235,
-                        164
+                        1962,
+                        76
                         // %END_POSITION%
                         ).into(),
                         // (left_monitor.rect.left, left_monitor.rect.top + 10).into(),

@@ -1,4 +1,4 @@
-use syn::{parse_file, visit_mut::VisitMut, Expr, File};
+use syn::{parse_file, visit_mut::VisitMut, Expr, File, visit::Visit, ItemFn};
 use quote::ToTokens;
 use std::fs;
 
@@ -17,13 +17,34 @@ impl VisitMut for WindowPluginVisitor {
     }
 }
 
+
+// Define a visitor that will find function items.
+struct FnVisitor;
+
+impl<'ast> Visit<'ast> for FnVisitor {
+    fn visit_item_fn(&mut self, i: &'ast ItemFn) {
+        println!("Found function: {}", i.sig.ident);
+        // Continue traversing the AST as normal
+        syn::visit::visit_item_fn(self, i);
+    }
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut ast = parse_file(&fs::read_to_string("src/main.rs")?)?;
 
     let mut visitor = WindowPluginVisitor;
     visitor.visit_file_mut(&mut ast);
 
-    fs::write("src/main.rs", ast.into_token_stream().to_string())?;
+
+    
+    // Create a visitor
+    let mut visitor = FnVisitor;
+
+    // Visit the syntax tree
+    visitor.visit_file(&ast);
+
+    
+    // fs::write("src/main.rs", ast.into_token_stream().to_string())?;
 
     Ok(())
 }
