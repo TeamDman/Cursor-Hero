@@ -7,7 +7,6 @@ edition = "2021"
 
 
 [dependencies]
-cursor_hero_restart_memory = {workspace = true}
 cursor_hero_cursor_mirror = {workspace = true}
 cursor_hero_hover = {workspace = true}
 cursor_hero_pressure_plate = {workspace = true}
@@ -27,3 +26,6 @@ cursor_hero_ui = {workspace = true}
 cursor_hero_icon = {workspace = true}
 cursor_hero_winutils = {workspace = true}
 bevy = {workspace = true}
+
+[dev-dependencies]
+cursor_hero_restart_memory = {workspace = true}

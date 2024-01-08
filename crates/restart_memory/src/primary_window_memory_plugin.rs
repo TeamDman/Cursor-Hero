@@ -7,11 +7,8 @@ pub struct PrimaryWindowMemoryPlugin;
 
 impl Plugin for PrimaryWindowMemoryPlugin {
     fn build(&self, app: &mut App) {
-        #[cfg(debug_assertions)]
-        {
-            app.insert_resource(PrimaryWindowMemoryConfig::default())
-                .add_systems(Update, note_window_info.pipe(handle_persist_errors));
-        }
+        app.insert_resource(PrimaryWindowMemoryConfig::default())
+            .add_systems(Update, note_window_info.pipe(handle_persist_errors));
     }
 }
 
@@ -81,6 +78,7 @@ fn note_window_info(
     }
     Ok(PersistSuccess::Debounce)
 }
+
 fn handle_persist_errors(In(result): In<Result<PersistSuccess, PersistError>>) {
     if let Err(e) = result {
         error!("persist error occurred: {:?}", e);
