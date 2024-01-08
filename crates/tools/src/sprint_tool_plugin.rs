@@ -39,7 +39,7 @@ impl SprintToolAction {
 
     fn default_mkb_binding(&self) -> UserInput {
         match self {
-            Self::Sprint => KeyCode::ShiftRight.into(),
+            Self::Sprint => KeyCode::ShiftLeft.into(),
         }
     }
 
@@ -120,8 +120,9 @@ fn handle_input(
                 character.speed = new_speed;
             // }
             character.reach = character.default_reach + (character.sprint_reach - character.default_reach) * open;
-        } else {
+        } else if t_act.just_released(SprintToolAction::Sprint) {
             character.reach = character.default_reach;
+            character.speed = character.default_speed;
         }
     }
 }
