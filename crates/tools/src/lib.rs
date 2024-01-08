@@ -26,19 +26,16 @@ use crate::zoom_tool::ZoomToolPlugin;
 pub struct ToolsPlugin;
 impl Plugin for ToolsPlugin {
     fn build(&self, app: &mut App) {
-        app/*¶*/
-            .add_plugins(CubeToolPlugin)
-            // .add_plugins(PlaceholderToolPlugin)
-            .add_plugins(ClickToolPlugin)
-            .add_plugins(PointerWindowPositionToolPlugin)
-            .add_plugins(PointerScreenPositionToolPlugin)
-            .add_plugins(TalkToolPlugin)
-            .add_plugins(ZoomToolPlugin)
-            .add_plugins(FocusToolPlugin)
-            .add_plugins(RestartToolPlugin)
-            .add_plugins(InspectToolPlugin)
-            .add_plugins(SprintToolPlugin)
-            /*¶*/
-        ;
+        app.add_plugins(CubeToolPlugin);
+        // app.add_plugins(PlaceholderToolPlugin);
+        app.add_plugins(ClickToolPlugin);
+        app.add_plugins(PointerWindowPositionToolPlugin);
+        app.add_plugins(PointerScreenPositionToolPlugin);
+        app.add_plugins(TalkToolPlugin);
+        app.add_plugins(ZoomToolPlugin);
+        app.add_plugins(FocusToolPlugin);
+        app.add_plugins(RestartToolPlugin);
+        app.add_plugins(InspectToolPlugin);
+        app.add_plugins(SprintToolPlugin);
     }
 }
