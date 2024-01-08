@@ -44,7 +44,11 @@ fn update_window_icon(
     materials: Res<Assets<Image>>,
     icon_resource: Res<WindowIconResource>,
     mut commands: Commands,
+    mut flag: Local<bool>
 ) {
+    if *flag {
+        return;
+    }
     if let Some(icon) = materials.get(&icon_resource.0) {
         // update the icon
         let icon = Icon::from_rgba(icon.clone().data, icon.size().x, icon.size().y).unwrap();
@@ -75,9 +79,10 @@ b) disambiguation of multiple copies of a system in the same schedule
                     // should probably make a PR for it
                     // and should also include a simplified way to remove a system from a schedule
                     // maybe a .remove_when similar to .run_if
-                    schedule.remove_system(system_id);
+                    // schedule.remove_system(system_id);
                 }
             }
         );
+        *flag = true;
     }
 }
