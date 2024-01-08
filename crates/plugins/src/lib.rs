@@ -7,7 +7,7 @@ use cursor_hero_hover::afterimage_plugin::AfterimagePlugin;
 use cursor_hero_hover::hover_ui_automation_plugin::HoverUiAutomationPlugin;
 use cursor_hero_input::active_input_state_plugin::ActiveInputStatePlugin;
 use cursor_hero_level_bounds::level_bounds_plugin::LevelBoundsPlugin;
-use cursor_hero_movement::click_drag_movement_plugin::ClickDragMovementPlugin;
+use cursor_hero_click_drag_character_movement::ClickDragMovementPlugin;
 use cursor_hero_physics::damping_plugin::DampingPlugin;
 use cursor_hero_pointer::pointer_plugin::PointerPlugin;
 use cursor_hero_pressure_plate::pressure_plate_plugin::PressurePlatePlugin;

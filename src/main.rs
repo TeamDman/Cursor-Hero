@@ -11,9 +11,7 @@ use bevy_xpbd_2d::resources::Gravity;
 use cursor_hero_winutils::win_screen_capture::get_monitor_infos;
 use cursor_hero_winutils::win_screen_capture::MonitorInfo;
 use bevy_embedded_assets::EmbeddedAssetPlugin;
-
-use crate::plugins::MyPlugin;
-mod plugins;
+use cursor_hero_plugins::MyPlugin;
 
 const AUDIO_SCALE: f32 = 1. / 100.0;
 

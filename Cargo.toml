@@ -18,7 +18,7 @@ cursor_hero_camera = { path = "./crates/camera" }
 cursor_hero_character = { path = "./crates/character" }
 cursor_hero_data = { path = "./crates/data" }
 cursor_hero_metrics = { path = "./crates/metrics" }
-cursor_hero_movement = { path = "./crates/movement" }
+cursor_hero_click_drag_character_movement = { path = "./crates/click_drag_character_movement" }
 cursor_hero_physics = { path = "./crates/physics" }
 cursor_hero_pointer = { path = "./crates/pointer" }
 cursor_hero_screen = { path = "./crates/screen" }
@@ -27,6 +27,7 @@ cursor_hero_tools = { path = "./crates/tools" }
 cursor_hero_ui = { path = "./crates/ui" }
 cursor_hero_winutils = { path = "./crates/winutils" }
 cursor_hero_restart_memory = { path = "./crates/restart_memory" }
+cursor_hero_plugins = { path = "./crates/plugins" }
 cursor_hero_icon = { path = "./crates/icon" }
 anyhow = "1.0.75"
 # bevy = { path = "../bevy", features = ["dynamic_linking"] }
@@ -66,7 +67,7 @@ cursor_hero_camera = {workspace = true}
 cursor_hero_character = {workspace = true}
 cursor_hero_data = {workspace = true}
 cursor_hero_metrics = {workspace = true}
-cursor_hero_movement = {workspace = true}
+cursor_hero_click_drag_character_movement = {workspace = true}
 cursor_hero_physics = {workspace = true}
 cursor_hero_pointer = {workspace = true}
 cursor_hero_screen = {workspace = true}
@@ -74,6 +75,7 @@ cursor_hero_toolbelt = {workspace = true}
 cursor_hero_tools = {workspace = true}
 cursor_hero_ui = {workspace = true}
 cursor_hero_winutils = {workspace = true}
+cursor_hero_plugins = {workspace = true}
 anyhow = {workspace = true}
 bevy = {workspace = true}
 bevy-inspector-egui = {workspace = true}
