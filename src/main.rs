@@ -52,7 +52,11 @@ fn main() {
     };
 
     let mut app = App::new();
-    app.add_plugins(
+    app
+    .add_plugins(EmbeddedAssetPlugin {
+        mode: bevy_embedded_assets::PluginMode::ReplaceDefault,
+    })
+    .add_plugins(
         DefaultPlugins
             .set(ImagePlugin::default_nearest())
             .set(AudioPlugin {
@@ -82,9 +86,6 @@ fn main() {
             .set(log_plugin)
             .build(),
     )
-    .add_plugins(EmbeddedAssetPlugin {
-        mode: bevy_embedded_assets::PluginMode::ReplaceDefault,
-    })
     .add_plugins(PhysicsPlugins::default())
     .insert_resource(Gravity(Vector::ZERO))
     .add_plugins(WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)))
