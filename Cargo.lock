@@ -1668,35 +1668,12 @@ checksum = "7a81dae078cea95a014a339291cec439d2f232ebe854a9d672b796c6afafa9b7"
 name = "cursor_hero"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "bevy",
  "bevy-inspector-egui",
  "bevy_embedded_assets",
  "bevy_xpbd_2d",
- "cursor_hero_camera",
- "cursor_hero_character",
- "cursor_hero_click_drag_character_movement",
- "cursor_hero_cursor_mirror",
- "cursor_hero_data",
- "cursor_hero_hover",
- "cursor_hero_icon",
- "cursor_hero_input",
- "cursor_hero_level_bounds",
- "cursor_hero_metrics",
- "cursor_hero_physics",
  "cursor_hero_plugins",
- "cursor_hero_pointer",
- "cursor_hero_pressure_plate",
- "cursor_hero_restart_memory",
- "cursor_hero_screen",
- "cursor_hero_toolbelt",
- "cursor_hero_tools",
- "cursor_hero_ui",
- "cursor_hero_winutils",
  "embed-resource",
- "proc-macro2",
- "quote",
- "syn 2.0.48",
 ]
 
 [[package]]

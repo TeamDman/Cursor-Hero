@@ -57,34 +57,11 @@ bevy_embedded_assets = { version = "0.9.1", path = "../bevy_embedded_assets"}
 winit = "0.28.7"
 
 [dependencies]
-cursor_hero_restart_memory = {workspace = true}
-cursor_hero_cursor_mirror = {workspace = true}
-cursor_hero_hover = {workspace = true}
-cursor_hero_pressure_plate = {workspace = true}
-cursor_hero_level_bounds = {workspace = true}
-cursor_hero_input = {workspace = true}
-cursor_hero_camera = {workspace = true}
-cursor_hero_character = {workspace = true}
-cursor_hero_data = {workspace = true}
-cursor_hero_metrics = {workspace = true}
-cursor_hero_click_drag_character_movement = {workspace = true}
-cursor_hero_physics = {workspace = true}
-cursor_hero_pointer = {workspace = true}
-cursor_hero_screen = {workspace = true}
-cursor_hero_toolbelt = {workspace = true}
-cursor_hero_tools = {workspace = true}
-cursor_hero_ui = {workspace = true}
-cursor_hero_winutils = {workspace = true}
 cursor_hero_plugins = {workspace = true}
-anyhow = {workspace = true}
 bevy = {workspace = true}
 bevy-inspector-egui = {workspace = true}
 bevy_xpbd_2d = {workspace = true}
-syn = {workspace = true}
-quote = {workspace = true}
-proc-macro2 = {workspace = true}
 bevy_embedded_assets = {workspace = true}
-cursor_hero_icon = { workspace = true }
 
 [dev-dependencies]
 bevy = { workspace = true, features = ["dynamic_linking"] }

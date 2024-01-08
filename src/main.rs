@@ -3,35 +3,16 @@ use bevy::audio::SpatialScale;
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::input::common_conditions::input_toggle_active;
 use bevy::prelude::*;
-use bevy::window::PresentMode;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_xpbd_2d::math::Vector;
 use bevy_xpbd_2d::plugins::PhysicsPlugins;
 use bevy_xpbd_2d::resources::Gravity;
-use cursor_hero_winutils::win_screen_capture::get_monitor_infos;
-use cursor_hero_winutils::win_screen_capture::MonitorInfo;
 use bevy_embedded_assets::EmbeddedAssetPlugin;
 use cursor_hero_plugins::MyPlugin;
 
 const AUDIO_SCALE: f32 = 1. / 100.0;
 
 fn main() {
-    let left_monitor = get_monitor_infos()
-        .expect("Monitor info not found")
-        .into_iter()
-        .fold(None, |acc: Option<MonitorInfo>, elem| {
-            if let Some(acc) = acc {
-                if elem.rect.left < acc.rect.left {
-                    Some(elem)
-                } else {
-                    Some(acc)
-                }
-            } else {
-                Some(elem)
-            }
-        })
-        .expect("Left monitor not found");
-
     use bevy::log::LogPlugin;
 
     // this code is compiled only if debug assertions are enabled (debug mode)
