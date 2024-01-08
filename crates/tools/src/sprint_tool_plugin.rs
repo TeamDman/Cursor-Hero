@@ -115,11 +115,13 @@ fn handle_input(
             .expect("Toolbelt should have a character");
         if t_act.pressed(SprintToolAction::Sprint) {
             let open = t_act.value(SprintToolAction::Sprint);
-            let new_speed = character.sprint_speed + (character.default_speed - character.sprint_speed) * (1.0 - open);
+            let new_speed = character.sprint_speed
+                + (character.default_speed - character.sprint_speed) * (1.0 - open);
             // if character.speed < new_speed {
-                character.speed = new_speed;
+            character.speed = new_speed;
             // }
-            character.reach = character.default_reach + (character.sprint_reach - character.default_reach) * open;
+            character.reach =
+                character.default_reach + (character.sprint_reach - character.default_reach) * open;
         } else if t_act.just_released(SprintToolAction::Sprint) {
             character.reach = character.default_reach;
             character.speed = character.default_speed;

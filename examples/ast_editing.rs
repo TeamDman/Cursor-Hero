@@ -26,7 +26,12 @@ struct FnVisitor;
 
 impl<'ast> Visit<'ast> for FnVisitor {
     fn visit_field_value(&mut self, i: &'ast syn::FieldValue) {
-        if i.member == syn::Member::Named(syn::Ident::new("primary_window", proc_macro2::Span::call_site())) {
+        if i.member
+            == syn::Member::Named(syn::Ident::new(
+                "primary_window",
+                proc_macro2::Span::call_site(),
+            ))
+        {
             println!("Found primary_window");
             // You can further inspect the fields of the Window struct here
         }

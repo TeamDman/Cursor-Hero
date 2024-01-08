@@ -3,11 +3,11 @@ use bevy::audio::SpatialScale;
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::input::common_conditions::input_toggle_active;
 use bevy::prelude::*;
+use bevy_embedded_assets::EmbeddedAssetPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_xpbd_2d::math::Vector;
 use bevy_xpbd_2d::plugins::PhysicsPlugins;
 use bevy_xpbd_2d::resources::Gravity;
-use bevy_embedded_assets::EmbeddedAssetPlugin;
 use cursor_hero_plugins::MyPlugin;
 
 const AUDIO_SCALE: f32 = 1. / 100.0;
@@ -31,8 +31,7 @@ fn main() {
     };
 
     let mut app = App::new();
-    app
-    .add_plugins(EmbeddedAssetPlugin {
+    app.add_plugins(EmbeddedAssetPlugin {
         mode: bevy_embedded_assets::PluginMode::ReplaceDefault,
     })
     .add_plugins(
@@ -47,17 +46,17 @@ fn main() {
                     title: "Cursor Hero".into(),
                     resolution: (
                         // %BEGIN_RESOLUTION%
-                        818.0,
-                        758.0
-                        // %END_RESOLUTION%
-                    ).into(),
+                        818.0, 758.0, // %END_RESOLUTION%
+                    )
+                        .into(),
                     resizable: true,
-                    position: WindowPosition::At((
-                        // %BEGIN_POSITION%
-                        903,
-                        105
-                        // %END_POSITION%
-                    ).into()),
+                    position: WindowPosition::At(
+                        (
+                            // %BEGIN_POSITION%
+                            903, 105, // %END_POSITION%
+                        )
+                            .into(),
+                    ),
                     ..default()
                 }),
                 ..default()
