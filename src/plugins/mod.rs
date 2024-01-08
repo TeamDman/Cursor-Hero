@@ -18,6 +18,7 @@ use cursor_hero_toolbelt::ToolbeltPlugin;
 use cursor_hero_tools::ToolsPlugin;
 use cursor_hero_ui::fps_text_plugin::FpsTextPlugin;
 use cursor_hero_ui::position_text_plugin::PositionTextPlugin;
+use cursor_hero_icon::IconPlugin;
 
 pub struct MyPlugin;
 
@@ -44,6 +45,7 @@ impl Plugin for MyPlugin {
             .add_plugins(DampingPlugin)
             .add_plugins(LevelBoundsPlugin)
             .add_plugins(PrimaryWindowMemoryPlugin)
+            .add_plugins(IconPlugin)
             /*¶*/;
     }
 }

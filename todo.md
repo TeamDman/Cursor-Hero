@@ -1,4 +1,4 @@
-- r3 focus window tool
+
 - show tools which have conflicting keys in red
 - tool to focus the game window and maximize it on the monitors with dpad
 

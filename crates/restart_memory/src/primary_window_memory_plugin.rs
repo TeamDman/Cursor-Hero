@@ -7,9 +7,11 @@ pub struct PrimaryWindowMemoryPlugin;
 
 impl Plugin for PrimaryWindowMemoryPlugin {
     fn build(&self, app: &mut App) {
-        // run every 5 seconds
-        app.insert_resource(PrimaryWindowMemoryConfig::default())
-            .add_systems(Update, note_window_info.pipe(handle_persist_errors));
+        #[cfg(debug_assertions)]
+        {
+            app.insert_resource(PrimaryWindowMemoryConfig::default())
+                .add_systems(Update, note_window_info.pipe(handle_persist_errors));
+        }
     }
 }
 
@@ -27,14 +29,12 @@ impl Default for PrimaryWindowMemoryConfig {
     }
 }
 
-
 #[derive(Debug)]
 enum PersistError {
     Io(std::io::Error),
     WindowBounds(cursor_hero_winutils::win_window::WindowBoundsError),
     StringFormatting,
 }
-
 
 #[derive(Debug)]
 enum PersistSuccess {
@@ -57,13 +57,16 @@ fn note_window_info(
         return Ok(PersistSuccess::Disabled);
     }
 
-    let window_handle = window_query.get_single().map_err(|_| PersistError::StringFormatting)?;
+    let window_handle = window_query
+        .get_single()
+        .map_err(|_| PersistError::StringFormatting)?;
     let win32handle = match window_handle.window_handle {
         raw_window_handle::RawWindowHandle::Win32(handle) => handle,
         _ => return Err(PersistError::StringFormatting), // Handle the error case
     };
 
-    let window_position = get_window_bounds(win32handle.hwnd as _).map_err(|e| PersistError::WindowBounds(e))?;
+    let window_position =
+        get_window_bounds(win32handle.hwnd as _).map_err(|e| PersistError::WindowBounds(e))?;
     let resolution = Vec2::new(
         (window_position.right - window_position.left) as f32,
         (window_position.bottom - window_position.top) as f32,
@@ -74,18 +77,17 @@ fn note_window_info(
     if (*debounce).0 != resolution || (*debounce).1 != position {
         persist_window_bounds(resolution, position)?;
         *debounce = (resolution, position);
-        return Ok(PersistSuccess::WritePerformed)
+        return Ok(PersistSuccess::WritePerformed);
     }
     Ok(PersistSuccess::Debounce)
 }
-fn handle_persist_errors(In(result): In<Result<PersistSuccess,PersistError>>) {
+fn handle_persist_errors(In(result): In<Result<PersistSuccess, PersistError>>) {
     if let Err(e) = result {
         error!("persist error occurred: {:?}", e);
     } else if let Ok(PersistSuccess::WritePerformed) = result {
         info!("persisted window bounds");
     }
 }
-
 
 // The function that persists the window bounds and position to a file.
 fn persist_window_bounds(resolution: Vec2, position: IVec2) -> Result<(), PersistError> {
@@ -104,15 +106,23 @@ fn persist_window_bounds(resolution: Vec2, position: IVec2) -> Result<(), Persis
         begin_position, indent, position.x, indent, position.y, indent, end_position
     );
 
-    let begin_resolution_index = main_rs.find(begin_resolution).ok_or(PersistError::StringFormatting)?;
-    let end_resolution_index = main_rs.find(end_resolution).ok_or(PersistError::StringFormatting)?;
+    let begin_resolution_index = main_rs
+        .find(begin_resolution)
+        .ok_or(PersistError::StringFormatting)?;
+    let end_resolution_index = main_rs
+        .find(end_resolution)
+        .ok_or(PersistError::StringFormatting)?;
     main_rs.replace_range(
         begin_resolution_index..end_resolution_index + end_resolution.len(),
         &resolution_replace,
     );
 
-    let begin_position_index = main_rs.find(begin_position).ok_or(PersistError::StringFormatting)?;
-    let end_position_index = main_rs.find(end_position).ok_or(PersistError::StringFormatting)?;
+    let begin_position_index = main_rs
+        .find(begin_position)
+        .ok_or(PersistError::StringFormatting)?;
+    let end_position_index = main_rs
+        .find(end_position)
+        .ok_or(PersistError::StringFormatting)?;
     main_rs.replace_range(
         begin_position_index..end_position_index + end_position.len(),
         &position_replace,

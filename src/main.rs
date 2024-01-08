@@ -3,12 +3,14 @@ use bevy::audio::SpatialScale;
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::input::common_conditions::input_toggle_active;
 use bevy::prelude::*;
+use bevy::window::PresentMode;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_xpbd_2d::math::Vector;
 use bevy_xpbd_2d::plugins::PhysicsPlugins;
 use bevy_xpbd_2d::resources::Gravity;
 use cursor_hero_winutils::win_screen_capture::get_monitor_infos;
 use cursor_hero_winutils::win_screen_capture::MonitorInfo;
+use bevy_embedded_assets::EmbeddedAssetPlugin;
 
 use crate::plugins::MyPlugin;
 mod plugins;
@@ -62,15 +64,15 @@ fn main() {
                     title: "Cursor Hero".into(),
                     resolution: (
                         // %BEGIN_RESOLUTION%
-                        1621.0,
-                        1003.0
+                        818.0,
+                        758.0
                         // %END_RESOLUTION%
                     ).into(),
                     resizable: true,
                     position: WindowPosition::At((
                         // %BEGIN_POSITION%
-                        -1761,
-                        -15
+                        903,
+                        105
                         // %END_POSITION%
                     ).into()),
                     ..default()
@@ -80,6 +82,9 @@ fn main() {
             .set(log_plugin)
             .build(),
     )
+    .add_plugins(EmbeddedAssetPlugin {
+        mode: bevy_embedded_assets::PluginMode::ReplaceDefault,
+    })
     .add_plugins(PhysicsPlugins::default())
     .insert_resource(Gravity(Vector::ZERO))
     .add_plugins(WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)))
