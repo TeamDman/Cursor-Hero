@@ -65,7 +65,7 @@ fn update_window_icon(
                 Err(e) => error!("Failed to remove update_window_icon system: {}", e),
             }
             let mut schedules = world.resource_mut::<Schedules>();
-            if let Some(schedule) = schedules.get_mut(Update) {
+            if let Some(_schedule) = schedules.get_mut(Update) {
                 /*
                 https://discord.com/channels/691052431525675048/749335865876021248/1138225592064561243
                 Alice 🌹 — 08/07/2023 5:42 PM

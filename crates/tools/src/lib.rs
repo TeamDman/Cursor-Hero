@@ -15,7 +15,7 @@ use crate::click_tool_plugin::ClickToolPlugin;
 use crate::cube_tool_plugin::CubeToolPlugin;
 use crate::focus_tool::FocusToolPlugin;
 use crate::inspect_tool::InspectToolPlugin;
-use crate::placeholder_tool_plugin::PlaceholderToolPlugin;
+// use crate::placeholder_tool_plugin::PlaceholderToolPlugin;
 use crate::pointer_screen_position_tool::PointerScreenPositionToolPlugin;
 use crate::pointer_window_position_tool::PointerWindowPositionToolPlugin;
 use crate::restart_tool::RestartToolPlugin;

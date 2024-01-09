@@ -46,7 +46,6 @@ fn enforce(
         (&Transform, &Sprite, &CollidingEntities),
         (With<LevelBounds>, Without<Character>),
     >,
-    images: Res<Assets<Image>>,
 ) {
     for (character_entity, character_transform, mut character_velocity) in
         character_query.iter_mut()

@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use cursor_hero_camera::camera_plugin::CameraPlugin;
 use cursor_hero_character::character_plugin::CharacterPlugin;
+use cursor_hero_character_movement::CharacterMovementPlugin;
 use cursor_hero_cursor_mirror::cursor_mirroring_plugin::CursorMirroringPlugin;
 use cursor_hero_hover::afterimage_plugin::AfterimagePlugin;
 use cursor_hero_hover::hover_ui_automation_plugin::HoverUiAutomationPlugin;
@@ -28,6 +29,7 @@ impl Plugin for MyPlugin {
         app.add_plugins(ToolsPlugin);
         app.add_plugins(ToolbeltPlugin);
         app.add_plugins(CharacterPlugin);
+        app.add_plugins(CharacterMovementPlugin);
         app.add_plugins(ActiveInputStatePlugin);
         app.add_plugins(AfterimagePlugin);
         app.add_plugins(CameraPlugin);

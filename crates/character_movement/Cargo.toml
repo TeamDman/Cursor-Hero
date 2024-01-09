@@ -1,13 +1,13 @@
 [package]
-name = "cursor_hero_pointer"
+name = "cursor_hero_character_movement"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cursor_hero_character = { workspace = true }
-bevy = { workspace = true }
+cursor_hero_physics = { path = "../physics" }
+cursor_hero_character = { path = "../character" }
 leafwing-input-manager = { workspace = true }
+bevy = { workspace = true }
 bevy_xpbd_2d = { workspace = true }
-bevy-inspector-egui = { workspace = true}

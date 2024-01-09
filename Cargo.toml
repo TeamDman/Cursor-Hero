@@ -16,6 +16,7 @@ cursor_hero_level_bounds = { path = "./crates/level_bounds" }
 cursor_hero_input = { path = "./crates/input" }
 cursor_hero_camera = { path = "./crates/camera" }
 cursor_hero_character = { path = "./crates/character" }
+cursor_hero_character_movement = { path = "./crates/character_movement" }
 cursor_hero_data = { path = "./crates/data" }
 cursor_hero_metrics = { path = "./crates/metrics" }
 cursor_hero_click_drag_character_movement = { path = "./crates/click_drag_character_movement" }

@@ -1,20 +1,15 @@
 use windows::core::PCSTR;
 use windows::Win32::Foundation::HWND;
-use windows::Win32::Foundation::LPARAM;
 use windows::Win32::Foundation::RECT;
-use windows::Win32::Foundation::WPARAM;
-use windows::Win32::UI::Input::KeyboardAndMouse::ReleaseCapture;
 use windows::Win32::UI::WindowsAndMessaging::FindWindowA;
 use windows::Win32::UI::WindowsAndMessaging::GetSystemMetrics;
 use windows::Win32::UI::WindowsAndMessaging::GetWindowRect;
 use windows::Win32::UI::WindowsAndMessaging::IsWindowVisible;
-use windows::Win32::UI::WindowsAndMessaging::SendMessageW;
 use windows::Win32::UI::WindowsAndMessaging::SetForegroundWindow;
 use windows::Win32::UI::WindowsAndMessaging::ShowWindow;
 use windows::Win32::UI::WindowsAndMessaging::SM_CYCAPTION;
 use windows::Win32::UI::WindowsAndMessaging::SM_CYFRAME;
 use windows::Win32::UI::WindowsAndMessaging::SW_RESTORE;
-use windows::Win32::UI::WindowsAndMessaging::WM_NCLBUTTONDOWN;
 
 #[derive(Debug)]
 pub enum WindowBoundsError {

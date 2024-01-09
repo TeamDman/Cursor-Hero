@@ -1699,6 +1699,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "cursor_hero_character_movement"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy_xpbd_2d",
+ "cursor_hero_character",
+ "cursor_hero_physics",
+ "leafwing-input-manager",
+]
+
+[[package]]
 name = "cursor_hero_click_drag_character_movement"
 version = "0.1.0"
 dependencies = [
@@ -1786,6 +1797,7 @@ dependencies = [
  "bevy",
  "cursor_hero_camera",
  "cursor_hero_character",
+ "cursor_hero_character_movement",
  "cursor_hero_click_drag_character_movement",
  "cursor_hero_cursor_mirror",
  "cursor_hero_data",
@@ -1810,6 +1822,7 @@ name = "cursor_hero_pointer"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "bevy-inspector-egui",
  "bevy_xpbd_2d",
  "cursor_hero_character",
  "leafwing-input-manager",

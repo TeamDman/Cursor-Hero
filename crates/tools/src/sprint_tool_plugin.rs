@@ -1,9 +1,7 @@
 use bevy::prelude::*;
-use bevy_xpbd_2d::prelude::*;
 use leafwing_input_manager::prelude::*;
 
 use cursor_hero_character::character_plugin::Character;
-use cursor_hero_physics::damping_plugin::MovementDamping;
 use cursor_hero_pointer::pointer_plugin::Pointer;
 
 use cursor_hero_toolbelt::types::*;
@@ -100,31 +98,36 @@ fn handle_input(
         &Parent,
     )>,
     toolbelts: Query<&Parent, With<Toolbelt>>,
-    mut characters: Query<&mut Character>,
+    mut character_query: Query<(&mut Character, &Children)>,
+    mut pointer_query: Query<&mut Pointer>,
 ) {
     for (t_act, t_enabled, t_parent) in tools.iter() {
         if t_enabled.is_none() {
             continue;
         }
+
         let belt_parent = toolbelts
             .get(t_parent.get())
             .expect("Toolbelt should have a parent")
             .get();
-        let mut character = characters
-            .get_mut(belt_parent)
-            .expect("Toolbelt should have a character");
-        if t_act.pressed(SprintToolAction::Sprint) {
-            let open = t_act.value(SprintToolAction::Sprint);
-            let new_speed = character.sprint_speed
-                + (character.default_speed - character.sprint_speed) * (1.0 - open);
-            // if character.speed < new_speed {
-            character.speed = new_speed;
-            // }
-            character.reach =
-                character.default_reach + (character.sprint_reach - character.default_reach) * open;
-        } else if t_act.just_released(SprintToolAction::Sprint) {
-            character.reach = character.default_reach;
-            character.speed = character.default_speed;
+        if let Ok((mut character, character_kids)) = character_query.get_mut(belt_parent) {
+            let pointer = character_kids.iter().find(|e| pointer_query.get(**e).is_ok());
+            if t_act.pressed(SprintToolAction::Sprint) {
+                let open = t_act.value(SprintToolAction::Sprint);
+                character.speed = character.sprint_speed
+                    + (character.default_speed - character.sprint_speed) * (1.0 - open);
+
+                if let Some(Ok(mut pointer)) = pointer.map(|e| pointer_query.get_mut(*e)) {
+                    pointer.reach = pointer.default_reach
+                        + (pointer.sprint_reach - pointer.default_reach) * open;
+                }
+            } else if t_act.just_released(SprintToolAction::Sprint) {
+                character.speed = character.default_speed;
+
+                if let Some(Ok(mut pointer)) = pointer.map(|e| pointer_query.get_mut(*e)) {
+                    pointer.reach = pointer.default_reach;
+                }
+            }
         }
     }
 }
