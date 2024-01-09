@@ -73,32 +73,14 @@ fn insert_movement(query: Query<Entity, Added<Character>>, mut commands: Command
 
 fn apply_movement(
     time: Res<Time>,
-    mut character_query: Query<(&mut Character, &mut LinearVelocity, &ActionState<Action>)>,
+    mut character_query: Query<(&Character, &mut LinearVelocity, &ActionState<Action>)>,
 ) {
     let delta_time = time.delta_seconds_f64().adjust_precision();
-    for (mut c, mut c_vel, c_act) in character_query.iter_mut() {
+    for (c, mut c_vel, c_act) in character_query.iter_mut() {
         if c_act.pressed(Action::Move) {
             let move_delta = delta_time * c_act.clamped_axis_pair(Action::Move).unwrap().xy();
-
-            if move_delta.x == 0.0 && move_delta.y == 0.0 {
-                debug!("No movement detected");
-                debug!("Resetting to base speed");
-                c.speed = 5000.0;
-            } else {
-                // debug!("Movement detected, {:?}", move_delta);
-            }
-
-            // Increment speed if continuously moving
-            // character.speed += character.speed_increment;
-
-            // character.speed += 1000.0;
             c_vel.x += move_delta.x * c.speed;
             c_vel.y += move_delta.y * c.speed;
-        } else {
-            // Reset speed if not moving
-            // character.speed = character.base_speed;
-            debug!("Resetting to base speed");
-            c.speed = 5000.0;
-        }
+        } 
     }
 }

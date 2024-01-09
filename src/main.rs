@@ -46,8 +46,8 @@ fn main() {
                     title: format!("Cursor Hero v{}", env!("CARGO_PKG_VERSION")).into(),
                     resolution: (
                         // %BEGIN_RESOLUTION%
-                        866.0,
-                        875.0
+                        1952.0,
+                        1095.0
                         // %END_RESOLUTION%
                     )
                         .into(),
@@ -55,8 +55,8 @@ fn main() {
                     position: WindowPosition::At(
                         (
                             // %BEGIN_POSITION%
-                        903,
-                        105
+                        1912,
+                        -8
                         // %END_POSITION%
                         )
                             .into(),

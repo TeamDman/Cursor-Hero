@@ -39,7 +39,7 @@ impl Default for Character {
     fn default() -> Self {
         Self {
             speed: 1000.0,
-            default_speed: 1000.0,
+            default_speed: 5000.0,
             sprint_speed: 80000.0,
         }
     }
