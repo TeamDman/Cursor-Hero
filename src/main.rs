@@ -43,11 +43,11 @@ fn main() {
             })
             .set(WindowPlugin {
                 primary_window: Some(Window {
-                    title: "Cursor Hero".into(),
+                    title: format!("Cursor Hero v{}", env!("CARGO_PKG_VERSION")).into(),
                     resolution: (
                         // %BEGIN_RESOLUTION%
-                        834.0,
-                        797.0
+                        866.0,
+                        875.0
                         // %END_RESOLUTION%
                     )
                         .into(),
