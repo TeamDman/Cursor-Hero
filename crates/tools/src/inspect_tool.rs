@@ -1,7 +1,6 @@
 use std::thread;
 
 use bevy::prelude::*;
-use bevy::sprite::Anchor;
 use image::DynamicImage;
 use image::RgbImage;
 use image::RgbaImage;
@@ -138,7 +137,7 @@ fn spawn_tool_event_responder_update_system(
                 commands.entity(*toolbelt_id).with_children(|t_commands| {
                     t_commands.spawn((
                         ToolBundle {
-                            name: Name::new(format!("Inspect Tool")),
+                            name: Name::new("Inspect Tool"),
                             sprite_bundle: SpriteBundle {
                                 sprite: Sprite {
                                     custom_size: Some(Vec2::new(100.0, 100.0)),
@@ -246,8 +245,7 @@ fn handle_replies(
                             println!("intersection rect: {:?}", intersection);
 
                             // convert to monitor coordinates
-                            let mut origin = intersection.center() - screen_rect.min.xy();
-                            // origin.y *= -1.0;
+                            let origin = intersection.center() - screen_rect.min.xy();
                             let tex_grab_rect = Rect::from_center_size(origin, intersection.size());
                             println!("tex_grab_rect: {:?}", tex_grab_rect);
 
@@ -258,7 +256,6 @@ fn handle_replies(
                                     tex_grab_rect.size().y
                                 );
 
-                                
                                 // Calculate where to start placing pixels in the element's texture
                                 let texture_start_x = (intersection.min.x - elem_rect.min.x) as u32;
                                 let texture_start_y = (intersection.min.y - elem_rect.min.y) as u32;
@@ -278,45 +275,15 @@ fn handle_replies(
                                                 // screen_image.data[start + 3],
                                             ];
                                             tex.put_pixel(
-                                                texture_start_x + x as u32 - tex_grab_rect.min.x as u32,
-                                                texture_start_y + y as u32 - tex_grab_rect.min.y as u32,
+                                                texture_start_x + x as u32
+                                                    - tex_grab_rect.min.x as u32,
+                                                texture_start_y + y as u32
+                                                    - tex_grab_rect.min.y as u32,
                                                 image::Rgb(pixel),
                                             );
                                         }
                                     }
                                 }
-
-                                // // Calculate the visible part of the element on the screen
-                                // let visible_part = intersect;
-                                // println!("Visible part on screen: {:?}", visible_part);
-
-                                // // Calculate where to start placing pixels in the element's texture
-                                // let texture_start_x = (visible_part.min.x - elem_rect.min.x) as u32;
-                                // let texture_start_y = (visible_part.min.y - elem_rect.min.y) as u32;
-                                // println!("Texture start: {} {}", texture_start_x, texture_start_y);
-
-                                // // Copy the visible part of the screen texture to the element's texture
-                                // for y in 0..visible_part.height() as usize {
-                                //     for x in 0..visible_part.width() as usize {
-                                //         let screen_x = (visible_part.min.x + x as f32) as usize;
-                                //         let screen_y = (visible_part.min.y + y as f32) as usize;
-                                //         let start_idx =
-                                //             (screen_y * screen_size.width as usize + screen_x) * 4;
-
-                                //         if start_idx + 4 <= screen_image.data.len() {
-                                //             let pixel: [u8; 3] = [
-                                //                 screen_image.data[start_idx],
-                                //                 screen_image.data[start_idx + 1],
-                                //                 screen_image.data[start_idx + 2],
-                                //             ];
-                                //             tex.put_pixel(
-                                //                 texture_start_x + x as u32,
-                                //                 texture_start_y + y as u32,
-                                //                 image::Rgb(pixel),
-                                //             );
-                                //         }
-                                //     }
-                                // }
                             }
                         }
                     }
@@ -333,7 +300,7 @@ fn handle_replies(
                     SpriteBundle {
                         transform: Transform::from_translation(elem_center_pos),
                         sprite: Sprite {
-                            custom_size: Some(elem_size.clone()),
+                            custom_size: Some(elem_size),
                             // color: Color::PURPLE,
                             ..default()
                         },

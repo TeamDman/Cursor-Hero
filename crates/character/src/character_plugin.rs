@@ -23,8 +23,6 @@ impl Plugin for CharacterPlugin {
     }
 }
 
-
-
 #[derive(Component, InspectorOptions, Reflect)]
 #[reflect(Component, InspectorOptions)]
 pub struct Character {

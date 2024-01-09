@@ -81,6 +81,6 @@ fn apply_movement(
             let move_delta = delta_time * c_act.clamped_axis_pair(Action::Move).unwrap().xy();
             c_vel.x += move_delta.x * c.speed;
             c_vel.y += move_delta.y * c.speed;
-        } 
+        }
     }
 }

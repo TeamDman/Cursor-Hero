@@ -72,7 +72,7 @@ fn spawn_tool_event_responder_update_system(
                 commands.entity(*toolbelt_id).with_children(|t_commands| {
                     t_commands.spawn((
                         ToolBundle {
-                            name: Name::new(format!("Zoom Tool")),
+                            name: Name::new("Zoom Tool"),
                             sprite_bundle: SpriteBundle {
                                 sprite: Sprite {
                                     custom_size: Some(Vec2::new(100.0, 100.0)),
@@ -118,7 +118,8 @@ fn handle_input(
         }
         if t_act.pressed(ToolAction::ZoomOut) {
             let mut scale = cam.single_mut().scale;
-            scale *= Vec3::splat(1.0) + Vec2::splat(0.1 * time.delta_seconds() * modifier).extend(0.0);
+            scale *=
+                Vec3::splat(1.0) + Vec2::splat(0.1 * time.delta_seconds() * modifier).extend(0.0);
             scale = scale.clamp(Vec3::splat(0.1), Vec3::splat(10.0));
             cam.single_mut().scale = scale;
             if t_act.just_pressed(ToolAction::ZoomOut) {
@@ -127,7 +128,8 @@ fn handle_input(
         }
         if t_act.pressed(ToolAction::ZoomIn) {
             let mut scale = cam.single_mut().scale;
-            scale *= Vec3::splat(1.0) - Vec2::splat(0.1 * time.delta_seconds() * modifier).extend(0.0);
+            scale *=
+                Vec3::splat(1.0) - Vec2::splat(0.1 * time.delta_seconds() * modifier).extend(0.0);
             scale = scale.clamp(Vec3::splat(0.1), Vec3::splat(10.0));
             cam.single_mut().scale = scale;
             if t_act.just_pressed(ToolAction::ZoomIn) {

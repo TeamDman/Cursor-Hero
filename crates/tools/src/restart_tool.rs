@@ -64,7 +64,7 @@ fn spawn_tool_event_responder_update_system(
                 commands.entity(*toolbelt_id).with_children(|t_commands| {
                     t_commands.spawn((
                         ToolBundle {
-                            name: Name::new(format!("Restart Tool")),
+                            name: Name::new("Restart Tool"),
                             sprite_bundle: SpriteBundle {
                                 sprite: Sprite {
                                     custom_size: Some(Vec2::new(100.0, 100.0)),

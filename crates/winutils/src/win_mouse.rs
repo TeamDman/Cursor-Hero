@@ -270,7 +270,7 @@ pub fn find_element_at(x: i32, y: i32) -> Result<UIElement, uiautomation::Error>
 //     let walker = automation.filter_tree_walker(filter)?;
 //     let root = automation.get_root_element()?;
 //     let elem = find_recursive(&walker, &root)?;
-    
+
 // }
 
 // fn find_recursive(walker: &UITreeWalker, element: &UIElement) -> Result<UIElement, uiautomation::Error> {

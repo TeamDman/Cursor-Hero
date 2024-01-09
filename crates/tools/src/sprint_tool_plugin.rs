@@ -63,7 +63,7 @@ fn spawn_tool_event_responder_update_system(
                 commands.entity(*toolbelt_id).with_children(|t_commands| {
                     t_commands.spawn((
                         ToolBundle {
-                            name: Name::new(format!("Sprint Tool")),
+                            name: Name::new("Sprint Tool"),
                             sprite_bundle: SpriteBundle {
                                 sprite: Sprite {
                                     custom_size: Some(Vec2::new(100.0, 100.0)),
@@ -111,7 +111,9 @@ fn handle_input(
             .expect("Toolbelt should have a parent")
             .get();
         if let Ok((mut character, character_kids)) = character_query.get_mut(belt_parent) {
-            let pointer = character_kids.iter().find(|e| pointer_query.get(**e).is_ok());
+            let pointer = character_kids
+                .iter()
+                .find(|e| pointer_query.get(**e).is_ok());
             if t_act.pressed(SprintToolAction::Sprint) {
                 let open = t_act.value(SprintToolAction::Sprint);
                 character.speed = character.sprint_speed

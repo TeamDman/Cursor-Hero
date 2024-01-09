@@ -1,6 +1,7 @@
 use super::types::*;
 use bevy::prelude::*;
 
+#[allow(clippy::type_complexity)]
 pub fn toolbelt_circle_radius_update_system(
     toolbelts: Query<
         (Ref<CirclularDistributionProperties>, &Children),

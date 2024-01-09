@@ -119,7 +119,7 @@ fn spawn_screens(
                         RigidBody::Static,
                         Collider::cuboid(size.x, size.y),
                         LevelBounds,
-                        Name::new(format!("Level Bounds")),
+                        Name::new("Level Bounds"),
                     ));
                 }
             });

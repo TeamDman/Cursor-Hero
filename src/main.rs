@@ -3,13 +3,11 @@ use bevy::audio::SpatialScale;
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::input::common_conditions::input_toggle_active;
 use bevy::prelude::*;
-use bevy::window::CompositeAlphaMode;
-use bevy::window::WindowLevel;
 use bevy_embedded_assets::EmbeddedAssetPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_xpbd_2d::math::Vector;
-use bevy_xpbd_2d::plugins::PhysicsPlugins;
 use bevy_xpbd_2d::plugins::setup::Physics;
+use bevy_xpbd_2d::plugins::PhysicsPlugins;
 use bevy_xpbd_2d::resources::Gravity;
 use cursor_hero_plugins::MyPlugin;
 
@@ -45,24 +43,19 @@ fn main() {
                 ..default()
             })
             .set(WindowPlugin {
-
                 primary_window: Some(Window {
                     transparent: true,
-                    title: format!("Cursor Hero v{}", env!("CARGO_PKG_VERSION")).into(),
+                    title: format!("Cursor Hero v{}", env!("CARGO_PKG_VERSION")),
                     resolution: (
                         // %BEGIN_RESOLUTION%
-                        948.0,
-                        778.0
-                        // %END_RESOLUTION%
+                        948.0, 778.0, // %END_RESOLUTION%
                     )
                         .into(),
                     resizable: true,
                     position: WindowPosition::At(
                         (
-                        // %BEGIN_POSITION%
-                        745,
-                        259
-                        // %END_POSITION%
+                            // %BEGIN_POSITION%
+                            745, 259, // %END_POSITION%
                         )
                             .into(),
                     ),

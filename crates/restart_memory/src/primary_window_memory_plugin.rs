@@ -63,7 +63,7 @@ fn note_window_info(
     };
 
     let window_position =
-        get_window_bounds(win32handle.hwnd as _).map_err(|e| PersistError::WindowBounds(e))?;
+        get_window_bounds(win32handle.hwnd as _).map_err(PersistError::WindowBounds)?;
     let resolution = Vec2::new(
         (window_position.right - window_position.left) as f32,
         (window_position.bottom - window_position.top) as f32,
@@ -71,7 +71,7 @@ fn note_window_info(
     let position = IVec2::new(window_position.left as i32, window_position.top as i32);
 
     // Call the function that persists the window bounds and position
-    if (*debounce).0 != resolution || (*debounce).1 != position {
+    if (*debounce).0 != resolution || debounce.1 != position {
         // only save if not minimized
         if resolution.x != -32000.0 && resolution.y != -32000.0 {
             persist_window_bounds(resolution, position)?;

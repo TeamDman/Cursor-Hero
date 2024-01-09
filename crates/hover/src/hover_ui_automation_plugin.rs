@@ -167,7 +167,7 @@ fn setup(mut commands: Commands) {
 }
 
 fn update_game_mouse_position(
-    mut bridge: ResMut<Bridge>,
+    bridge: ResMut<Bridge>,
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     window_query: Query<&Window, With<PrimaryWindow>>,
     mut debounce: Local<Option<IVec2>>,

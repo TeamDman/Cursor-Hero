@@ -10,7 +10,7 @@ pub fn tool_hovered_tag_update_system(
     mut events: EventWriter<ToolHoveredEvent>,
 ) {
     for (t_vis, t_kids, t_parent) in toolbelts.iter() {
-        if t_vis != &Visibility::Visible {
+        if t_vis != Visibility::Visible {
             continue;
         }
         if let Ok(follow_vel) = follow.get(t_parent.get()) {
