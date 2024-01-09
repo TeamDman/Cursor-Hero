@@ -26,6 +26,7 @@ cursor_hero_tools = {workspace = true}
 cursor_hero_ui = {workspace = true}
 cursor_hero_icon = {workspace = true}
 cursor_hero_winutils = {workspace = true}
+cursor_hero_restart_memory = {workspace = true}
 bevy = {workspace = true}
 
 [dev-dependencies]
