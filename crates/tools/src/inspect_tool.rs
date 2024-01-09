@@ -220,6 +220,7 @@ fn handle_replies(
             GameboundMessage::ElementDetails(info) => {
                 info!("Received element name: {}", info.name);
                 let elem_rect = info.bounding_rect;
+                println!("elem_rect: {:?}", elem_rect);
                 let elem_size = info.bounding_rect.max - info.bounding_rect.min;
                 let mut tex = RgbImage::new(elem_size.x as u32, elem_size.y as u32);
 
@@ -241,14 +242,13 @@ fn handle_replies(
 
                             // find the overlap
                             println!("screen_rect: {:?}", screen_rect);
-                            println!("elem_rect: {:?}", elem_rect);
-                            let intersect = screen_rect.intersect(elem_rect);
-                            println!("intersection rect: {:?}", intersect);
+                            let intersection = screen_rect.intersect(elem_rect);
+                            println!("intersection rect: {:?}", intersection);
 
                             // convert to monitor coordinates
-                            let mut origin = intersect.center() - screen_rect.min.xy();
+                            let mut origin = intersection.center() - screen_rect.min.xy();
                             // origin.y *= -1.0;
-                            let tex_grab_rect = Rect::from_center_size(origin, intersect.size());
+                            let tex_grab_rect = Rect::from_center_size(origin, intersection.size());
                             println!("tex_grab_rect: {:?}", tex_grab_rect);
 
                             if !tex_grab_rect.is_empty() {
@@ -258,61 +258,65 @@ fn handle_replies(
                                     tex_grab_rect.size().y
                                 );
 
-                                // // Copy the overlapping part of the screen texture to the element's texture.
-                                // for y in tex_grab_rect.min.y as usize..tex_grab_rect.max.y as usize
-                                // {
-                                //     for x in
-                                //         tex_grab_rect.min.x as usize..tex_grab_rect.max.x as usize
-                                //     {
-                                //         let start = (y * screen_size.width as usize + x) * 4;
-                                //         if start + 4 <= screen_image.data.len() {
-                                //             let pixel: [u8; 3] = [
-                                //                 screen_image.data[start],
-                                //                 screen_image.data[start + 1],
-                                //                 screen_image.data[start + 2],
-                                //                 // screen_image.data[start + 3],
-                                //             ];
-                                //             tex.put_pixel(
-                                //                 x as u32 - tex_grab_rect.min.x as u32,
-                                //                 y as u32 - tex_grab_rect.min.y as u32,
-                                //                 image::Rgb(pixel),
-                                //             );
-                                //         }
-                                //     }
-                                // }
-
-                                // Calculate the visible part of the element on the screen
-                                let visible_part = intersect;
-                                println!("Visible part on screen: {:?}", visible_part);
-
+                                
                                 // Calculate where to start placing pixels in the element's texture
-                                let texture_start_x =
-                                    (visible_part.min.x - elem_rect.min.x).max(0.0) as u32;
-                                let texture_start_y =
-                                    (visible_part.min.y - elem_rect.min.y).max(0.0) as u32;
-
-                                // Copy the visible part of the screen texture to the element's texture
-                                for y in 0..visible_part.height() as usize {
-                                    for x in 0..visible_part.width() as usize {
-                                        let screen_x = (visible_part.min.x + x as f32) as usize;
-                                        let screen_y = (visible_part.min.y + y as f32) as usize;
-                                        let start_idx =
-                                            (screen_y * screen_size.width as usize + screen_x) * 4;
-
-                                        if start_idx + 4 <= screen_image.data.len() {
+                                let texture_start_x = (intersection.min.x - elem_rect.min.x) as u32;
+                                let texture_start_y = (intersection.min.y - elem_rect.min.y) as u32;
+                                println!("Texture start: {} {}", texture_start_x, texture_start_y);
+                                // Copy the overlapping part of the screen texture to the element's texture.
+                                for y in tex_grab_rect.min.y as usize..tex_grab_rect.max.y as usize
+                                {
+                                    for x in
+                                        tex_grab_rect.min.x as usize..tex_grab_rect.max.x as usize
+                                    {
+                                        let start = (y * screen_size.width as usize + x) * 4;
+                                        if start + 4 <= screen_image.data.len() {
                                             let pixel: [u8; 3] = [
-                                                screen_image.data[start_idx],
-                                                screen_image.data[start_idx + 1],
-                                                screen_image.data[start_idx + 2],
+                                                screen_image.data[start],
+                                                screen_image.data[start + 1],
+                                                screen_image.data[start + 2],
+                                                // screen_image.data[start + 3],
                                             ];
                                             tex.put_pixel(
-                                                texture_start_x + x as u32,
-                                                texture_start_y + y as u32,
+                                                texture_start_x + x as u32 - tex_grab_rect.min.x as u32,
+                                                texture_start_y + y as u32 - tex_grab_rect.min.y as u32,
                                                 image::Rgb(pixel),
                                             );
                                         }
                                     }
                                 }
+
+                                // // Calculate the visible part of the element on the screen
+                                // let visible_part = intersect;
+                                // println!("Visible part on screen: {:?}", visible_part);
+
+                                // // Calculate where to start placing pixels in the element's texture
+                                // let texture_start_x = (visible_part.min.x - elem_rect.min.x) as u32;
+                                // let texture_start_y = (visible_part.min.y - elem_rect.min.y) as u32;
+                                // println!("Texture start: {} {}", texture_start_x, texture_start_y);
+
+                                // // Copy the visible part of the screen texture to the element's texture
+                                // for y in 0..visible_part.height() as usize {
+                                //     for x in 0..visible_part.width() as usize {
+                                //         let screen_x = (visible_part.min.x + x as f32) as usize;
+                                //         let screen_y = (visible_part.min.y + y as f32) as usize;
+                                //         let start_idx =
+                                //             (screen_y * screen_size.width as usize + screen_x) * 4;
+
+                                //         if start_idx + 4 <= screen_image.data.len() {
+                                //             let pixel: [u8; 3] = [
+                                //                 screen_image.data[start_idx],
+                                //                 screen_image.data[start_idx + 1],
+                                //                 screen_image.data[start_idx + 2],
+                                //             ];
+                                //             tex.put_pixel(
+                                //                 texture_start_x + x as u32,
+                                //                 texture_start_y + y as u32,
+                                //                 image::Rgb(pixel),
+                                //             );
+                                //         }
+                                //     }
+                                // }
                             }
                         }
                     }
