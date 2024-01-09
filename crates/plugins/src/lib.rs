@@ -19,6 +19,7 @@ use cursor_hero_screen::screen_plugin::ScreenPlugin;
 use cursor_hero_screen::screen_update_plugin::ScreenUpdatePlugin;
 use cursor_hero_toolbelt::ToolbeltPlugin;
 use cursor_hero_tools::ToolsPlugin;
+use cursor_hero_ui::about_text_plugin::AboutTextPlugin;
 use cursor_hero_ui::fps_text_plugin::FpsTextPlugin;
 use cursor_hero_ui::position_text_plugin::PositionTextPlugin;
 
@@ -35,6 +36,7 @@ impl Plugin for MyPlugin {
         app.add_plugins(CameraPlugin);
         app.add_plugins(FpsTextPlugin);
         app.add_plugins(PositionTextPlugin);
+        app.add_plugins(AboutTextPlugin);
         app.add_plugins(PressurePlatePlugin);
         app.add_plugins(ScreenPlugin);
         app.add_plugins(ScreenUpdatePlugin);
