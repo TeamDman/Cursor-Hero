@@ -625,6 +625,7 @@ dependencies = [
 [[package]]
 name = "bevy_embedded_assets"
 version = "0.9.1"
+source = "git+https://github.com/TeamDman/bevy_embedded_assets.git?branch=cursor_hero#294fba97bc55597c8275fcdf72d10da64fa8e88c"
 dependencies = [
  "bevy",
  "cargo-emit",
