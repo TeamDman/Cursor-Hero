@@ -22,8 +22,7 @@ impl Plugin for HoverUiAutomationPlugin {
                 Update,
                 (
                     update_game_mouse_position,
-                    update_screen_hover_info,
-                    update_game_hover_info,
+                    update_hover_info,
                     show_hovered_rect,
                 )
                     .chain(),
@@ -31,13 +30,24 @@ impl Plugin for HoverUiAutomationPlugin {
     }
 }
 
-#[derive(Resource, Deref)]
-struct ScreenHoveredBridge(pub Receiver<Option<ElementInfo>>);
+#[derive(Debug)]
+enum GameboundMessage {
+    ScreenHoverInfo(ElementInfo),
+    ScreenHoverInfoNone,
+    GameHoverInfo(ElementInfo),
+    GameHoverInfoNone,
+}
+
+#[derive(Debug)]
+enum ThreadboundMessage {
+    CursorPosition(IVec2),
+    CursorPositionNone,
+}
+
 #[derive(Resource)]
-struct GameHoveredBridge {
-    debounce: Option<(isize, isize)>,
-    pub sender: Sender<Option<(isize, isize)>>,
-    pub receiver: Receiver<Option<ElementInfo>>,
+struct Bridge {
+    pub sender: Sender<ThreadboundMessage>,
+    pub receiver: Receiver<GameboundMessage>,
 }
 
 #[derive(Resource, Default)]
@@ -47,16 +57,17 @@ struct HoverInfo {
 }
 
 #[allow(dead_code)]
-struct ElementInfo {
-    name: String,
-    bounding_rect: Rect,
-    control_type: String,
-    class_name: String,
-    automation_id: String,
+#[derive(Debug)]
+pub struct ElementInfo {
+    pub name: String,
+    pub bounding_rect: Rect,
+    pub control_type: String,
+    pub class_name: String,
+    pub automation_id: String,
     // value: Option<String>,
 }
 
-fn get_element_info(element: UIElement) -> Result<ElementInfo, uiautomation::errors::Error> {
+pub fn get_element_info(element: UIElement) -> Result<ElementInfo, uiautomation::errors::Error> {
     let name = element.get_name()?;
     let bb = element.get_bounding_rectangle()?;
     let class_name = element.get_classname()?;
@@ -80,63 +91,86 @@ fn get_element_info(element: UIElement) -> Result<ElementInfo, uiautomation::err
 }
 
 fn setup(mut commands: Commands) {
-    let (tx, rx) = bounded::<_>(10);
-    commands.insert_resource(ScreenHoveredBridge(rx));
-    thread::spawn(move || {
-        let automation = UIAutomation::new().unwrap();
-        loop {
-            if let Ok(cursor_pos) = get_cursor_position() {
-                // println!("Cursor position: {:?}", cursor_pos);
-                if let Ok(root) = automation
-                    .element_from_point(uiautomation::types::Point::new(cursor_pos.x, cursor_pos.y))
-                {
-                    let info = get_element_info(root);
-                    tx.send(info.ok()).unwrap();
-                }
-            }
-            std::thread::sleep(std::time::Duration::from_millis(50));
-        }
-    });
-
     let (game_tx, game_rx) = bounded::<_>(10);
     let (thread_tx, thread_rx) = bounded::<_>(10);
-    commands.insert_resource(GameHoveredBridge {
-        debounce: None,
+    commands.insert_resource(Bridge {
         sender: thread_tx,
         receiver: game_rx,
     });
-    thread::spawn(move || {
-        let automation = UIAutomation::new().unwrap();
-        loop {
-            // Block until at least one message is available
-            let mut latest_position = thread_rx.recv().unwrap();
 
-            // Check for and use the latest message available
-            while let Ok(newer_position) = thread_rx.try_recv() {
-                latest_position = newer_position;
+    let game_tx_clone = game_tx.clone();
+    thread::Builder::new()
+        .name("Screen element hover info thread".to_string())
+        .spawn(move || {
+            let game_tx = game_tx_clone;
+            let automation = UIAutomation::new().unwrap();
+            loop {
+                if let Ok(cursor_pos) = get_cursor_position() {
+                    if let Ok(root) = automation.element_from_point(
+                        uiautomation::types::Point::new(cursor_pos.x, cursor_pos.y),
+                    ) {
+                        let info = get_element_info(root);
+                        match info {
+                            Ok(info) => {
+                                game_tx
+                                    .send(GameboundMessage::ScreenHoverInfo(info))
+                                    .unwrap();
+                            }
+                            Err(_) => {
+                                game_tx.send(GameboundMessage::ScreenHoverInfoNone).unwrap();
+                            }
+                        }
+                    }
+                }
+                std::thread::sleep(std::time::Duration::from_millis(50));
             }
-            let cursor_pos = latest_position;
-            if cursor_pos.is_none() {
-                game_tx.send(None).unwrap();
-                continue;
+        })
+        .expect("Failed to spawn screen element hover info thread");
+
+    thread::Builder::new()
+        .name("Game element hover info thread".to_string())
+        .spawn(move || {
+            let automation = UIAutomation::new().unwrap();
+            loop {
+                // Block until at least one message is available
+                let mut msg = thread_rx.recv().unwrap();
+
+                // Check for and use the latest message available
+                while let Ok(newer_msg) = thread_rx.try_recv() {
+                    msg = newer_msg;
+                }
+                match msg {
+                    ThreadboundMessage::CursorPositionNone => {
+                        game_tx.send(GameboundMessage::GameHoverInfoNone).unwrap();
+                        continue;
+                    }
+                    ThreadboundMessage::CursorPosition(cursor_pos) => {
+                        if let Ok(root) = automation.element_from_point(
+                            uiautomation::types::Point::new(cursor_pos.x, cursor_pos.y),
+                        ) {
+                            let info = get_element_info(root);
+                            match info {
+                                Ok(info) => {
+                                    game_tx.send(GameboundMessage::GameHoverInfo(info)).unwrap();
+                                }
+                                Err(_) => {
+                                    game_tx.send(GameboundMessage::GameHoverInfoNone).unwrap();
+                                }
+                            }
+                        }
+                    }
+                }
+                std::thread::sleep(std::time::Duration::from_millis(50));
             }
-            let cursor_pos = cursor_pos.unwrap();
-            if let Ok(root) = automation.element_from_point(uiautomation::types::Point::new(
-                cursor_pos.0 as i32,
-                cursor_pos.1 as i32,
-            )) {
-                let info = get_element_info(root);
-                game_tx.send(info.ok()).unwrap();
-            }
-            std::thread::sleep(std::time::Duration::from_millis(50));
-        }
-    });
+        })
+        .expect("Failed to spawn game element hover info thread");
 }
 
 fn update_game_mouse_position(
-    mut bridge: ResMut<GameHoveredBridge>,
+    mut bridge: ResMut<Bridge>,
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     window_query: Query<&Window, With<PrimaryWindow>>,
+    mut debounce: Local<Option<IVec2>>,
 ) {
     let (camera, camera_transform) = camera_query.single();
     let window = window_query.single();
@@ -144,21 +178,38 @@ fn update_game_mouse_position(
         .cursor_position()
         .and_then(|cursor| camera.viewport_to_world(camera_transform, cursor))
         .map(|ray| ray.origin.truncate())
-        .map(|world_position| (world_position.x as isize, -world_position.y as isize));
-    if bridge.debounce != value {
-        bridge.debounce = value;
-        bridge.sender.send(value).unwrap();
+        .map(|world_position| IVec2::new(world_position.x as i32, -world_position.y as i32));
+    if *debounce != value {
+        *debounce = value;
+        match value {
+            Some(value) => bridge
+                .sender
+                .send(ThreadboundMessage::CursorPosition(value))
+                .unwrap(),
+            None => bridge
+                .sender
+                .send(ThreadboundMessage::CursorPositionNone)
+                .unwrap(),
+        }
     }
 }
 
-fn update_screen_hover_info(mut hovered: ResMut<HoverInfo>, receiver: Res<ScreenHoveredBridge>) {
-    if let Ok(data) = receiver.0.try_recv() {
-        hovered.screen_element = data;
-    }
-}
-fn update_game_hover_info(mut hovered: ResMut<HoverInfo>, bridge: Res<GameHoveredBridge>) {
-    if let Ok(data) = bridge.receiver.try_recv() {
-        hovered.game_element = data;
+fn update_hover_info(mut hovered: ResMut<HoverInfo>, bridge: Res<Bridge>) {
+    if let Ok(msg) = bridge.receiver.try_recv() {
+        match msg {
+            GameboundMessage::ScreenHoverInfo(info) => {
+                hovered.screen_element = Some(info);
+            }
+            GameboundMessage::ScreenHoverInfoNone => {
+                hovered.screen_element = None;
+            }
+            GameboundMessage::GameHoverInfo(info) => {
+                hovered.game_element = Some(info);
+            }
+            GameboundMessage::GameHoverInfoNone => {
+                hovered.game_element = None;
+            }
+        }
     }
 }
 

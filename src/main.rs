@@ -3,10 +3,13 @@ use bevy::audio::SpatialScale;
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::input::common_conditions::input_toggle_active;
 use bevy::prelude::*;
+use bevy::window::CompositeAlphaMode;
+use bevy::window::WindowLevel;
 use bevy_embedded_assets::EmbeddedAssetPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_xpbd_2d::math::Vector;
 use bevy_xpbd_2d::plugins::PhysicsPlugins;
+use bevy_xpbd_2d::plugins::setup::Physics;
 use bevy_xpbd_2d::resources::Gravity;
 use cursor_hero_plugins::MyPlugin;
 
@@ -42,25 +45,28 @@ fn main() {
                 ..default()
             })
             .set(WindowPlugin {
+
                 primary_window: Some(Window {
+                    transparent: true,
                     title: format!("Cursor Hero v{}", env!("CARGO_PKG_VERSION")).into(),
                     resolution: (
                         // %BEGIN_RESOLUTION%
-                        1952.0,
-                        1095.0
+                        888.0,
+                        886.0
                         // %END_RESOLUTION%
                     )
                         .into(),
                     resizable: true,
                     position: WindowPosition::At(
                         (
-                            // %BEGIN_POSITION%
-                        1912,
-                        -8
+                        // %BEGIN_POSITION%
+                        951,
+                        124
                         // %END_POSITION%
                         )
                             .into(),
                     ),
+
                     ..default()
                 }),
                 ..default()
@@ -70,7 +76,9 @@ fn main() {
     )
     .add_plugins(PhysicsPlugins::default())
     .insert_resource(Gravity(Vector::ZERO))
+    .insert_resource(Time::new_with(Physics::fixed_hz(144.0)))
     .add_plugins(WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)))
+    // .insert_resource(ClearColor(Color::NONE))
     .add_plugins((FrameTimeDiagnosticsPlugin,))
     .add_plugins(MyPlugin);
     app.run();

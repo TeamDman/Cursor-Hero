@@ -1,7 +1,7 @@
+- add version and @TeamDman UI element to bottom right
+
 - couple click tool with window/screen mouse position tool
 - make overlay logic stop when inspection tool disabled
-- scale zoom with sprint
-- decouple physics from FPS / fixed update
 
 - add version number to binary as part of build
 

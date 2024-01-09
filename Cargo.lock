@@ -1931,6 +1931,7 @@ dependencies = [
  "cursor_hero_character",
  "cursor_hero_click_drag_character_movement",
  "cursor_hero_data",
+ "cursor_hero_hover",
  "cursor_hero_physics",
  "cursor_hero_pointer",
  "cursor_hero_toolbelt",

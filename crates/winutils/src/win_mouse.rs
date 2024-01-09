@@ -1,6 +1,8 @@
 use bevy::math::Vec2;
 use bevy::prelude::*;
 use uiautomation::UIAutomation;
+use uiautomation::UIElement;
+use uiautomation::UITreeWalker;
 use windows::Win32::Foundation::POINT;
 use windows::Win32::UI::Input::KeyboardAndMouse::SendInput;
 use windows::Win32::UI::Input::KeyboardAndMouse::INPUT;
@@ -252,10 +254,44 @@ pub fn scroll_wheel_down() -> Result<(), windows::core::Error> {
     Ok(())
 }
 
-pub fn print_under_mouse(x: i32, y: i32) -> Result<(), uiautomation::Error> {
+pub fn find_element_at(x: i32, y: i32) -> Result<UIElement, uiautomation::Error> {
     let automation = UIAutomation::new().unwrap();
-    if let Ok(element) = automation.element_from_point(uiautomation::types::Point::new(x, y)) {
-        info!("{} - {}", element.get_classname()?, element.get_name()?);
-    }
-    Ok(())
+    automation.element_from_point(uiautomation::types::Point::new(x, y))
 }
+
+// pub fn get_element_from_identifier(id: &str) -> Result<UIElement, uiautomation::Error> {
+//     let automation = UIAutomation::new().unwrap();
+//     // find the elem.get_automation_id() that matches id
+//     let filter = automation.create_property_condition(
+//         uiautomation::types::UIProperty::AutomationId,
+//         uiautomation::variants::Variant::from(id),
+//         None,
+//     )?;
+//     let walker = automation.filter_tree_walker(filter)?;
+//     let root = automation.get_root_element()?;
+//     let elem = find_recursive(&walker, &root)?;
+    
+// }
+
+// fn find_recursive(walker: &UITreeWalker, element: &UIElement) -> Result<UIElement, uiautomation::Error> {
+//     if element.get_automation_id()? == id {
+//         return Ok(element);
+//     }
+
+//     if let Ok(child) = walker.get_first_child(&element) {
+//         if let Ok(elem) = find_recursive(walker, &child) {
+//             return Ok(elem);
+//         }
+
+//         let mut next = child;
+//         while let Ok(sibling) = walker.get_next_sibling(&next) {
+//             if let Ok(elem) = find_recursive(walker, &sibling) {
+//                 return Ok(elem);
+//             }
+
+//             next = sibling;
+//         }
+//     }
+
+//     Err(uiautomation::Error::from_win32(0))
+// }
