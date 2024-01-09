@@ -6,8 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cursor_hero_camera = { path = "../camera" }
-cursor_hero_physics = { path = "../physics" }
+cursor_hero_camera = { workspace = true }
+cursor_hero_physics = { workspace = true }
 cursor_hero_winutils = { workspace = true}
 bevy-inspector-egui = { workspace = true}
 bevy = { workspace = true }

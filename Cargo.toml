@@ -32,16 +32,16 @@ cursor_hero_plugins = { path = "./crates/plugins" }
 cursor_hero_icon = { path = "./crates/icon" }
 anyhow = "1.0.75"
 # bevy = { path = "../bevy", features = ["dynamic_linking"] }
-bevy = { path = "../bevy" }
-bevy-inspector-egui = { path = "../bevy-inspector-egui/crates/bevy-inspector-egui" }
-bevy_xpbd_2d = { path = "../bevy_xpbd/crates/bevy_xpbd_2d", features = [
+bevy = { version = "0.12.1", git = "https://github.com/TeamDman/bevy.git", branch = "cursor_hero" }
+bevy-inspector-egui = { version = "0.22.1", git = "https://github.com/TeamDman/bevy-inspector-egui.git", branch = "cursor_hero" }
+bevy_xpbd_2d = { git = "https://github.com/TeamDman/bevy_xpbd.git", branch="cursor_hero", features = [
   "simd",
   "parallel",
 ] }
 crossbeam-channel = "0.5.8"
 itertools = "0.12.0"
 raw-window-handle = "0.5.2"
-leafwing-input-manager = { path = "../leafwing-input-manager" }
+leafwing-input-manager = { git = "https://github.com/TeamDman/leafwing-input-manager.git", branch = "cursor_hero" }
 windows = "0.51.1"
 indexmap = "2.1.0"
 image = "0.24.7"
@@ -54,15 +54,15 @@ tokio-named-pipes = "0.1.0"
 syn = { version = "2.0.48", features = ["full", "visit-mut", "visit"] }
 quote = "1.0.35"
 proc-macro2 = "1.0.76"
-bevy_embedded_assets = { version = "0.9.1", path = "../bevy_embedded_assets"}
+bevy_embedded_assets = { version = "0.9.1", git = "https://github.com/TeamDman/bevy_embedded_assets.git", branch = "cursor_hero" }
 winit = "0.28.7"
 
 [dependencies]
-cursor_hero_plugins = {workspace = true}
-bevy = {workspace = true}
-bevy-inspector-egui = {workspace = true}
-bevy_xpbd_2d = {workspace = true}
-bevy_embedded_assets = {workspace = true}
+cursor_hero_plugins = { workspace = true }
+bevy = { workspace = true }
+bevy-inspector-egui = { workspace = true }
+bevy_xpbd_2d = { workspace = true }
+bevy_embedded_assets = { workspace = true }
 
 [dev-dependencies]
 bevy = { workspace = true, features = ["dynamic_linking"] }
