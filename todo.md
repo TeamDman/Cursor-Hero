@@ -1,3 +1,9 @@
+- couple click tool with window/screen mouse position tool
+- make overlay logic stop when inspection tool disabled
+- scale zoom with sprint
+- decouple physics from FPS / fixed update
+
+- add version number to binary as part of build
 
 - show tools which have conflicting keys in red
 - tool to focus the game window and maximize it on the monitors with dpad
