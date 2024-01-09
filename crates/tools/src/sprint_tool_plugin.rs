@@ -116,6 +116,8 @@ fn handle_input(
                 let open = t_act.value(SprintToolAction::Sprint);
                 character.speed = character.sprint_speed
                     + (character.default_speed - character.sprint_speed) * (1.0 - open);
+                character.zoom_speed = character.zoom_sprint_speed
+                    + (character.zoom_default_speed - character.zoom_sprint_speed) * (1.0 - open);
 
                 if let Some(Ok(mut pointer)) = pointer.map(|e| pointer_query.get_mut(*e)) {
                     pointer.reach = pointer.default_reach
@@ -123,6 +125,7 @@ fn handle_input(
                 }
             } else if t_act.just_released(SprintToolAction::Sprint) {
                 character.speed = character.default_speed;
+                character.zoom_speed = character.zoom_default_speed;
 
                 if let Some(Ok(mut pointer)) = pointer.map(|e| pointer_query.get_mut(*e)) {
                     pointer.reach = pointer.default_reach;

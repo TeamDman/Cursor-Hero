@@ -34,6 +34,12 @@ pub struct Character {
     pub default_speed: f32,
     #[inspector(min = 0.0)]
     pub sprint_speed: f32,
+    #[inspector(min = 0.0)]
+    pub zoom_speed: f32,
+    #[inspector(min = 0.0)]
+    pub zoom_default_speed: f32,
+    #[inspector(min = 0.0)]
+    pub zoom_sprint_speed: f32,
 }
 impl Default for Character {
     fn default() -> Self {
@@ -41,6 +47,9 @@ impl Default for Character {
             speed: 1000.0,
             default_speed: 5000.0,
             sprint_speed: 80000.0,
+            zoom_speed: 1.0,
+            zoom_default_speed: 1.0,
+            zoom_sprint_speed: 150.0,
         }
     }
 }

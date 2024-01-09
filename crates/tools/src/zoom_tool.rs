@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use cursor_hero_character::character_plugin::Character;
 use leafwing_input_manager::prelude::*;
 
 use cursor_hero_camera::camera_plugin::MainCamera;
@@ -97,16 +98,27 @@ fn spawn_tool_event_responder_update_system(
 }
 
 fn handle_input(
-    tools: Query<(&ActionState<ToolAction>, Option<&ToolActiveTag>)>,
+    tools: Query<(&ActionState<ToolAction>, Option<&ToolActiveTag>, &Parent)>,
     mut cam: Query<&mut Transform, With<MainCamera>>,
+    time: Res<Time>,
+    toolbelts: Query<&Parent, With<Toolbelt>>,
+    mut character_query: Query<(&mut Character, &Children)>,
 ) {
-    for (t_act, t_enabled) in tools.iter() {
+    for (t_act, t_enabled, t_parent) in tools.iter() {
         if t_enabled.is_none() {
             continue;
         }
+        let belt_parent = toolbelts
+            .get(t_parent.get())
+            .expect("Toolbelt should have a parent")
+            .get();
+        let mut modifier = 1.0;
+        if let Ok((character, _)) = character_query.get_mut(belt_parent) {
+            modifier = character.zoom_speed;
+        }
         if t_act.pressed(ToolAction::ZoomOut) {
             let mut scale = cam.single_mut().scale;
-            scale *= Vec2::splat(1.1).extend(1.0);
+            scale *= Vec3::splat(1.0) + Vec2::splat(0.1 * time.delta_seconds() * modifier).extend(0.0);
             scale = scale.clamp(Vec3::splat(0.1), Vec3::splat(10.0));
             cam.single_mut().scale = scale;
             if t_act.just_pressed(ToolAction::ZoomOut) {
@@ -115,7 +127,7 @@ fn handle_input(
         }
         if t_act.pressed(ToolAction::ZoomIn) {
             let mut scale = cam.single_mut().scale;
-            scale *= Vec2::splat(0.9).extend(1.0);
+            scale *= Vec3::splat(1.0) - Vec2::splat(0.1 * time.delta_seconds() * modifier).extend(0.0);
             scale = scale.clamp(Vec3::splat(0.1), Vec3::splat(10.0));
             cam.single_mut().scale = scale;
             if t_act.just_pressed(ToolAction::ZoomIn) {
