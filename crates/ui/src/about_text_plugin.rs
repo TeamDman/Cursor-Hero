@@ -11,7 +11,7 @@ impl Plugin for AboutTextPlugin {
 fn spawn_text(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         TextBundle::from_section(
-            format!("Cursor Hero v{}\nby @TeamDman", env!("CARGO_PKG_VERSION")),
+            format!("Cursor Hero v0.2.0\nby @TeamDman"),
             TextStyle {
                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                 font_size: 16.0,
