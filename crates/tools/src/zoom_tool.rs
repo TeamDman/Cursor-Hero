@@ -42,10 +42,10 @@ impl ToolAction {
 
     fn default_mkb_binding(&self) -> UserInput {
         match self {
-            Self::ZoomIn => KeyCode::PageDown.into(),
-            Self::ZoomOut => KeyCode::PageUp.into(),
-            Self::ScrollUp => KeyCode::Up.into(),
-            Self::ScrollDown => KeyCode::Down.into(),
+            Self::ZoomIn => KeyCode::Home.into(),
+            Self::ZoomOut => KeyCode::End.into(),
+            Self::ScrollUp => KeyCode::PageDown.into(),
+            Self::ScrollDown => KeyCode::PageUp.into(),
         }
     }
 
