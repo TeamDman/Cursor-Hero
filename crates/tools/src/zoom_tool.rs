@@ -24,8 +24,8 @@ pub struct ZoomTool;
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
 pub enum ToolAction {
-    ZoomIn,
     ZoomOut,
+    ZoomIn,
     ScrollUp,
     ScrollDown,
 }
@@ -33,8 +33,8 @@ pub enum ToolAction {
 impl ToolAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
-            Self::ZoomIn => GamepadButtonType::East.into(),
-            Self::ZoomOut => GamepadButtonType::North.into(),
+            Self::ZoomOut => GamepadButtonType::East.into(),
+            Self::ZoomIn => GamepadButtonType::North.into(),
             Self::ScrollUp => GamepadButtonType::West.into(),
             Self::ScrollDown => GamepadButtonType::South.into(),
         }
@@ -42,8 +42,8 @@ impl ToolAction {
 
     fn default_mkb_binding(&self) -> UserInput {
         match self {
-            Self::ZoomIn => KeyCode::Home.into(),
-            Self::ZoomOut => KeyCode::End.into(),
+            Self::ZoomOut => KeyCode::Home.into(),
+            Self::ZoomIn => KeyCode::End.into(),
             Self::ScrollUp => KeyCode::PageDown.into(),
             Self::ScrollDown => KeyCode::PageUp.into(),
         }
@@ -104,22 +104,22 @@ fn handle_input(
         if t_enabled.is_none() {
             continue;
         }
-        if t_act.pressed(ToolAction::ZoomIn) {
+        if t_act.pressed(ToolAction::ZoomOut) {
             let mut scale = cam.single_mut().scale;
             scale *= Vec2::splat(1.1).extend(1.0);
             scale = scale.clamp(Vec3::splat(0.1), Vec3::splat(10.0));
             cam.single_mut().scale = scale;
-            if t_act.just_pressed(ToolAction::ZoomIn) {
-                info!("Zooming in");
+            if t_act.just_pressed(ToolAction::ZoomOut) {
+                info!("Zooming out");
             }
         }
-        if t_act.pressed(ToolAction::ZoomOut) {
+        if t_act.pressed(ToolAction::ZoomIn) {
             let mut scale = cam.single_mut().scale;
             scale *= Vec2::splat(0.9).extend(1.0);
             scale = scale.clamp(Vec3::splat(0.1), Vec3::splat(10.0));
             cam.single_mut().scale = scale;
-            if t_act.just_pressed(ToolAction::ZoomOut) {
-                info!("Zooming out");
+            if t_act.just_pressed(ToolAction::ZoomIn) {
+                info!("Zooming in");
             }
         }
         if t_act.pressed(ToolAction::ScrollUp) {
