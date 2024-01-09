@@ -126,7 +126,7 @@ fn spawn_tool_event_responder_update_system(
                             input_map: ClickToolAction::default_input_map(),
                             ..default()
                         },
-                        ToolActiveTag,
+                        // ToolActiveTag,
                         ClickTool,
                     ));
                 });

@@ -13,7 +13,7 @@ pub struct CubeToolPlugin;
 impl Plugin for CubeToolPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<CubeTool>()
-            .register_type::<SpawnedCube>()
+            .register_type::<Attractable>()
             .add_plugins(InputManagerPlugin::<CubeToolAction>::default())
             .add_systems(
                 Update,
@@ -96,7 +96,7 @@ fn spawn_tool_event_responder_update_system(
 }
 
 #[derive(Component, Reflect)]
-pub struct SpawnedCube;
+pub struct Attractable;
 
 fn handle_input(
     mut commands: Commands,
@@ -108,7 +108,7 @@ fn handle_input(
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<&Children, With<Character>>,
     pointers: Query<&GlobalTransform, With<Pointer>>,
-    mut cubes: Query<(Entity, &GlobalTransform, &mut LinearVelocity), With<SpawnedCube>>,
+    mut cubes: Query<(Entity, &GlobalTransform, &mut LinearVelocity), With<Attractable>>,
 ) {
     for (t_act, t_enabled, t_parent) in tools.iter() {
         if t_enabled.is_none() {
@@ -130,7 +130,7 @@ fn handle_input(
         if t_act.just_pressed(CubeToolAction::SpawnCube) {
             info!("Spawn Cube");
             commands.spawn((
-                SpawnedCube,
+                Attractable,
                 MovementDamping { factor: 0.98 },
                 SpriteBundle {
                     sprite: Sprite {
