@@ -1714,13 +1714,14 @@ checksum = "7a81dae078cea95a014a339291cec439d2f232ebe854a9d672b796c6afafa9b7"
 
 [[package]]
 name = "cursor_hero"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "bevy",
  "bevy-inspector-egui",
  "bevy_embedded_assets",
  "bevy_xpbd_2d",
  "cursor_hero_plugins",
+ "cursor_hero_version",
  "embed-resource",
 ]
 
@@ -1951,6 +1952,14 @@ dependencies = [
  "bevy",
  "cursor_hero_camera",
  "cursor_hero_character",
+ "cursor_hero_version",
+]
+
+[[package]]
+name = "cursor_hero_version"
+version = "0.1.0"
+dependencies = [
+ "bevy",
 ]
 
 [[package]]

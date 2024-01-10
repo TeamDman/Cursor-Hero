@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use cursor_hero_version::version_plugin::Version;
 
 pub struct AboutTextPlugin;
 
@@ -8,10 +9,10 @@ impl Plugin for AboutTextPlugin {
     }
 }
 
-fn spawn_text(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn spawn_text(mut commands: Commands, asset_server: Res<AssetServer>, version: Res<Version>) {
     commands.spawn((
         TextBundle::from_section(
-            format!("Cursor Hero v0.2.0\nby @TeamDman"),
+            format!("Cursor Hero v{}\nby @TeamDman", version.0),
             TextStyle {
                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                 font_size: 16.0,

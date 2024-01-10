@@ -1,6 +1,6 @@
 [package]
 name = "cursor_hero"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 
 [workspace]
@@ -28,6 +28,7 @@ cursor_hero_tools = { path = "./crates/tools" }
 cursor_hero_ui = { path = "./crates/ui" }
 cursor_hero_winutils = { path = "./crates/winutils" }
 cursor_hero_restart_memory = { path = "./crates/restart_memory" }
+cursor_hero_version = { path = "./crates/version" }
 cursor_hero_plugins = { path = "./crates/plugins" }
 cursor_hero_icon = { path = "./crates/icon" }
 anyhow = "1.0.75"
@@ -59,6 +60,7 @@ winit = "0.28.7"
 
 [dependencies]
 cursor_hero_plugins = { workspace = true }
+cursor_hero_version = { workspace = true }
 bevy = { workspace = true }
 bevy-inspector-egui = { workspace = true }
 bevy_xpbd_2d = { workspace = true }

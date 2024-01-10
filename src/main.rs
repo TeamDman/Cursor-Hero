@@ -10,6 +10,7 @@ use bevy_xpbd_2d::plugins::setup::Physics;
 use bevy_xpbd_2d::plugins::PhysicsPlugins;
 use bevy_xpbd_2d::resources::Gravity;
 use cursor_hero_plugins::MyPlugin;
+use cursor_hero_version::version_plugin::VersionPlugin;
 
 const AUDIO_SCALE: f32 = 1. / 100.0;
 
@@ -32,6 +33,7 @@ fn main() {
     };
 
     let mut app = App::new();
+    app.add_plugins(VersionPlugin(env!("CARGO_PKG_VERSION").to_string()));
     app.add_plugins(EmbeddedAssetPlugin {
         mode: bevy_embedded_assets::PluginMode::ReplaceDefault,
     })
@@ -49,7 +51,8 @@ fn main() {
                     #[cfg(debug_assertions)]
                     resolution: (
                         // %BEGIN_RESOLUTION%
-                        1936.0, 1056.0,
+                        1649.0,
+                        974.0
                         // %END_RESOLUTION%
                     )
                         .into(),
@@ -58,8 +61,9 @@ fn main() {
                     position: WindowPosition::At(
                         (
                             // %BEGIN_POSITION%
-                            -8, -8,
-                            // %END_POSITION%
+                        181,
+                        35
+                        // %END_POSITION%
                         )
                             .into(),
                     ),
