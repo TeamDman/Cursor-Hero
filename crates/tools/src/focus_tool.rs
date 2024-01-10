@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy::window::RawHandleWrapper;
+use cursor_hero_camera::camera_plugin::MainCamera;
+use cursor_hero_movement::Movement;
 use cursor_hero_winutils::win_mouse::set_cursor_position;
 use cursor_hero_winutils::win_window::get_window_title_bar_center_position;
 use leafwing_input_manager::prelude::*;
@@ -96,6 +98,7 @@ fn handle_input(
         ),
         With<Character>,
     >,
+    camera: Query<Entity, With<MainCamera>>,
     mut commands: Commands,
     mut materials: ResMut<Assets<ColorMaterial>>,
     window_query: Query<&RawHandleWrapper, With<PrimaryWindow>>,
@@ -115,13 +118,25 @@ fn handle_input(
             let (character_entity, character_is_followed, mut material) = character;
 
             if character_is_followed.is_none() {
-                commands.entity(character_entity).insert(FollowWithCamera);
+                let mut character_commands = commands.entity(character_entity);
+                // begin following character
+                character_commands.insert(FollowWithCamera);
+                // switch movement to character
+                character_commands.insert(Movement::default());
+                // remove movement from camera
+                commands.entity(camera.single()).remove::<Movement>();
+                // change color of character
                 *material = materials.add(CharacterColor::FocusedWithCamera.as_material());
                 info!("now following");
             } else {
-                commands
-                    .entity(character_entity)
-                    .remove::<FollowWithCamera>();
+                let mut character_commands = commands.entity(character_entity);
+                // stop following character
+                character_commands.remove::<FollowWithCamera>();
+                // switch movement to camera
+                character_commands.remove::<Movement>();
+                // remove movement from character
+                commands.entity(camera.single()).insert(Movement::default());
+                // change color of character
                 *material = materials.add(CharacterColor::Unfocused.as_material());
                 info!("no longer following");
             }

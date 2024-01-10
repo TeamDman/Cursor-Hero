@@ -1,7 +1,8 @@
 use bevy::input::mouse::MouseWheel;
 use bevy::prelude::*;
 use bevy::transform::TransformSystem;
-use bevy_xpbd_2d::PhysicsSet;
+use bevy_xpbd_2d::prelude::*;
+use cursor_hero_physics::damping_plugin::MovementDamping;
 use leafwing_input_manager::action_state::ActionState;
 use leafwing_input_manager::input_map::InputMap;
 use leafwing_input_manager::plugin::InputManagerPlugin;
@@ -44,6 +45,9 @@ fn spawn_camera(mut commands: Commands) {
     commands.spawn((
         Camera2dBundle::default(),
         MainCamera,
+        MovementDamping { factor: 0.90 },
+        Collider::capsule(20.0, 12.5),
+        RigidBody::Kinematic,
         InputManagerBundle::<CameraAction> {
             input_map,
             action_state: ActionState::default(),

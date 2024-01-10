@@ -1,4 +1,6 @@
 use bevy::prelude::*;
+use cursor_hero_camera::camera_plugin::MainCamera;
+use cursor_hero_movement::Movement;
 use leafwing_input_manager::prelude::*;
 
 use cursor_hero_character::character_plugin::Character;
@@ -83,8 +85,9 @@ fn handle_input(
         &Parent,
     )>,
     toolbelts: Query<&Parent, With<Toolbelt>>,
-    mut character_query: Query<(&mut Character, &Children)>,
+    mut character_query: Query<(&mut Character, Option<&mut Movement>, &Children), Without<MainCamera>>,
     mut pointer_query: Query<&mut Pointer>,
+    mut camera_query: Query<Option<&mut Movement>, (With<MainCamera>, Without<Character>)>
 ) {
     for (t_act, t_enabled, t_parent) in tools.iter() {
         if t_enabled.is_none() {
@@ -95,14 +98,24 @@ fn handle_input(
             .get(t_parent.get())
             .expect("Toolbelt should have a parent")
             .get();
-        if let Ok((mut character, character_kids)) = character_query.get_mut(belt_parent) {
+        if let Ok((mut character, mut movement, character_kids)) = character_query.get_mut(belt_parent) {
             let pointer = character_kids
                 .iter()
                 .find(|e| pointer_query.get(**e).is_ok());
             if t_act.pressed(SprintToolAction::Sprint) {
                 let open = t_act.value(SprintToolAction::Sprint);
-                character.speed = character.sprint_speed
-                    + (character.default_speed - character.sprint_speed) * (1.0 - open);
+                match movement {
+                    Some(mut movement) => {
+                        movement.speed = movement.sprint_speed
+                            + (movement.default_speed - movement.sprint_speed) * (1.0 - open);
+                    }
+                    None => {
+                        if let Some(mut movement) = camera_query.single_mut() {
+                            movement.speed = movement.sprint_speed
+                                + (movement.default_speed - movement.sprint_speed) * (1.0 - open);
+                        }
+                    }
+                }
                 character.zoom_speed = character.zoom_sprint_speed
                     + (character.zoom_default_speed - character.zoom_sprint_speed) * (1.0 - open);
 
@@ -111,7 +124,16 @@ fn handle_input(
                         + (pointer.sprint_reach - pointer.default_reach) * open;
                 }
             } else if t_act.just_released(SprintToolAction::Sprint) {
-                character.speed = character.default_speed;
+                match movement {
+                    Some(mut movement) => {
+                        movement.speed = movement.default_speed;
+                    }
+                    None => {
+                        if let Some(mut movement) = camera_query.single_mut() {
+                            movement.speed = movement.default_speed;
+                        }
+                    }
+                }
                 character.zoom_speed = character.zoom_default_speed;
 
                 if let Some(Ok(mut pointer)) = pointer.map(|e| pointer_query.get_mut(*e)) {

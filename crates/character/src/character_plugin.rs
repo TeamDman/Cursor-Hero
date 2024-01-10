@@ -5,6 +5,7 @@ use bevy_inspector_egui::InspectorOptions;
 use bevy_xpbd_2d::prelude::*;
 
 use cursor_hero_camera::camera_plugin::FollowWithCamera;
+use cursor_hero_movement::Movement;
 use cursor_hero_physics::damping_plugin::MovementDamping;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
 
@@ -27,12 +28,6 @@ impl Plugin for CharacterPlugin {
 #[reflect(Component, InspectorOptions)]
 pub struct Character {
     #[inspector(min = 0.0)]
-    pub speed: f32,
-    #[inspector(min = 0.0)]
-    pub default_speed: f32,
-    #[inspector(min = 0.0)]
-    pub sprint_speed: f32,
-    #[inspector(min = 0.0)]
     pub zoom_speed: f32,
     #[inspector(min = 0.0)]
     pub zoom_default_speed: f32,
@@ -42,9 +37,6 @@ pub struct Character {
 impl Default for Character {
     fn default() -> Self {
         Self {
-            speed: 1000.0,
-            default_speed: 5000.0,
-            sprint_speed: 80000.0,
             zoom_speed: 1.0,
             zoom_default_speed: 1.0,
             zoom_sprint_speed: 150.0,
@@ -104,6 +96,7 @@ fn spawn_character(
         RigidBody::Kinematic,
         Collider::capsule(20.0, 12.5),
         SpatialListener::new(7.0),
+        Movement::default(),
     ));
     if CharacterColor::default() == CharacterColor::FocusedWithCamera {
         character.insert(FollowWithCamera);
