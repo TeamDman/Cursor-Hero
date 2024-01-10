@@ -22,11 +22,12 @@ use cursor_hero_tools::ToolsPlugin;
 use cursor_hero_ui::about_text_plugin::AboutTextPlugin;
 use cursor_hero_ui::fps_text_plugin::FpsTextPlugin;
 use cursor_hero_ui::position_text_plugin::PositionTextPlugin;
-
+use cursor_hero_wallpaper::wallpaper_plugin::WallpaperPlugin;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(WallpaperPlugin);
         app.add_plugins(ToolsPlugin);
         app.add_plugins(ToolbeltPlugin);
         app.add_plugins(CharacterPlugin);

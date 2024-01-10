@@ -1,0 +1,1 @@
+given a rust file open, add a keyboard shortcut to run the test closest to the cursor
