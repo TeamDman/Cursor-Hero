@@ -12,7 +12,7 @@ use cursor_hero_winutils::win_window::focus_window;
 
 use cursor_hero_toolbelt::types::*;
 
-use crate::spawn_action_tool;
+use crate::prelude::*;
 
 pub struct FocusToolPlugin;
 
@@ -35,6 +35,7 @@ fn toolbelt_events(
         match e {
             ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
                 spawn_action_tool!(
+                    e,
                     commands,
                     *toolbelt_id,
                     asset_server,

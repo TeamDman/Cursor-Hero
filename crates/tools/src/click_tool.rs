@@ -14,7 +14,7 @@ use cursor_hero_winutils::win_mouse::right_mouse_up;
 
 use cursor_hero_toolbelt::types::*;
 
-use crate::spawn_action_tool;
+use crate::prelude::*;
 
 pub struct ClickToolPlugin;
 
@@ -39,6 +39,7 @@ fn toolbelt_events(
         match e {
             ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
                 spawn_action_tool!(
+                    e,
                     commands,
                     *toolbelt_id,
                     asset_server,

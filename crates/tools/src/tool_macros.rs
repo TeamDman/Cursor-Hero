@@ -1,7 +1,7 @@
 #[macro_export]
 macro_rules! spawn_tool {
-    ($commands:expr, $toolbelt_id:expr, $asset_server:expr, $tool_component:expr) => {{
-        let name = crate::tool_naming::format_tool_name_from_source(file!());
+    ($e:expr, $commands:expr, $toolbelt_id:expr, $asset_server:expr, $tool_component:expr) => {{
+        let name = format_tool_name_from_source(file!());
         $commands.entity($toolbelt_id).with_children(|t_commands| {
             t_commands.spawn((
                 ToolBundle {
@@ -12,7 +12,7 @@ macro_rules! spawn_tool {
                             ..default()
                         },
                         texture: $asset_server
-                            .load(crate::tool_naming::format_tool_image_from_source(file!())),
+                            .load(format_tool_image_from_source(file!())),
                         ..default()
                     },
                     ..default()
@@ -23,16 +23,16 @@ macro_rules! spawn_tool {
         });
         info!(
             "{:?} => {:?}",
-            $toolbelt_id,
-            crate::tool_naming::format_tool_name_from_source(file!())
+            $e,
+            format_tool_name_from_source(file!())
         );
     }};
 }
 
 #[macro_export]
 macro_rules! spawn_action_tool {
-    ($commands:expr, $toolbelt_id:expr, $asset_server:expr, $tool_component:expr, $tool_actions:ty) => {{
-        let name = crate::tool_naming::format_tool_name_from_source(file!());
+    ($e:expr, $commands:expr, $toolbelt_id:expr, $asset_server:expr, $tool_component:expr, $tool_actions:ty) => {{
+        let name = format_tool_name_from_source(file!());
         $commands.entity($toolbelt_id).with_children(|t_commands| {
             t_commands.spawn((
                 ToolBundle {
@@ -43,7 +43,7 @@ macro_rules! spawn_action_tool {
                             ..default()
                         },
                         texture: $asset_server
-                            .load(crate::tool_naming::format_tool_image_from_source(file!())),
+                            .load(format_tool_image_from_source(file!())),
                         ..default()
                     },
                     ..default()
@@ -57,9 +57,9 @@ macro_rules! spawn_action_tool {
             ));
         });
         info!(
-            "{:?} => {:?}",
-            $toolbelt_id,
-            crate::tool_naming::format_tool_name_from_source(file!())
+            "{:?} <= {:?}",
+            $e,
+            format_tool_name_from_source(file!())
         );
     }};
 }

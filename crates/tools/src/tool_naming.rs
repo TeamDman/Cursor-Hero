@@ -30,6 +30,7 @@ pub fn format_tool_image_from_source(file_path: &str) -> String {
     let file_name = Path::new(file_path)
         .file_stem() // Get the file stem (file name without extension)
         .and_then(|stem| stem.to_str()) // Convert OsStr to &str
-        .unwrap_or("");
+        .unwrap_or("")
+        .trim_end_matches("_plugin");
     format!("textures/tools/{}.png", file_name)
 }

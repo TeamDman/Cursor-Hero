@@ -9,7 +9,7 @@ use windows::Win32::System::Threading::CREATE_NEW_PROCESS_GROUP;
 use cursor_hero_data::paths::CURSOR_HERO_GIT_DIR;
 use cursor_hero_toolbelt::types::*;
 
-use crate::spawn_action_tool;
+use crate::prelude::*;
 pub struct RestartToolPlugin;
 
 impl Plugin for RestartToolPlugin {
@@ -31,7 +31,7 @@ fn toolbelt_events(
     for e in reader.read() {
         match e {
             ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
-                spawn_action_tool!(commands, *toolbelt_id, asset_server, RestartTool, RestartToolAction);
+                spawn_action_tool!(e,commands, *toolbelt_id, asset_server, RestartTool, RestartToolAction);
             }
             _ => {}
         }

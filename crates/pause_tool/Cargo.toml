@@ -7,3 +7,6 @@ edition = "2021"
 
 [dependencies]
 bevy = { workspace = true }
+leafwing-input-manager = { workspace = true }
+cursor_hero_toolbelt = { workspace = true }
+cursor_hero_tools = { workspace = true }

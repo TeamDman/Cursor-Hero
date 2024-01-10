@@ -1835,6 +1835,9 @@ name = "cursor_hero_pause_tool"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "cursor_hero_toolbelt",
+ "cursor_hero_tools",
+ "leafwing-input-manager",
 ]
 
 [[package]]

@@ -1,14 +1,14 @@
 use bevy::prelude::*;
 
-use crate::click_tool_plugin::ClickToolPlugin;
-use crate::cube_tool_plugin::CubeToolPlugin;
+use crate::click_tool::ClickToolPlugin;
+use crate::cube_tool::CubeToolPlugin;
 use crate::focus_tool::FocusToolPlugin;
 use crate::inspect_tool::InspectToolPlugin;
 // use crate::placeholder_tool_plugin::PlaceholderToolPlugin;
 use crate::cursor_monitor_position_tool::CursorMonitorPositionToolPlugin;
 use crate::cursor_window_position_tool::CursorWindowPositionToolPlugin;
 use crate::restart_tool::RestartToolPlugin;
-use crate::sprint_tool_plugin::SprintToolPlugin;
+use crate::sprint_tool::SprintToolPlugin;
 use crate::talk_tool::TalkToolPlugin;
 use crate::zoom_tool::ZoomToolPlugin;
 

@@ -21,8 +21,8 @@ use cursor_hero_winutils::win_mouse::find_element_at;
 
 use cursor_hero_toolbelt::types::*;
 
-use crate::cube_tool_plugin::CubeToolInteractable;
-use crate::spawn_action_tool;
+use crate::cube_tool::CubeToolInteractable;
+use crate::prelude::*;
 
 pub struct InspectToolPlugin;
 
@@ -45,8 +45,9 @@ fn toolbelt_events(
 ) {
     for e in reader.read() {
         match e {
-            ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
+            ToolbeltEvent::PopulateInspectorToolbelt(toolbelt_id) => {
                 spawn_action_tool!(
+                    e,
                     commands,
                     *toolbelt_id,
                     asset_server,

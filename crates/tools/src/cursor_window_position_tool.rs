@@ -13,7 +13,7 @@ use cursor_hero_winutils::win_mouse::set_cursor_position;
 use cursor_hero_winutils::win_window::get_window_bounds;
 use cursor_hero_winutils::win_window::get_window_inner_offset;
 
-use crate::spawn_tool;
+// use crate::prelude::*;
 
 pub struct CursorWindowPositionToolPlugin;
 
@@ -41,14 +41,14 @@ fn toolbelt_events(
 ) {
     for e in reader.read() {
         match e {
-            ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
-                spawn_tool!(
-                    commands,
-                    *toolbelt_id,
-                    asset_server,
-                    CursorWindowPositionTool
-                );
-            }
+            // ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
+            //     spawn_tool!(
+            //         commands,
+            //         *toolbelt_id,
+            //         asset_server,
+            //         CursorWindowPositionTool
+            //     );
+            // }
             _ => {}
         }
     }

@@ -6,7 +6,7 @@ use cursor_hero_pointer::pointer_plugin::Pointer;
 
 use cursor_hero_toolbelt::types::*;
 
-use crate::spawn_action_tool;
+use crate::prelude::*;
 
 pub struct SprintToolPlugin;
 
@@ -60,6 +60,7 @@ fn toolbelt_events(
         match e {
             ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
                 spawn_action_tool!(
+                    e,
                     commands,
                     *toolbelt_id,
                     asset_server,

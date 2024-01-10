@@ -8,7 +8,7 @@ use cursor_hero_pointer::pointer_plugin::Pointer;
 
 use cursor_hero_toolbelt::types::*;
 
-use crate::spawn_action_tool;
+use crate::prelude::*;
 
 pub struct CubeToolPlugin;
 
@@ -31,8 +31,9 @@ fn toolbelt_events(
 ) {
     for e in reader.read() {
         match e {
-            ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
+            ToolbeltEvent::PopulateInspectorToolbelt(toolbelt_id) => {
                 spawn_action_tool!(
+                    e,
                     commands,
                     *toolbelt_id,
                     asset_server,

@@ -7,7 +7,7 @@ use cursor_hero_toolbelt::types::*;
 use cursor_hero_winutils::win_mouse::scroll_wheel_down;
 use cursor_hero_winutils::win_mouse::scroll_wheel_up;
 
-use crate::spawn_action_tool;
+use crate::prelude::*;
 
 pub struct ZoomToolPlugin;
 
@@ -31,6 +31,7 @@ fn toolbelt_events(
         match e {
             ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
                 spawn_action_tool!(
+                    e,
                     commands,
                     *toolbelt_id,
                     asset_server,

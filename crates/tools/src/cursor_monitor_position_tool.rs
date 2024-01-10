@@ -9,7 +9,7 @@ use cursor_hero_pointer::pointer_plugin::PointerSystemSet;
 use cursor_hero_toolbelt::types::*;
 use cursor_hero_winutils::win_mouse::set_cursor_position;
 
-use crate::spawn_tool;
+use crate::prelude::*;
 
 pub struct CursorMonitorPositionToolPlugin;
 
@@ -39,6 +39,7 @@ fn toolbelt_events(
         match e {
             ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
                 spawn_tool!(
+                    e,
                     commands,
                     *toolbelt_id,
                     asset_server,

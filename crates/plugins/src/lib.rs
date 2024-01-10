@@ -10,7 +10,7 @@ use cursor_hero_input::active_input_state_plugin::ActiveInputStatePlugin;
 use cursor_hero_level_bounds::level_bounds_plugin::LevelBoundsPlugin;
 // use cursor_hero_click_drag_character_movement::ClickDragMovementPlugin;
 use cursor_hero_icon::IconPlugin;
-use cursor_hero_pause_tool::pause_tool_plugin::Pause_ToolPlugin;
+use cursor_hero_pause_tool::pause_tool_plugin::PauseToolPlugin;
 use cursor_hero_physics::damping_plugin::DampingPlugin;
 use cursor_hero_pointer::pointer_plugin::PointerPlugin;
 use cursor_hero_pressure_plate::pressure_plate_plugin::PressurePlatePlugin;
@@ -28,7 +28,7 @@ pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(Pause_ToolPlugin);
+        app.add_plugins(PauseToolPlugin);
         app.add_plugins(WallpaperPlugin);
         app.add_plugins(ToolPlugin);
         app.add_plugins(ToolbeltPlugin);
