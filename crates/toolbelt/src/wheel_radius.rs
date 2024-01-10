@@ -1,25 +1,50 @@
 use super::types::*;
-use bevy::prelude::*;
+use bevy::{prelude::*, ecs::query::ReadOnlyWorldQuery};
+use cursor_hero_pointer::pointer_plugin::Pointer;
+use itertools::Itertools;
 
+/// This system places the tools in a circle around the toolbelt wearer.
+/// It also adjusts the pointer radius to match the toolbelt radius.
 #[allow(clippy::type_complexity)]
 pub fn wheel_radius(
-    toolbelts: Query<
-        (Ref<CirclularDistributionProperties>, &Children),
-        (With<Toolbelt>, Without<Tool>),
-    >,
-    mut tools: Query<&mut Transform, (With<Tool>, Without<Toolbelt>)>,
+    toolbelts: Query<(Ref<Wheel>, &Children, &Parent), (With<Toolbelt>, Without<Tool>)>,
+    wearer_query: Query<&Children>,
+    mut tool_query: Query<&mut Transform, (With<Tool>, Without<Toolbelt>)>,
+    mut pointer_query: Query<&mut Pointer>,
 ) {
-    for (circle, children) in toolbelts.iter() {
-        if circle.is_changed() {
-            let count = children.iter().count();
-            for (i, tool) in children.iter().enumerate() {
-                let angle = 360.0 / (count as f32) * i as f32;
-                let x = angle.to_radians().cos() * circle.radius;
-                let y = angle.to_radians().sin() * circle.radius;
-                if let Ok(mut tool_transform) = tools.get_mut(*tool) {
-                    tool_transform.translation = Vec3::new(x, y, 200.0);
+    for (wheel, tools, wearer) in toolbelts.iter() {
+        if wheel.is_changed() {
+            // distribute the tools
+            distribute(tools, &mut tool_query, wheel.radius);
+
+            // adjust the pointer radius
+            if let Ok(wearer) = wearer_query.get(**wearer) {
+                for kid in wearer.iter() {
+                    if let Ok(mut pointer) = pointer_query.get_mut(*kid) {
+                        pointer.reach = wheel.radius;
+                    }
                 }
             }
         }
+    }
+}
+
+pub fn distribute<T: ReadOnlyWorldQuery>(
+    toolbelt_children: &Children,
+    tool_query: &mut Query<&mut Transform, T>,
+    radius: f32,
+) {
+    let tools = toolbelt_children
+        .iter()
+        .filter(|e| tool_query.get(**e).is_ok())
+        .collect_vec();
+    let count = tools.len();
+    for (i, tool) in tools.into_iter().enumerate() {
+        let angle = 360.0 / (count as f32) * i as f32;
+        let x = angle.to_radians().cos() * radius;
+        let y = angle.to_radians().sin() * radius;
+        let tool_pos = &mut tool_query.get_mut(*tool).unwrap().translation;
+        tool_pos.x = x;
+        tool_pos.y = y;
     }
 }

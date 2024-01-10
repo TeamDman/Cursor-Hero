@@ -24,7 +24,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         SpriteBundle {
             transform: Transform::from_xyz(0.0, 0.0, 20.0),
             sprite: Sprite {
-                custom_size: Some(Vec2::new(20.0, 20.0)),
+                // custom_size: Some(Vec2::new(20.0, 20.0)),
                 anchor: Anchor::TopLeft,
                 ..default()
             },

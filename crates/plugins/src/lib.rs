@@ -2,11 +2,11 @@ use bevy::prelude::*;
 
 use cursor_hero_camera::camera_plugin::CameraPlugin;
 use cursor_hero_character::character_plugin::CharacterPlugin;
+use cursor_hero_input::InputPlugin;
 use cursor_hero_movement::MovementPlugin;
 use cursor_hero_cursor_mirror::cursor_mirroring_plugin::CursorMirroringPlugin;
 use cursor_hero_hover::afterimage_plugin::AfterimagePlugin;
 use cursor_hero_hover::hover_ui_automation_plugin::HoverUiAutomationPlugin;
-use cursor_hero_input::active_input_state_plugin::ActiveInputStatePlugin;
 use cursor_hero_level_bounds::level_bounds_plugin::LevelBoundsPlugin;
 // use cursor_hero_click_drag_character_movement::ClickDragMovementPlugin;
 use cursor_hero_icon::IconPlugin;
@@ -34,7 +34,7 @@ impl Plugin for MyPlugin {
         app.add_plugins(ToolbeltPlugin);
         app.add_plugins(CharacterPlugin);
         app.add_plugins(MovementPlugin);
-        app.add_plugins(ActiveInputStatePlugin);
+        app.add_plugins(InputPlugin);
         app.add_plugins(AfterimagePlugin);
         app.add_plugins(CameraPlugin);
         app.add_plugins(FpsTextPlugin);

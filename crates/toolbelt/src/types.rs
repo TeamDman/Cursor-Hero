@@ -34,7 +34,7 @@ pub struct Toolbelt;
 
 #[derive(Bundle)]
 pub struct ToolbeltBundle {
-    pub circle: CirclularDistributionProperties,
+    pub circle: Wheel,
     pub spatial: SpatialBundle,
     pub name: Name,
     pub input_manager: InputManagerBundle<ToolbeltAction>,
@@ -43,7 +43,7 @@ pub struct ToolbeltBundle {
 impl Default for ToolbeltBundle {
     fn default() -> Self {
         Self {
-            circle: CirclularDistributionProperties::default(),
+            circle: Wheel::default(),
             spatial: SpatialBundle {
                 visibility: Visibility::Hidden,
                 ..default()
@@ -73,12 +73,12 @@ pub enum ToolbeltEvent {
 }
 
 #[derive(Component, Reflect, Clone, Copy)]
-pub struct CirclularDistributionProperties {
+pub struct Wheel {
     pub radius: f32,
     pub min_radius: f32,
     pub max_radius: f32,
 }
-impl Default for CirclularDistributionProperties {
+impl Default for Wheel {
     fn default() -> Self {
         Self {
             radius: 200.0,

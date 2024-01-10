@@ -7,6 +7,7 @@ use crate::inspect_tool::InspectToolPlugin;
 // use crate::placeholder_tool_plugin::PlaceholderToolPlugin;
 use crate::cursor_monitor_position_tool::CursorMonitorPositionToolPlugin;
 use crate::cursor_window_position_tool::CursorWindowPositionToolPlugin;
+#[cfg(debug_assertions)]
 use crate::restart_tool::RestartToolPlugin;
 use crate::sprint_tool::SprintToolPlugin;
 use crate::talk_tool::TalkToolPlugin;
@@ -23,6 +24,7 @@ impl Plugin for ToolPlugin {
         app.add_plugins(TalkToolPlugin);
         app.add_plugins(ZoomToolPlugin);
         app.add_plugins(FocusToolPlugin);
+        #[cfg(debug_assertions)]
         app.add_plugins(RestartToolPlugin);
         app.add_plugins(InspectToolPlugin);
         app.add_plugins(SprintToolPlugin);

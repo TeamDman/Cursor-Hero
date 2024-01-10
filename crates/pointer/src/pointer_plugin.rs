@@ -95,7 +95,7 @@ fn insert_pointer(
                 Name::new("Pointer"),
                 SpriteBundle {
                     texture: asset_server.load("textures/cursor.png"),
-                    transform: Transform::from_xyz(0.0, 0.0, 1.0),
+                    transform: Transform::from_xyz(0.0, 0.0, 2.0),
                     sprite: Sprite {
                         color: CharacterColor::default().as_color(),
                         anchor: Anchor::TopLeft,
@@ -125,8 +125,9 @@ fn update_pointer_position(
                 continue;
             }
 
-            let desired_position = look.extend(0.0) * p.reach;
-            pointer_transform.translation = desired_position;
+            let desired_position = look * p.reach;
+            pointer_transform.translation.x = desired_position.x;
+            pointer_transform.translation.y = desired_position.y;
             *debounce = false;
         } else if !*debounce {
             pointer_transform.translation.x = 0.0;
