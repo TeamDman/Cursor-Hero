@@ -3,7 +3,6 @@ use std::thread;
 use bevy::prelude::*;
 use image::DynamicImage;
 use image::RgbImage;
-use image::RgbaImage;
 
 use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
