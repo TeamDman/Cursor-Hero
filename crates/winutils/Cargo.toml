@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 cursor_hero_metrics = { workspace = true }
 bevy = { workspace = true }
-windows = { version = "0.51.1", features = [
+windows = { workspace = true, features = [
     "Win32_Foundation",
     "Win32_UI_WindowsAndMessaging",
     "Win32_Graphics_Gdi",

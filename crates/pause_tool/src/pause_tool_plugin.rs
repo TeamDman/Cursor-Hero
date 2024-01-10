@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
-pub struct WallpaperPlugin;
+pub struct Pause_ToolPlugin;
 
-impl Plugin for WallpaperPlugin {
+impl Plugin for Pause_ToolPlugin {
     fn build(&self, app: &mut App) {}
 }

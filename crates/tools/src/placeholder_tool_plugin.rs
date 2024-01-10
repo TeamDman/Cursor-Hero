@@ -13,18 +13,15 @@ impl Plugin for PlaceholderToolPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<PlaceholderTool>()
             .add_plugins(InputManagerPlugin::<PlaceholderToolAction>::default())
-            .add_systems(
-                Update,
-                (spawn_tool_event_responder_update_system, handle_input),
-            );
+            .add_systems(Update, (toolbelt_events, handle_input));
     }
 }
 
 #[derive(Component, Reflect)]
-pub struct PlaceholderTool;
+struct PlaceholderTool;
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
-pub enum PlaceholderToolAction {
+enum PlaceholderToolAction {
     Action1,
     Action2,
     Action3,
@@ -58,14 +55,14 @@ impl PlaceholderToolAction {
     }
 }
 
-fn spawn_tool_event_responder_update_system(
+fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltEvent>,
 ) {
     for e in reader.read() {
         match e {
-            ToolbeltEvent::Populate(toolbelt_id) => {
+            ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
                 commands.entity(*toolbelt_id).with_children(|t_commands| {
                     for i in 0..1 {
                         t_commands.spawn((
@@ -77,7 +74,8 @@ fn spawn_tool_event_responder_update_system(
                                         custom_size: Some(Vec2::new(100.0, 100.0)),
                                         ..default()
                                     },
-                                    texture: asset_server.load("textures/tool_placeholder.png"),
+                                    texture: asset_server
+                                        .load("textures/tools/placeholder_tool.png"),
                                     ..default()
                                 },
                                 ..default()
@@ -90,6 +88,7 @@ fn spawn_tool_event_responder_update_system(
                     }
                 });
             }
+            _ => {}
         }
     }
 }

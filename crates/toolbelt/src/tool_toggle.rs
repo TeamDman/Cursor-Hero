@@ -2,7 +2,7 @@ use super::types::*;
 use bevy::prelude::*;
 use leafwing_input_manager::action_state::ActionState;
 
-pub fn tool_activation_update_system(
+pub fn tool_toggle(
     mut commands: Commands,
     hovered: Query<(Entity, Option<&ToolActiveTag>), With<ToolHoveredTag>>,
     toolbelts: Query<(&ActionState<ToolbeltAction>, &Children)>,

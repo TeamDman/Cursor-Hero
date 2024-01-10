@@ -3,21 +3,17 @@ use cursor_hero_character::character_plugin::Character;
 
 use super::types::*;
 
-pub fn toolbelt_spawn_setup_system(
+pub fn insert_toolbelt(
     mut commands: Commands,
-    character: Query<Entity, With<Character>>,
     mut writer: EventWriter<ToolbeltEvent>,
+    fresh_characters: Query<Entity, Added<Character>>,
 ) {
-    if let Ok(character_id) = character.get_single() {
+    for character_id in fresh_characters.iter() {
         commands.entity(character_id).with_children(|c_commands| {
             let toolbelt = c_commands.spawn(ToolbeltBundle::default());
-            writer.send(ToolbeltEvent::Populate(toolbelt.id()));
+            writer.send(ToolbeltEvent::PopulateDefaultToolbelt(toolbelt.id()));
         });
 
         info!("Toolbelt setup complete");
-    } else {
-        unreachable!(
-            "Toolbelt setup system is configured to only run after the character is spawned."
-        )
     }
 }

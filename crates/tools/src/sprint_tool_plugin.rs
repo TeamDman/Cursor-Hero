@@ -6,6 +6,8 @@ use cursor_hero_pointer::pointer_plugin::Pointer;
 
 use cursor_hero_toolbelt::types::*;
 
+use crate::spawn_action_tool;
+
 pub struct SprintToolPlugin;
 
 impl Plugin for SprintToolPlugin {
@@ -13,18 +15,15 @@ impl Plugin for SprintToolPlugin {
         app.register_type::<SprintTool>()
             .register_type::<SpawnedCube>()
             .add_plugins(InputManagerPlugin::<SprintToolAction>::default())
-            .add_systems(
-                Update,
-                (spawn_tool_event_responder_update_system, handle_input),
-            );
+            .add_systems(Update, (toolbelt_events, handle_input));
     }
 }
 
 #[derive(Component, Reflect)]
-pub struct SprintTool;
+struct SprintTool;
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
-pub enum SprintToolAction {
+enum SprintToolAction {
     Sprint,
 }
 
@@ -52,38 +51,23 @@ impl SprintToolAction {
     }
 }
 
-fn spawn_tool_event_responder_update_system(
+fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltEvent>,
 ) {
     for e in reader.read() {
         match e {
-            ToolbeltEvent::Populate(toolbelt_id) => {
-                commands.entity(*toolbelt_id).with_children(|t_commands| {
-                    t_commands.spawn((
-                        ToolBundle {
-                            name: Name::new("Sprint Tool"),
-                            sprite_bundle: SpriteBundle {
-                                sprite: Sprite {
-                                    custom_size: Some(Vec2::new(100.0, 100.0)),
-                                    ..default()
-                                },
-                                texture: asset_server.load("textures/sprint.png"),
-                                ..default()
-                            },
-                            ..default()
-                        },
-                        InputManagerBundle::<SprintToolAction> {
-                            input_map: SprintToolAction::default_input_map(),
-                            ..default()
-                        },
-                        SprintTool,
-                        ToolActiveTag,
-                    ));
-                });
-                info!("Added tool to toolbelt {:?}", toolbelt_id);
+            ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
+                spawn_action_tool!(
+                    commands,
+                    *toolbelt_id,
+                    asset_server,
+                    SprintTool,
+                    SprintToolAction
+                );
             }
+            _ => {}
         }
     }
 }

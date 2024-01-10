@@ -14,6 +14,8 @@ use cursor_hero_winutils::win_mouse::right_mouse_up;
 
 use cursor_hero_toolbelt::types::*;
 
+use crate::spawn_action_tool;
+
 pub struct ClickToolPlugin;
 
 impl Plugin for ClickToolPlugin {
@@ -21,18 +23,36 @@ impl Plugin for ClickToolPlugin {
         app.register_type::<ClickTool>()
             .add_plugins(InputManagerPlugin::<ClickToolAction>::default())
             .add_systems(Startup, spawn_worker_thread)
-            .add_systems(
-                Update,
-                (spawn_tool_event_responder_update_system, handle_input),
-            );
+            .add_systems(Update, (toolbelt_events, handle_input));
     }
 }
 
 #[derive(Component, Reflect)]
-pub struct ClickTool;
+struct ClickTool;
+
+fn toolbelt_events(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut reader: EventReader<ToolbeltEvent>,
+) {
+    for e in reader.read() {
+        match e {
+            ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
+                spawn_action_tool!(
+                    commands,
+                    *toolbelt_id,
+                    asset_server,
+                    ClickTool,
+                    ClickToolAction
+                );
+            }
+            _ => {}
+        }
+    }
+}
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
-pub enum ClickToolAction {
+enum ClickToolAction {
     LeftClick,
     RightClick,
 }
@@ -100,42 +120,6 @@ fn spawn_worker_thread(mut commands: Commands) {
     });
 }
 
-fn spawn_tool_event_responder_update_system(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut reader: EventReader<ToolbeltEvent>,
-) {
-    for e in reader.read() {
-        match e {
-            ToolbeltEvent::Populate(toolbelt_id) => {
-                commands.entity(*toolbelt_id).with_children(|t_commands| {
-                    t_commands.spawn((
-                        ToolBundle {
-                            name: Name::new("Click Tool"),
-                            sprite_bundle: SpriteBundle {
-                                sprite: Sprite {
-                                    custom_size: Some(Vec2::new(100.0, 100.0)),
-                                    ..default()
-                                },
-                                texture: asset_server.load("textures/tool_mouse.png"),
-                                ..default()
-                            },
-                            ..default()
-                        },
-                        InputManagerBundle::<ClickToolAction> {
-                            input_map: ClickToolAction::default_input_map(),
-                            ..default()
-                        },
-                        // ToolActiveTag,
-                        ClickTool,
-                    ));
-                });
-                info!("Added tool to toolbelt {:?}", toolbelt_id);
-            }
-        }
-    }
-}
-
 fn handle_input(
     tools: Query<(
         &ActionState<ClickToolAction>,
@@ -145,8 +129,6 @@ fn handle_input(
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<&Children, With<Character>>,
     pointers: Query<&GlobalTransform, With<Pointer>>,
-    // window: Query<(Entity, &Window), With<PrimaryWindow>>,
-    // winit_windows: NonSendMut<WinitWindows>,
     bridge: ResMut<ClickBridge>,
 ) {
     for (t_act, t_enabled, t_parent) in tools.iter() {
@@ -219,9 +201,5 @@ fn handle_input(
                 }
             }
         }
-
-        // winit_windows
-        //     .get_window(window.single().0)
-        //     .map(|w| w.focus_window());
     }
 }

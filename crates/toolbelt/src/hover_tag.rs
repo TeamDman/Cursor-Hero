@@ -2,7 +2,7 @@ use super::types::*;
 use bevy::prelude::*;
 use bevy_xpbd_2d::components::LinearVelocity;
 
-pub fn tool_hovered_tag_update_system(
+pub fn hover_tag(
     mut commands: Commands,
     toolbelts: Query<(&Visibility, &Children, &Parent), With<Toolbelt>>,
     follow: Query<&LinearVelocity>,

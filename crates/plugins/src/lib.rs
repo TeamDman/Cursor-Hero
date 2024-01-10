@@ -10,6 +10,7 @@ use cursor_hero_input::active_input_state_plugin::ActiveInputStatePlugin;
 use cursor_hero_level_bounds::level_bounds_plugin::LevelBoundsPlugin;
 // use cursor_hero_click_drag_character_movement::ClickDragMovementPlugin;
 use cursor_hero_icon::IconPlugin;
+use cursor_hero_pause_tool::pause_tool_plugin::Pause_ToolPlugin;
 use cursor_hero_physics::damping_plugin::DampingPlugin;
 use cursor_hero_pointer::pointer_plugin::PointerPlugin;
 use cursor_hero_pressure_plate::pressure_plate_plugin::PressurePlatePlugin;
@@ -17,8 +18,8 @@ use cursor_hero_pressure_plate::pressure_plate_plugin::PressurePlatePlugin;
 use cursor_hero_restart_memory::primary_window_memory_plugin::PrimaryWindowMemoryPlugin;
 use cursor_hero_screen::screen_plugin::ScreenPlugin;
 use cursor_hero_screen::screen_update_plugin::ScreenUpdatePlugin;
-use cursor_hero_toolbelt::ToolbeltPlugin;
-use cursor_hero_tools::ToolsPlugin;
+use cursor_hero_toolbelt::toolbelt_plugin::ToolbeltPlugin;
+use cursor_hero_tools::ToolPlugin;
 use cursor_hero_ui::about_text_plugin::AboutTextPlugin;
 use cursor_hero_ui::fps_text_plugin::FpsTextPlugin;
 use cursor_hero_ui::position_text_plugin::PositionTextPlugin;
@@ -27,8 +28,9 @@ pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(Pause_ToolPlugin);
         app.add_plugins(WallpaperPlugin);
-        app.add_plugins(ToolsPlugin);
+        app.add_plugins(ToolPlugin);
         app.add_plugins(ToolbeltPlugin);
         app.add_plugins(CharacterPlugin);
         app.add_plugins(CharacterMovementPlugin);

@@ -8,25 +8,45 @@ use cursor_hero_pointer::pointer_plugin::Pointer;
 
 use cursor_hero_toolbelt::types::*;
 
+use crate::spawn_action_tool;
+
 pub struct CubeToolPlugin;
 
 impl Plugin for CubeToolPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<CubeTool>()
-            .register_type::<Attractable>()
+            .register_type::<CubeToolInteractable>()
             .add_plugins(InputManagerPlugin::<CubeToolAction>::default())
-            .add_systems(
-                Update,
-                (spawn_tool_event_responder_update_system, handle_input),
-            );
+            .add_systems(Update, (toolbelt_events, handle_input));
     }
 }
 
 #[derive(Component, Reflect)]
-pub struct CubeTool;
+struct CubeTool;
+
+fn toolbelt_events(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut reader: EventReader<ToolbeltEvent>,
+) {
+    for e in reader.read() {
+        match e {
+            ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
+                spawn_action_tool!(
+                    commands,
+                    *toolbelt_id,
+                    asset_server,
+                    CubeTool,
+                    CubeToolAction
+                );
+            }
+            _ => {}
+        }
+    }
+}
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
-pub enum CubeToolAction {
+enum CubeToolAction {
     SpawnCube,
     RemoveCube,
     AttractCube,
@@ -60,43 +80,8 @@ impl CubeToolAction {
     }
 }
 
-fn spawn_tool_event_responder_update_system(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut reader: EventReader<ToolbeltEvent>,
-) {
-    for e in reader.read() {
-        match e {
-            ToolbeltEvent::Populate(toolbelt_id) => {
-                commands.entity(*toolbelt_id).with_children(|t_commands| {
-                    t_commands.spawn((
-                        ToolBundle {
-                            name: Name::new("Cube Tool"),
-                            sprite_bundle: SpriteBundle {
-                                sprite: Sprite {
-                                    custom_size: Some(Vec2::new(100.0, 100.0)),
-                                    ..default()
-                                },
-                                texture: asset_server.load("textures/cube.png"),
-                                ..default()
-                            },
-                            ..default()
-                        },
-                        InputManagerBundle::<CubeToolAction> {
-                            input_map: CubeToolAction::default_input_map(),
-                            ..default()
-                        },
-                        CubeTool,
-                    ));
-                });
-                info!("Added tool to toolbelt {:?}", toolbelt_id);
-            }
-        }
-    }
-}
-
 #[derive(Component, Reflect)]
-pub struct Attractable;
+pub struct CubeToolInteractable;
 
 fn handle_input(
     mut commands: Commands,
@@ -108,7 +93,7 @@ fn handle_input(
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<&Children, With<Character>>,
     pointers: Query<&GlobalTransform, With<Pointer>>,
-    mut cubes: Query<(Entity, &GlobalTransform, &mut LinearVelocity), With<Attractable>>,
+    mut cubes: Query<(Entity, &GlobalTransform, &mut LinearVelocity), With<CubeToolInteractable>>,
 ) {
     for (t_act, t_enabled, t_parent) in tools.iter() {
         if t_enabled.is_none() {
@@ -130,7 +115,7 @@ fn handle_input(
         if t_act.just_pressed(CubeToolAction::SpawnCube) {
             info!("Spawn Cube");
             commands.spawn((
-                Attractable,
+                CubeToolInteractable,
                 MovementDamping { factor: 0.98 },
                 SpriteBundle {
                     sprite: Sprite {

@@ -58,15 +58,18 @@ impl Default for ToolbeltBundle {
     }
 }
 
-#[derive(SystemSet, Clone, Hash, Debug, PartialEq, Eq)]
+// #[derive(SystemSet, Clone, Hash, Debug, PartialEq, Eq)]
 
-pub enum ToolbeltSystemSet {
-    Spawn,
-}
+// pub enum ToolbeltSystemSet {
+//     Spawn,
+// }
 
 #[derive(Event, Debug, Reflect)]
 pub enum ToolbeltEvent {
-    Populate(Entity),
+    EquipDefaultToolbelt(Entity),
+    PopulateDefaultToolbelt(Entity),
+    EquipInspectorToolbelt(Entity),
+    PopulateInspectorToolbelt(Entity),
 }
 
 #[derive(Component, Reflect, Clone, Copy)]

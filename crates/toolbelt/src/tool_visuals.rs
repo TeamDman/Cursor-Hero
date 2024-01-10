@@ -2,7 +2,7 @@ use super::types::*;
 use bevy::prelude::*;
 
 #[allow(clippy::type_complexity)]
-pub fn tool_visual_update_system(
+pub fn tool_visuals(
     mut query: Query<(&mut Sprite, Option<&ToolHoveredTag>, Option<&ToolActiveTag>), With<Tool>>,
 ) {
     // when a tool is updated, update the visuals for the tool

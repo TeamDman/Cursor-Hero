@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 use bevy::transform::TransformSystem;
+use bevy::window::PrimaryWindow;
+use bevy::window::RawHandleWrapper;
 use bevy_xpbd_2d::prelude::*;
 use itertools::Itertools;
 
@@ -8,13 +10,17 @@ use cursor_hero_pointer::pointer_plugin::Pointer;
 use cursor_hero_pointer::pointer_plugin::PointerSystemSet;
 use cursor_hero_toolbelt::types::*;
 use cursor_hero_winutils::win_mouse::set_cursor_position;
+use cursor_hero_winutils::win_window::get_window_bounds;
+use cursor_hero_winutils::win_window::get_window_inner_offset;
 
-pub struct PointerScreenPositionToolPlugin;
+use crate::spawn_tool;
 
-impl Plugin for PointerScreenPositionToolPlugin {
+pub struct CursorWindowPositionToolPlugin;
+
+impl Plugin for CursorWindowPositionToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<PointerScreenPositionTool>()
-            .add_systems(Update, spawn_tool_event_responder_update_system)
+        app.register_type::<CursorWindowPositionTool>()
+            .add_systems(Update, toolbelt_events)
             .add_systems(
                 PostUpdate,
                 snap_mouse_to_pointer
@@ -26,45 +32,35 @@ impl Plugin for PointerScreenPositionToolPlugin {
 }
 
 #[derive(Component, Reflect)]
-pub struct PointerScreenPositionTool;
+struct CursorWindowPositionTool;
 
-fn spawn_tool_event_responder_update_system(
+fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltEvent>,
 ) {
     for e in reader.read() {
         match e {
-            ToolbeltEvent::Populate(toolbelt_id) => {
-                commands.entity(*toolbelt_id).with_children(|t_commands| {
-                    t_commands.spawn((
-                        ToolBundle {
-                            name: Name::new("Pointer Screen Position Tool"),
-                            sprite_bundle: SpriteBundle {
-                                sprite: Sprite {
-                                    custom_size: Some(Vec2::new(100.0, 100.0)),
-                                    ..default()
-                                },
-                                texture: asset_server.load("textures/pointer_global.png"),
-                                ..default()
-                            },
-                            ..default()
-                        },
-                        PointerScreenPositionTool,
-                        ToolActiveTag,
-                    ));
-                });
-                info!("Added tool to toolbelt {:?}", toolbelt_id);
+            ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
+                spawn_tool!(
+                    commands,
+                    *toolbelt_id,
+                    asset_server,
+                    CursorWindowPositionTool
+                );
             }
+            _ => {}
         }
     }
 }
 
 fn snap_mouse_to_pointer(
+    camera_query: Query<(&GlobalTransform, &Camera)>,
+    window_query: Query<&RawHandleWrapper, With<PrimaryWindow>>,
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<(Ref<GlobalTransform>, &Children), With<Character>>,
     pointers: Query<Ref<GlobalTransform>, With<Pointer>>,
-    tools: Query<(Option<&ToolActiveTag>, &Parent), With<PointerScreenPositionTool>>,
+    tools: Query<(Option<&ToolActiveTag>, &Parent), With<CursorWindowPositionTool>>,
 ) {
     // ensure only a single cursor positioning tool is active
     let active = tools
@@ -99,8 +95,26 @@ fn snap_mouse_to_pointer(
         return;
     }
 
-    let t = p_pos.translation();
-    if set_cursor_position(t.x as i32, -t.y as i32).is_err() {
-        warn!("Failed to set cursor position");
+    let window_handle = window_query.get_single().expect("Need a single window");
+    let win32handle = match window_handle.window_handle {
+        raw_window_handle::RawWindowHandle::Win32(handle) => handle,
+        _ => panic!("Unsupported window handle"),
+    };
+    let window_position = get_window_bounds(win32handle.hwnd as _).expect("Need a window position");
+
+    let (camera_transform, camera) = camera_query.get_single().expect("Need a single camera");
+    if let Some(viewport_position) = camera.world_to_viewport(camera_transform, p_pos.translation())
+    {
+        let mut pos: Vec2 = Vec2::ZERO;
+        pos.x += window_position.left as f32 + viewport_position.x;
+        pos.y += window_position.top as f32 + viewport_position.y;
+        let offset = get_window_inner_offset();
+        pos.x += offset.0 as f32;
+        pos.y += offset.1 as f32;
+        // debug!("Setting cursor position to {:?}", pos);
+        let result = set_cursor_position(pos.x as i32, pos.y as i32);
+        if let Err(e) = result {
+            warn!("Failed to set cursor position: {}", e);
+        }
     }
 }

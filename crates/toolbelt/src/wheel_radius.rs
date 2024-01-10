@@ -2,7 +2,7 @@ use super::types::*;
 use bevy::prelude::*;
 
 #[allow(clippy::type_complexity)]
-pub fn toolbelt_circle_radius_update_system(
+pub fn wheel_radius(
     toolbelts: Query<
         (Ref<CirclularDistributionProperties>, &Children),
         (With<Toolbelt>, Without<Tool>),

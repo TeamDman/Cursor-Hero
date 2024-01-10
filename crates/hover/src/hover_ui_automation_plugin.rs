@@ -17,6 +17,7 @@ pub struct HoverUiAutomationPlugin;
 impl Plugin for HoverUiAutomationPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(HoverInfo::default())
+            .register_type::<Element>()
             .add_systems(Startup, setup)
             .add_systems(
                 Update,
@@ -56,8 +57,7 @@ struct HoverInfo {
     game_element: Option<ElementInfo>,
 }
 
-#[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Reflect, Clone)]
 pub struct ElementInfo {
     pub name: String,
     pub bounding_rect: Rect,
@@ -65,6 +65,11 @@ pub struct ElementInfo {
     pub class_name: String,
     pub automation_id: String,
     // value: Option<String>,
+}
+
+#[derive(Component, Reflect)]
+pub struct Element {
+    pub info: ElementInfo,
 }
 
 pub fn get_element_info(element: UIElement) -> Result<ElementInfo, uiautomation::errors::Error> {
@@ -221,14 +226,14 @@ struct GameHoveredIndicatorTag;
 #[allow(clippy::type_complexity)]
 fn show_hovered_rect(
     mut screen_indicator: Query<
-        (Entity, &mut Sprite, &mut Transform),
+        (Entity, &mut Sprite, &mut Transform, &mut Element),
         (
             With<ScreenHoveredIndicatorTag>,
             Without<GameHoveredIndicatorTag>,
         ),
     >,
     mut game_indicator: Query<
-        (Entity, &mut Sprite, &mut Transform),
+        (Entity, &mut Sprite, &mut Transform, &mut Element),
         (
             With<GameHoveredIndicatorTag>,
             Without<ScreenHoveredIndicatorTag>,
@@ -237,7 +242,8 @@ fn show_hovered_rect(
     hovered: Res<HoverInfo>,
     mut commands: Commands,
 ) {
-    if let Ok((entity, mut sprite, mut transform)) = screen_indicator.get_single_mut() {
+    if let Ok((entity, mut sprite, mut transform, mut element)) = screen_indicator.get_single_mut()
+    {
         if let Some(info) = &hovered.screen_element {
             sprite.custom_size = Some(Vec2::new(
                 info.bounding_rect.width(),
@@ -248,6 +254,7 @@ fn show_hovered_rect(
                 -info.bounding_rect.min.y - info.bounding_rect.height() / 2.,
                 0.,
             );
+            element.info = info.clone();
         } else {
             commands.entity(entity).despawn_recursive();
         }
@@ -271,10 +278,11 @@ fn show_hovered_rect(
             },
             Name::new("Screen Hovered Indicator"),
             ScreenHoveredIndicatorTag,
+            Element { info: info.clone() },
         ));
     }
 
-    if let Ok((entity, mut sprite, mut transform)) = game_indicator.get_single_mut() {
+    if let Ok((entity, mut sprite, mut transform, mut element)) = game_indicator.get_single_mut() {
         if let Some(info) = &hovered.game_element {
             sprite.custom_size = Some(Vec2::new(
                 info.bounding_rect.width(),
@@ -285,6 +293,7 @@ fn show_hovered_rect(
                 -info.bounding_rect.min.y - info.bounding_rect.height() / 2.,
                 0.,
             );
+            element.info = info.clone();
         } else {
             commands.entity(entity).despawn_recursive();
         }
@@ -308,6 +317,7 @@ fn show_hovered_rect(
             },
             Name::new("Game Hovered Indicator"),
             GameHoveredIndicatorTag,
+            Element { info: info.clone() },
         ));
     }
 }

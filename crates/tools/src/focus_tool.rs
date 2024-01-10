@@ -12,29 +12,48 @@ use cursor_hero_winutils::win_window::focus_window;
 
 use cursor_hero_toolbelt::types::*;
 
+use crate::spawn_action_tool;
+
 pub struct FocusToolPlugin;
 
 impl Plugin for FocusToolPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<FocusTool>()
-            .add_plugins(InputManagerPlugin::<ToolAction>::default())
-            .add_systems(
-                Update,
-                (spawn_tool_event_responder_update_system, handle_input),
-            );
+            .add_plugins(InputManagerPlugin::<FocusToolAction>::default())
+            .add_systems(Update, (toolbelt_events, handle_input));
+    }
+}
+#[derive(Component, Reflect)]
+struct FocusTool;
+
+fn toolbelt_events(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut reader: EventReader<ToolbeltEvent>,
+) {
+    for e in reader.read() {
+        match e {
+            ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
+                spawn_action_tool!(
+                    commands,
+                    *toolbelt_id,
+                    asset_server,
+                    FocusTool,
+                    FocusToolAction
+                );
+            }
+            _ => {}
+        }
     }
 }
 
-#[derive(Component, Reflect)]
-pub struct FocusTool;
-
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
-pub enum ToolAction {
+enum FocusToolAction {
     ToggleFollowCharacter,
     FocusMainWindow,
 }
 
-impl ToolAction {
+impl FocusToolAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
             Self::ToggleFollowCharacter => GamepadButtonType::LeftThumb.into(),
@@ -49,10 +68,10 @@ impl ToolAction {
         }
     }
 
-    fn default_input_map() -> InputMap<ToolAction> {
+    fn default_input_map() -> InputMap<FocusToolAction> {
         let mut input_map = InputMap::default();
 
-        for variant in ToolAction::variants() {
+        for variant in FocusToolAction::variants() {
             input_map.insert(variant.default_mkb_binding(), variant);
             input_map.insert(variant.default_gamepad_binding(), variant);
         }
@@ -60,45 +79,13 @@ impl ToolAction {
     }
 }
 
-fn spawn_tool_event_responder_update_system(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut reader: EventReader<ToolbeltEvent>,
-) {
-    for e in reader.read() {
-        match e {
-            ToolbeltEvent::Populate(toolbelt_id) => {
-                commands.entity(*toolbelt_id).with_children(|t_commands| {
-                    t_commands.spawn((
-                        ToolBundle {
-                            name: Name::new("Focus Tool"),
-                            sprite_bundle: SpriteBundle {
-                                sprite: Sprite {
-                                    custom_size: Some(Vec2::new(100.0, 100.0)),
-                                    ..default()
-                                },
-                                texture: asset_server.load("textures/focus.png"),
-                                ..default()
-                            },
-                            ..default()
-                        },
-                        InputManagerBundle::<ToolAction> {
-                            input_map: ToolAction::default_input_map(),
-                            ..default()
-                        },
-                        FocusTool,
-                        ToolActiveTag,
-                    ));
-                });
-                info!("Added tool to toolbelt {:?}", toolbelt_id);
-            }
-        }
-    }
-}
-
 #[allow(clippy::type_complexity)]
 fn handle_input(
-    tools: Query<(&ActionState<ToolAction>, Option<&ToolActiveTag>, &Parent)>,
+    tools: Query<(
+        &ActionState<FocusToolAction>,
+        Option<&ToolActiveTag>,
+        &Parent,
+    )>,
     toolbelts: Query<&Parent, With<Toolbelt>>,
     mut characters: Query<
         (
@@ -116,7 +103,7 @@ fn handle_input(
         if t_enabled.is_none() {
             continue;
         }
-        if t_act.just_pressed(ToolAction::ToggleFollowCharacter) {
+        if t_act.just_pressed(FocusToolAction::ToggleFollowCharacter) {
             info!("Toggle follow character");
             let toolbelt = toolbelts
                 .get(t_parent.get())
@@ -138,7 +125,7 @@ fn handle_input(
                 info!("no longer following");
             }
         }
-        if t_act.just_pressed(ToolAction::FocusMainWindow) {
+        if t_act.just_pressed(FocusToolAction::FocusMainWindow) {
             info!("Focus main window");
             let window_handle = window_query.get_single().expect("Need a single window");
             let win32handle = match window_handle.window_handle {

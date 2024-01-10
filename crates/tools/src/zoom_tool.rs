@@ -7,31 +7,51 @@ use cursor_hero_toolbelt::types::*;
 use cursor_hero_winutils::win_mouse::scroll_wheel_down;
 use cursor_hero_winutils::win_mouse::scroll_wheel_up;
 
+use crate::spawn_action_tool;
+
 pub struct ZoomToolPlugin;
 
 impl Plugin for ZoomToolPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<ZoomTool>()
-            .add_plugins(InputManagerPlugin::<ToolAction>::default())
-            .add_systems(
-                Update,
-                (spawn_tool_event_responder_update_system, handle_input),
-            );
+            .add_plugins(InputManagerPlugin::<ZoomToolAction>::default())
+            .add_systems(Update, (toolbelt_events, handle_input));
     }
 }
 
 #[derive(Component, Reflect)]
-pub struct ZoomTool;
+struct ZoomTool;
+
+fn toolbelt_events(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut reader: EventReader<ToolbeltEvent>,
+) {
+    for e in reader.read() {
+        match e {
+            ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
+                spawn_action_tool!(
+                    commands,
+                    *toolbelt_id,
+                    asset_server,
+                    ZoomTool,
+                    ZoomToolAction
+                );
+            }
+            _ => {}
+        }
+    }
+}
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
-pub enum ToolAction {
+enum ZoomToolAction {
     ZoomOut,
     ZoomIn,
     ScrollUp,
     ScrollDown,
 }
 
-impl ToolAction {
+impl ZoomToolAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
             Self::ZoomOut => GamepadButtonType::East.into(),
@@ -50,10 +70,10 @@ impl ToolAction {
         }
     }
 
-    fn default_input_map() -> InputMap<ToolAction> {
+    fn default_input_map() -> InputMap<ZoomToolAction> {
         let mut input_map = InputMap::default();
 
-        for variant in ToolAction::variants() {
+        for variant in ZoomToolAction::variants() {
             input_map.insert(variant.default_mkb_binding(), variant);
             input_map.insert(variant.default_gamepad_binding(), variant);
         }
@@ -61,44 +81,8 @@ impl ToolAction {
     }
 }
 
-fn spawn_tool_event_responder_update_system(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut reader: EventReader<ToolbeltEvent>,
-) {
-    for e in reader.read() {
-        match e {
-            ToolbeltEvent::Populate(toolbelt_id) => {
-                commands.entity(*toolbelt_id).with_children(|t_commands| {
-                    t_commands.spawn((
-                        ToolBundle {
-                            name: Name::new("Zoom Tool"),
-                            sprite_bundle: SpriteBundle {
-                                sprite: Sprite {
-                                    custom_size: Some(Vec2::new(100.0, 100.0)),
-                                    ..default()
-                                },
-                                texture: asset_server.load("textures/zoom_tool.png"),
-                                ..default()
-                            },
-                            ..default()
-                        },
-                        InputManagerBundle::<ToolAction> {
-                            input_map: ToolAction::default_input_map(),
-                            ..default()
-                        },
-                        ToolActiveTag,
-                        ZoomTool,
-                    ));
-                });
-                info!("Added tool to toolbelt {:?}", toolbelt_id);
-            }
-        }
-    }
-}
-
 fn handle_input(
-    tools: Query<(&ActionState<ToolAction>, Option<&ToolActiveTag>, &Parent)>,
+    tools: Query<(&ActionState<ZoomToolAction>, Option<&ToolActiveTag>, &Parent)>,
     mut cam: Query<&mut Transform, With<MainCamera>>,
     time: Res<Time>,
     toolbelts: Query<&Parent, With<Toolbelt>>,
@@ -116,45 +100,45 @@ fn handle_input(
         if let Ok((character, _)) = character_query.get_mut(belt_parent) {
             modifier = character.zoom_speed;
         }
-        if t_act.pressed(ToolAction::ZoomOut) {
+        if t_act.pressed(ZoomToolAction::ZoomOut) {
             let mut scale = cam.single_mut().scale;
             scale *=
                 Vec3::splat(1.0) + Vec2::splat(0.1 * time.delta_seconds() * modifier).extend(0.0);
             scale = scale.clamp(Vec3::splat(0.1), Vec3::splat(10.0));
             cam.single_mut().scale = scale;
-            if t_act.just_pressed(ToolAction::ZoomOut) {
+            if t_act.just_pressed(ZoomToolAction::ZoomOut) {
                 info!("Zooming out");
             }
         }
-        if t_act.pressed(ToolAction::ZoomIn) {
+        if t_act.pressed(ZoomToolAction::ZoomIn) {
             let mut scale = cam.single_mut().scale;
             scale *=
                 Vec3::splat(1.0) - Vec2::splat(0.1 * time.delta_seconds() * modifier).extend(0.0);
             scale = scale.clamp(Vec3::splat(0.1), Vec3::splat(10.0));
             cam.single_mut().scale = scale;
-            if t_act.just_pressed(ToolAction::ZoomIn) {
+            if t_act.just_pressed(ZoomToolAction::ZoomIn) {
                 info!("Zooming in");
             }
         }
-        if t_act.pressed(ToolAction::ScrollUp) {
+        if t_act.pressed(ZoomToolAction::ScrollUp) {
             match scroll_wheel_up() {
                 Ok(_) => {}
                 Err(e) => {
                     error!("Error scrolling up: {:?}", e);
                 }
             }
-            if t_act.just_pressed(ToolAction::ScrollUp) {
+            if t_act.just_pressed(ZoomToolAction::ScrollUp) {
                 info!("Scrolling up");
             }
         }
-        if t_act.pressed(ToolAction::ScrollDown) {
+        if t_act.pressed(ZoomToolAction::ScrollDown) {
             match scroll_wheel_down() {
                 Ok(_) => {}
                 Err(e) => {
                     error!("Error scrolling down: {:?}", e);
                 }
             }
-            if t_act.just_pressed(ToolAction::ScrollDown) {
+            if t_act.just_pressed(ZoomToolAction::ScrollDown) {
                 info!("Scrolling down");
             }
         }

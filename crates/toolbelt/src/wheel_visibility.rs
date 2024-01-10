@@ -2,7 +2,7 @@ use super::types::*;
 use bevy::prelude::*;
 use leafwing_input_manager::action_state::ActionState;
 
-pub fn update_toolbelt_visibility(
+pub fn wheel_visibility(
     mut toolbelts: Query<
         (
             &ActionState<ToolbeltAction>,
