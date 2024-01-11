@@ -3,6 +3,9 @@ use bevy::input::gamepad::GamepadConnectionEvent;
 use bevy::input::gamepad::GamepadSettings;
 use bevy::prelude::*;
 
+pub const PRESS_THRESHOLD: f32 = 0.1;
+pub const RELEASE_THRESHOLD: f32 = 0.08;
+
 /// Responsible for updating the trigger thresholds for Mining Laser
 /// https://github.com/Leafwing-Studios/leafwing-input-manager/issues/405
 pub fn update_gamepad_settings(
@@ -17,7 +20,7 @@ pub fn update_gamepad_settings(
                 gamepad: event.gamepad,
                 button_type: GamepadButtonType::RightTrigger2,
             },
-            ButtonSettings::new(0.1, 0.08).unwrap(), //Ok because this would be programmer error
+            ButtonSettings::new(PRESS_THRESHOLD, RELEASE_THRESHOLD).unwrap(), //Ok because this would be programmer error
         );
 
         gamepad_settings.button_settings.insert(
@@ -25,7 +28,7 @@ pub fn update_gamepad_settings(
                 gamepad: event.gamepad,
                 button_type: GamepadButtonType::LeftTrigger2,
             },
-            ButtonSettings::new(0.1, 0.08).unwrap(), //Ok because this would be programmer error
+            ButtonSettings::new(PRESS_THRESHOLD, RELEASE_THRESHOLD).unwrap(), //Ok because this would be programmer error
         );
     });
 }

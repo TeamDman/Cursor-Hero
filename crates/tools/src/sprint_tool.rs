@@ -102,7 +102,7 @@ fn handle_input(
             .get(t_parent.get())
             .expect("Toolbelt should have a parent")
             .get();
-        if let Ok((mut character, mut movement, character_kids)) =
+        if let Ok((mut character, movement, character_kids)) =
             character_query.get_mut(belt_parent)
         {
             let pointer = character_kids

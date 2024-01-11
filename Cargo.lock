@@ -1933,6 +1933,7 @@ dependencies = [
  "bevy-inspector-egui",
  "bevy_xpbd_2d",
  "cursor_hero_character",
+ "cursor_hero_input",
  "cursor_hero_pointer",
  "itertools 0.12.0",
  "leafwing-input-manager",

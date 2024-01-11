@@ -72,18 +72,31 @@ pub enum ToolbeltEvent {
     PopulateInspectorToolbelt(Entity),
 }
 
-#[derive(Component, Reflect, Clone, Copy)]
+#[derive(Component, Reflect, Clone, Copy, Debug)]
 pub struct Wheel {
     pub radius: f32,
-    pub min_radius: f32,
-    pub max_radius: f32,
+    pub radius_start: f32,
+    pub radius_end: f32,
+    pub spin: f32,
+    pub spin_start: f32,
+    pub spin_end: f32,
+    pub scale: f32,
+    pub scale_start: f32,
+    pub scale_end: f32,
 }
 impl Default for Wheel {
     fn default() -> Self {
         Self {
             radius: 200.0,
-            min_radius: 50.0,
-            max_radius: 200.0,
+            // min_radius: 50.0,
+            radius_start: 200.0,
+            radius_end: 200.0,
+            spin: 0.0,
+            spin_start: 300.0,
+            spin_end: 360.0,
+            scale: 1.0,
+            scale_start: 0.5,
+            scale_end: 1.0,
         }
     }
 }

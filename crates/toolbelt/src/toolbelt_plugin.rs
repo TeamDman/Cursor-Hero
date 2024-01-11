@@ -1,4 +1,6 @@
 use bevy::prelude::*;
+use bevy::transform::TransformSystem;
+use bevy_xpbd_2d::PhysicsSet;
 use leafwing_input_manager::prelude::*;
 
 use crate::hover_tag::hover_tag;
@@ -8,8 +10,8 @@ use crate::tool_frame::insert_hover_frame;
 use crate::tool_frame::remove_hover_frame;
 use crate::tool_toggle::tool_toggle;
 use crate::types::*;
-use crate::wheel_radius::wheel_radius;
-use crate::wheel_visibility::wheel_visibility;
+use crate::wheel_distribution::wheel_distribution;
+use crate::wheel_opening::wheel_opening;
 pub struct ToolbeltPlugin;
 
 impl Plugin for ToolbeltPlugin {
@@ -26,15 +28,20 @@ impl Plugin for ToolbeltPlugin {
             .add_systems(
                 Update,
                 (
-                    wheel_visibility,
                     tool_color,
                     hover_tag,
                     tool_toggle,
-                    wheel_radius,
+                    wheel_opening,
                     insert_toolbelt,
                     insert_hover_frame,
                     remove_hover_frame,
                 ),
+            )
+            .add_systems(
+                PostUpdate,
+                wheel_distribution
+                    .after(PhysicsSet::Sync)
+                    .after(TransformSystem::TransformPropagate),
             );
     }
 }

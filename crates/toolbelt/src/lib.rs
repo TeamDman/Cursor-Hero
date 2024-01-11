@@ -5,5 +5,5 @@ pub mod tool_frame;
 pub mod tool_toggle;
 pub mod toolbelt_plugin;
 pub mod types;
-pub mod wheel_radius;
-pub mod wheel_visibility;
+pub mod wheel_distribution;
+pub mod wheel_opening;
