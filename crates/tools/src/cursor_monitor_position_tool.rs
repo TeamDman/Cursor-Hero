@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy::transform::TransformSystem;
 use bevy_xpbd_2d::prelude::*;
+use cursor_hero_input::active_input_state_plugin::ActiveInput;
 use itertools::Itertools;
 
 use cursor_hero_character::character_plugin::Character;
@@ -20,6 +21,7 @@ impl Plugin for CursorMonitorPositionToolPlugin {
             .add_systems(
                 PostUpdate,
                 snap_mouse_to_pointer
+                    .run_if(in_state(ActiveInput::Gamepad))
                     .after(PointerSystemSet::Position)
                     .after(PhysicsSet::Sync)
                     .after(TransformSystem::TransformPropagate),

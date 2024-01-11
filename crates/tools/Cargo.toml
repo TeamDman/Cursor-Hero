@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 cursor_hero_toolbelt = { workspace = true }
+cursor_hero_input = { workspace = true }
 cursor_hero_screen = { workspace = true }
 cursor_hero_hover = { workspace = true }
 cursor_hero_pointer = { workspace = true }

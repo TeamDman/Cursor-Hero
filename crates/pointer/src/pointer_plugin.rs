@@ -1,7 +1,11 @@
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 use bevy::transform::TransformSystem;
+use bevy::window::PrimaryWindow;
 use bevy_xpbd_2d::prelude::*;
+use cursor_hero_camera::camera_plugin::FollowWithCamera;
+use cursor_hero_camera::camera_plugin::MainCamera;
+use cursor_hero_input::active_input_state_plugin::ActiveInput;
 use leafwing_input_manager::prelude::*;
 use leafwing_input_manager::user_input::InputKind;
 
@@ -23,6 +27,10 @@ impl Plugin for PointerPlugin {
             .configure_sets(Update, PointerSystemSet::Position)
             .add_plugins(InputManagerPlugin::<Action>::default())
             .add_systems(Update, insert_pointer.in_set(PointerSystemSet::Spawn))
+            .add_systems(
+                Update,
+                update_pointer_from_mouse.run_if(in_state(ActiveInput::MouseKeyboard)),
+            )
             .add_systems(
                 PostUpdate,
                 update_pointer_position
@@ -134,6 +142,36 @@ fn update_pointer_position(
             pointer_transform.translation.x = 0.0;
             pointer_transform.translation.y = 0.0;
             *debounce = true;
+        }
+    }
+}
+
+fn update_pointer_from_mouse(
+    window_query: Query<&Window, With<PrimaryWindow>>,
+    camera_query: Query<(&Camera, &GlobalTransform), (With<MainCamera>, Without<Character>)>,
+    follow_query: Query<(&Transform, &Children), (With<FollowWithCamera>, Without<MainCamera>, Without<Pointer>)>,
+    mut pointer_query: Query<&mut Transform, (With<Pointer>, Without<FollowWithCamera>)>,
+) {
+    let (camera, camera_global_transform) = camera_query.single();
+    let window = window_query.single();
+
+    if let Some(current_screen_position) = window.cursor_position() {
+        // mouse is inside the window, convert to world coords
+        if let Some(current_world_position) = camera
+            .viewport_to_world(camera_global_transform, current_screen_position)
+            .map(|ray| ray.origin.truncate())
+        {
+            if let Ok((character_pos, character_kids)) = follow_query.get_single() {
+                // get the pointer in the character's children
+                for kid in character_kids.iter() {
+                    if let Ok(mut pointer) = pointer_query.get_mut(*kid) {
+                        pointer.translation.x =
+                            current_world_position.x - character_pos.translation.x;
+                        pointer.translation.y =
+                            current_world_position.y - character_pos.translation.y;
+                    }
+                }
+            }
         }
     }
 }
