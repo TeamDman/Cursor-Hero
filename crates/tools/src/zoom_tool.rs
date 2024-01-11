@@ -31,6 +31,7 @@ fn toolbelt_events(
         match e {
             ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
                 spawn_action_tool::<ZoomToolAction>(
+                    file!(),
                     e,
                     &mut commands,
                     *toolbelt_id,

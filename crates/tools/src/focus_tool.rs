@@ -37,6 +37,7 @@ fn toolbelt_events(
         match e {
             ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
                 spawn_action_tool::<FocusToolAction>(
+                    file!(),
                     e,
                     &mut commands,
                     *toolbelt_id,

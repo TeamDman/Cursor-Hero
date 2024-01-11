@@ -51,7 +51,9 @@ fn main() {
                     #[cfg(debug_assertions)]
                     resolution: (
                         // %BEGIN_RESOLUTION%
-                        1470.0, 888.0, // %END_RESOLUTION%
+                        2064.0,
+                        1128.0
+                        // %END_RESOLUTION%
                     )
                         .into(),
                     resizable: true,
@@ -59,7 +61,9 @@ fn main() {
                     position: WindowPosition::At(
                         (
                             // %BEGIN_POSITION%
-                            -1764, -32, // %END_POSITION%
+                        -2056,
+                        -85
+                        // %END_POSITION%
                         )
                             .into(),
                     ),

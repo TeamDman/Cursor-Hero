@@ -25,6 +25,7 @@ fn toolbelt_events(
         match e {
             ToolbeltEvent::PopulateInspectorToolbelt(toolbelt_id) => {
                 spawn_action_tool::<PauseToolAction>(
+                    file!(),
                     e,
                     &mut commands,
                     *toolbelt_id,

@@ -33,6 +33,7 @@ fn toolbelt_events(
         match e {
             ToolbeltEvent::PopulateInspectorToolbelt(toolbelt_id) => {
                 spawn_action_tool::<CubeToolAction>(
+                    file!(),
                     e,
                     &mut commands,
                     *toolbelt_id,

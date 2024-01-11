@@ -9,6 +9,7 @@ use cursor_hero_toolbelt::types::ToolbeltEvent;
 use leafwing_input_manager::prelude::*;
 
 pub fn spawn_action_tool<T>(
+    source_path: &str,
     event: &ToolbeltEvent,
     commands: &mut Commands,
     toolbelt_id: Entity,
@@ -17,7 +18,7 @@ pub fn spawn_action_tool<T>(
 ) where
     T: ToolAction + Actionlike,
 {
-    let name = format_tool_name_from_source(file!());
+    let name = format_tool_name_from_source(source_path);
     commands.entity(toolbelt_id).with_children(|t_commands| {
         t_commands.spawn((
             ToolBundle {
@@ -27,7 +28,7 @@ pub fn spawn_action_tool<T>(
                         custom_size: Some(Vec2::new(100.0, 100.0)),
                         ..default()
                     },
-                    texture: asset_server.load(format_tool_image_from_source(file!())),
+                    texture: asset_server.load(format_tool_image_from_source(source_path)),
                     ..default()
                 },
                 ..default()
@@ -40,17 +41,18 @@ pub fn spawn_action_tool<T>(
             },
         ));
     });
-    info!("{:?} => {:?}", event, format_tool_name_from_source(file!()));
+    info!("{:?} => {:?}", event, format_tool_name_from_source(source_path));
 }
 
 pub fn spawn_tool(
+    source_path: &str,
     event: &ToolbeltEvent,
     commands: &mut Commands,
     toolbelt_id: Entity,
     asset_server: &Res<AssetServer>,
     tool_component: impl Component,
 ) {
-    let name = format_tool_name_from_source(file!());
+    let name = format_tool_name_from_source(source_path);
     commands.entity(toolbelt_id).with_children(|t_commands| {
         let mut bundle = ToolBundle {
             name: Name::new(name),
@@ -59,7 +61,7 @@ pub fn spawn_tool(
                     custom_size: Some(Vec2::new(100.0, 100.0)),
                     ..default()
                 },
-                texture: asset_server.load(format_tool_image_from_source(file!())),
+                texture: asset_server.load(format_tool_image_from_source(source_path)),
                 ..default()
             },
             ..default()
@@ -70,5 +72,5 @@ pub fn spawn_tool(
             .insert(tool_component)
             .insert(ToolActiveTag);
     });
-    info!("{:?} => {:?}", event, format_tool_name_from_source(file!()));
+    info!("{:?} => {:?}", event, format_tool_name_from_source(source_path));
 }
