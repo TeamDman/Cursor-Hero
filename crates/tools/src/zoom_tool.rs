@@ -30,13 +30,12 @@ fn toolbelt_events(
     for e in reader.read() {
         match e {
             ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
-                spawn_action_tool!(
+                spawn_action_tool::<ZoomToolAction>(
                     e,
                     &mut commands,
                     *toolbelt_id,
                     &asset_server,
                     ZoomTool,
-                    ZoomToolAction
                 );
             }
             _ => {}

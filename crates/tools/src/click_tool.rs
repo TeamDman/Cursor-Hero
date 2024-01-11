@@ -38,13 +38,12 @@ fn toolbelt_events(
     for e in reader.read() {
         match e {
             ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
-                spawn_action_tool!(
+                spawn_action_tool::<ClickToolAction>(
                     e,
                     &mut commands,
                     *toolbelt_id,
                     &asset_server,
                     ClickTool,
-                    ClickToolAction
                 );
             }
             _ => {}

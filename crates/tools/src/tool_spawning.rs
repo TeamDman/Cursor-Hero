@@ -8,7 +8,7 @@ use cursor_hero_toolbelt::types::ToolBundle;
 use cursor_hero_toolbelt::types::ToolbeltEvent;
 use leafwing_input_manager::prelude::*;
 
-pub fn spawn_action_tool_impl<T>(
+pub fn spawn_action_tool<T>(
     event: &ToolbeltEvent,
     commands: &mut Commands,
     toolbelt_id: Entity,
@@ -43,7 +43,7 @@ pub fn spawn_action_tool_impl<T>(
     info!("{:?} => {:?}", event, format_tool_name_from_source(file!()));
 }
 
-pub fn spawn_tool_impl(
+pub fn spawn_tool(
     event: &ToolbeltEvent,
     commands: &mut Commands,
     toolbelt_id: Entity,
@@ -71,30 +71,4 @@ pub fn spawn_tool_impl(
             .insert(ToolActiveTag);
     });
     info!("{:?} => {:?}", event, format_tool_name_from_source(file!()));
-}
-
-#[macro_export]
-macro_rules! spawn_tool {
-    ($event:expr, $commands:expr, $toolbelt_id:expr, $asset_server:expr, $tool_component:expr) => {{
-        spawn_tool_impl(
-            $event,
-            $commands,
-            $toolbelt_id,
-            $asset_server,
-            $tool_component,
-        );
-    }};
-}
-
-#[macro_export]
-macro_rules! spawn_action_tool {
-    ($event:expr, $commands:expr, $toolbelt_id:expr, $asset_server:expr, $tool_component:expr, $tool_actions:ty) => {{
-        spawn_action_tool_impl::<$tool_actions>(
-            $event,
-            $commands,
-            $toolbelt_id,
-            $asset_server,
-            $tool_component,
-        );
-    }};
 }

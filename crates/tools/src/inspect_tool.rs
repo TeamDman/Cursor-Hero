@@ -46,13 +46,12 @@ fn toolbelt_events(
     for e in reader.read() {
         match e {
             ToolbeltEvent::PopulateInspectorToolbelt(toolbelt_id) => {
-                spawn_action_tool!(
+                spawn_action_tool::<InspectToolAction>(
                     e,
                     &mut commands,
                     *toolbelt_id,
                     &asset_server,
                     InspectTool,
-                    InspectToolAction
                 );
             }
             _ => {}
@@ -143,7 +142,11 @@ fn spawn_worker_thread(mut commands: Commands) {
 }
 
 fn handle_input(
-    tools: Query<(&ActionState<InspectToolAction>, Option<&ToolActiveTag>, &Parent)>,
+    tools: Query<(
+        &ActionState<InspectToolAction>,
+        Option<&ToolActiveTag>,
+        &Parent,
+    )>,
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<&Children, With<Character>>,
     pointers: Query<&GlobalTransform, With<Pointer>>,

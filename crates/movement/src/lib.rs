@@ -42,7 +42,7 @@ impl MovementAction {
             Self::Move => UserInput::VirtualDPad(VirtualDPad::wasd()),
         }
     }
-    
+
     fn default_input_map() -> InputMap<MovementAction> {
         let mut input_map = InputMap::default();
 

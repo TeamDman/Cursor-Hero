@@ -24,13 +24,12 @@ fn toolbelt_events(
     for e in reader.read() {
         match e {
             ToolbeltEvent::PopulateInspectorToolbelt(toolbelt_id) => {
-                spawn_action_tool!(
+                spawn_action_tool::<PauseToolAction>(
                     e,
                     &mut commands,
                     *toolbelt_id,
                     &asset_server,
                     PauseTool,
-                    PauseToolAction
                 );
             }
             _ => {}

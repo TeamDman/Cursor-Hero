@@ -32,13 +32,12 @@ fn toolbelt_events(
     for e in reader.read() {
         match e {
             ToolbeltEvent::PopulateInspectorToolbelt(toolbelt_id) => {
-                spawn_action_tool!(
+                spawn_action_tool::<CubeToolAction>(
                     e,
                     &mut commands,
                     *toolbelt_id,
                     &asset_server,
                     CubeTool,
-                    CubeToolAction
                 );
             }
             _ => {}
