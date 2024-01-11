@@ -33,6 +33,9 @@ fn spawn_tool_impl(
                 ..default()
             },
             tool_component,
+            Sensor,
+            RigidBody::Static,
+            Collider::cuboid(100.0, 100.0),
             ToolActiveTag,
         ));
         if let Some(bundle) = input_manager {

@@ -108,7 +108,8 @@ fn insert_pointer(
                     action_state: ActionState::default(),
                 },
                 RigidBody::Dynamic,
-                MassPropertiesBundle::new_computed(&Collider::cuboid(10.0, 10.0), 1.0),
+                Collider::cuboid(10.0, 10.0),
+                Sensor,
             ));
         });
     }
