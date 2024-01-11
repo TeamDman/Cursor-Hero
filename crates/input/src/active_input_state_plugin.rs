@@ -6,12 +6,13 @@ pub struct ActiveInputStatePlugin;
 
 impl Plugin for ActiveInputStatePlugin {
     fn build(&self, app: &mut App) {
-        app.add_state::<ActiveInput>()
-            .add_systems(
-                Update,
+        app.add_state::<ActiveInput>().add_systems(
+            Update,
+            (
                 activate_gamepad.run_if(in_state(ActiveInput::MouseKeyboard)),
-            )
-            .add_systems(Update, activate_mkb.run_if(in_state(ActiveInput::Gamepad)));
+                activate_mkb.run_if(in_state(ActiveInput::Gamepad)),
+            ),
+        );
     }
 }
 
@@ -27,12 +28,24 @@ fn activate_gamepad(
     mut next_state: ResMut<NextState<ActiveInput>>,
     mut gamepad_evr: EventReader<GamepadEvent>,
 ) {
+    let mut debounce = false;
     for ev in gamepad_evr.read() {
         match ev {
-            GamepadEvent::Button(_) | GamepadEvent::Axis(_) => {
-                info!("Switching to gamepad input");
-                next_state.set(ActiveInput::Gamepad);
-                return;
+            GamepadEvent::Button(_) => {
+                if !debounce {
+                    info!("Switching to gamepad input because of {:?}", ev);
+                    next_state.set(ActiveInput::Gamepad);
+                    debounce = true;
+                }
+            }
+            GamepadEvent::Axis(ax) => {
+                if ax.value != 0.0 {
+                    if !debounce {
+                        info!("Switching to gamepad input because of {:?}", ev);
+                        next_state.set(ActiveInput::Gamepad);
+                        debounce = true;
+                    }
+                }
             }
             _ => (),
         }
@@ -42,9 +55,9 @@ fn activate_gamepad(
 /// Switch to mouse and keyboard input when any keyboard button is pressed
 fn activate_mkb(
     mut next_state: ResMut<NextState<ActiveInput>>,
-    mut kb_evr: EventReader<KeyboardInput>,
+    mut kb_reader: EventReader<KeyboardInput>,
 ) {
-    for _ev in kb_evr.read() {
+    if kb_reader.read().count() > 0 {
         info!("Switching to mouse and keyboard input");
         next_state.set(ActiveInput::MouseKeyboard);
     }
