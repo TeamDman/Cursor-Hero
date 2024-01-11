@@ -1,4 +1,5 @@
-- add version and @TeamDman UI element to bottom right
+- make tool wheel use pointer instead of direction.
+- Disable zoom when hovering over Bevy eGooey.
 
 - couple click tool with window/screen mouse position tool
 - make overlay logic stop when inspection tool disabled

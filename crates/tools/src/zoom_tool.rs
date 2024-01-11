@@ -32,9 +32,9 @@ fn toolbelt_events(
             ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
                 spawn_action_tool!(
                     e,
-                    commands,
+                    &mut commands,
                     *toolbelt_id,
-                    asset_server,
+                    &asset_server,
                     ZoomTool,
                     ZoomToolAction
                 );
@@ -70,7 +70,8 @@ impl ZoomToolAction {
             Self::ScrollDown => KeyCode::PageUp.into(),
         }
     }
-
+}
+impl ToolAction for ZoomToolAction {
     fn default_input_map() -> InputMap<ZoomToolAction> {
         let mut input_map = InputMap::default();
 
@@ -83,7 +84,11 @@ impl ZoomToolAction {
 }
 
 fn handle_input(
-    tools: Query<(&ActionState<ZoomToolAction>, Option<&ToolActiveTag>, &Parent)>,
+    tools: Query<(
+        &ActionState<ZoomToolAction>,
+        Option<&ToolActiveTag>,
+        &Parent,
+    )>,
     mut cam: Query<&mut Transform, With<MainCamera>>,
     time: Res<Time>,
     toolbelts: Query<&Parent, With<Toolbelt>>,

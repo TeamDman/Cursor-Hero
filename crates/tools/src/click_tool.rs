@@ -40,9 +40,9 @@ fn toolbelt_events(
             ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
                 spawn_action_tool!(
                     e,
-                    commands,
+                    &mut commands,
                     *toolbelt_id,
-                    asset_server,
+                    &asset_server,
                     ClickTool,
                     ClickToolAction
                 );
@@ -89,7 +89,8 @@ impl ClickToolAction {
             Self::RightClick => KeyCode::ControlRight.into(),
         }
     }
-
+}
+impl ToolAction for ClickToolAction {
     fn default_input_map() -> InputMap<ClickToolAction> {
         let mut input_map = InputMap::default();
 

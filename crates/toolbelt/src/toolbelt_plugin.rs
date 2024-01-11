@@ -3,9 +3,10 @@ use leafwing_input_manager::prelude::*;
 
 use crate::hover_tag::hover_tag;
 use crate::insert_toolbelt::insert_toolbelt;
-use crate::tool_frame::{insert_hover_frame, remove_hover_frame};
-use crate::tool_toggle::tool_toggle;
 use crate::tool_color::tool_color;
+use crate::tool_frame::insert_hover_frame;
+use crate::tool_frame::remove_hover_frame;
+use crate::tool_toggle::tool_toggle;
 use crate::types::*;
 use crate::wheel_radius::wheel_radius;
 use crate::wheel_visibility::wheel_visibility;

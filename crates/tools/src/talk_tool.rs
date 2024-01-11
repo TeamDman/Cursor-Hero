@@ -36,9 +36,9 @@ fn toolbelt_events(
             ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
                 spawn_action_tool!(
                     e,
-                    commands,
+                    &mut commands,
                     *toolbelt_id,
-                    asset_server,
+                    &asset_server,
                     TalkTool,
                     TalkToolAction
                 );
@@ -81,7 +81,8 @@ impl TalkToolAction {
             Self::Listen => KeyCode::ShiftRight.into(),
         }
     }
-
+}
+impl ToolAction for TalkToolAction {
     fn default_input_map() -> InputMap<TalkToolAction> {
         let mut input_map = InputMap::default();
 

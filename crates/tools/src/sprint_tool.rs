@@ -41,7 +41,8 @@ impl SprintToolAction {
             Self::Sprint => KeyCode::ShiftLeft.into(),
         }
     }
-
+}
+impl ToolAction for SprintToolAction {
     fn default_input_map() -> InputMap<SprintToolAction> {
         let mut input_map = InputMap::default();
 
@@ -63,9 +64,9 @@ fn toolbelt_events(
             ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
                 spawn_action_tool!(
                     e,
-                    commands,
+                    &mut commands,
                     *toolbelt_id,
-                    asset_server,
+                    &asset_server,
                     SprintTool,
                     SprintToolAction
                 );
@@ -85,9 +86,12 @@ fn handle_input(
         &Parent,
     )>,
     toolbelts: Query<&Parent, With<Toolbelt>>,
-    mut character_query: Query<(&mut Character, Option<&mut Movement>, &Children), Without<MainCamera>>,
+    mut character_query: Query<
+        (&mut Character, Option<&mut Movement>, &Children),
+        Without<MainCamera>,
+    >,
     mut pointer_query: Query<&mut Pointer>,
-    mut camera_query: Query<Option<&mut Movement>, (With<MainCamera>, Without<Character>)>
+    mut camera_query: Query<Option<&mut Movement>, (With<MainCamera>, Without<Character>)>,
 ) {
     for (t_act, t_enabled, t_parent) in tools.iter() {
         if t_enabled.is_none() {
@@ -98,7 +102,9 @@ fn handle_input(
             .get(t_parent.get())
             .expect("Toolbelt should have a parent")
             .get();
-        if let Ok((mut character, mut movement, character_kids)) = character_query.get_mut(belt_parent) {
+        if let Ok((mut character, mut movement, character_kids)) =
+            character_query.get_mut(belt_parent)
+        {
             let pointer = character_kids
                 .iter()
                 .find(|e| pointer_query.get(**e).is_ok());

@@ -91,6 +91,10 @@ impl Default for Wheel {
 #[derive(Component, Reflect, Clone, Copy, Debug)]
 pub struct Tool;
 
+pub trait ToolAction: Actionlike {
+    fn default_input_map() -> InputMap<Self>;
+}
+
 #[derive(Bundle)]
 pub struct ToolBundle {
     pub name: Name,

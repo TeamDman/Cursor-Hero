@@ -50,7 +50,7 @@ impl Action {
             Self::Move => UserInput::VirtualDPad(VirtualDPad::arrow_keys()),
         }
     }
-
+    
     fn default_input_map() -> InputMap<Action> {
         let mut input_map = InputMap::default();
 

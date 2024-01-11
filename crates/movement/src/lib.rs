@@ -42,7 +42,7 @@ impl MovementAction {
             Self::Move => UserInput::VirtualDPad(VirtualDPad::wasd()),
         }
     }
-
+    
     fn default_input_map() -> InputMap<MovementAction> {
         let mut input_map = InputMap::default();
 
@@ -93,7 +93,8 @@ fn apply_movement(
     let delta_time = time.delta_seconds_f64().adjust_precision();
     for (c, mut c_vel, c_act) in character_query.iter_mut() {
         if c_act.pressed(MovementAction::Move) {
-            let move_delta = delta_time * c_act.clamped_axis_pair(MovementAction::Move).unwrap().xy();
+            let move_delta =
+                delta_time * c_act.clamped_axis_pair(MovementAction::Move).unwrap().xy();
             c_vel.x += move_delta.x * c.speed;
             c_vel.y += move_delta.y * c.speed;
         }

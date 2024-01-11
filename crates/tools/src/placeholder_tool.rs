@@ -43,7 +43,8 @@ impl PlaceholderToolAction {
             Self::Action3 => KeyCode::AltRight.into(),
         }
     }
-
+}
+impl ToolAction for PlaceholderToolAction {
     fn default_input_map() -> InputMap<PlaceholderToolAction> {
         let mut input_map = InputMap::default();
 

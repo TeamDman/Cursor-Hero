@@ -38,9 +38,9 @@ fn toolbelt_events(
             ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
                 spawn_action_tool!(
                     e,
-                    commands,
+                    &mut commands,
                     *toolbelt_id,
-                    asset_server,
+                    &asset_server,
                     FocusTool,
                     FocusToolAction
                 );
@@ -70,7 +70,8 @@ impl FocusToolAction {
             Self::FocusMainWindow => KeyCode::Home.into(),
         }
     }
-
+}
+impl ToolAction for FocusToolAction {
     fn default_input_map() -> InputMap<FocusToolAction> {
         let mut input_map = InputMap::default();
 

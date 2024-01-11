@@ -2,12 +2,12 @@ use bevy::prelude::*;
 
 use cursor_hero_camera::camera_plugin::CameraPlugin;
 use cursor_hero_character::character_plugin::CharacterPlugin;
-use cursor_hero_input::InputPlugin;
-use cursor_hero_movement::MovementPlugin;
 use cursor_hero_cursor_mirror::cursor_mirroring_plugin::CursorMirroringPlugin;
 use cursor_hero_hover::afterimage_plugin::AfterimagePlugin;
 use cursor_hero_hover::hover_ui_automation_plugin::HoverUiAutomationPlugin;
+use cursor_hero_input::InputPlugin;
 use cursor_hero_level_bounds::level_bounds_plugin::LevelBoundsPlugin;
+use cursor_hero_movement::MovementPlugin;
 // use cursor_hero_click_drag_character_movement::ClickDragMovementPlugin;
 use cursor_hero_icon::IconPlugin;
 use cursor_hero_pause_tool::pause_tool_plugin::PauseToolPlugin;

@@ -34,9 +34,9 @@ fn toolbelt_events(
             ToolbeltEvent::PopulateInspectorToolbelt(toolbelt_id) => {
                 spawn_action_tool!(
                     e,
-                    commands,
+                    &mut commands,
                     *toolbelt_id,
-                    asset_server,
+                    &asset_server,
                     CubeTool,
                     CubeToolAction
                 );
@@ -69,7 +69,8 @@ impl CubeToolAction {
             Self::AttractCube => KeyCode::AltRight.into(),
         }
     }
-
+}
+impl ToolAction for CubeToolAction {
     fn default_input_map() -> InputMap<CubeToolAction> {
         let mut input_map = InputMap::default();
 

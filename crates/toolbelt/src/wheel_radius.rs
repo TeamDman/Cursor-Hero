@@ -1,5 +1,6 @@
 use super::types::*;
-use bevy::{prelude::*, ecs::query::ReadOnlyWorldQuery};
+use bevy::ecs::query::ReadOnlyWorldQuery;
+use bevy::prelude::*;
 use cursor_hero_pointer::pointer_plugin::Pointer;
 use itertools::Itertools;
 

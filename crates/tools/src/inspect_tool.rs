@@ -29,7 +29,7 @@ pub struct InspectToolPlugin;
 impl Plugin for InspectToolPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<InspectTool>()
-            .add_plugins(InputManagerPlugin::<ToolAction>::default())
+            .add_plugins(InputManagerPlugin::<InspectToolAction>::default())
             .add_systems(Startup, spawn_worker_thread)
             .add_systems(Update, (toolbelt_events, handle_input, handle_replies));
     }
@@ -48,11 +48,11 @@ fn toolbelt_events(
             ToolbeltEvent::PopulateInspectorToolbelt(toolbelt_id) => {
                 spawn_action_tool!(
                     e,
-                    commands,
+                    &mut commands,
                     *toolbelt_id,
-                    asset_server,
+                    &asset_server,
                     InspectTool,
-                    ToolAction
+                    InspectToolAction
                 );
             }
             _ => {}
@@ -61,7 +61,7 @@ fn toolbelt_events(
 }
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
-enum ToolAction {
+enum InspectToolAction {
     PrintUnderMouse,
 }
 
@@ -80,7 +80,7 @@ struct Bridge {
     pub receiver: Receiver<GameboundMessage>,
 }
 
-impl ToolAction {
+impl InspectToolAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
             Self::PrintUnderMouse => GamepadButtonType::RightTrigger.into(),
@@ -92,11 +92,12 @@ impl ToolAction {
             Self::PrintUnderMouse => KeyCode::ControlLeft.into(),
         }
     }
-
-    fn default_input_map() -> InputMap<ToolAction> {
+}
+impl ToolAction for InspectToolAction {
+    fn default_input_map() -> InputMap<InspectToolAction> {
         let mut input_map = InputMap::default();
 
-        for variant in ToolAction::variants() {
+        for variant in InspectToolAction::variants() {
             input_map.insert(variant.default_mkb_binding(), variant);
             input_map.insert(variant.default_gamepad_binding(), variant);
         }
@@ -142,7 +143,7 @@ fn spawn_worker_thread(mut commands: Commands) {
 }
 
 fn handle_input(
-    tools: Query<(&ActionState<ToolAction>, Option<&ToolActiveTag>, &Parent)>,
+    tools: Query<(&ActionState<InspectToolAction>, Option<&ToolActiveTag>, &Parent)>,
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<&Children, With<Character>>,
     pointers: Query<&GlobalTransform, With<Pointer>>,
@@ -168,7 +169,7 @@ fn handle_input(
             .next()
             .expect("Character should have a pointer");
         let p_pos = p.translation();
-        if t_act.just_pressed(ToolAction::PrintUnderMouse) {
+        if t_act.just_pressed(InspectToolAction::PrintUnderMouse) {
             info!("PrintUnderMouse button");
             match bridge.sender.send(ThreadboundMessage::PrintUnderMouse(
                 p_pos.x as i32,

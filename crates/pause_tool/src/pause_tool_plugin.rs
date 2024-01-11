@@ -1,7 +1,7 @@
 use bevy::prelude::*;
+use cursor_hero_toolbelt::types::*;
 use cursor_hero_tools::prelude::*;
 use leafwing_input_manager::prelude::*;
-use cursor_hero_toolbelt::types::*;
 
 pub struct PauseToolPlugin;
 
@@ -10,7 +10,7 @@ impl Plugin for PauseToolPlugin {
         app.register_type::<PauseTool>()
             .add_plugins(InputManagerPlugin::<PauseToolAction>::default())
             .add_systems(Update, (toolbelt_events, handle_input));
-        }
+    }
 }
 
 #[derive(Component, Reflect)]
@@ -26,9 +26,9 @@ fn toolbelt_events(
             ToolbeltEvent::PopulateInspectorToolbelt(toolbelt_id) => {
                 spawn_action_tool!(
                     e,
-                    commands,
+                    &mut commands,
                     *toolbelt_id,
-                    asset_server,
+                    &asset_server,
                     PauseTool,
                     PauseToolAction
                 );
@@ -55,7 +55,8 @@ impl PauseToolAction {
             Self::TogglePause => KeyCode::Escape.into(),
         }
     }
-
+}
+impl ToolAction for PauseToolAction {
     fn default_input_map() -> InputMap<PauseToolAction> {
         let mut input_map = InputMap::default();
 
@@ -66,7 +67,6 @@ impl PauseToolAction {
         input_map
     }
 }
-
 
 fn handle_input(
     mut commands: Commands,

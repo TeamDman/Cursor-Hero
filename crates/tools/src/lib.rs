@@ -16,7 +16,8 @@ pub mod zoom_tool;
 pub use crate::tool_plugin::ToolPlugin;
 
 pub mod prelude {
-    pub use crate::spawn_tool;
     pub use crate::spawn_action_tool;
-    pub use crate::tool_naming::*;
+    pub use crate::spawn_tool;
+    pub use crate::tool_macros::spawn_action_tool_impl;
+    pub use crate::tool_macros::spawn_tool_impl;
 }

@@ -31,7 +31,14 @@ fn toolbelt_events(
     for e in reader.read() {
         match e {
             ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
-                spawn_action_tool!(e,commands, *toolbelt_id, asset_server, RestartTool, RestartToolAction);
+                spawn_action_tool!(
+                    e,
+                    &mut commands,
+                    *toolbelt_id,
+                    &asset_server,
+                    RestartTool,
+                    RestartToolAction
+                );
             }
             _ => {}
         }
@@ -55,7 +62,8 @@ impl RestartToolAction {
             Self::CancelAndRunPreviousTerminalCommand => KeyCode::Return.into(),
         }
     }
-
+}
+impl ToolAction for RestartToolAction {
     fn default_input_map() -> InputMap<RestartToolAction> {
         let mut input_map = InputMap::default();
 

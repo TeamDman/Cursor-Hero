@@ -1,9 +1,9 @@
 pub mod hover_tag;
 pub mod insert_toolbelt;
-pub mod tool_toggle;
 pub mod tool_color;
+pub mod tool_frame;
+pub mod tool_toggle;
 pub mod toolbelt_plugin;
 pub mod types;
 pub mod wheel_radius;
 pub mod wheel_visibility;
-pub mod tool_frame;
