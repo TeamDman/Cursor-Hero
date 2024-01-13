@@ -1,5 +1,3 @@
-- when in mouse and keyboard mode, make game pointer follow mouse
-- make tool wheel use pointer instead of direction.
 - Disable zoom when hovering over Bevy eGooey.
 
 - couple click tool with window/screen mouse position tool

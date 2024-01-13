@@ -24,8 +24,9 @@ pub enum PointerSystemSet {
 impl Plugin for PointerPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<Pointer>()
+            .register_type::<PointerJoint>()
             .configure_sets(Update, PointerSystemSet::Position)
-            .add_plugins(InputManagerPlugin::<Action>::default())
+            .add_plugins(InputManagerPlugin::<PointerAction>::default())
             .add_systems(Update, insert_pointer.in_set(PointerSystemSet::Spawn))
             .add_systems(
                 Update,
@@ -42,11 +43,11 @@ impl Plugin for PointerPlugin {
 }
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
-pub enum Action {
+pub enum PointerAction {
     Move,
 }
 
-impl Action {
+impl PointerAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
             Self::Move => UserInput::Single(InputKind::DualAxis(DualAxis::right_stick())),
@@ -59,10 +60,10 @@ impl Action {
         }
     }
 
-    fn default_input_map() -> InputMap<Action> {
+    fn default_input_map() -> InputMap<PointerAction> {
         let mut input_map = InputMap::default();
 
-        for variant in Action::variants() {
+        for variant in PointerAction::variants() {
             input_map.insert(variant.default_mkb_binding(), variant);
             input_map.insert(variant.default_gamepad_binding(), variant);
         }
@@ -80,6 +81,10 @@ pub struct Pointer {
     #[inspector(min = 0.0)]
     pub sprint_reach: f32,
 }
+
+#[derive(Component, Reflect)]
+pub struct PointerJoint;
+
 impl Default for Pointer {
     fn default() -> Self {
         Self {
@@ -95,52 +100,84 @@ fn insert_pointer(
     asset_server: Res<AssetServer>,
     character: Query<Entity, Added<Character>>,
 ) {
-    for c_e in character.iter() {
-        info!("Creating pointer for character '{:?}'", c_e);
-        commands.entity(c_e).with_children(|c_commands| {
-            c_commands.spawn((
-                Pointer::default(),
-                Name::new("Pointer"),
-                SpriteBundle {
-                    texture: asset_server.load("textures/cursor.png"),
-                    transform: Transform::from_xyz(0.0, 0.0, 2.0),
-                    sprite: Sprite {
-                        color: CharacterColor::default().as_color(),
-                        anchor: Anchor::TopLeft,
-                        ..default()
+    for character_id in character.iter() {
+        info!("Creating pointer for character '{:?}'", character_id);
+        commands.entity(character_id).with_children(|parent| {
+            let pointer_id = parent
+                .spawn((
+                    Pointer::default(),
+                    Name::new("Pointer"),
+                    SpriteBundle {
+                        texture: asset_server.load("textures/cursor.png"),
+                        transform: Transform::from_xyz(0.0, 0.0, 2.0),
+                        sprite: Sprite {
+                            color: CharacterColor::default().as_color(),
+                            anchor: Anchor::TopLeft,
+                            ..default()
+                        },
+                        ..Default::default()
                     },
-                    ..Default::default()
-                },
-                InputManagerBundle::<Action> {
-                    input_map: Action::default_input_map(),
-                    action_state: ActionState::default(),
-                },
-                RigidBody::Dynamic,
-                Collider::cuboid(10.0, 10.0),
-                Sensor,
+                    InputManagerBundle::<PointerAction> {
+                        input_map: PointerAction::default_input_map(),
+                        action_state: ActionState::default(),
+                    },
+                    RigidBody::Dynamic,
+                    Collider::cuboid(10.0, 10.0),
+                    Sensor,
+                ))
+                .id();
+            parent.spawn((
+                    FixedJoint::new(character_id, pointer_id)
+                    .with_linear_velocity_damping(0.1)
+                    .with_angular_velocity_damping(1.0)
+                    .with_compliance(0.00000001),
+                PointerJoint,
             ));
         });
     }
 }
 
 fn update_pointer_position(
-    mut pointer_query: Query<(&mut Transform, &ActionState<Action>, &Pointer)>,
+    mut pointer_query: Query<
+        (
+            &mut Position,
+            &mut LinearVelocity,
+            &ActionState<PointerAction>,
+            &Pointer,
+            &Parent,
+        ),
+        Without<Character>,
+    >,
+    mut character_query: Query<(&Position, &Children), (With<Character>, Without<Pointer>)>,
+    mut pointer_joint_query: Query<&mut FixedJoint, With<PointerJoint>>,
     mut debounce: Local<bool>,
 ) {
-    for (mut pointer_transform, p_act, p) in pointer_query.iter_mut() {
-        if p_act.pressed(Action::Move) {
-            let look = p_act.axis_pair(Action::Move).unwrap().xy();
+    for (mut pointer_position, mut pointer_velocity, pointer_actions, pointer_id, pointer_parent) in
+        pointer_query.iter_mut()
+    {
+        let (character_position, character_kids) =
+            character_query.get_mut(pointer_parent.get()).unwrap();
+        if pointer_actions.pressed(PointerAction::Move) {
+            let look = pointer_actions.axis_pair(PointerAction::Move).unwrap().xy();
             if look.x.is_nan() || look.y.is_nan() {
                 continue;
             }
 
-            let desired_position = look * p.reach;
-            pointer_transform.translation.x = desired_position.x;
-            pointer_transform.translation.y = desired_position.y;
+            let offset = look * pointer_id.reach;
+            let desired_position = character_position.xy() + offset;
+            let desired_velocity = desired_position - pointer_position.xy();
+            for child in character_kids.iter() {
+                if let Ok(mut joint) = pointer_joint_query.get_mut(*child) {
+                    joint.local_anchor1 = offset;
+                }
+            }
             *debounce = false;
         } else if !*debounce {
-            pointer_transform.translation.x = 0.0;
-            pointer_transform.translation.y = 0.0;
+            for child in character_kids.iter() {
+                if let Ok(mut joint) = pointer_joint_query.get_mut(*child) {
+                    joint.local_anchor1 = Vec2::ZERO;
+                }
+            }
             *debounce = true;
         }
     }
@@ -149,7 +186,14 @@ fn update_pointer_position(
 fn update_pointer_from_mouse(
     window_query: Query<&Window, With<PrimaryWindow>>,
     camera_query: Query<(&Camera, &GlobalTransform), (With<MainCamera>, Without<Character>)>,
-    follow_query: Query<(&Transform, &Children), (With<FollowWithCamera>, Without<MainCamera>, Without<Pointer>)>,
+    follow_query: Query<
+        (&Transform, &Children),
+        (
+            With<FollowWithCamera>,
+            Without<MainCamera>,
+            Without<Pointer>,
+        ),
+    >,
     mut pointer_query: Query<&mut Transform, (With<Pointer>, Without<FollowWithCamera>)>,
 ) {
     let (camera, camera_global_transform) = camera_query.single();

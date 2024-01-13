@@ -20,7 +20,7 @@ impl Plugin for ToolPlugin {
         // app.add_plugins(PlaceholderToolPlugin);
         app.add_plugins(ClickToolPlugin);
         app.add_plugins(CursorWindowPositionToolPlugin);
-        app.add_plugins(CursorMonitorPositionToolPlugin);
+        // app.add_plugins(CursorMonitorPositionToolPlugin);
         app.add_plugins(TalkToolPlugin);
         app.add_plugins(ZoomToolPlugin);
         app.add_plugins(FocusToolPlugin);

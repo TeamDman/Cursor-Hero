@@ -34,7 +34,7 @@ fn spawn_tool_impl(
             },
             tool_component,
             Sensor,
-            RigidBody::Static,
+            RigidBody::Kinematic,
             Collider::cuboid(100.0, 100.0),
             ToolActiveTag,
         ));

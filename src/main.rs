@@ -6,6 +6,7 @@ use bevy::prelude::*;
 use bevy_embedded_assets::EmbeddedAssetPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_xpbd_2d::math::Vector;
+use bevy_xpbd_2d::plugins::PhysicsDebugPlugin;
 use bevy_xpbd_2d::plugins::setup::Physics;
 use bevy_xpbd_2d::plugins::PhysicsPlugins;
 use bevy_xpbd_2d::resources::Gravity;
@@ -37,6 +38,7 @@ fn main() {
     app.add_plugins(EmbeddedAssetPlugin {
         mode: bevy_embedded_assets::PluginMode::ReplaceDefault,
     })
+    .add_plugins(PhysicsDebugPlugin::default())
     .add_plugins(
         DefaultPlugins
             .set(ImagePlugin::default_nearest())
@@ -51,8 +53,8 @@ fn main() {
                     #[cfg(debug_assertions)]
                     resolution: (
                         // %BEGIN_RESOLUTION%
-                        1337.0,
-                        756.0
+                        1436.0,
+                        877.0
                         // %END_RESOLUTION%
                     )
                         .into(),
@@ -61,8 +63,8 @@ fn main() {
                     position: WindowPosition::At(
                         (
                             // %BEGIN_POSITION%
-                        223,
-                        53
+                        274,
+                        13
                         // %END_POSITION%
                         )
                             .into(),
