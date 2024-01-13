@@ -19,8 +19,8 @@ impl Plugin for ToolbeltPlugin {
         app.register_type::<Toolbelt>()
             .register_type::<Wheel>()
             .register_type::<Tool>()
-            .register_type::<ToolActiveTag>()
-            .register_type::<ToolHoveredTag>()
+            .register_type::<ActiveTool>()
+            .register_type::<HoveredTool>()
             .add_event::<ToolbeltEvent>()
             .add_event::<ToolHoveredEvent>()
             .add_event::<ToolActivationEvent>()
@@ -35,13 +35,16 @@ impl Plugin for ToolbeltPlugin {
                     insert_toolbelt,
                     insert_hover_frame,
                     remove_hover_frame,
+                    wheel_distribution
+
                 ),
             )
-            .add_systems(
-                PostUpdate,
-                wheel_distribution
-                    .after(PhysicsSet::Sync)
-                    .after(TransformSystem::TransformPropagate),
-            );
+            // .add_systems(
+            //     PostUpdate,
+            //     wheel_distribution
+            //         .after(PhysicsSet::Sync)
+            //         .after(TransformSystem::TransformPropagate),
+            // );
+            ;
     }
 }

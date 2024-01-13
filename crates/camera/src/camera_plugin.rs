@@ -46,7 +46,7 @@ fn spawn_camera(mut commands: Commands) {
         Camera2dBundle::default(),
         MainCamera,
         MovementDamping { factor: 0.90 },
-        Collider::capsule(20.0, 12.5),
+        MassPropertiesBundle::new_computed(&Collider::ball(10.0), 1.0),
         RigidBody::Kinematic,
         InputManagerBundle::<CameraAction> {
             input_map,

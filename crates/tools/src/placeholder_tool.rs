@@ -60,6 +60,7 @@ fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltEvent>,
+    toolbelt_query: Query<&Parent, With<Toolbelt>>,
 ) {
     for e in reader.read() {
         match e {
@@ -94,7 +95,7 @@ fn toolbelt_events(
     }
 }
 
-fn handle_input(actors: Query<(&ActionState<PlaceholderToolAction>, Option<&ToolActiveTag>)>) {
+fn handle_input(actors: Query<(&ActionState<PlaceholderToolAction>, Option<&ActiveTool>)>) {
     for (action_state, active_tool_tag) in actors.iter() {
         if active_tool_tag.is_none() {
             continue;

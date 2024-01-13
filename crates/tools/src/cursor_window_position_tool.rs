@@ -38,6 +38,7 @@ fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltEvent>,
+    toolbelt_query: Query<&Parent, With<Toolbelt>>,
 ) {
     for e in reader.read() {
         match e {
@@ -61,7 +62,7 @@ fn snap_mouse_to_pointer(
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<(Ref<GlobalTransform>, &Children), With<Character>>,
     pointers: Query<Ref<GlobalTransform>, With<Pointer>>,
-    tools: Query<(Option<&ToolActiveTag>, &Parent), With<CursorWindowPositionTool>>,
+    tools: Query<(Option<&ActiveTool>, &Parent), With<CursorWindowPositionTool>>,
 ) {
     // ensure only a single cursor positioning tool is active
     let active = tools

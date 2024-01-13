@@ -2,9 +2,10 @@ use crate::tool_naming::format_tool_image_from_source;
 use crate::tool_naming::format_tool_name_from_source;
 use bevy::prelude::*;
 use bevy_xpbd_2d::prelude::*;
+use cursor_hero_toolbelt::types::ActiveTool;
 use cursor_hero_toolbelt::types::ToolAction;
-use cursor_hero_toolbelt::types::ToolActiveTag;
 use cursor_hero_toolbelt::types::ToolBundle;
+use cursor_hero_toolbelt::types::ToolJoint;
 use cursor_hero_toolbelt::types::ToolbeltEvent;
 use leafwing_input_manager::prelude::*;
 
@@ -13,13 +14,14 @@ fn spawn_tool_impl(
     event: &ToolbeltEvent,
     commands: &mut Commands,
     toolbelt_id: Entity,
+    character_id: Entity,
     asset_server: &Res<AssetServer>,
     tool_component: impl Component,
     input_manager: Option<impl Bundle>,
 ) {
     let name = format_tool_name_from_source(source_path);
-    commands.entity(toolbelt_id).with_children(|t_commands| {
-        let mut builder = t_commands.spawn((
+    commands.entity(toolbelt_id).with_children(|toolbelt| {
+        let mut tool = toolbelt.spawn((
             ToolBundle {
                 name: Name::new(name),
                 sprite_bundle: SpriteBundle {
@@ -34,13 +36,21 @@ fn spawn_tool_impl(
             },
             tool_component,
             Sensor,
-            RigidBody::Kinematic,
+            RigidBody::Dynamic,
             Collider::cuboid(100.0, 100.0),
-            ToolActiveTag,
+            ActiveTool,
         ));
         if let Some(bundle) = input_manager {
-            builder.insert(bundle);
+            tool.insert(bundle);
         }
+        let tool_id = tool.id();
+        toolbelt.spawn((
+            FixedJoint::new(character_id, tool_id)
+                .with_linear_velocity_damping(0.1)
+                .with_angular_velocity_damping(1.0)
+                .with_compliance(0.00000001),
+            ToolJoint,
+        ));
     });
     info!(
         "{:?} => {:?}",
@@ -54,6 +64,7 @@ pub fn spawn_action_tool<T>(
     event: &ToolbeltEvent,
     commands: &mut Commands,
     toolbelt_id: Entity,
+    character_id: Entity,
     asset_server: &Res<AssetServer>,
     tool_component: impl Component,
 ) where
@@ -64,6 +75,7 @@ pub fn spawn_action_tool<T>(
         event,
         commands,
         toolbelt_id,
+        character_id,
         asset_server,
         tool_component,
         Some(InputManagerBundle::<T> {
@@ -81,6 +93,7 @@ pub fn spawn_tool(
     event: &ToolbeltEvent,
     commands: &mut Commands,
     toolbelt_id: Entity,
+    character_id: Entity,
     asset_server: &Res<AssetServer>,
     tool_component: impl Component,
 ) {
@@ -89,6 +102,7 @@ pub fn spawn_tool(
         event,
         commands,
         toolbelt_id,
+        character_id,
         asset_server,
         tool_component,
         None::<WeAintGotNoBundle>,

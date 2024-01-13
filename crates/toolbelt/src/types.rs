@@ -103,6 +103,8 @@ impl Default for Wheel {
 
 #[derive(Component, Reflect, Clone, Copy, Debug)]
 pub struct Tool;
+#[derive(Component, Reflect, Clone, Copy, Debug)]
+pub struct ToolJoint;
 
 pub trait ToolAction: Actionlike {
     fn default_input_map() -> InputMap<Self>;
@@ -131,10 +133,10 @@ impl Default for ToolBundle {
 }
 
 #[derive(Component, Reflect, Debug)]
-pub struct ToolActiveTag;
+pub struct ActiveTool;
 
 #[derive(Component, Reflect, Debug)]
-pub struct ToolHoveredTag;
+pub struct HoveredTool;
 
 #[derive(Event, Debug, Reflect)]
 pub enum ToolHoveredEvent {

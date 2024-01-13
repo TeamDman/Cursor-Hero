@@ -20,6 +20,7 @@ fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltEvent>,
+    toolbelt_query: Query<&Parent, With<Toolbelt>>,
 ) {
     for e in reader.read() {
         match e {
@@ -29,6 +30,7 @@ fn toolbelt_events(
                     e,
                     &mut commands,
                     *toolbelt_id,
+                    toolbelt_query.get(*toolbelt_id).unwrap().get(),
                     &asset_server,
                     PauseTool,
                 );
@@ -72,7 +74,7 @@ fn handle_input(
     mut commands: Commands,
     tools: Query<(
         &ActionState<PauseToolAction>,
-        Option<&ToolActiveTag>,
+        Option<&ActiveTool>,
         &Parent,
     )>,
 ) {
