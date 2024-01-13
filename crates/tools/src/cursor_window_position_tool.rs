@@ -41,6 +41,7 @@ fn toolbelt_events(
 ) {
     for e in reader.read() {
         match e {
+            //// Turned off for now
             // ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
             //     spawn_tool!(
             //         commands,
