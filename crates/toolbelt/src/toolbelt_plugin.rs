@@ -5,6 +5,7 @@ use leafwing_input_manager::prelude::*;
 
 use crate::hover_tag::hover_tag;
 use crate::insert_toolbelt::insert_toolbelt;
+use crate::pointer_reach::pointer_reach;
 use crate::tool_color::tool_color;
 use crate::tool_distribution::tool_distribution;
 use crate::tool_frame::insert_hover_frame;
@@ -39,6 +40,7 @@ impl Plugin for ToolbeltPlugin {
                     tool_visibility,
                     tool_distribution,
                     wheel_properties,
+                    pointer_reach,
                 ),
             );
     }

@@ -85,7 +85,7 @@ pub struct SpawnedCube;
 
 fn handle_input(
     tools: Query<(&ActionState<SprintToolAction>, Option<&ActiveTool>, &Parent)>,
-    toolbelts: Query<&Parent, With<Toolbelt>>,
+    toolbelts: Query<(&Wheel, &Parent), With<Toolbelt>>,
     mut character_query: Query<
         (&mut Character, Option<&mut Movement>, &Children),
         Without<MainCamera>,
@@ -98,11 +98,12 @@ fn handle_input(
             continue;
         }
 
-        let belt_parent = toolbelts
+        let (wheel, toolbelt_parent) = toolbelts
             .get(t_parent.get())
-            .expect("Toolbelt should have a parent")
-            .get();
-        if let Ok((mut character, movement, character_kids)) = character_query.get_mut(belt_parent)
+            .expect("Toolbelt should have a parent");
+
+        if let Ok((mut character, movement, character_kids)) =
+            character_query.get_mut(toolbelt_parent.get())
         {
             let pointer = character_kids
                 .iter()
@@ -124,9 +125,11 @@ fn handle_input(
                 character.zoom_speed = character.zoom_sprint_speed
                     + (character.zoom_default_speed - character.zoom_sprint_speed) * (1.0 - open);
 
-                if let Some(Ok(mut pointer)) = pointer.map(|e| pointer_query.get_mut(*e)) {
-                    pointer.reach = pointer.default_reach
-                        + (pointer.sprint_reach - pointer.default_reach) * open;
+                if !wheel.open {
+                    if let Some(Ok(mut pointer)) = pointer.map(|e| pointer_query.get_mut(*e)) {
+                        pointer.reach = pointer.default_reach
+                            + (pointer.sprint_reach - pointer.default_reach) * open;
+                    }
                 }
             } else if t_act.just_released(SprintToolAction::Sprint) {
                 match movement {
@@ -140,9 +143,10 @@ fn handle_input(
                     }
                 }
                 character.zoom_speed = character.zoom_default_speed;
-
-                if let Some(Ok(mut pointer)) = pointer.map(|e| pointer_query.get_mut(*e)) {
-                    pointer.reach = pointer.default_reach;
+                if !wheel.open {
+                    if let Some(Ok(mut pointer)) = pointer.map(|e| pointer_query.get_mut(*e)) {
+                        pointer.reach = pointer.default_reach;
+                    }
                 }
             }
         }

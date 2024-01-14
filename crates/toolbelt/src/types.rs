@@ -95,6 +95,7 @@ pub struct Wheel {
     pub scale: f32,
     pub scale_start: f32,
     pub scale_end: f32,
+    pub open: bool,
 }
 impl Default for Wheel {
     fn default() -> Self {
@@ -109,6 +110,7 @@ impl Default for Wheel {
             scale: 1.0,
             scale_start: 0.5,
             scale_end: 1.0,
+            open: false,
         }
     }
 }

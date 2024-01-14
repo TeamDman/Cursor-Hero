@@ -7,8 +7,6 @@ use bevy_xpbd_2d::constraints::FixedJoint;
 use cursor_hero_pointer::pointer_plugin::Pointer;
 use itertools::Itertools;
 
-/// This system places the tools in a circle around the toolbelt wearer.
-/// It also adjusts the pointer radius to match the toolbelt radius.
 #[allow(clippy::type_complexity)]
 pub fn tool_distribution(
     toolbelts: Query<(Ref<Wheel>, &Children, &Parent), (With<Toolbelt>, Without<Tool>)>,

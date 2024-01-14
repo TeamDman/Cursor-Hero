@@ -1,6 +1,5 @@
 use bevy::input::mouse::MouseWheel;
 use bevy::prelude::*;
-use bevy::transform::TransformSystem;
 use bevy_xpbd_2d::prelude::*;
 use cursor_hero_movement::MovementEvent;
 use cursor_hero_physics::damping_plugin::MovementDamping;
@@ -77,7 +76,6 @@ pub fn update_camera_zoom(
 fn handle_events(
     mut commands: Commands,
     mut camera_events: EventReader<CameraEvent>,
-    mut movement_events: EventWriter<MovementEvent>,
     camera_joint_query: Query<(Entity, &FixedJoint), With<CameraJoint>>,
     camera_query: Query<(Entity, Option<&Children>), With<MainCamera>>,
 ) {
@@ -117,14 +115,3 @@ fn handle_events(
         }
     }
 }
-
-// fn camera_follow_update(
-//     mut cam: Query<&mut Transform, With<MainCamera>>,
-//     follow: Query<&Transform, (With<FollowWithCamera>, Without<MainCamera>)>, // we exclude the camera to guarantee queries are disjoint
-// ) {
-//     if let Ok(follow) = follow.get_single() {
-//         cam.single_mut().translation = follow.translation;
-//     } else if follow.iter().len() != 0 {
-//         panic!("Multiple entities with FollowWithCamera component");
-//     }
-// }
