@@ -1719,7 +1719,6 @@ dependencies = [
  "bevy",
  "bevy-inspector-egui",
  "bevy_embedded_assets",
- "bevy_xpbd_2d",
  "cursor_hero_plugins",
  "cursor_hero_version",
  "embed-resource",

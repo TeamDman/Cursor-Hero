@@ -5,11 +5,6 @@ use bevy::input::common_conditions::input_toggle_active;
 use bevy::prelude::*;
 use bevy_embedded_assets::EmbeddedAssetPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use bevy_xpbd_2d::math::Vector;
-use bevy_xpbd_2d::plugins::setup::Physics;
-use bevy_xpbd_2d::plugins::PhysicsDebugPlugin;
-use bevy_xpbd_2d::plugins::PhysicsPlugins;
-use bevy_xpbd_2d::resources::Gravity;
 use cursor_hero_plugins::MyPlugin;
 use cursor_hero_version::version_plugin::VersionPlugin;
 
@@ -38,7 +33,6 @@ fn main() {
     app.add_plugins(EmbeddedAssetPlugin {
         mode: bevy_embedded_assets::PluginMode::ReplaceDefault,
     })
-    // .add_plugins(PhysicsDebugPlugin::default())
     .add_plugins(
         DefaultPlugins
             .set(ImagePlugin::default_nearest())
@@ -53,8 +47,8 @@ fn main() {
                     #[cfg(debug_assertions)]
                     resolution: (
                         // %BEGIN_RESOLUTION%
-                        1368.0,
-                        1022.0
+                        1695.0,
+                        892.0
                         // %END_RESOLUTION%
                     )
                         .into(),
@@ -63,8 +57,8 @@ fn main() {
                     position: WindowPosition::At(
                         (
                             // %BEGIN_POSITION%
-                        280,
-                        81
+                        140,
+                        83
                         // %END_POSITION%
                         )
                             .into(),
@@ -77,10 +71,7 @@ fn main() {
             .set(log_plugin)
             .build(),
     )
-    .add_plugins(PhysicsPlugins::default())
-    .insert_resource(Gravity(Vector::ZERO))
-    .insert_resource(Time::new_with(Physics::fixed_hz(144.0)))
-    .add_plugins(WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)))
+     .add_plugins(WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)))
     // .insert_resource(ClearColor(Color::NONE))
     .add_plugins((FrameTimeDiagnosticsPlugin,))
     .add_plugins(MyPlugin);

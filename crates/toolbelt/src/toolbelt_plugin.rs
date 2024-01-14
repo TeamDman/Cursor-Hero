@@ -38,10 +38,15 @@ impl Plugin for ToolbeltPlugin {
                     tool_color,
                     tool_toggle,
                     tool_visibility,
-                    tool_distribution,
                     wheel_properties,
                     pointer_reach,
                 ),
+            )
+            .add_systems(
+                PostUpdate,
+                tool_distribution
+                    .after(PhysicsSet::Sync)
+                    .after(TransformSystem::TransformPropagate),
             );
     }
 }

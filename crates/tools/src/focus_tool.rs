@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy::window::RawHandleWrapper;
-use cursor_hero_camera::camera_plugin::FollowedByCamera;
+use cursor_hero_camera::camera_plugin::FollowWithMainCamera;
 use cursor_hero_camera::camera_plugin::MainCamera;
 use cursor_hero_movement::Movement;
 use cursor_hero_movement::MovementEvent;
@@ -96,7 +96,7 @@ fn handle_input(
     mut characters: Query<
         (
             Entity,
-            Option<&FollowedByCamera>,
+            Option<&FollowWithMainCamera>,
             &mut Handle<ColorMaterial>,
         ),
         With<Character>,

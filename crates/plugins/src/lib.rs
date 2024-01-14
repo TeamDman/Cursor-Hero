@@ -12,6 +12,7 @@ use cursor_hero_movement::MovementPlugin;
 use cursor_hero_icon::IconPlugin;
 use cursor_hero_pause_tool::pause_tool_plugin::PauseToolPlugin;
 use cursor_hero_physics::damping_plugin::DampingPlugin;
+use cursor_hero_physics::physics_plugin::PhysicsPlugin;
 use cursor_hero_pointer::pointer_plugin::PointerPlugin;
 use cursor_hero_pressure_plate::pressure_plate_plugin::PressurePlatePlugin;
 #[cfg(debug_assertions)]
@@ -49,6 +50,7 @@ impl Plugin for MyPlugin {
         app.add_plugins(DampingPlugin);
         app.add_plugins(LevelBoundsPlugin);
         app.add_plugins(IconPlugin);
+        app.add_plugins(PhysicsPlugin);
         //app.add_plugins(ClickDragMovementPlugin);
         //app.add_plugins(HoverShowerRelayPlugin);
         //app.add_plugins(HoverShowerServicePlugin);

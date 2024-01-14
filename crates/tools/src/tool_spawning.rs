@@ -2,11 +2,7 @@ use crate::tool_naming::format_tool_image_from_source;
 use crate::tool_naming::format_tool_name_from_source;
 use bevy::prelude::*;
 use bevy_xpbd_2d::prelude::*;
-use cursor_hero_toolbelt::types::ActiveTool;
-use cursor_hero_toolbelt::types::ToolAction;
-use cursor_hero_toolbelt::types::ToolBundle;
-use cursor_hero_toolbelt::types::ToolJoint;
-use cursor_hero_toolbelt::types::ToolbeltEvent;
+use cursor_hero_toolbelt::types::*;
 use leafwing_input_manager::prelude::*;
 
 fn spawn_tool_impl(
@@ -43,11 +39,6 @@ fn spawn_tool_impl(
         if let Some(bundle) = input_manager {
             tool.insert(bundle);
         }
-        let tool_id = tool.id();
-        toolbelt.spawn((
-            FixedJoint::new(character_id, tool_id).with_compliance(0.0),
-            ToolJoint,
-        ));
     });
     info!(
         "{:?} => {:?}",

@@ -1,5 +1,7 @@
+use bevy::ecs::query::QuerySingleError::MultipleEntities;
 use bevy::input::mouse::MouseWheel;
 use bevy::prelude::*;
+use bevy::transform::TransformSystem;
 use bevy_xpbd_2d::prelude::*;
 use cursor_hero_movement::MovementEvent;
 use cursor_hero_physics::damping_plugin::MovementDamping;
@@ -18,6 +20,12 @@ impl Plugin for CameraPlugin {
             .add_systems(Startup, spawn_camera)
             .add_systems(Update, (update_camera_zoom, handle_events))
             .add_event::<CameraEvent>()
+            .add_systems(
+                PostUpdate,
+                follow
+                    .after(PhysicsSet::Sync)
+                    .before(TransformSystem::TransformPropagate),
+            )
             .register_type::<MainCamera>();
     }
 }
@@ -51,9 +59,7 @@ fn spawn_camera(mut commands: Commands) {
 }
 
 #[derive(Component)]
-pub struct FollowedByCamera;
-#[derive(Component)]
-pub struct CameraJoint;
+pub struct FollowWithMainCamera;
 
 #[derive(Event, Debug, Reflect)]
 pub enum CameraEvent {
@@ -76,7 +82,6 @@ pub fn update_camera_zoom(
 fn handle_events(
     mut commands: Commands,
     mut camera_events: EventReader<CameraEvent>,
-    camera_joint_query: Query<(Entity, &FixedJoint), With<CameraJoint>>,
     camera_query: Query<(Entity, Option<&Children>), With<MainCamera>>,
 ) {
     if let Ok((camera_id, camera_children)) = camera_query.get_single() {
@@ -84,34 +89,40 @@ fn handle_events(
             match event {
                 CameraEvent::BeginFollowing { target_id } => {
                     info!("Camera following character '{:?}'", target_id);
-                    // add joint between character and camera
-                    let joint_id = commands
-                        .spawn((
-                            FixedJoint::new(*target_id, camera_id)
-                                // .with_linear_velocity_damping(0.99)
-                                .with_compliance(0.0),
-                            CameraJoint,
-                        ))
-                        .id();
-                    commands.entity(*target_id).add_child(joint_id);
-                    commands.entity(camera_id).add_child(joint_id);
-                    // insert tag on character to mark it as being followed
-                    commands.entity(*target_id).insert(FollowedByCamera);
+                    // tag character to mark it as being followed
+                    commands.entity(*target_id).insert(FollowWithMainCamera);
                 }
                 CameraEvent::StopFollowing { target_id } => {
                     info!("Camera stopped following character '{:?}'", target_id);
-                    // remove joint between character and camera
-                    for joint_id in camera_children.iter().flat_map(|children| children.iter()) {
-                        if let Ok((joint_id, joint)) = camera_joint_query.get(*joint_id) {
-                            if joint.entity1 == *target_id {
-                                commands.entity(joint_id).despawn();
-                            }
-                        }
-                    }
-                    // remove tag on character
-                    commands.entity(*target_id).remove::<FollowedByCamera>();
+                    // remove tag from character
+                    commands.entity(*target_id).remove::<FollowWithMainCamera>();
                 }
             }
         }
+    }
+}
+
+fn follow(
+    follow_query: Query<&GlobalTransform, With<FollowWithMainCamera>>,
+    mut cam_query: Query<&mut Transform, With<MainCamera>>,
+) {
+    match follow_query.get_single() {
+        Ok(follow_transform) => match cam_query.get_single_mut() {
+            Ok(mut cam_transform) => {
+                cam_transform.translation = follow_transform.translation();
+            }
+            Err(e) => match e {
+                MultipleEntities(e) => {
+                    error!("Error getting camera transform: {:?}", e);
+                }
+                _ => {}
+            },
+        },
+        Err(e) => match e {
+            MultipleEntities(e) => {
+                error!("Error getting camera follow transform: {:?}", e);
+            }
+            _ => {}
+        },
     }
 }

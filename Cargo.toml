@@ -65,7 +65,6 @@ cursor_hero_plugins = { workspace = true }
 cursor_hero_version = { workspace = true }
 bevy = { workspace = true }
 bevy-inspector-egui = { workspace = true }
-bevy_xpbd_2d = { workspace = true }
 bevy_embedded_assets = { workspace = true }
 
 [dev-dependencies]
