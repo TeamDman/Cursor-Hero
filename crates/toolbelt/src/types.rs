@@ -95,6 +95,9 @@ pub struct Wheel {
     pub scale: f32,
     pub scale_start: f32,
     pub scale_end: f32,
+    pub alpha: f32,
+    pub alpha_start: f32,
+    pub alpha_end: f32,
     pub open: bool,
 }
 impl Default for Wheel {
@@ -110,6 +113,9 @@ impl Default for Wheel {
             scale: 1.0,
             scale_start: 0.5,
             scale_end: 1.0,
+            alpha: 0.0,
+            alpha_start: 0.0,
+            alpha_end: 1.0,
             open: false,
         }
     }

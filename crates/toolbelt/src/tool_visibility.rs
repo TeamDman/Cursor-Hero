@@ -10,18 +10,29 @@ pub fn tool_visibility(
         (&ActionState<ToolbeltAction>, &mut Wheel, &Children),
         (Without<Tool>, With<Toolbelt>),
     >,
-    mut tool_query: Query<(Entity, &mut Transform, &mut Visibility), With<Tool>>,
+    mut tool_query: Query<(Entity, &mut Transform, &mut Visibility, &mut Sprite), With<Tool>>,
 ) {
-    for (toolbelt_actions, mut wheel, toolbelt_kids) in toolbelts.iter_mut() {
+    for (toolbelt_actions, wheel, toolbelt_kids) in toolbelts.iter_mut() {
         if toolbelt_actions.just_pressed(ToolbeltAction::Show) {
             info!("Show toolbelt");
-            for (_, _, mut tool_visibility) in tool_query.iter_mut() {
-                *tool_visibility = Visibility::Visible;
+            for child_id in toolbelt_kids.iter() {
+                if let Ok((_, _, mut tool_visibility, _)) = tool_query.get_mut(*child_id) {
+                    *tool_visibility = Visibility::Visible;
+                }
             }
         } else if toolbelt_actions.just_released(ToolbeltAction::Show) {
             info!("Hide toolbelt");
-            for (_, _, mut tool_visibility) in tool_query.iter_mut() {
-                *tool_visibility = Visibility::Hidden;
+            for child_id in toolbelt_kids.iter() {
+                if let Ok((_, _, mut tool_visibility, _)) = tool_query.get_mut(*child_id) {
+                    *tool_visibility = Visibility::Hidden;
+                }
+            }
+        }
+        if wheel.open {
+            for child_id in toolbelt_kids.iter() {
+                if let Ok((_, _, _, mut tool_sprite)) = tool_query.get_mut(*child_id) {
+                    tool_sprite.color = tool_sprite.color.with_a(wheel.alpha);
+                }
             }
         }
     }

@@ -37,8 +37,12 @@ impl Plugin for ToolbeltPlugin {
                     remove_hover_frame,
                     tool_color,
                     tool_toggle,
-                    tool_visibility,
-                    (wheel_properties, pointer_reach).chain(), // prevent sprint plugin from clobbering wheel pointer reach update
+                    (
+                        wheel_properties,
+                        pointer_reach, // prevent sprint plugin from clobbering wheel pointer reach update
+                        tool_visibility,
+                    )
+                        .chain(),
                 ),
             )
             .add_systems(
