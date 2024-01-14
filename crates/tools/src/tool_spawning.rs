@@ -45,10 +45,7 @@ fn spawn_tool_impl(
         }
         let tool_id = tool.id();
         toolbelt.spawn((
-            FixedJoint::new(character_id, tool_id),
-            // .with_linear_velocity_damping(0.1)
-            // .with_angular_velocity_damping(1.0)
-            // .with_compliance(0.00000001),
+            FixedJoint::new(character_id, tool_id).with_compliance(0.0),
             ToolJoint,
         ));
     });

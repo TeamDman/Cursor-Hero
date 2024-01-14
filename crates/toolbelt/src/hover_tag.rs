@@ -10,7 +10,7 @@ pub fn hover_tag(
         (
             Entity,
             &CollidingEntities,
-            &InheritedVisibility,
+            &Visibility,
             Option<&HoveredTool>,
         ),
         With<Tool>,
@@ -19,7 +19,7 @@ pub fn hover_tag(
 ) {
     let pointers = pointer_query.iter().collect::<Vec<_>>();
     for (tool_id, tool_touching, tool_visible, tool_hovered) in tool_query.iter() {
-        if !tool_visible.get() {
+        if tool_visible != Visibility::Visible {
             continue;
         }
         if tool_touching.iter().any(|e| pointers.contains(e)) {

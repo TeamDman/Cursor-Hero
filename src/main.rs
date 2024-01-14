@@ -38,7 +38,7 @@ fn main() {
     app.add_plugins(EmbeddedAssetPlugin {
         mode: bevy_embedded_assets::PluginMode::ReplaceDefault,
     })
-    .add_plugins(PhysicsDebugPlugin::default())
+    // .add_plugins(PhysicsDebugPlugin::default())
     .add_plugins(
         DefaultPlugins
             .set(ImagePlugin::default_nearest())
@@ -53,8 +53,8 @@ fn main() {
                     #[cfg(debug_assertions)]
                     resolution: (
                         // %BEGIN_RESOLUTION%
-                        706.0,
-                        817.0
+                        1320.0,
+                        905.0
                         // %END_RESOLUTION%
                     )
                         .into(),
@@ -63,8 +63,8 @@ fn main() {
                     position: WindowPosition::At(
                         (
                             // %BEGIN_POSITION%
-                        628,
-                        230
+                        280,
+                        81
                         // %END_POSITION%
                         )
                             .into(),

@@ -97,6 +97,7 @@ fn spawn_character(
             ..default()
         },
         Character::default(),
+        MainCharacter,
         MovementDamping { factor: 0.90 },
         Name::new("Character"),
         RigidBody::Kinematic,
@@ -109,7 +110,7 @@ fn spawn_character(
             target_id: character.id(),
         });
     }
-    info!("Character spawn command issued");
+    info!("Spawned character");
 }
 
 fn handle_camera_events(

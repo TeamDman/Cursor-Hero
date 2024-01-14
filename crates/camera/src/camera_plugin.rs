@@ -88,16 +88,17 @@ fn handle_events(
                     info!("Camera following character '{:?}'", target_id);
                     // add joint between character and camera
                     let joint_id = commands
-                        .spawn((FixedJoint::new(*target_id, camera_id), CameraJoint))
+                        .spawn((
+                            FixedJoint::new(*target_id, camera_id)
+                                // .with_linear_velocity_damping(0.99)
+                                .with_compliance(0.0),
+                            CameraJoint,
+                        ))
                         .id();
                     commands.entity(*target_id).add_child(joint_id);
                     commands.entity(camera_id).add_child(joint_id);
                     // insert tag on character to mark it as being followed
                     commands.entity(*target_id).insert(FollowedByCamera);
-                    // insert movement on character
-                    movement_events.send(MovementEvent::AddMovement {
-                        target_id: *target_id,
-                    });
                 }
                 CameraEvent::StopFollowing { target_id } => {
                     info!("Camera stopped following character '{:?}'", target_id);
@@ -111,10 +112,6 @@ fn handle_events(
                     }
                     // remove tag on character
                     commands.entity(*target_id).remove::<FollowedByCamera>();
-                    // remove movement on character
-                    movement_events.send(MovementEvent::RemoveMovement {
-                        target_id: *target_id,
-                    });
                 }
             }
         }

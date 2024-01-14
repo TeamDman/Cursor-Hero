@@ -138,6 +138,7 @@ impl Default for ToolBundle {
                     custom_size: Some(Vec2::new(100.0, 100.0)),
                     ..default()
                 },
+                visibility: Visibility::Hidden,
                 ..default()
             },
         }

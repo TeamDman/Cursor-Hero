@@ -6,12 +6,14 @@ use leafwing_input_manager::prelude::*;
 use crate::hover_tag::hover_tag;
 use crate::insert_toolbelt::insert_toolbelt;
 use crate::tool_color::tool_color;
+use crate::tool_distribution::tool_distribution;
 use crate::tool_frame::insert_hover_frame;
 use crate::tool_frame::remove_hover_frame;
 use crate::tool_toggle::tool_toggle;
+use crate::tool_visibility;
+use crate::tool_visibility::tool_visibility;
 use crate::types::*;
-use crate::wheel_distribution::wheel_distribution;
-use crate::wheel_opening::wheel_opening;
+use crate::wheel_properties::wheel_properties;
 pub struct ToolbeltPlugin;
 
 impl Plugin for ToolbeltPlugin {
@@ -28,14 +30,15 @@ impl Plugin for ToolbeltPlugin {
             .add_systems(
                 Update,
                 (
-                    tool_color,
                     hover_tag,
-                    tool_toggle,
-                    wheel_opening,
-                    insert_toolbelt,
                     insert_hover_frame,
+                    insert_toolbelt,
                     remove_hover_frame,
-                    wheel_distribution,
+                    tool_color,
+                    tool_toggle,
+                    tool_visibility,
+                    tool_distribution,
+                    wheel_properties,
                 ),
             );
     }
