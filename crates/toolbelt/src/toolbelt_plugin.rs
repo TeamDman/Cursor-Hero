@@ -38,8 +38,7 @@ impl Plugin for ToolbeltPlugin {
                     tool_color,
                     tool_toggle,
                     tool_visibility,
-                    wheel_properties,
-                    pointer_reach,
+                    (wheel_properties, pointer_reach).chain(), // prevent sprint plugin from clobbering wheel pointer reach update
                 ),
             )
             .add_systems(
