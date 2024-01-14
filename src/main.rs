@@ -6,8 +6,8 @@ use bevy::prelude::*;
 use bevy_embedded_assets::EmbeddedAssetPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_xpbd_2d::math::Vector;
-use bevy_xpbd_2d::plugins::PhysicsDebugPlugin;
 use bevy_xpbd_2d::plugins::setup::Physics;
+use bevy_xpbd_2d::plugins::PhysicsDebugPlugin;
 use bevy_xpbd_2d::plugins::PhysicsPlugins;
 use bevy_xpbd_2d::resources::Gravity;
 use cursor_hero_plugins::MyPlugin;
@@ -53,8 +53,8 @@ fn main() {
                     #[cfg(debug_assertions)]
                     resolution: (
                         // %BEGIN_RESOLUTION%
-                        562.0,
-                        466.0
+                        706.0,
+                        817.0
                         // %END_RESOLUTION%
                     )
                         .into(),

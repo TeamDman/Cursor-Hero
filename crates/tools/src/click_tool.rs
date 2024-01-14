@@ -34,17 +34,19 @@ fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltEvent>,
-    toolbelt_query: Query<&Parent, With<Toolbelt>>,
 ) {
     for e in reader.read() {
         match e {
-            ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
+            ToolbeltEvent::PopulateDefaultToolbelt {
+                toolbelt_id,
+                character_id,
+            } => {
                 spawn_action_tool::<ClickToolAction>(
                     file!(),
                     e,
                     &mut commands,
                     *toolbelt_id,
-                    toolbelt_query.get(*toolbelt_id).unwrap().get(),
+                    *character_id,
                     &asset_server,
                     ClickTool,
                 );
@@ -125,11 +127,7 @@ fn spawn_worker_thread(mut commands: Commands) {
 }
 
 fn handle_input(
-    tools: Query<(
-        &ActionState<ClickToolAction>,
-        Option<&ActiveTool>,
-        &Parent,
-    )>,
+    tools: Query<(&ActionState<ClickToolAction>, Option<&ActiveTool>, &Parent)>,
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<&Children, With<Character>>,
     pointers: Query<&GlobalTransform, With<Pointer>>,

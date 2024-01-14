@@ -1731,6 +1731,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy_xpbd_2d",
+ "cursor_hero_movement",
  "cursor_hero_physics",
  "leafwing-input-manager",
 ]

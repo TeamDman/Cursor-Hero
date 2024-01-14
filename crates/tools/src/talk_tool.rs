@@ -30,17 +30,19 @@ fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltEvent>,
-    toolbelt_query: Query<&Parent, With<Toolbelt>>,
 ) {
     for e in reader.read() {
         match e {
-            ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
+            ToolbeltEvent::PopulateDefaultToolbelt {
+                toolbelt_id,
+                character_id,
+            } => {
                 spawn_action_tool::<TalkToolAction>(
                     file!(),
                     e,
                     &mut commands,
                     *toolbelt_id,
-                    toolbelt_query.get(*toolbelt_id).unwrap().get(),
+                    *character_id,
                     &asset_server,
                     TalkTool,
                 );

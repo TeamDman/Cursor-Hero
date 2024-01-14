@@ -58,17 +58,19 @@ fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltEvent>,
-    toolbelt_query: Query<&Parent, With<Toolbelt>>,
 ) {
     for e in reader.read() {
         match e {
-            ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
+            ToolbeltEvent::PopulateDefaultToolbelt {
+                toolbelt_id,
+                character_id,
+            } => {
                 spawn_action_tool::<SprintToolAction>(
                     file!(),
                     e,
                     &mut commands,
                     *toolbelt_id,
-                    toolbelt_query.get(*toolbelt_id).unwrap().get(),
+                    *character_id,
                     &asset_server,
                     SprintTool,
                 );
@@ -82,11 +84,7 @@ fn toolbelt_events(
 pub struct SpawnedCube;
 
 fn handle_input(
-    tools: Query<(
-        &ActionState<SprintToolAction>,
-        Option<&ActiveTool>,
-        &Parent,
-    )>,
+    tools: Query<(&ActionState<SprintToolAction>, Option<&ActiveTool>, &Parent)>,
     toolbelts: Query<&Parent, With<Toolbelt>>,
     mut character_query: Query<
         (&mut Character, Option<&mut Movement>, &Children),
@@ -104,8 +102,7 @@ fn handle_input(
             .get(t_parent.get())
             .expect("Toolbelt should have a parent")
             .get();
-        if let Ok((mut character, movement, character_kids)) =
-            character_query.get_mut(belt_parent)
+        if let Ok((mut character, movement, character_kids)) = character_query.get_mut(belt_parent)
         {
             let pointer = character_kids
                 .iter()

@@ -3,8 +3,8 @@ use bevy::sprite::Anchor;
 use bevy::transform::TransformSystem;
 use bevy::window::PrimaryWindow;
 use bevy_xpbd_2d::prelude::*;
-use cursor_hero_camera::camera_plugin::FollowWithCamera;
 use cursor_hero_camera::camera_plugin::MainCamera;
+use cursor_hero_character::character_plugin::MainCharacter;
 use cursor_hero_input::active_input_state_plugin::ActiveInput;
 use leafwing_input_manager::prelude::*;
 use leafwing_input_manager::user_input::InputKind;
@@ -127,7 +127,7 @@ fn insert_pointer(
                 ))
                 .id();
             parent.spawn((
-                    FixedJoint::new(character_id, pointer_id)
+                FixedJoint::new(character_id, pointer_id)
                     .with_linear_velocity_damping(0.1)
                     .with_angular_velocity_damping(1.0)
                     .with_compliance(0.00000001),
@@ -188,15 +188,9 @@ fn update_pointer_from_mouse(
     camera_query: Query<(&Camera, &GlobalTransform), (With<MainCamera>, Without<Character>)>,
     character_query: Query<
         (&Position, &Children),
-        (
-            With<FollowWithCamera>,
-            With<Character>,
-            Without<MainCamera>,
-            Without<Pointer>,
-        ),
+        (With<MainCharacter>, Without<MainCamera>, Without<Pointer>),
     >,
-    mut pointer_query: Query<&mut Position, (With<Pointer>, Without<FollowWithCamera>)>,
-    mut pointer_joint_query: Query<&mut FixedJoint, With<PointerJoint>>
+    mut pointer_joint_query: Query<&mut FixedJoint, With<PointerJoint>>,
 ) {
     let (camera, camera_global_transform) = camera_query.single();
     let window = window_query.single();

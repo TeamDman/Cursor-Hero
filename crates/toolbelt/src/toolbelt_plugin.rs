@@ -35,16 +35,8 @@ impl Plugin for ToolbeltPlugin {
                     insert_toolbelt,
                     insert_hover_frame,
                     remove_hover_frame,
-                    wheel_distribution
-
+                    wheel_distribution,
                 ),
-            )
-            // .add_systems(
-            //     PostUpdate,
-            //     wheel_distribution
-            //         .after(PhysicsSet::Sync)
-            //         .after(TransformSystem::TransformPropagate),
-            // );
-            ;
+            );
     }
 }

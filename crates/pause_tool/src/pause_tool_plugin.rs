@@ -20,17 +20,19 @@ fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltEvent>,
-    toolbelt_query: Query<&Parent, With<Toolbelt>>,
 ) {
     for e in reader.read() {
         match e {
-            ToolbeltEvent::PopulateInspectorToolbelt(toolbelt_id) => {
+            ToolbeltEvent::PopulateInspectorToolbelt {
+                toolbelt_id,
+                character_id,
+            } => {
                 spawn_action_tool::<PauseToolAction>(
                     file!(),
                     e,
                     &mut commands,
                     *toolbelt_id,
-                    toolbelt_query.get(*toolbelt_id).unwrap().get(),
+                    *character_id,
                     &asset_server,
                     PauseTool,
                 );
@@ -72,11 +74,7 @@ impl ToolAction for PauseToolAction {
 
 fn handle_input(
     mut commands: Commands,
-    tools: Query<(
-        &ActionState<PauseToolAction>,
-        Option<&ActiveTool>,
-        &Parent,
-    )>,
+    tools: Query<(&ActionState<PauseToolAction>, Option<&ActiveTool>, &Parent)>,
 ) {
     for (t_act, t_enabled, t_parent) in tools.iter() {
         if t_enabled.is_none() {

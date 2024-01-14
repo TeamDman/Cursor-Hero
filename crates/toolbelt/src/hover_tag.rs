@@ -6,7 +6,15 @@ use cursor_hero_pointer::pointer_plugin::Pointer;
 pub fn hover_tag(
     mut commands: Commands,
     pointer_query: Query<Entity, With<Pointer>>,
-    tool_query: Query<(Entity, &CollidingEntities, &InheritedVisibility, Option<&HoveredTool>), With<Tool>>,
+    tool_query: Query<
+        (
+            Entity,
+            &CollidingEntities,
+            &InheritedVisibility,
+            Option<&HoveredTool>,
+        ),
+        With<Tool>,
+    >,
     mut events: EventWriter<ToolHoveredEvent>,
 ) {
     let pointers = pointer_query.iter().collect::<Vec<_>>();

@@ -38,19 +38,10 @@ fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltEvent>,
-    toolbelt_query: Query<&Parent, With<Toolbelt>>,
 ) {
     for e in reader.read() {
         match e {
-            //// Turned off for now
-            // ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
-            //     spawn_tool!(
-            //         commands,
-            //         *toolbelt_id,
-            //         asset_server,
-            //         CursorWindowPositionTool
-            //     );
-            // }
+            // registration disabled for now
             _ => {}
         }
     }

@@ -4,7 +4,7 @@ use bevy_inspector_egui::prelude::ReflectInspectorOptions;
 use bevy_inspector_egui::InspectorOptions;
 use bevy_xpbd_2d::prelude::*;
 
-use cursor_hero_camera::camera_plugin::FollowWithCamera;
+use cursor_hero_camera::camera_plugin::CameraEvent;
 use cursor_hero_movement::Movement;
 use cursor_hero_physics::damping_plugin::MovementDamping;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
@@ -20,6 +20,7 @@ impl Plugin for CharacterPlugin {
     fn build(&self, app: &mut App) {
         app.configure_sets(Startup, CharacterSystemSet::Spawn)
             .add_systems(Startup, spawn_character.in_set(CharacterSystemSet::Spawn))
+            .add_systems(Update, handle_camera_events)
             .register_type::<Character>();
     }
 }
@@ -34,6 +35,10 @@ pub struct Character {
     #[inspector(min = 0.0)]
     pub zoom_sprint_speed: f32,
 }
+
+#[derive(Component)]
+pub struct MainCharacter;
+
 impl Default for Character {
     fn default() -> Self {
         Self {
@@ -71,6 +76,7 @@ fn spawn_character(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    mut camera_events: EventWriter<CameraEvent>,
 ) {
     let default_material = materials.add(CharacterColor::FocusedWithCamera.as_material());
     let os_cursor_pos = get_cursor_position().expect("Should be able to fetch cursor pos from OS");
@@ -99,7 +105,33 @@ fn spawn_character(
         Movement::default(),
     ));
     if CharacterColor::default() == CharacterColor::FocusedWithCamera {
-        character.insert(FollowWithCamera);
+        camera_events.send(CameraEvent::BeginFollowing {
+            target_id: character.id(),
+        });
     }
     info!("Character spawn command issued");
+}
+
+fn handle_camera_events(
+    mut commands: Commands,
+    mut camera_events: EventReader<CameraEvent>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+    mut character_query: Query<(Entity, &mut Handle<ColorMaterial>), With<Character>>,
+) {
+    for event in camera_events.read() {
+        match event {
+            CameraEvent::BeginFollowing { target_id } => {
+                if let Ok((character_id, mut material)) = character_query.get_mut(*target_id) {
+                    *material = materials.add(CharacterColor::FocusedWithCamera.as_material());
+                    info!("Updated character color to focused");
+                }
+            }
+            CameraEvent::StopFollowing { target_id } => {
+                if let Ok((character_id, mut material)) = character_query.get_mut(*target_id) {
+                    *material = materials.add(CharacterColor::Unfocused.as_material());
+                    info!("Updated character color to unfocused");
+                }
+            }
+        }
+    }
 }

@@ -28,17 +28,19 @@ fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltEvent>,
-    toolbelt_query: Query<&Parent, With<Toolbelt>>,
 ) {
     for e in reader.read() {
         match e {
-            ToolbeltEvent::PopulateInspectorToolbelt(toolbelt_id) => {
+            ToolbeltEvent::PopulateInspectorToolbelt {
+                toolbelt_id,
+                character_id,
+            } => {
                 spawn_action_tool::<CubeToolAction>(
                     file!(),
                     e,
                     &mut commands,
                     *toolbelt_id,
-                    toolbelt_query.get(*toolbelt_id).unwrap().get(),
+                    *character_id,
                     &asset_server,
                     CubeTool,
                 );
@@ -89,11 +91,7 @@ pub struct CubeToolInteractable;
 
 fn handle_input(
     mut commands: Commands,
-    tools: Query<(
-        &ActionState<CubeToolAction>,
-        Option<&ActiveTool>,
-        &Parent,
-    )>,
+    tools: Query<(&ActionState<CubeToolAction>, Option<&ActiveTool>, &Parent)>,
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<&Children, With<Character>>,
     pointers: Query<&GlobalTransform, With<Pointer>>,

@@ -26,17 +26,19 @@ fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltEvent>,
-    toolbelt_query: Query<&Parent, With<Toolbelt>>,
 ) {
     for e in reader.read() {
         match e {
-            ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
+            ToolbeltEvent::PopulateDefaultToolbelt {
+                toolbelt_id,
+                character_id,
+            } => {
                 spawn_action_tool::<ZoomToolAction>(
                     file!(),
                     e,
                     &mut commands,
                     *toolbelt_id,
-                    toolbelt_query.get(*toolbelt_id).unwrap().get(),
+                    *character_id,
                     &asset_server,
                     ZoomTool,
                 );
@@ -86,11 +88,7 @@ impl ToolAction for ZoomToolAction {
 }
 
 fn handle_input(
-    tools: Query<(
-        &ActionState<ZoomToolAction>,
-        Option<&ActiveTool>,
-        &Parent,
-    )>,
+    tools: Query<(&ActionState<ZoomToolAction>, Option<&ActiveTool>, &Parent)>,
     mut cam: Query<&mut Transform, With<MainCamera>>,
     time: Res<Time>,
     toolbelts: Query<&Parent, With<Toolbelt>>,

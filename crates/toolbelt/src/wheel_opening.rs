@@ -33,7 +33,12 @@ pub fn wheel_opening(
             wheel.scale = wheel.scale_start + (wheel.scale_end - wheel.scale_start) * open;
             if toolbelt_actions.just_pressed(ToolbeltAction::Show) {
                 // ensure the tools are positioned nicely when the toolbelt is first opened
-                distribute(toolbelt_kids, &mut tool_query, &mut tool_joint_query, &wheel);
+                distribute(
+                    toolbelt_kids,
+                    &mut tool_query,
+                    &mut tool_joint_query,
+                    &wheel,
+                );
                 info!("Show toolbelt");
             }
         } else if toolbelt_actions.just_released(ToolbeltAction::Show) {

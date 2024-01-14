@@ -1,13 +1,15 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy::window::RawHandleWrapper;
+use cursor_hero_camera::camera_plugin::FollowedByCamera;
 use cursor_hero_camera::camera_plugin::MainCamera;
 use cursor_hero_movement::Movement;
+use cursor_hero_movement::MovementEvent;
 use cursor_hero_winutils::win_mouse::set_cursor_position;
 use cursor_hero_winutils::win_window::get_window_title_bar_center_position;
 use leafwing_input_manager::prelude::*;
 
-use cursor_hero_camera::camera_plugin::FollowWithCamera;
+use cursor_hero_camera::camera_plugin::CameraEvent;
 use cursor_hero_character::character_plugin::Character;
 use cursor_hero_character::character_plugin::CharacterColor;
 use cursor_hero_winutils::win_window::focus_window;
@@ -32,17 +34,19 @@ fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltEvent>,
-    toolbelt_query: Query<&Parent, With<Toolbelt>>,
 ) {
     for e in reader.read() {
         match e {
-            ToolbeltEvent::PopulateDefaultToolbelt(toolbelt_id) => {
+            ToolbeltEvent::PopulateDefaultToolbelt {
+                toolbelt_id,
+                character_id,
+            } => {
                 spawn_action_tool::<FocusToolAction>(
                     file!(),
                     e,
                     &mut commands,
                     *toolbelt_id,
-                    toolbelt_query.get(*toolbelt_id).unwrap().get(),
+                    *character_id,
                     &asset_server,
                     FocusTool,
                 );
@@ -87,24 +91,22 @@ impl ToolAction for FocusToolAction {
 
 #[allow(clippy::type_complexity)]
 fn handle_input(
-    tools: Query<(
-        &ActionState<FocusToolAction>,
-        Option<&ActiveTool>,
-        &Parent,
-    )>,
+    tools: Query<(&ActionState<FocusToolAction>, Option<&ActiveTool>, &Parent)>,
     toolbelts: Query<&Parent, With<Toolbelt>>,
     mut characters: Query<
         (
             Entity,
-            Option<&FollowWithCamera>,
+            Option<&FollowedByCamera>,
             &mut Handle<ColorMaterial>,
         ),
         With<Character>,
     >,
-    camera: Query<Entity, With<MainCamera>>,
+    camera_query: Query<Entity, With<MainCamera>>,
     mut commands: Commands,
     mut materials: ResMut<Assets<ColorMaterial>>,
     window_query: Query<&RawHandleWrapper, With<PrimaryWindow>>,
+    mut camera_events: EventWriter<CameraEvent>,
+    mut movement_events: EventWriter<MovementEvent>,
 ) {
     for (t_act, t_enabled, t_parent) in tools.iter() {
         if t_enabled.is_none() {
@@ -118,30 +120,30 @@ fn handle_input(
             let character = characters
                 .get_mut(toolbelt.get())
                 .expect("Toolbelt should have a character");
-            let (character_entity, character_is_followed, mut material) = character;
+            let (character_id, character_is_followed, mut material) = character;
 
             if character_is_followed.is_none() {
-                let mut character_commands = commands.entity(character_entity);
-                // begin following character
-                character_commands.insert(FollowWithCamera);
-                // switch movement to character
-                character_commands.insert(Movement::default());
-                // remove movement from camera
-                commands.entity(camera.single()).remove::<Movement>();
-                // change color of character
-                *material = materials.add(CharacterColor::FocusedWithCamera.as_material());
-                info!("now following");
+                camera_events.send(CameraEvent::BeginFollowing {
+                    target_id: character_id,
+                });
+                movement_events.send(MovementEvent::RemoveMovement {
+                    target_id: camera_query.single(),
+                });
+                movement_events.send(MovementEvent::AddMovement {
+                    target_id: character_id,
+                });
+                info!("sent follow events");
             } else {
-                let mut character_commands = commands.entity(character_entity);
-                // stop following character
-                character_commands.remove::<FollowWithCamera>();
-                // switch movement to camera
-                character_commands.remove::<Movement>();
-                // remove movement from character
-                commands.entity(camera.single()).insert(Movement::default());
-                // change color of character
-                *material = materials.add(CharacterColor::Unfocused.as_material());
-                info!("no longer following");
+                camera_events.send(CameraEvent::StopFollowing {
+                    target_id: character_id,
+                });
+                movement_events.send(MovementEvent::AddMovement {
+                    target_id: camera_query.single(),
+                });
+                movement_events.send(MovementEvent::RemoveMovement {
+                    target_id: character_id,
+                });
+                info!("sent unfollow events");
             }
         }
         if t_act.just_pressed(FocusToolAction::FocusMainWindow) {

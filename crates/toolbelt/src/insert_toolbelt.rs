@@ -11,7 +11,10 @@ pub fn insert_toolbelt(
     for character_id in fresh_characters.iter() {
         commands.entity(character_id).with_children(|c_commands| {
             let toolbelt = c_commands.spawn(ToolbeltBundle::default());
-            writer.send(ToolbeltEvent::PopulateDefaultToolbelt(toolbelt.id()));
+            writer.send(ToolbeltEvent::PopulateDefaultToolbelt {
+                toolbelt_id: toolbelt.id(),
+                character_id,
+            });
         });
 
         info!("Toolbelt setup complete");

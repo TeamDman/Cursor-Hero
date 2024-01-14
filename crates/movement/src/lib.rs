@@ -13,6 +13,7 @@ impl Plugin for MovementPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(InputManagerPlugin::<MovementAction>::default())
             .register_type::<Movement>()
+            .add_event::<MovementEvent>()
             .add_systems(
                 Update,
                 (
@@ -52,6 +53,12 @@ impl MovementAction {
         }
         input_map
     }
+}
+
+#[derive(Event, Debug, Reflect)]
+pub enum MovementEvent {
+    AddMovement { target_id: Entity },
+    RemoveMovement { target_id: Entity },
 }
 
 fn insert_movement(query: Query<Entity, Added<Movement>>, mut commands: Commands) {
@@ -97,6 +104,25 @@ fn apply_movement(
                 delta_time * c_act.clamped_axis_pair(MovementAction::Move).unwrap().xy();
             c_vel.x += move_delta.x * c.speed;
             c_vel.y += move_delta.y * c.speed;
+        }
+    }
+}
+
+fn handle_events(
+    mut commands: Commands,
+    mut movement_events: EventReader<MovementEvent>,
+    mut character_query: Query<(Entity, &mut Movement)>,
+) {
+    for event in movement_events.read() {
+        match event {
+            MovementEvent::AddMovement { target_id } => {
+                info!("Adding movement for {:?}", target_id);
+                commands.entity(*target_id).insert(Movement::default());
+            }
+            MovementEvent::RemoveMovement { target_id } => {
+                info!("Removing movement for {:?}", target_id);
+                commands.entity(*target_id).remove::<Movement>();
+            }
         }
     }
 }

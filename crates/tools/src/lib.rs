@@ -8,9 +8,9 @@ pub mod placeholder_tool;
 pub mod restart_tool;
 pub mod sprint_tool;
 pub mod talk_tool;
-pub mod tool_spawning;
 pub mod tool_naming;
 pub mod tool_plugin;
+pub mod tool_spawning;
 pub mod zoom_tool;
 
 pub use crate::tool_plugin::ToolPlugin;

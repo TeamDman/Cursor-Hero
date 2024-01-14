@@ -5,7 +5,7 @@ use bevy::window::PrimaryWindow;
 use bevy_xpbd_2d::components::Position;
 
 use cursor_hero_camera::camera_plugin::update_camera_zoom;
-use cursor_hero_camera::camera_plugin::FollowWithCamera;
+use cursor_hero_camera::camera_plugin::FollowedByCamera;
 use cursor_hero_camera::camera_plugin::MainCamera;
 use cursor_hero_character::character_plugin::Character;
 
@@ -39,7 +39,7 @@ struct MouseDragState {
 }
 
 fn should_teleport_character_to_camera(
-    query: Query<&FollowWithCamera, Added<FollowWithCamera>>,
+    query: Query<&FollowedByCamera, Added<FollowedByCamera>>,
     mouse_drag_state: Res<MouseDragState>,
 ) -> bool {
     query.iter().next().is_some() && mouse_drag_state.is_dragging
@@ -58,7 +58,7 @@ fn mouse_drag_update(
     mut mouse_button_input_events: EventReader<MouseButtonInput>,
     mut mouse_drag_state: ResMut<MouseDragState>,
     mut mouse_motion_events: EventReader<MouseMotion>,
-    mut follow: Query<&mut Position, (With<FollowWithCamera>, Without<MainCamera>)>,
+    mut follow: Query<&mut Position, (With<FollowedByCamera>, Without<MainCamera>)>,
     window_query: Query<&Window, With<PrimaryWindow>>,
     camera_query: Query<(&Camera, &GlobalTransform), (With<MainCamera>, Without<Character>)>,
     mut camera_transform_query: Query<&mut Transform, (With<MainCamera>, Without<Character>)>,

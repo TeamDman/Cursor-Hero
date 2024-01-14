@@ -66,10 +66,22 @@ impl Default for ToolbeltBundle {
 
 #[derive(Event, Debug, Reflect)]
 pub enum ToolbeltEvent {
-    EquipDefaultToolbelt(Entity),
-    PopulateDefaultToolbelt(Entity),
-    EquipInspectorToolbelt(Entity),
-    PopulateInspectorToolbelt(Entity),
+    EquipDefaultToolbelt {
+        toolbelt_id: Entity,
+        character_id: Entity,
+    },
+    PopulateDefaultToolbelt {
+        toolbelt_id: Entity,
+        character_id: Entity,
+    },
+    EquipInspectorToolbelt {
+        toolbelt_id: Entity,
+        character_id: Entity,
+    },
+    PopulateInspectorToolbelt {
+        toolbelt_id: Entity,
+        character_id: Entity,
+    },
 }
 
 #[derive(Component, Reflect, Clone, Copy, Debug)]
