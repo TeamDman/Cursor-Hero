@@ -73,7 +73,7 @@ fn note_window_info(
     // Call the function that persists the window bounds and position
     if (*debounce).0 != resolution || debounce.1 != position {
         // only save if not minimized
-        if resolution.x != -32000.0 && resolution.y != -32000.0 {
+        if position.x != -32000 && position.y != -32000 {
             persist_window_bounds(resolution, position)?;
         }
         *debounce = (resolution, position);
