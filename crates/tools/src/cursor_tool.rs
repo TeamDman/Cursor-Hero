@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy::transform::TransformSystem;
 use bevy_xpbd_2d::prelude::*;
+use cursor_hero_glam::NegativeYI;
 use cursor_hero_input::active_input_state_plugin::ActiveInput;
 use cursor_hero_winutils::win_window::ToBevyRect;
 use itertools::Itertools;
@@ -8,7 +9,6 @@ use itertools::Itertools;
 use bevy::window::PrimaryWindow;
 use bevy::window::RawHandleWrapper;
 use cursor_hero_character::character_plugin::Character;
-use cursor_hero_glam::bevy::NegativeY;
 use cursor_hero_pointer::pointer_plugin::Pointer;
 use cursor_hero_pointer::pointer_plugin::PointerSystemSet;
 use cursor_hero_toolbelt::types::*;
@@ -70,7 +70,7 @@ fn snap_mouse_to_pointer(
     pointers: Query<Ref<GlobalTransform>, With<Pointer>>,
     tools: Query<(Option<&ActiveTool>, &Parent), With<CursorTool>>,
     camera_query: Query<(&GlobalTransform, &Camera)>,
-    window_query: Query<&RawHandleWrapper, With<PrimaryWindow>>,
+    window_query: Query<(&RawHandleWrapper, &Window), With<PrimaryWindow>>,
 ) {
     // ensure only a single cursor positioning tool is active
     let active = tools
@@ -104,50 +104,48 @@ fn snap_mouse_to_pointer(
     if !pointer_position.is_changed() && !character_position.is_changed() {
         return;
     }
-    // debug!(
-    //     "pointer changed: {}, character changed: {}",
-    //     pointer_position.is_changed(),
-    //     character_position.is_changed()
-    // );
 
-    let destination_position = pointer_position.translation();
+    // get the destination position
+    let mut destination_position = pointer_position.translation().xy().as_ivec2();
 
-    let window_handle = window_query.get_single().expect("Need a single window");
-    let win32handle = match window_handle.window_handle {
-        raw_window_handle::RawWindowHandle::Win32(handle) => handle,
-        _ => panic!("Unsupported window handle"),
-    };
-    let window_position = get_window_bounds(win32handle.hwnd as _)
-        .expect("Need a window position")
-        .to_bevy_rect();
-    let (camera_transform, camera) = camera_query.get_single().expect("Need a single camera");
-    let is_over_window = window_position.contains(destination_position.xy().neg_y());
-    debug!(
-        "contains: {}, window: {:?}, destination: {:?}",
-        is_over_window, window_position, destination_position
-    );
-    if is_over_window
-        && let Some(viewport_position) =
-            camera.world_to_viewport(camera_transform, destination_position)
-    {
-        debug!("viewport position: {:?}, window position: {:?}", viewport_position, window_position);
-        let mut pos: Vec2 = Vec2::ZERO;
-        pos.x += window_position.min.x as f32 + viewport_position.x;
-        pos.y += window_position.min.y as f32 + viewport_position.y;
-        let offset = get_window_inner_offset();
-        pos.x += offset.0 as f32 * 2.0;
-        pos.y += offset.1 as f32;
-        match set_cursor_position(pos.x as i32, pos.y as i32) {
-            Ok(_) => {}
-            Err(e) => warn!("Failed to set cursor position: {}", e),
+    // only when focused, do repositioning logic for when the cursor is over the window
+    let (window_handle, window) = window_query.get_single().expect("Need a single window");
+    if window.focused {
+        // get the window bounds
+        let window_bounds = match window_handle.window_handle {
+            raw_window_handle::RawWindowHandle::Win32(handle) => {
+                get_window_bounds(handle.hwnd as _)
+                    .expect("Need a window position")
+                    .to_bevy_rect()
+            }
+            _ => panic!("Unsupported window handle"),
+        };
+
+        // get the viewport position of the pointer
+        let is_over_window = window_bounds.contains(destination_position.neg_y().as_vec2());
+        let viewport_position = match is_over_window {
+            true => {
+                let (camera_transform, camera) =
+                    camera_query.get_single().expect("Need a single camera");
+                camera
+                    .world_to_viewport(camera_transform, destination_position.as_vec2().extend(0.0))
+            }
+            false => None,
+        };
+
+        // if the pointer is in view, position the cursor _over_ the pointer instead
+        if let Some(viewport_position) = viewport_position {
+            destination_position = (viewport_position + window_bounds.min).as_ivec2().neg_y();
+
+            // accomodate window decorations
+            let mut offset = get_window_inner_offset().neg_y();
+            offset.x *= 2;
+            destination_position += offset;
         }
-    } else {
-        match set_cursor_position(
-            destination_position.x as i32,
-            -destination_position.y as i32,
-        ) {
-            Ok(_) => {}
-            Err(e) => warn!("Failed to set cursor position: {}", e),
-        }
+    }
+
+    match set_cursor_position(destination_position.neg_y()) {
+        Ok(_) => {}
+        Err(e) => warn!("Failed to set cursor position: {}", e),
     }
 }

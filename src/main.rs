@@ -47,8 +47,8 @@ fn main() {
                     #[cfg(debug_assertions)]
                     resolution: (
                         // %BEGIN_RESOLUTION%
-                        2027.0,
-                        857.0
+                        1828.0,
+                        1091.0
                         // %END_RESOLUTION%
                     )
                         .into(),

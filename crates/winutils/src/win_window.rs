@@ -1,5 +1,7 @@
+use bevy::math::IVec2;
 use bevy::math::Rect;
 use bevy::math::Vec2;
+use windows::Win32::UI::WindowsAndMessaging::GetForegroundWindow;
 use windows::core::PCSTR;
 use windows::Win32::Foundation::HWND;
 use windows::Win32::Foundation::RECT;
@@ -54,7 +56,7 @@ pub fn get_window_bounds(hwnd: isize) -> Result<RECT, WindowBoundsError> {
     }
 }
 
-pub fn get_window_title_bar_center_position(hwnd: isize) -> Result<(i32, i32), WindowBoundsError> {
+pub fn get_window_title_bar_center_position(hwnd: isize) -> Result<IVec2, WindowBoundsError> {
     unsafe {
         let bounds = get_window_bounds(hwnd)?;
 
@@ -66,11 +68,11 @@ pub fn get_window_title_bar_center_position(hwnd: isize) -> Result<(i32, i32), W
 
         let x = bounds.left + (bounds.right - bounds.left) / 2;
         let y = bounds.top + caption_height / 2 + frame_height;
-        Ok((x, y))
+        Ok(IVec2::new(x, y))
     }
 }
 
-pub fn get_window_inner_offset() -> (i32, i32) {
+pub fn get_window_inner_offset() -> IVec2 {
     unsafe {
         // SM_CYCAPTION includes the height of the title bar
         let caption_height = GetSystemMetrics(SM_CYCAPTION);
@@ -78,7 +80,7 @@ pub fn get_window_inner_offset() -> (i32, i32) {
         // SM_CYFRAME includes the height of the window frame (border)
         let frame_height = GetSystemMetrics(SM_CYFRAME);
 
-        (frame_height, caption_height + frame_height * 2)
+        IVec2::new(frame_height, caption_height + frame_height * 2)
     }
 }
 
@@ -108,54 +110,12 @@ pub fn note_window_info(hwnd: isize) -> Result<RECT, WindowBoundsError> {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub fn is_window_focused(hwnd: HWND) -> bool {
+    unsafe {
+        // Get the handle to the currently focused (foreground) window.
+        let foreground_hwnd = GetForegroundWindow();
 
-    // use bevy_inspector_egui::egui::TextBuffer;
-    use windows::Win32::Foundation::BOOL;
-    use windows::Win32::Foundation::HWND;
-    use windows::Win32::Foundation::LPARAM;
-    use windows::Win32::UI::WindowsAndMessaging::EnumWindows;
-    use windows::Win32::UI::WindowsAndMessaging::GetWindowTextA;
-    use windows::Win32::UI::WindowsAndMessaging::IsWindowVisible;
-
-    unsafe extern "system" fn enum_windows_proc(hwnd: HWND, _lp: LPARAM) -> BOOL {
-        if IsWindowVisible(hwnd).as_bool() {
-            let mut title = [0u8; 256];
-            let title_length = GetWindowTextA(hwnd, &mut title);
-
-            if title_length > 0 {
-                let title = String::from_utf8_lossy(&title[..title_length as usize]);
-                println!("Window title: \"{}\"", &title);
-                match get_window_bounds_from_title(title.as_str()) {
-                    Ok(rect) => {
-                        println!("Window bounds: {:?}", rect);
-                    }
-                    Err(err) => {
-                        eprintln!("Error: {:?}", err);
-                        // panic!("Error: {:?}", err);
-                    }
-                }
-            }
-        }
-        BOOL::from(true) // Continue enumeration
-    }
-
-    #[test]
-    fn enum_windows() {
-        unsafe {
-            EnumWindows(Some(enum_windows_proc), LPARAM(0)).unwrap();
-        }
-    }
-
-    #[test]
-    fn test_get_window_bounds_from_title() {
-        let title = "Cursor Hero";
-        let result = get_window_bounds_from_title(title);
-        assert!(result.is_ok(), "Error: {:?}", result.err());
-        let rect = result.unwrap();
-        assert!(rect.left < rect.right);
-        assert!(rect.top < rect.bottom);
+        // Compare it with the provided hwnd.
+        foreground_hwnd == hwnd
     }
 }

@@ -29,9 +29,9 @@ pub fn get_cursor_position() -> Result<Vec2, windows::core::Error> {
     }
 }
 
-pub fn set_cursor_position(x: i32, y: i32) -> Result<(), windows::core::Error> {
+pub fn set_cursor_position(position: IVec2) -> Result<(), windows::core::Error> {
     unsafe {
-        SetCursorPos(x, y)?;
+        SetCursorPos(position.x, position.y)?;
         Ok(())
     }
 }
