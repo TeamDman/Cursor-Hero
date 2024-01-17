@@ -109,7 +109,9 @@ fn handle_input(
                 .iter()
                 .find(|e| pointer_query.get(**e).is_ok());
             if t_act.pressed(SprintToolAction::Sprint) {
-                let open = t_act.value(SprintToolAction::Sprint);
+                let mut open = t_act.value(SprintToolAction::Sprint);
+                open = open.powf(2.0);
+
                 match movement {
                     Some(mut movement) => {
                         movement.speed = movement.sprint_speed

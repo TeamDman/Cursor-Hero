@@ -62,5 +62,8 @@ fn apply_movement_damping(
         if angular_velocity.0.abs() < 10.0 {
             angular_velocity.0 = 0.0;
         }
+        // if linear_velocity.x != 0.0 && linear_velocity.y != 0.0 {
+        //     debug!("linear_velocity: {:?}", linear_velocity);
+        // }
     }
 }

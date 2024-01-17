@@ -70,20 +70,18 @@ fn toolbelt_events(
                 commands.entity(*toolbelt_id).with_children(|t_commands| {
                     for i in 0..1 {
                         t_commands.spawn((
+                            Tool,
                             PlaceholderTool,
-                            ToolBundle {
-                                name: Name::new(format!("Placeholder Tool {}", i)),
-                                sprite_bundle: SpriteBundle {
-                                    sprite: Sprite {
-                                        custom_size: Some(Vec2::new(100.0, 100.0)),
-                                        ..default()
-                                    },
-                                    texture: asset_server
-                                        .load("textures/tools/placeholder_tool.png"),
+                            Name::new(format!("Placeholder Tool {}", i)),
+                            SpriteBundle {
+                                sprite: Sprite {
+                                    custom_size: Some(Vec2::new(100.0, 100.0)),
                                     ..default()
                                 },
+                                texture: asset_server.load("textures/tools/placeholder_tool.png"),
                                 ..default()
                             },
+                            Visibility::Hidden,
                             InputManagerBundle::<PlaceholderToolAction> {
                                 input_map: PlaceholderToolAction::default_input_map(),
                                 ..default()

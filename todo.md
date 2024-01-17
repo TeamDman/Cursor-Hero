@@ -1,5 +1,7 @@
 - Disable zoom when hovering over Bevy eGooey.
 
+- sprint tool scales scroll speed
+
 - couple click tool with window/screen mouse position tool
 - make overlay logic stop when inspection tool disabled
 

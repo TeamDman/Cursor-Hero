@@ -15,6 +15,7 @@ cursor_hero_winutils = { workspace = true }
 cursor_hero_camera = { workspace = true }
 cursor_hero_character = { workspace = true }
 cursor_hero_movement = { workspace = true }
+cursor_hero_glam = { workspace = true }
 cursor_hero_data = { workspace = true }
 cursor_hero_click_drag_character_movement = { workspace = true }
 cursor_hero_physics = { workspace = true }

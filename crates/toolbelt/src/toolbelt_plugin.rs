@@ -10,8 +10,8 @@ use crate::tool_color::tool_color;
 use crate::tool_distribution::tool_distribution;
 use crate::tool_frame::insert_hover_frame;
 use crate::tool_frame::remove_hover_frame;
+use crate::tool_help::tool_help;
 use crate::tool_toggle::tool_toggle;
-use crate::tool_visibility;
 use crate::tool_visibility::tool_visibility;
 use crate::types::*;
 use crate::wheel_properties::wheel_properties;
@@ -41,6 +41,7 @@ impl Plugin for ToolbeltPlugin {
                         wheel_properties,
                         pointer_reach, // prevent sprint plugin from clobbering wheel pointer reach update
                         tool_visibility,
+                        tool_help,
                     )
                         .chain(),
                 ),

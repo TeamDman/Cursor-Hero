@@ -18,21 +18,20 @@ fn spawn_tool_impl(
     let name = format_tool_name_from_source(source_path);
     commands.entity(toolbelt_id).with_children(|toolbelt| {
         let mut tool = toolbelt.spawn((
-            ToolBundle {
-                name: Name::new(name),
-                sprite_bundle: SpriteBundle {
-                    sprite: Sprite {
-                        custom_size: Some(Vec2::new(100.0, 100.0)),
-                        ..default()
-                    },
-                    texture: asset_server.load(format_tool_image_from_source(source_path)),
+            Tool,
+            Name::new(name),
+            SpriteBundle {
+                sprite: Sprite {
+                    custom_size: Some(Vec2::new(100.0, 100.0)),
                     ..default()
                 },
+                texture: asset_server.load(format_tool_image_from_source(source_path)),
+                visibility: Visibility::Hidden,
                 ..default()
             },
             tool_component,
             Sensor,
-            RigidBody::Dynamic,
+            RigidBody::Kinematic,
             Collider::cuboid(100.0, 100.0),
             ActiveTool,
         ));

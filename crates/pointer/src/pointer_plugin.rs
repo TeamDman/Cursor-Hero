@@ -24,7 +24,6 @@ pub enum PointerSystemSet {
 impl Plugin for PointerPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<Pointer>()
-            .register_type::<PointerJoint>()
             .configure_sets(Update, PointerSystemSet::Position)
             .add_plugins(InputManagerPlugin::<PointerAction>::default())
             .add_systems(Update, insert_pointer.in_set(PointerSystemSet::Spawn))
@@ -82,9 +81,6 @@ pub struct Pointer {
     pub sprint_reach: f32,
 }
 
-#[derive(Component, Reflect)]
-pub struct PointerJoint;
-
 impl Default for Pointer {
     fn default() -> Self {
         Self {
@@ -126,13 +122,6 @@ fn insert_pointer(
                     Sensor,
                 ))
                 .id();
-            parent.spawn((
-                FixedJoint::new(character_id, pointer_id)
-                    .with_linear_velocity_damping(0.1)
-                    .with_angular_velocity_damping(1.0)
-                    .with_compliance(0.00000001),
-                PointerJoint,
-            ));
         });
     }
 }
@@ -148,15 +137,13 @@ fn update_pointer_position(
         ),
         Without<Character>,
     >,
-    mut character_query: Query<(&Position, &Children), (With<Character>, Without<Pointer>)>,
-    mut pointer_joint_query: Query<&mut FixedJoint, With<PointerJoint>>,
+    mut character_query: Query<&Position, (With<Character>, Without<Pointer>)>,
     mut debounce: Local<bool>,
 ) {
     for (mut pointer_position, mut pointer_velocity, pointer_actions, pointer_id, pointer_parent) in
         pointer_query.iter_mut()
     {
-        let (character_position, character_kids) =
-            character_query.get_mut(pointer_parent.get()).unwrap();
+        let character_position = character_query.get_mut(pointer_parent.get()).unwrap();
         if pointer_actions.pressed(PointerAction::Move) {
             let look = pointer_actions.axis_pair(PointerAction::Move).unwrap().xy();
             if look.x.is_nan() || look.y.is_nan() {
@@ -166,18 +153,13 @@ fn update_pointer_position(
             let offset = look * pointer_id.reach;
             let desired_position = character_position.xy() + offset;
             let desired_velocity = desired_position - pointer_position.xy();
-            for child in character_kids.iter() {
-                if let Ok(mut joint) = pointer_joint_query.get_mut(*child) {
-                    joint.local_anchor1 = offset;
-                }
-            }
+            pointer_position.x = desired_position.x;
+            pointer_position.y = desired_position.y;
             *debounce = false;
         } else if !*debounce {
-            for child in character_kids.iter() {
-                if let Ok(mut joint) = pointer_joint_query.get_mut(*child) {
-                    joint.local_anchor1 = Vec2::ZERO;
-                }
-            }
+            let desired_position = character_position.xy();
+            pointer_position.x = desired_position.x;
+            pointer_position.y = desired_position.y;
             *debounce = true;
         }
     }
@@ -190,7 +172,7 @@ fn update_pointer_from_mouse(
         (&Position, &Children),
         (With<MainCharacter>, Without<MainCamera>, Without<Pointer>),
     >,
-    mut pointer_joint_query: Query<&mut FixedJoint, With<PointerJoint>>,
+    mut pointer_query: Query<&mut Position, With<Pointer>>,
 ) {
     let (camera, camera_global_transform) = camera_query.single();
     let window = window_query.single();
@@ -201,10 +183,11 @@ fn update_pointer_from_mouse(
             .viewport_to_world(camera_global_transform, current_screen_position)
             .map(|ray| ray.origin.truncate())
         {
-            if let Ok((character_pos, character_kids)) = character_query.get_single() {
-                for child in character_kids.iter() {
-                    if let Ok(mut joint) = pointer_joint_query.get_mut(*child) {
-                        joint.local_anchor1 = current_world_position - character_pos.xy();
+            if let Ok((character_pos, character_children)) = character_query.get_single() {
+                for child in character_children.iter() {
+                    if let Ok(mut pointer_position) = pointer_query.get_mut(*child) {
+                        pointer_position.x = current_world_position.x;
+                        pointer_position.y = current_world_position.y;
                     }
                 }
             }

@@ -19,6 +19,7 @@ cursor_hero_input = { path = "./crates/input" }
 cursor_hero_camera = { path = "./crates/camera" }
 cursor_hero_character = { path = "./crates/character" }
 cursor_hero_movement = { path = "./crates/movement" }
+cursor_hero_glam = { path = "./crates/glam" }
 cursor_hero_data = { path = "./crates/data" }
 cursor_hero_metrics = { path = "./crates/metrics" }
 cursor_hero_click_drag_character_movement = { path = "./crates/click_drag_character_movement" }
@@ -34,6 +35,7 @@ cursor_hero_version = { path = "./crates/version" }
 cursor_hero_plugins = { path = "./crates/plugins" }
 cursor_hero_icon = { path = "./crates/icon" }
 anyhow = "1.0.75"
+glam = "0.25.0"
 # bevy = { path = "../bevy", features = ["dynamic_linking"] }
 bevy = { version = "0.12.1", git = "https://github.com/TeamDman/bevy.git", branch = "cursor_hero" }
 bevy-inspector-egui = { version = "0.22.1", git = "https://github.com/TeamDman/bevy-inspector-egui.git", branch = "cursor_hero" }

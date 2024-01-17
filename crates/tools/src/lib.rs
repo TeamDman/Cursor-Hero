@@ -1,3 +1,6 @@
+#![feature(let_chains)]
+
+
 pub mod click_tool;
 pub mod cube_tool;
 pub mod cursor_monitor_position_tool;

@@ -123,32 +123,11 @@ impl Default for Wheel {
 
 #[derive(Component, Reflect, Clone, Copy, Debug)]
 pub struct Tool;
+#[derive(Component, Reflect, Clone, Copy, Debug)]
+pub struct ToolHelpTrigger;
 
 pub trait ToolAction: Actionlike {
     fn default_input_map() -> InputMap<Self>;
-}
-
-#[derive(Bundle)]
-pub struct ToolBundle {
-    pub name: Name,
-    pub tool: Tool,
-    pub sprite_bundle: SpriteBundle,
-}
-impl Default for ToolBundle {
-    fn default() -> Self {
-        Self {
-            name: Name::new("Unnamed Tool"),
-            tool: Tool,
-            sprite_bundle: SpriteBundle {
-                sprite: Sprite {
-                    custom_size: Some(Vec2::new(100.0, 100.0)),
-                    ..default()
-                },
-                visibility: Visibility::Hidden,
-                ..default()
-            },
-        }
-    }
 }
 
 #[derive(Component, Reflect, Debug)]

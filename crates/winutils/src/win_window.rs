@@ -1,3 +1,5 @@
+use bevy::math::Rect;
+use bevy::math::Vec2;
 use windows::core::PCSTR;
 use windows::Win32::Foundation::HWND;
 use windows::Win32::Foundation::RECT;
@@ -10,6 +12,20 @@ use windows::Win32::UI::WindowsAndMessaging::ShowWindow;
 use windows::Win32::UI::WindowsAndMessaging::SM_CYCAPTION;
 use windows::Win32::UI::WindowsAndMessaging::SM_CYFRAME;
 use windows::Win32::UI::WindowsAndMessaging::SW_RESTORE;
+
+
+pub trait ToBevyRect {
+    fn to_bevy_rect(&self) -> Rect;
+}
+
+impl ToBevyRect for RECT {
+    fn to_bevy_rect(&self) -> Rect {
+        Rect {
+            min: Vec2::new(self.left as f32, self.top as f32),
+            max: Vec2::new(self.right as f32, self.bottom as f32),
+        }
+    }
+}
 
 #[derive(Debug)]
 pub enum WindowBoundsError {
