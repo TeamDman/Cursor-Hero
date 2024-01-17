@@ -3,7 +3,7 @@
 
 pub mod click_tool;
 pub mod cube_tool;
-pub mod cursor_monitor_position_tool;
+pub mod cursor_tool;
 pub mod cursor_window_position_tool;
 pub mod focus_tool;
 pub mod inspect_tool;

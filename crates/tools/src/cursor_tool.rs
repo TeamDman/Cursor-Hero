@@ -18,11 +18,11 @@ use cursor_hero_winutils::win_window::get_window_inner_offset;
 
 use crate::prelude::*;
 
-pub struct CursorMonitorPositionToolPlugin;
+pub struct CursorToolPlugin;
 
-impl Plugin for CursorMonitorPositionToolPlugin {
+impl Plugin for CursorToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<CursorMonitorPositionTool>()
+        app.register_type::<CursorTool>()
             .add_systems(Update, toolbelt_events)
             .add_systems(
                 PostUpdate,
@@ -36,7 +36,7 @@ impl Plugin for CursorMonitorPositionToolPlugin {
 }
 
 #[derive(Component, Reflect)]
-struct CursorMonitorPositionTool;
+struct CursorTool;
 
 fn toolbelt_events(
     mut commands: Commands,
@@ -56,7 +56,7 @@ fn toolbelt_events(
                     *toolbelt_id,
                     *character_id,
                     &asset_server,
-                    CursorMonitorPositionTool,
+                    CursorTool,
                 );
             }
             _ => {}
@@ -68,7 +68,7 @@ fn snap_mouse_to_pointer(
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<(Ref<GlobalTransform>, &Children), With<Character>>,
     pointers: Query<Ref<GlobalTransform>, With<Pointer>>,
-    tools: Query<(Option<&ActiveTool>, &Parent), With<CursorMonitorPositionTool>>,
+    tools: Query<(Option<&ActiveTool>, &Parent), With<CursorTool>>,
     camera_query: Query<(&GlobalTransform, &Camera)>,
     window_query: Query<&RawHandleWrapper, With<PrimaryWindow>>,
 ) {
