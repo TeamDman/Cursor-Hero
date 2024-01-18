@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy::window::RawHandleWrapper;
-use cursor_hero_winutils::win_window::get_window_bounds;
+use bevy::winit::WinitWindows;
+use cursor_hero_winutils::win_window::get_window_inner_bounds;
 
 pub struct PrimaryWindowMemoryPlugin;
 
@@ -31,6 +32,7 @@ enum PersistError {
     Io(std::io::Error),
     WindowBounds(cursor_hero_winutils::win_window::WindowBoundsError),
     StringFormatting,
+    Query,
 }
 
 #[derive(Debug)]
@@ -44,7 +46,8 @@ enum PersistSuccess {
 fn note_window_info(
     mut config: ResMut<PrimaryWindowMemoryConfig>,
     time: Res<Time>,
-    window_query: Query<&RawHandleWrapper, With<PrimaryWindow>>,
+    window_query: Query<(Entity, &RawHandleWrapper, &Window), With<PrimaryWindow>>,
+    winit_windows: NonSend<WinitWindows>,
     mut debounce: Local<(Vec2, IVec2)>,
 ) -> Result<PersistSuccess, PersistError> {
     if !config.timer.tick(time.delta()).just_finished() {
@@ -54,23 +57,34 @@ fn note_window_info(
         return Ok(PersistSuccess::Disabled);
     }
 
-    let window_handle = window_query
-        .get_single()
-        .map_err(|_| PersistError::StringFormatting)?;
-    let win32handle = match window_handle.window_handle {
-        raw_window_handle::RawWindowHandle::Win32(handle) => handle,
-        _ => return Err(PersistError::StringFormatting), // Handle the error case
+    let (window_id, window_handle, window) =
+        window_query.get_single().map_err(|_| PersistError::Query)?;
+
+    let winit_window = winit_windows
+        .get_window(window_id)
+        .ok_or(PersistError::Query)?;
+
+    if winit_window.is_minimized().unwrap_or(false) {
+        return Ok(PersistSuccess::Disabled);
+    }
+    let resolution = Vec2::new(
+        window.resolution.physical_width() as f32,
+        window.resolution.physical_height() as f32,
+    );
+    let position = match window.position {
+        WindowPosition::At(position) => position,
+        _ => {
+            let hwnd = match window_handle.window_handle {
+                raw_window_handle::RawWindowHandle::Win32(handle) => handle.hwnd as isize,
+                _ => return Ok(PersistSuccess::Disabled),
+            };
+            get_window_inner_bounds(hwnd)
+                .map_err(PersistError::WindowBounds)?
+                .size()
+                .as_ivec2()
+        }
     };
 
-    let window_position =
-        get_window_bounds(win32handle.hwnd as _).map_err(PersistError::WindowBounds)?;
-    let resolution = Vec2::new(
-        (window_position.right - window_position.left) as f32,
-        (window_position.bottom - window_position.top) as f32,
-    );
-    let position = IVec2::new(window_position.left as i32, window_position.top as i32);
-
-    // Call the function that persists the window bounds and position
     if (*debounce).0 != resolution || debounce.1 != position {
         // only save if not minimized
         if position.x != -32000 && position.y != -32000 {

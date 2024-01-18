@@ -3,7 +3,6 @@ use bevy::transform::TransformSystem;
 use bevy_xpbd_2d::prelude::*;
 use cursor_hero_glam::NegativeYI;
 use cursor_hero_input::active_input_state_plugin::ActiveInput;
-use cursor_hero_winutils::win_window::ToBevyRect;
 use itertools::Itertools;
 
 use bevy::window::PrimaryWindow;
@@ -114,9 +113,7 @@ fn snap_mouse_to_pointer(
         // get the window bounds
         let window_bounds = match window_handle.window_handle {
             raw_window_handle::RawWindowHandle::Win32(handle) => {
-                get_window_bounds(handle.hwnd as _)
-                    .expect("Need a window position")
-                    .to_bevy_rect()
+                get_window_bounds(handle.hwnd as _).expect("Need a window position")
             }
             _ => panic!("Unsupported window handle"),
         };

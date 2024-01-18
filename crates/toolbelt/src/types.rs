@@ -134,7 +134,7 @@ pub trait ToolAction: Actionlike {
 pub struct ActiveTool;
 
 #[derive(Component, Reflect, Debug)]
-pub struct HoveredTool;
+pub struct Hovered;
 
 #[derive(Event, Debug, Reflect)]
 pub enum ToolHoveredEvent {
@@ -146,4 +146,5 @@ pub enum ToolHoveredEvent {
 pub enum ToolActivationEvent {
     Activate(Entity),
     Deactivate(Entity),
+    ActivateHelp(Entity),
 }

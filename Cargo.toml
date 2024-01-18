@@ -15,6 +15,7 @@ cursor_hero_cursor_mirror = { path = "./crates/cursor_mirror" }
 cursor_hero_hover = { path = "./crates/hover" }
 cursor_hero_pressure_plate = { path = "./crates/pressure_plate" }
 cursor_hero_level_bounds = { path = "./crates/level_bounds" }
+cursor_hero_bevy = { path = "./crates/bevy" }
 cursor_hero_input = { path = "./crates/input" }
 cursor_hero_camera = { path = "./crates/camera" }
 cursor_hero_character = { path = "./crates/character" }

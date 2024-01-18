@@ -30,7 +30,7 @@ impl ToolColor {
 
 #[allow(clippy::type_complexity)]
 pub fn tool_color(
-    mut query: Query<(&mut Sprite, Option<&HoveredTool>, Option<&ActiveTool>), With<Tool>>,
+    mut query: Query<(&mut Sprite, Option<&Hovered>, Option<&ActiveTool>), With<Tool>>,
 ) {
     for (mut sprite, hovered, active) in query.iter_mut() {
         let color = ToolColor::from(hovered.is_some(), active.is_some()).color();

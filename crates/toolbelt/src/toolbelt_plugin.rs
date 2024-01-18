@@ -3,15 +3,16 @@ use bevy::transform::TransformSystem;
 use bevy_xpbd_2d::PhysicsSet;
 use leafwing_input_manager::prelude::*;
 
-use crate::hover_tag::hover_tag;
+use crate::hover_detection::hover_detection;
 use crate::insert_toolbelt::insert_toolbelt;
 use crate::pointer_reach::pointer_reach;
+use crate::tool_activation::tool_activation;
 use crate::tool_color::tool_color;
 use crate::tool_distribution::tool_distribution;
-use crate::tool_frame::insert_hover_frame;
-use crate::tool_frame::remove_hover_frame;
-use crate::tool_help::tool_help;
-use crate::tool_toggle::tool_toggle;
+use crate::hover_frame::insert_hover_frame;
+use crate::hover_frame::remove_hover_frame;
+use crate::tool_help_activation::tool_help_activation;
+use crate::tool_help_insertion::tool_help_insertion;
 use crate::tool_visibility::tool_visibility;
 use crate::types::*;
 use crate::wheel_properties::wheel_properties;
@@ -23,7 +24,7 @@ impl Plugin for ToolbeltPlugin {
             .register_type::<Wheel>()
             .register_type::<Tool>()
             .register_type::<ActiveTool>()
-            .register_type::<HoveredTool>()
+            .register_type::<Hovered>()
             .add_event::<ToolbeltEvent>()
             .add_event::<ToolHoveredEvent>()
             .add_event::<ToolActivationEvent>()
@@ -31,17 +32,18 @@ impl Plugin for ToolbeltPlugin {
             .add_systems(
                 Update,
                 (
-                    hover_tag,
+                    hover_detection,
                     insert_hover_frame,
                     insert_toolbelt,
                     remove_hover_frame,
                     tool_color,
-                    tool_toggle,
+                    tool_activation,
+                    tool_help_activation,
                     (
                         wheel_properties,
                         pointer_reach, // prevent sprint plugin from clobbering wheel pointer reach update
                         tool_visibility,
-                        tool_help,
+                        tool_help_insertion,
                     )
                         .chain(),
                 ),

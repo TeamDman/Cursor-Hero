@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 cursor_hero_character = { workspace = true }
+cursor_hero_bevy = { workspace = true }
 cursor_hero_pointer = { workspace = true }
 cursor_hero_input = { workspace = true }
 bevy = { workspace = true }
