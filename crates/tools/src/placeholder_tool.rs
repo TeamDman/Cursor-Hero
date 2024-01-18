@@ -62,35 +62,33 @@ fn toolbelt_events(
     mut reader: EventReader<ToolbeltEvent>,
 ) {
     for e in reader.read() {
-        match e {
-            ToolbeltEvent::PopulateDefaultToolbelt {
-                toolbelt_id,
-                character_id,
-            } => {
-                commands.entity(*toolbelt_id).with_children(|t_commands| {
-                    for i in 0..1 {
-                        t_commands.spawn((
-                            Tool,
-                            PlaceholderTool,
-                            Name::new(format!("Placeholder Tool {}", i)),
-                            SpriteBundle {
-                                sprite: Sprite {
-                                    custom_size: Some(Vec2::new(100.0, 100.0)),
-                                    ..default()
-                                },
-                                texture: asset_server.load("textures/tools/placeholder_tool.png"),
+        if let ToolbeltEvent::PopulateDefaultToolbelt {
+            toolbelt_id,
+            character_id: _,
+        } = e
+        {
+            commands.entity(*toolbelt_id).with_children(|t_commands| {
+                for i in 0..1 {
+                    t_commands.spawn((
+                        Tool,
+                        PlaceholderTool,
+                        Name::new(format!("Placeholder Tool {}", i)),
+                        SpriteBundle {
+                            sprite: Sprite {
+                                custom_size: Some(Vec2::new(100.0, 100.0)),
                                 ..default()
                             },
-                            Visibility::Hidden,
-                            InputManagerBundle::<PlaceholderToolAction> {
-                                input_map: PlaceholderToolAction::default_input_map(),
-                                ..default()
-                            },
-                        ));
-                    }
-                });
-            }
-            _ => {}
+                            texture: asset_server.load("textures/tools/placeholder_tool.png"),
+                            ..default()
+                        },
+                        Visibility::Hidden,
+                        InputManagerBundle::<PlaceholderToolAction> {
+                            input_map: PlaceholderToolAction::default_input_map(),
+                            ..default()
+                        },
+                    ));
+                }
+            });
         }
     }
 }

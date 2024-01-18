@@ -10,7 +10,6 @@ fn spawn_tool_impl(
     event: &ToolbeltEvent,
     commands: &mut Commands,
     toolbelt_id: Entity,
-    character_id: Entity,
     asset_server: &Res<AssetServer>,
     tool_component: impl Component,
     input_manager: Option<impl Bundle>,
@@ -51,7 +50,7 @@ pub fn spawn_action_tool<T>(
     event: &ToolbeltEvent,
     commands: &mut Commands,
     toolbelt_id: Entity,
-    character_id: Entity,
+    _character_id: Entity,
     asset_server: &Res<AssetServer>,
     tool_component: impl Component,
 ) where
@@ -62,7 +61,6 @@ pub fn spawn_action_tool<T>(
         event,
         commands,
         toolbelt_id,
-        character_id,
         asset_server,
         tool_component,
         Some(InputManagerBundle::<T> {
@@ -80,7 +78,7 @@ pub fn spawn_tool(
     event: &ToolbeltEvent,
     commands: &mut Commands,
     toolbelt_id: Entity,
-    character_id: Entity,
+    _character_id: Entity,
     asset_server: &Res<AssetServer>,
     tool_component: impl Component,
 ) {
@@ -89,7 +87,6 @@ pub fn spawn_tool(
         event,
         commands,
         toolbelt_id,
-        character_id,
         asset_server,
         tool_component,
         None::<WeAintGotNoBundle>,

@@ -19,6 +19,7 @@ impl Plugin for MovementPlugin {
                 (
                     apply_movement.after(DampingSystemSet::Dampen),
                     insert_movement,
+                    handle_events,
                 ),
             );
     }
@@ -111,7 +112,6 @@ fn apply_movement(
 fn handle_events(
     mut commands: Commands,
     mut movement_events: EventReader<MovementEvent>,
-    mut character_query: Query<(Entity, &mut Movement)>,
 ) {
     for event in movement_events.read() {
         match event {

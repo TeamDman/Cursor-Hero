@@ -6,6 +6,7 @@ use bevy_xpbd_2d::components::Sensor;
 use cursor_hero_bevy::NameOrEntityDisplay;
 use leafwing_input_manager::action_state::ActionState;
 
+#[allow(clippy::type_complexity)]
 pub fn tool_help_insertion(
     mut commands: Commands,
     toolbelt_query: Query<
@@ -46,17 +47,13 @@ pub fn tool_help_insertion(
             }
         } else if toolbelt_actions.just_released(ToolbeltAction::Show) {
             for child_id in toolbelt_kids.iter() {
-                if let Ok((tool_id, tool_children, _)) = tool_query.get(*child_id) {
-                    if let Some(tool_children) = tool_children {
-                        for child_id in tool_children.iter() {
-                            if let Ok(tool_help_trigger_id) =
-                                tool_help_triggger_query.get(*child_id)
-                            {
-                                commands
-                                    .entity(tool_id)
-                                    .remove_children(&[tool_help_trigger_id]);
-                                commands.entity(tool_help_trigger_id).despawn_recursive();
-                            }
+                if let Ok((tool_id, Some(tool_children), _)) = tool_query.get(*child_id) {
+                    for child_id in tool_children.iter() {
+                        if let Ok(tool_help_trigger_id) = tool_help_triggger_query.get(*child_id) {
+                            commands
+                                .entity(tool_id)
+                                .remove_children(&[tool_help_trigger_id]);
+                            commands.entity(tool_help_trigger_id).despawn_recursive();
                         }
                     }
                 }

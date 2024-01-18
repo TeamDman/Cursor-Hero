@@ -44,22 +44,20 @@ fn toolbelt_events(
     mut reader: EventReader<ToolbeltEvent>,
 ) {
     for e in reader.read() {
-        match e {
-            ToolbeltEvent::PopulateInspectorToolbelt {
-                toolbelt_id,
-                character_id,
-            } => {
-                spawn_action_tool::<InspectToolAction>(
-                    file!(),
-                    e,
-                    &mut commands,
-                    *toolbelt_id,
-                    *character_id,
-                    &asset_server,
-                    InspectTool,
-                );
-            }
-            _ => {}
+        if let ToolbeltEvent::PopulateInspectorToolbelt {
+            toolbelt_id,
+            character_id,
+        } = e
+        {
+            spawn_action_tool::<InspectToolAction>(
+                file!(),
+                e,
+                &mut commands,
+                *toolbelt_id,
+                *character_id,
+                &asset_server,
+                InspectTool,
+            );
         }
     }
 }

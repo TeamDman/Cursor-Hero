@@ -2,7 +2,6 @@ use bevy::math::Vec2;
 use bevy::prelude::*;
 use uiautomation::UIAutomation;
 use uiautomation::UIElement;
-use uiautomation::UITreeWalker;
 use windows::Win32::Foundation::POINT;
 use windows::Win32::UI::Input::KeyboardAndMouse::SendInput;
 use windows::Win32::UI::Input::KeyboardAndMouse::INPUT;

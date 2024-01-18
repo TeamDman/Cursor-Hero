@@ -3,13 +3,14 @@ use bevy::prelude::*;
 use cursor_hero_input::update_gamepad_settings::PRESS_THRESHOLD;
 use leafwing_input_manager::action_state::ActionState;
 
+#[allow(clippy::type_complexity)]
 pub fn wheel_properties(
     mut toolbelts: Query<
-        (&ActionState<ToolbeltAction>, &mut Wheel, &Children),
+        (&ActionState<ToolbeltAction>, &mut Wheel),
         (Without<Tool>, With<Toolbelt>),
     >,
 ) {
-    for (toolbelt_actions, mut wheel, toolbelt_kids) in toolbelts.iter_mut() {
+    for (toolbelt_actions, mut wheel) in toolbelts.iter_mut() {
         if toolbelt_actions.pressed(ToolbeltAction::Show) {
             let open = ((toolbelt_actions.value(ToolbeltAction::Show) - PRESS_THRESHOLD)
                 / (1.0 - PRESS_THRESHOLD)

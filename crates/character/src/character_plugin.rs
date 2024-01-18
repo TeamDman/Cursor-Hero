@@ -80,7 +80,7 @@ fn spawn_character(
 ) {
     let default_material = materials.add(CharacterColor::FocusedWithCamera.as_material());
     let os_cursor_pos = get_cursor_position().expect("Should be able to fetch cursor pos from OS");
-    let mut character = commands.spawn((
+    let character = commands.spawn((
         MaterialMesh2dBundle {
             mesh: meshes
                 .add(
@@ -114,21 +114,20 @@ fn spawn_character(
 }
 
 fn handle_camera_events(
-    mut commands: Commands,
     mut camera_events: EventReader<CameraEvent>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    mut character_query: Query<(Entity, &mut Handle<ColorMaterial>), With<Character>>,
+    mut character_query: Query<&mut Handle<ColorMaterial>, With<Character>>,
 ) {
     for event in camera_events.read() {
         match event {
             CameraEvent::BeginFollowing { target_id } => {
-                if let Ok((character_id, mut material)) = character_query.get_mut(*target_id) {
+                if let Ok(mut material) = character_query.get_mut(*target_id) {
                     *material = materials.add(CharacterColor::FocusedWithCamera.as_material());
                     info!("Updated character color to focused");
                 }
             }
             CameraEvent::StopFollowing { target_id } => {
-                if let Ok((character_id, mut material)) = character_query.get_mut(*target_id) {
+                if let Ok(mut material) = character_query.get_mut(*target_id) {
                     *material = materials.add(CharacterColor::Unfocused.as_material());
                     info!("Updated character color to unfocused");
                 }

@@ -37,6 +37,7 @@ pub fn tool_distribution(
     }
 }
 
+#[allow(clippy::type_complexity)]
 fn update_joints(
     character_position: &GlobalTransform,
     tool_ids: Vec<&Entity>,

@@ -33,6 +33,6 @@ fn main() {
         let new_binary_path = target_dir.join(new_binary_name).with_extension("exe");
 
         // Copy the binary
-        fs::copy(&original_binary_path, &new_binary_path).expect("Failed to copy the file");
+        fs::copy(original_binary_path, new_binary_path).expect("Failed to copy the file");
     }
 }

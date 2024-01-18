@@ -30,47 +30,45 @@ fn toolbelt_events(
     mut reader: EventReader<ToolbeltEvent>,
 ) {
     for e in reader.read() {
-        match e {
-            ToolbeltEvent::PopulateInspectorToolbelt {
-                toolbelt_id,
-                character_id,
-            } => {
-                spawn_action_tool::<CubeToolAction>(
-                    file!(),
-                    e,
-                    &mut commands,
-                    *toolbelt_id,
-                    *character_id,
-                    &asset_server,
-                    CubeTool,
-                );
-            }
-            _ => {}
+        if let ToolbeltEvent::PopulateInspectorToolbelt {
+            toolbelt_id,
+            character_id,
+        } = e
+        {
+            spawn_action_tool::<CubeToolAction>(
+                file!(),
+                e,
+                &mut commands,
+                *toolbelt_id,
+                *character_id,
+                &asset_server,
+                CubeTool,
+            );
         }
     }
 }
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
 enum CubeToolAction {
-    SpawnCube,
-    RemoveCube,
-    AttractCube,
+    Spawn,
+    Remove,
+    Attract,
 }
 
 impl CubeToolAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
-            Self::SpawnCube => GamepadButtonType::South.into(),
-            Self::RemoveCube => GamepadButtonType::East.into(),
-            Self::AttractCube => GamepadButtonType::LeftTrigger.into(),
+            Self::Spawn => GamepadButtonType::South.into(),
+            Self::Remove => GamepadButtonType::East.into(),
+            Self::Attract => GamepadButtonType::LeftTrigger.into(),
         }
     }
 
     fn default_mkb_binding(&self) -> UserInput {
         match self {
-            Self::SpawnCube => KeyCode::ControlLeft.into(),
-            Self::RemoveCube => KeyCode::ControlRight.into(),
-            Self::AttractCube => KeyCode::AltRight.into(),
+            Self::Spawn => KeyCode::ControlLeft.into(),
+            Self::Remove => KeyCode::ControlRight.into(),
+            Self::Attract => KeyCode::AltRight.into(),
         }
     }
 }
@@ -114,7 +112,7 @@ fn handle_input(
             .filter_map(|x| pointers.get(*x).ok())
             .next()
             .expect("Character should have a pointer");
-        if t_act.just_pressed(CubeToolAction::SpawnCube) {
+        if t_act.just_pressed(CubeToolAction::Spawn) {
             info!("Spawn Cube");
             commands.spawn((
                 CubeToolInteractable,
@@ -132,7 +130,7 @@ fn handle_input(
                 Name::new("Cube"),
             ));
         }
-        if t_act.just_pressed(CubeToolAction::RemoveCube) {
+        if t_act.just_pressed(CubeToolAction::Remove) {
             info!("Remove Cube");
             // remove the cube closest to the pointer
             let mut closest_cube = None;
@@ -148,8 +146,8 @@ fn handle_input(
                 commands.entity(cube).despawn_recursive();
             }
         }
-        if t_act.pressed(CubeToolAction::AttractCube) {
-            if t_act.just_pressed(CubeToolAction::AttractCube) {
+        if t_act.pressed(CubeToolAction::Attract) {
+            if t_act.just_pressed(CubeToolAction::Attract) {
                 info!("Attract Cube");
             }
             // add a force to all cubes towards the pointer

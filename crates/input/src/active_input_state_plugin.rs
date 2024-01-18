@@ -39,12 +39,10 @@ fn activate_gamepad(
                 }
             }
             GamepadEvent::Axis(ax) => {
-                if ax.value != 0.0 {
-                    if !debounce {
-                        info!("Switching to gamepad input because of {:?}", ev);
-                        next_state.set(ActiveInput::Gamepad);
-                        debounce = true;
-                    }
+                if ax.value != 0.0 && !debounce {
+                    info!("Switching to gamepad input because of {:?}", ev);
+                    next_state.set(ActiveInput::Gamepad);
+                    debounce = true;
                 }
             }
             _ => (),

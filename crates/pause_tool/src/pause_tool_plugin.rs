@@ -22,22 +22,20 @@ fn toolbelt_events(
     mut reader: EventReader<ToolbeltEvent>,
 ) {
     for e in reader.read() {
-        match e {
-            ToolbeltEvent::PopulateInspectorToolbelt {
-                toolbelt_id,
-                character_id,
-            } => {
-                spawn_action_tool::<PauseToolAction>(
-                    file!(),
-                    e,
-                    &mut commands,
-                    *toolbelt_id,
-                    *character_id,
-                    &asset_server,
-                    PauseTool,
-                );
-            }
-            _ => {}
+        if let ToolbeltEvent::PopulateInspectorToolbelt {
+            toolbelt_id,
+            character_id,
+        } = e
+        {
+            spawn_action_tool::<PauseToolAction>(
+                file!(),
+                e,
+                &mut commands,
+                *toolbelt_id,
+                *character_id,
+                &asset_server,
+                PauseTool,
+            );
         }
     }
 }
@@ -73,10 +71,10 @@ impl ToolAction for PauseToolAction {
 }
 
 fn handle_input(
-    mut commands: Commands,
+    mut _commands: Commands,
     tools: Query<(&ActionState<PauseToolAction>, Option<&ActiveTool>, &Parent)>,
 ) {
-    for (t_act, t_enabled, t_parent) in tools.iter() {
+    for (t_act, t_enabled, _t_parent) in tools.iter() {
         if t_enabled.is_none() {
             continue;
         }

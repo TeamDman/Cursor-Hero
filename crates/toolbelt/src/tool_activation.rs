@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use cursor_hero_bevy::NameOrEntityDisplay;
 use leafwing_input_manager::action_state::ActionState;
 
+#[allow(clippy::type_complexity)]
 pub fn tool_activation(
     mut commands: Commands,
     hovered_query: Query<(Entity, Option<&ActiveTool>, Option<&Name>), With<Hovered>>,

@@ -32,22 +32,20 @@ fn toolbelt_events(
     mut reader: EventReader<ToolbeltEvent>,
 ) {
     for e in reader.read() {
-        match e {
-            ToolbeltEvent::PopulateDefaultToolbelt {
-                toolbelt_id,
-                character_id,
-            } => {
-                spawn_action_tool::<TalkToolAction>(
-                    file!(),
-                    e,
-                    &mut commands,
-                    *toolbelt_id,
-                    *character_id,
-                    &asset_server,
-                    TalkTool,
-                );
-            }
-            _ => {}
+        if let ToolbeltEvent::PopulateDefaultToolbelt {
+            toolbelt_id,
+            character_id,
+        } = e
+        {
+            spawn_action_tool::<TalkToolAction>(
+                file!(),
+                e,
+                &mut commands,
+                *toolbelt_id,
+                *character_id,
+                &asset_server,
+                TalkTool,
+            );
         }
     }
 }

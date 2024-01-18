@@ -99,29 +99,27 @@ fn insert_pointer(
     for character_id in character.iter() {
         info!("Creating pointer for character '{:?}'", character_id);
         commands.entity(character_id).with_children(|parent| {
-            let pointer_id = parent
-                .spawn((
-                    Pointer::default(),
-                    Name::new("Pointer"),
-                    SpriteBundle {
-                        texture: asset_server.load("textures/cursor.png"),
-                        transform: Transform::from_xyz(0.0, 0.0, 2.0),
-                        sprite: Sprite {
-                            color: CharacterColor::default().as_color(),
-                            anchor: Anchor::TopLeft,
-                            ..default()
-                        },
-                        ..Default::default()
+            parent.spawn((
+                Pointer::default(),
+                Name::new("Pointer"),
+                SpriteBundle {
+                    texture: asset_server.load("textures/cursor.png"),
+                    transform: Transform::from_xyz(0.0, 0.0, 2.0),
+                    sprite: Sprite {
+                        color: CharacterColor::default().as_color(),
+                        anchor: Anchor::TopLeft,
+                        ..default()
                     },
-                    InputManagerBundle::<PointerAction> {
-                        input_map: PointerAction::default_input_map(),
-                        action_state: ActionState::default(),
-                    },
-                    RigidBody::Dynamic,
-                    Collider::cuboid(10.0, 10.0),
-                    Sensor,
-                ))
-                .id();
+                    ..Default::default()
+                },
+                InputManagerBundle::<PointerAction> {
+                    input_map: PointerAction::default_input_map(),
+                    action_state: ActionState::default(),
+                },
+                RigidBody::Dynamic,
+                Collider::cuboid(10.0, 10.0),
+                Sensor,
+            ));
         });
     }
 }
@@ -130,7 +128,6 @@ fn update_pointer_position(
     mut pointer_query: Query<
         (
             &mut Position,
-            &mut LinearVelocity,
             &ActionState<PointerAction>,
             &Pointer,
             &Parent,
@@ -140,7 +137,7 @@ fn update_pointer_position(
     mut character_query: Query<&Position, (With<Character>, Without<Pointer>)>,
     mut debounce: Local<bool>,
 ) {
-    for (mut pointer_position, mut pointer_velocity, pointer_actions, pointer_id, pointer_parent) in
+    for (mut pointer_position, pointer_actions, pointer_id, pointer_parent) in
         pointer_query.iter_mut()
     {
         let character_position = character_query.get_mut(pointer_parent.get()).unwrap();
@@ -152,7 +149,6 @@ fn update_pointer_position(
 
             let offset = look * pointer_id.reach;
             let desired_position = character_position.xy() + offset;
-            let desired_velocity = desired_position - pointer_position.xy();
             pointer_position.x = desired_position.x;
             pointer_position.y = desired_position.y;
             *debounce = false;
@@ -165,13 +161,11 @@ fn update_pointer_position(
     }
 }
 
+#[allow(clippy::type_complexity)]
 fn update_pointer_from_mouse(
     window_query: Query<&Window, With<PrimaryWindow>>,
     camera_query: Query<(&Camera, &GlobalTransform), (With<MainCamera>, Without<Character>)>,
-    character_query: Query<
-        (&Position, &Children),
-        (With<MainCharacter>, Without<MainCamera>, Without<Pointer>),
-    >,
+    character_query: Query<&Children, (With<MainCharacter>, Without<MainCamera>, Without<Pointer>)>,
     mut pointer_query: Query<&mut Position, With<Pointer>>,
 ) {
     let (camera, camera_global_transform) = camera_query.single();
@@ -183,7 +177,7 @@ fn update_pointer_from_mouse(
             .viewport_to_world(camera_global_transform, current_screen_position)
             .map(|ray| ray.origin.truncate())
         {
-            if let Ok((character_pos, character_children)) = character_query.get_single() {
+            if let Ok(character_children) = character_query.get_single() {
                 for child in character_children.iter() {
                     if let Ok(mut pointer_position) = pointer_query.get_mut(*child) {
                         pointer_position.x = current_world_position.x;

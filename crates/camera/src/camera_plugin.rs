@@ -3,7 +3,6 @@ use bevy::input::mouse::MouseWheel;
 use bevy::prelude::*;
 use bevy::transform::TransformSystem;
 use bevy_xpbd_2d::prelude::*;
-use cursor_hero_movement::MovementEvent;
 use cursor_hero_physics::damping_plugin::MovementDamping;
 use leafwing_input_manager::action_state::ActionState;
 use leafwing_input_manager::input_map::InputMap;
@@ -79,24 +78,18 @@ pub fn update_camera_zoom(
     }
 }
 
-fn handle_events(
-    mut commands: Commands,
-    mut camera_events: EventReader<CameraEvent>,
-    camera_query: Query<(Entity, Option<&Children>), With<MainCamera>>,
-) {
-    if let Ok((camera_id, camera_children)) = camera_query.get_single() {
-        for event in camera_events.read() {
-            match event {
-                CameraEvent::BeginFollowing { target_id } => {
-                    info!("Camera following character '{:?}'", target_id);
-                    // tag character to mark it as being followed
-                    commands.entity(*target_id).insert(FollowWithMainCamera);
-                }
-                CameraEvent::StopFollowing { target_id } => {
-                    info!("Camera stopped following character '{:?}'", target_id);
-                    // remove tag from character
-                    commands.entity(*target_id).remove::<FollowWithMainCamera>();
-                }
+fn handle_events(mut commands: Commands, mut camera_events: EventReader<CameraEvent>) {
+    for event in camera_events.read() {
+        match event {
+            CameraEvent::BeginFollowing { target_id } => {
+                info!("Camera following character '{:?}'", target_id);
+                // tag character to mark it as being followed
+                commands.entity(*target_id).insert(FollowWithMainCamera);
+            }
+            CameraEvent::StopFollowing { target_id } => {
+                info!("Camera stopped following character '{:?}'", target_id);
+                // remove tag from character
+                commands.entity(*target_id).remove::<FollowWithMainCamera>();
             }
         }
     }
@@ -111,18 +104,16 @@ fn follow(
             Ok(mut cam_transform) => {
                 cam_transform.translation = follow_transform.translation();
             }
-            Err(e) => match e {
-                MultipleEntities(e) => {
+            Err(e) => {
+                if let MultipleEntities(e) = e {
                     error!("Error getting camera transform: {:?}", e);
                 }
-                _ => {}
-            },
+            }
         },
-        Err(e) => match e {
-            MultipleEntities(e) => {
+        Err(e) => {
+            if let MultipleEntities(e) = e {
                 error!("Error getting camera follow transform: {:?}", e);
             }
-            _ => {}
-        },
+        }
     }
 }

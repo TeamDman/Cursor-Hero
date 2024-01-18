@@ -1,10 +1,8 @@
 use super::types::*;
 use bevy::prelude::*;
-use bevy_xpbd_2d::constraints::FixedJoint;
-use cursor_hero_input::update_gamepad_settings::PRESS_THRESHOLD;
-use itertools::Itertools;
 use leafwing_input_manager::action_state::ActionState;
 
+#[allow(clippy::type_complexity)]
 pub fn tool_visibility(
     mut toolbelts: Query<
         (&ActionState<ToolbeltAction>, &mut Wheel, &Children),

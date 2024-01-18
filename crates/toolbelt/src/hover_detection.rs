@@ -4,6 +4,7 @@ use bevy_xpbd_2d::components::CollidingEntities;
 use cursor_hero_bevy::NameOrEntityDisplay;
 use cursor_hero_pointer::pointer_plugin::Pointer;
 
+#[allow(clippy::type_complexity)]
 pub fn hover_detection(
     mut commands: Commands,
     pointer_query: Query<Entity, With<Pointer>>,
@@ -35,15 +36,13 @@ pub fn hover_detection(
                     hoverable_name.name_or_entity(hoverable_id)
                 );
             }
-        } else {
-            if hoverable_hovered.is_some() {
-                commands.entity(hoverable_id).remove::<Hovered>();
-                events.send(ToolHoveredEvent::HoverEnd(hoverable_id));
-                debug!(
-                    "No longer hovering over tool: {:?}",
-                    hoverable_name.name_or_entity(hoverable_id)
-                );
-            }
+        } else if hoverable_hovered.is_some() {
+            commands.entity(hoverable_id).remove::<Hovered>();
+            events.send(ToolHoveredEvent::HoverEnd(hoverable_id));
+            debug!(
+                "No longer hovering over tool: {:?}",
+                hoverable_name.name_or_entity(hoverable_id)
+            );
         }
     }
 }

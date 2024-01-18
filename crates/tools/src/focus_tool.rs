@@ -3,7 +3,6 @@ use bevy::window::PrimaryWindow;
 use bevy::window::RawHandleWrapper;
 use cursor_hero_camera::camera_plugin::FollowWithMainCamera;
 use cursor_hero_camera::camera_plugin::MainCamera;
-use cursor_hero_movement::Movement;
 use cursor_hero_movement::MovementEvent;
 use cursor_hero_winutils::win_mouse::set_cursor_position;
 use cursor_hero_winutils::win_window::get_window_title_bar_center_position;
@@ -11,7 +10,6 @@ use leafwing_input_manager::prelude::*;
 
 use cursor_hero_camera::camera_plugin::CameraEvent;
 use cursor_hero_character::character_plugin::Character;
-use cursor_hero_character::character_plugin::CharacterColor;
 use cursor_hero_winutils::win_window::focus_window;
 
 use cursor_hero_toolbelt::types::*;
@@ -36,22 +34,20 @@ fn toolbelt_events(
     mut reader: EventReader<ToolbeltEvent>,
 ) {
     for e in reader.read() {
-        match e {
-            ToolbeltEvent::PopulateDefaultToolbelt {
-                toolbelt_id,
-                character_id,
-            } => {
-                spawn_action_tool::<FocusToolAction>(
-                    file!(),
-                    e,
-                    &mut commands,
-                    *toolbelt_id,
-                    *character_id,
-                    &asset_server,
-                    FocusTool,
-                );
-            }
-            _ => {}
+        if let ToolbeltEvent::PopulateDefaultToolbelt {
+            toolbelt_id,
+            character_id,
+        } = e
+        {
+            spawn_action_tool::<FocusToolAction>(
+                file!(),
+                e,
+                &mut commands,
+                *toolbelt_id,
+                *character_id,
+                &asset_server,
+                FocusTool,
+            );
         }
     }
 }
@@ -90,20 +86,12 @@ impl ToolAction for FocusToolAction {
 }
 
 #[allow(clippy::type_complexity)]
+#[allow(clippy::too_many_arguments)]
 fn handle_input(
     tools: Query<(&ActionState<FocusToolAction>, Option<&ActiveTool>, &Parent)>,
     toolbelts: Query<&Parent, With<Toolbelt>>,
-    mut characters: Query<
-        (
-            Entity,
-            Option<&FollowWithMainCamera>,
-            &mut Handle<ColorMaterial>,
-        ),
-        With<Character>,
-    >,
+    mut characters: Query<(Entity, Option<&FollowWithMainCamera>), With<Character>>,
     camera_query: Query<Entity, With<MainCamera>>,
-    mut commands: Commands,
-    mut materials: ResMut<Assets<ColorMaterial>>,
     window_query: Query<&RawHandleWrapper, With<PrimaryWindow>>,
     mut camera_events: EventWriter<CameraEvent>,
     mut movement_events: EventWriter<MovementEvent>,
@@ -120,7 +108,7 @@ fn handle_input(
             let character = characters
                 .get_mut(toolbelt.get())
                 .expect("Toolbelt should have a character");
-            let (character_id, character_is_followed, mut material) = character;
+            let (character_id, character_is_followed) = character;
 
             if character_is_followed.is_none() {
                 camera_events.send(CameraEvent::BeginFollowing {

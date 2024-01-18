@@ -4,7 +4,6 @@ use cursor_hero_bevy::NameOrEntityDisplay;
 use leafwing_input_manager::action_state::ActionState;
 
 pub fn tool_help_activation(
-    mut commands: Commands,
     hovered_query: Query<(Entity, Option<&Name>), With<Hovered>>,
     toolbelt_query: Query<(&ActionState<ToolbeltAction>, &Children)>,
     mut events: EventWriter<ToolActivationEvent>,
