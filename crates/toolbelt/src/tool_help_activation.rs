@@ -11,9 +11,15 @@ pub fn tool_help_activation(
 ) {
     for (toolbelt_actions, toolbelt_children) in toolbelt_query.iter() {
         if toolbelt_actions.just_released(ToolbeltAction::Show) {
-            for (hovered_id, hovered_name) in toolbelt_children.iter().filter_map(|h| hovered_query.get(*h).ok()) {
+            for (hovered_id, hovered_name) in toolbelt_children
+                .iter()
+                .filter_map(|h| hovered_query.get(*h).ok())
+            {
                 events.send(ToolActivationEvent::ActivateHelp(hovered_id));
-                info!("Activating help for tool: {:?}", hovered_name.name_or_entity(hovered_id));
+                info!(
+                    "Activating help for tool: {:?}",
+                    hovered_name.name_or_entity(hovered_id)
+                );
             }
         }
     }

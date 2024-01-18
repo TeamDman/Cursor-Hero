@@ -47,9 +47,7 @@ fn main() {
                     #[cfg(debug_assertions)]
                     resolution: (
                         // %BEGIN_RESOLUTION%
-                        1233.0,
-                        781.0
-                        // %END_RESOLUTION%
+                        1233.0, 781.0, // %END_RESOLUTION%
                     )
                         .into(),
                     resizable: true,
@@ -57,9 +55,7 @@ fn main() {
                     position: WindowPosition::At(
                         (
                             // %BEGIN_POSITION%
-                        1932,
-                        32
-                        // %END_POSITION%
+                            1932, 32, // %END_POSITION%
                         )
                             .into(),
                     ),
@@ -71,7 +67,7 @@ fn main() {
             .set(log_plugin)
             .build(),
     )
-     .add_plugins(WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)))
+    .add_plugins(WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)))
     // .insert_resource(ClearColor(Color::NONE))
     .add_plugins((FrameTimeDiagnosticsPlugin,))
     .add_plugins(MyPlugin);

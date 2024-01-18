@@ -18,8 +18,7 @@ pub fn wheel_properties(
             wheel.radius = wheel.radius_start + (wheel.radius_end - wheel.radius_start) * open;
             wheel.spin = wheel.spin_start + (wheel.spin_end - wheel.spin_start) * open;
             wheel.scale = wheel.scale_start + (wheel.scale_end - wheel.scale_start) * open;
-            wheel.alpha = wheel.alpha_start
-                + (wheel.alpha_end - wheel.alpha_start) * open;
+            wheel.alpha = wheel.alpha_start + (wheel.alpha_end - wheel.alpha_start) * open;
             wheel.open = true;
         } else {
             wheel.open = false;
