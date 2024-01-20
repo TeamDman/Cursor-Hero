@@ -4,6 +4,7 @@ use cursor_hero_bevy::NameOrEntityDisplay;
 use leafwing_input_manager::action_state::ActionState;
 
 pub fn tool_help_activation(
+    // todo: the hovered item is a child of the tool, not the tool itself for the help icon
     hovered_query: Query<(Entity, Option<&Name>), With<Hovered>>,
     toolbelt_query: Query<(&ActionState<ToolbeltAction>, &Children)>,
     mut events: EventWriter<ToolActivationEvent>,

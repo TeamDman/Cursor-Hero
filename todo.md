@@ -1,4 +1,13 @@
 - Disable zoom when hovering over Bevy eGooey.
+- File browser in world
+
+- Voice input tool
+  - Push to talk
+  - Push to toggle talk
+  - Insert period
+  - Insert space
+  - Hit enter
+  - 
 
 - sprint tool scales scroll speed
 

@@ -2,6 +2,8 @@ use bevy::ecs::query::QuerySingleError::MultipleEntities;
 use bevy::input::mouse::MouseWheel;
 use bevy::prelude::*;
 use bevy::transform::TransformSystem;
+use bevy::window::PrimaryWindow;
+use bevy_egui::EguiContext;
 use bevy_xpbd_2d::prelude::*;
 use cursor_hero_physics::damping_plugin::MovementDamping;
 use leafwing_input_manager::action_state::ActionState;
@@ -69,8 +71,18 @@ pub enum CameraEvent {
 pub fn update_camera_zoom(
     mut cam: Query<&mut Transform, With<MainCamera>>,
     mut scroll: EventReader<MouseWheel>,
-) {
+    egui_context_query: Query<&EguiContext, With<PrimaryWindow>>,
+) { 
+    let Ok(egui_context) = egui_context_query.get_single() else {
+        return;
+    };
+    let hovering_over_egui = egui_context.clone().get_mut().is_pointer_over_area();
+    if hovering_over_egui {
+        scroll.clear();
+        return;
+    }
     for event in scroll.read() {
+
         let mut scale = cam.single_mut().scale;
         scale *= Vec2::splat(1.0 - event.y / 10.0).extend(1.0);
         scale = scale.clamp(Vec3::splat(0.1), Vec3::splat(10.0));
