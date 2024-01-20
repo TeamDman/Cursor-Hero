@@ -4,22 +4,30 @@ use cursor_hero_bevy::NameOrEntityDisplay;
 use leafwing_input_manager::action_state::ActionState;
 
 pub fn tool_help_activation(
-    // todo: the hovered item is a child of the tool, not the tool itself for the help icon
-    hovered_query: Query<(Entity, Option<&Name>), With<Hovered>>,
     toolbelt_query: Query<(&ActionState<ToolbeltAction>, &Children)>,
+    tool_query: Query<(Option<&Name>, &Children), With<Tool>>,
+    hovered_query: Query<Entity, (With<Hovered>, With<ToolHelpTrigger>)>,
     mut events: EventWriter<ToolActivationEvent>,
 ) {
     for (toolbelt_actions, toolbelt_children) in toolbelt_query.iter() {
         if toolbelt_actions.just_released(ToolbeltAction::Show) {
-            for (hovered_id, hovered_name) in toolbelt_children
-                .iter()
-                .filter_map(|h| hovered_query.get(*h).ok())
-            {
-                events.send(ToolActivationEvent::ActivateHelp(hovered_id));
-                info!(
-                    "Activating help for tool: {:?}",
-                    hovered_name.name_or_entity(hovered_id)
-                );
+            // check all the toolbelt children
+            for tool_id in toolbelt_children {
+                // if the child is a tool
+                if let Ok((tool_name, tool_children)) = tool_query.get(*tool_id) {
+                    // and the tool has children
+                    for tool_child_id in tool_children.iter() {
+                        // and the hovered child is a tool help trigger
+                        if let Ok(hovered_id) = hovered_query.get(*tool_child_id) {
+                            // then activate the help for the hovered tool
+                            events.send(ToolActivationEvent::ActivateHelp(hovered_id));
+                            info!(
+                                "Activating help for tool: {:?}",
+                                tool_name.name_or_entity(hovered_id)
+                            );
+                        }
+                    }
+                }
             }
         }
     }

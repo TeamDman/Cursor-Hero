@@ -12,7 +12,7 @@ use crate::tool_activation::tool_activation;
 use crate::tool_color::tool_color;
 use crate::tool_distribution::tool_distribution;
 use crate::tool_help_activation::tool_help_activation;
-use crate::tool_help_insertion::tool_help_insertion;
+use crate::tool_help_lifecycle::tool_help_lifecycle;
 use crate::tool_visibility::tool_visibility;
 use crate::types::*;
 use crate::wheel_audio::wheel_audio;
@@ -40,14 +40,14 @@ impl Plugin for ToolbeltPlugin {
                     remove_hover_frame,
                     tool_color,
                     tool_activation,
-                    tool_help_activation,
                     wheel_audio_cleanup,
                     (
                         wheel_opening,
                         wheel_audio,
                         pointer_reach, // prevent sprint plugin from clobbering wheel pointer reach update
                         tool_visibility,
-                        tool_help_insertion,
+                        tool_help_activation,
+                        tool_help_lifecycle,
                     )
                         .chain(),
                 ),

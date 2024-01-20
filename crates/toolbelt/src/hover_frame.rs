@@ -13,6 +13,11 @@ pub fn insert_hover_frame(
 ) {
     for event in reader.read() {
         if let ToolHoveredEvent::HoverStart(hovered_id) = event {
+            // Ensure the entity hasn't despawned since the event was sent
+            if commands.get_entity(*hovered_id).is_none() {
+                warn!("Hovered entity {:?} has despawned", hovered_id);
+                continue;
+            }
             let mut size = Vec2::new(200.0, 200.0);
             if let Ok(hovered_sprite) = hovered_query.get(*hovered_id)
                 && let Some(hovered_size) = hovered_sprite.custom_size

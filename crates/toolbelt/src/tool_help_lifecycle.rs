@@ -7,7 +7,7 @@ use cursor_hero_bevy::NameOrEntityDisplay;
 use leafwing_input_manager::action_state::ActionState;
 
 #[allow(clippy::type_complexity)]
-pub fn tool_help_insertion(
+pub fn tool_help_lifecycle(
     mut commands: Commands,
     toolbelt_query: Query<
         (&ActionState<ToolbeltAction>, &Children),

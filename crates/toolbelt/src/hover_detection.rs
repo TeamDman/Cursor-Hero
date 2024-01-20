@@ -31,18 +31,18 @@ pub fn hover_detection(
             if hoverable_hovered.is_none() {
                 commands.entity(hoverable_id).insert(Hovered);
                 events.send(ToolHoveredEvent::HoverStart(hoverable_id));
-                debug!(
-                    "Hovering over tool: {:?}",
-                    hoverable_name.name_or_entity(hoverable_id)
-                );
+                // debug!(
+                //     "Hovering over tool: {:?}",
+                //     hoverable_name.name_or_entity(hoverable_id)
+                // );
             }
         } else if hoverable_hovered.is_some() {
             commands.entity(hoverable_id).remove::<Hovered>();
             events.send(ToolHoveredEvent::HoverEnd(hoverable_id));
-            debug!(
-                "No longer hovering over tool: {:?}",
-                hoverable_name.name_or_entity(hoverable_id)
-            );
+            // debug!(
+            //     "No longer hovering over tool: {:?}",
+            //     hoverable_name.name_or_entity(hoverable_id)
+            // );
         }
     }
 }

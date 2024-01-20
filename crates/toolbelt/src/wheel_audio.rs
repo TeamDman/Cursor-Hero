@@ -11,12 +11,15 @@ pub fn wheel_audio(
     asset_server: Res<AssetServer>,
     mut toolbelt_events: EventReader<ToolbeltEvent>,
 ) {
-    for event in toolbelt_events.iter() {
+    for event in toolbelt_events.read() {
         match event {
             ToolbeltEvent::Opened { toolbelt_id } => {
                 commands.entity(*toolbelt_id).with_children(|parent| {
                     parent.spawn((
                         AudioBundle {
+                            // source: asset_server
+                            //     .load("sounds/plastic toy snapping shut 1 reversed.ogg"),
+
                             source: asset_server.load("sounds/plastic toy snapping shut 1.ogg"),
                             settings: PlaybackSettings::ONCE
                                 .with_spatial(true)
@@ -32,6 +35,7 @@ pub fn wheel_audio(
                 commands.entity(*toolbelt_id).with_children(|parent| {
                     parent.spawn((
                         AudioBundle {
+                            // source: asset_server.load("sounds/plastic toy snapping shut 1.ogg"),
                             source: asset_server
                                 .load("sounds/plastic toy snapping shut 1 reversed.ogg"),
                             settings: PlaybackSettings::ONCE

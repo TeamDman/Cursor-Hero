@@ -7,6 +7,8 @@ use leafwing_input_manager::Actionlike;
 use leafwing_input_manager::InputManagerBundle;
 
 use cursor_hero_toolbelt::types::*;
+
+use crate::tool_spawning::spawn_action_tool;
 pub struct PlaceholderToolPlugin;
 
 impl Plugin for PlaceholderToolPlugin {
@@ -64,31 +66,20 @@ fn toolbelt_events(
     for e in reader.read() {
         if let ToolbeltEvent::PopulateDefaultToolbelt {
             toolbelt_id,
-            character_id: _,
+            character_id,
         } = e
         {
-            commands.entity(*toolbelt_id).with_children(|t_commands| {
-                for i in 0..1 {
-                    t_commands.spawn((
-                        Tool,
-                        PlaceholderTool,
-                        Name::new(format!("Placeholder Tool {}", i)),
-                        SpriteBundle {
-                            sprite: Sprite {
-                                custom_size: Some(Vec2::new(100.0, 100.0)),
-                                ..default()
-                            },
-                            texture: asset_server.load("textures/tools/placeholder_tool.png"),
-                            ..default()
-                        },
-                        Visibility::Hidden,
-                        InputManagerBundle::<PlaceholderToolAction> {
-                            input_map: PlaceholderToolAction::default_input_map(),
-                            ..default()
-                        },
-                    ));
-                }
-            });
+            for _ in 0..1 {
+                spawn_action_tool::<PlaceholderToolAction>(
+                    file!(),
+                    e,
+                    &mut commands,
+                    *toolbelt_id,
+                    *character_id,
+                    &asset_server,
+                    PlaceholderTool,
+                );
+            }
         }
     }
 }
