@@ -10,6 +10,7 @@ cursor_hero_character = { workspace = true }
 cursor_hero_bevy = { workspace = true }
 cursor_hero_pointer = { workspace = true }
 cursor_hero_input = { workspace = true }
+cursor_hero_xelu_prompts = { workspace = true }
 bevy = { workspace = true }
 bevy-inspector-egui = { workspace = true }
 bevy_xpbd_2d = { workspace = true }
