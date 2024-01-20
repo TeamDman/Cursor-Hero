@@ -57,8 +57,8 @@ fn main() {
                     position: WindowPosition::At(
                         (
                             // %BEGIN_POSITION%
-                        1932,
-                        32
+                        345,
+                        21
                         // %END_POSITION%
                         )
                             .into(),

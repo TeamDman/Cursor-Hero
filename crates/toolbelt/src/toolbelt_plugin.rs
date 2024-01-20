@@ -15,7 +15,9 @@ use crate::tool_help_activation::tool_help_activation;
 use crate::tool_help_insertion::tool_help_insertion;
 use crate::tool_visibility::tool_visibility;
 use crate::types::*;
-use crate::wheel_properties::wheel_properties;
+use crate::wheel_audio::wheel_audio;
+use crate::wheel_audio::wheel_audio_cleanup;
+use crate::wheel_opening::wheel_opening;
 pub struct ToolbeltPlugin;
 
 impl Plugin for ToolbeltPlugin {
@@ -39,8 +41,10 @@ impl Plugin for ToolbeltPlugin {
                     tool_color,
                     tool_activation,
                     tool_help_activation,
+                    wheel_audio_cleanup,
                     (
-                        wheel_properties,
+                        wheel_opening,
+                        wheel_audio,
                         pointer_reach, // prevent sprint plugin from clobbering wheel pointer reach update
                         tool_visibility,
                         tool_help_insertion,

@@ -82,6 +82,12 @@ pub enum ToolbeltEvent {
         toolbelt_id: Entity,
         character_id: Entity,
     },
+    Opened {
+        toolbelt_id: Entity,
+    },
+    Closed {
+        toolbelt_id: Entity,
+    },
 }
 
 #[derive(Component, Reflect, Clone, Copy, Debug)]

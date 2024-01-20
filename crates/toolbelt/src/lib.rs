@@ -12,4 +12,5 @@ pub mod tool_help_insertion;
 pub mod tool_visibility;
 pub mod toolbelt_plugin;
 pub mod types;
-pub mod wheel_properties;
+pub mod wheel_opening;
+pub mod wheel_audio;

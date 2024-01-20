@@ -1,4 +1,3 @@
-- Disable zoom when hovering over Bevy eGooey.
 - File browser in world
 
 - Voice input tool

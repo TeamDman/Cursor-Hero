@@ -1732,16 +1732,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cursor_hero_bevy_inspector_egui"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "bevy-inspector-egui",
- "bevy_egui",
- "egui",
-]
-
-[[package]]
 name = "cursor_hero_camera"
 version = "0.1.0"
 dependencies = [
@@ -1882,7 +1872,6 @@ name = "cursor_hero_plugins"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "cursor_hero_bevy_inspector_egui",
  "cursor_hero_camera",
  "cursor_hero_character",
  "cursor_hero_click_drag_character_movement",
