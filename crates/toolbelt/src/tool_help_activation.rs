@@ -1,5 +1,6 @@
 use super::types::*;
 use bevy::prelude::*;
+use bevy::text::Text2dBounds;
 use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
 use cursor_hero_xelu_prompts::texture_path_for_input;
@@ -47,7 +48,7 @@ pub fn spawn_help_for_tool(
         Name::new(format!("Help for {}", tool.name)),
         SpriteBundle {
             sprite: Sprite {
-                custom_size: Some(Vec2::new(250.0, 250.0)),
+                custom_size: Some(Vec2::new(100.0, 100.0)),
                 color: Color::rgba(0.5, 0.5, 1.0, 0.8),
                 ..default()
             },
@@ -58,7 +59,7 @@ pub fn spawn_help_for_tool(
             timer: Timer::from_seconds(25.0, TimerMode::Once),
         },
         RigidBody::Dynamic,
-        Collider::cuboid(250.0, 250.0),
+        Collider::cuboid(100.0, 100.0),
     ));
     parent_commands.with_children(|parent| {
         // image
@@ -68,7 +69,7 @@ pub fn spawn_help_for_tool(
                 ..default()
             },
             texture: tool.texture.clone(),
-            transform: Transform::from_xyz(0.0, 0.0, 0.0),
+            transform: Transform::from_xyz(0.0, 0.0, 1.0),
             ..default()
         });
         // name
@@ -102,8 +103,10 @@ pub fn spawn_help_for_tool(
 
         // actions
         let action_start_y = -100.0; // Starting y position for actions
-        let action_spacing_y = 30.0; // Space between each action
-        let key_spacing_x = 40.0; // Space between each key
+        let action_spacing_y = 40.0; // Space between each action
+        let action_name_x = -150.0;
+        let key_size = 50.0; // Size of each key
+        let key_spacing_x = key_size + 15.0; // Space between each key
         for (i, (action_name, action_inputs)) in tool.actions.iter().enumerate() {
             let action_y = action_start_y - (i as f32 * action_spacing_y);
 
@@ -118,13 +121,13 @@ pub fn spawn_help_for_tool(
                     },
                 )
                 .with_alignment(TextAlignment::Center),
-                transform: Transform::from_xyz(-100.0, action_y, 0.2), // Place text to the left
+                transform: Transform::from_xyz(action_name_x, action_y, 0.2), // Place text to the left
                 ..default()
             });
 
             // Keys for action
             let mut key_x = 25.0; // Starting x position for keys
-            for (j, action) in action_inputs.iter().enumerate() {
+            for action in action_inputs.iter() {
                 let key_position = Vec3::new(key_x, action_y, 0.2); // Calculate the position for the key
                 key_x += key_spacing_x; // Move the x position for the next key
 
@@ -133,7 +136,7 @@ pub fn spawn_help_for_tool(
                         Some(path) => {
                             parent.spawn(SpriteBundle {
                                 sprite: Sprite {
-                                    custom_size: Some(Vec2::new(25.0, 25.0)),
+                                    custom_size: Some(Vec2::new(key_size, key_size)),
                                     ..default()
                                 },
                                 texture: asset_server.load(path),
