@@ -4,7 +4,6 @@ use leafwing_input_manager::input_map::InputMap;
 use leafwing_input_manager::prelude::*;
 use leafwing_input_manager::user_input::UserInput;
 use leafwing_input_manager::Actionlike;
-use leafwing_input_manager::InputManagerBundle;
 
 use cursor_hero_toolbelt::types::*;
 
@@ -71,7 +70,11 @@ fn toolbelt_events(
         {
             for _ in 0..1 {
                 spawn_action_tool::<PlaceholderToolAction>(
-                    file!(),
+                    Tool::create_with_actions::<PlaceholderToolAction>(
+                        file!(),
+                        "".to_string(),
+                        &asset_server,
+                    ),
                     e,
                     &mut commands,
                     *toolbelt_id,

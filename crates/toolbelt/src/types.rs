@@ -1,6 +1,10 @@
+use std::fmt::Debug;
+
 use bevy::prelude::*;
+use bevy::utils::HashMap;
 use leafwing_input_manager::prelude::*;
 use leafwing_input_manager::user_input::InputKind;
+use std::path::Path;
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
 pub enum ToolbeltAction {
@@ -127,8 +131,96 @@ impl Default for Wheel {
     }
 }
 
-#[derive(Component, Reflect, Clone, Copy, Debug)]
-pub struct Tool;
+#[derive(Component, Reflect, Clone, Debug)]
+pub struct Tool {
+    pub name: String,
+    pub description: String,
+    pub actions: HashMap<String, Vec<UserInput>>,
+    pub texture: Handle<Image>,
+}
+
+impl Tool {
+    pub fn actions_as_info<T>() -> HashMap<String, Vec<UserInput>>
+    where
+        T: ToolAction + Actionlike + Debug,
+    {
+        T::default_input_map()
+            .iter()
+            .map(|v| (format!("{:?}", v.0), v.1.clone()))
+            .collect()
+    }
+
+    pub fn create_with_actions<T>(
+        source_file_path: &str,
+        description: String,
+        asset_server: &Res<AssetServer>,
+    ) -> Tool
+    where
+        T: ToolAction + Actionlike + Debug,
+    {
+        let name = Self::format_tool_name_from_source(source_file_path);
+        let texture = asset_server.load(Self::format_tool_image_from_source(source_file_path));
+        let actions = Self::actions_as_info::<T>();
+        Self {
+            name,
+            description,
+            actions,
+            texture,
+        }
+    }
+
+    pub fn create(
+        source_file_path: &str,
+        description: String,
+        asset_server: &Res<AssetServer>,
+    ) -> Tool {
+        let name = Self::format_tool_name_from_source(source_file_path);
+        let texture = asset_server.load(Self::format_tool_image_from_source(source_file_path));
+        let actions = HashMap::default();
+        Self {
+            name,
+            description,
+            actions,
+            texture,
+        }
+    }
+
+    fn format_tool_name_from_source(file_path: &str) -> String {
+        // Extract the file name from the path
+        let file_name = Path::new(file_path)
+            .file_stem() // Get the file stem (file name without extension)
+            .and_then(|stem| stem.to_str()) // Convert OsStr to &str
+            .unwrap_or("");
+
+        file_name
+            .split('_')
+            .map(|word| {
+                word.chars()
+                    .enumerate()
+                    .map(|(i, c)| {
+                        if i == 0 {
+                            c.to_uppercase().to_string()
+                        } else {
+                            c.to_string()
+                        }
+                    })
+                    .collect::<String>()
+            })
+            .collect::<Vec<_>>()
+            .join(" ")
+    }
+
+    fn format_tool_image_from_source(file_path: &str) -> String {
+        // Extract the file name from the path
+        let file_name = Path::new(file_path)
+            .file_stem() // Get the file stem (file name without extension)
+            .and_then(|stem| stem.to_str()) // Convert OsStr to &str
+            .unwrap_or("")
+            .trim_end_matches("_plugin");
+        format!("textures/tools/{}.png", file_name)
+    }
+}
+
 #[derive(Component, Reflect, Clone, Copy, Debug)]
 pub struct ToolHelpTrigger;
 
@@ -152,5 +244,4 @@ pub enum ToolHoveredEvent {
 pub enum ToolActivationEvent {
     Activate(Entity),
     Deactivate(Entity),
-    ActivateHelp(Entity),
 }

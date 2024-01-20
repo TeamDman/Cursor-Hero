@@ -36,7 +36,7 @@ fn toolbelt_events(
         } = e
         {
             spawn_action_tool::<CubeToolAction>(
-                file!(),
+                Tool::create_with_actions::<CubeToolAction>(file!(), "".to_string(), &asset_server),
                 e,
                 &mut commands,
                 *toolbelt_id,

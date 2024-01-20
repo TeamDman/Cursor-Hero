@@ -50,7 +50,11 @@ fn toolbelt_events(
         } = e
         {
             spawn_action_tool::<InspectToolAction>(
-                file!(),
+                Tool::create_with_actions::<InspectToolAction>(
+                    file!(),
+                    "Inspect UI automation properties".to_string(),
+                    &asset_server,
+                ),
                 e,
                 &mut commands,
                 *toolbelt_id,
@@ -65,21 +69,6 @@ fn toolbelt_events(
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
 enum InspectToolAction {
     PrintUnderMouse,
-}
-
-#[derive(Debug)]
-enum ThreadboundMessage {
-    PrintUnderMouse(i32, i32),
-}
-#[derive(Debug)]
-enum GameboundMessage {
-    ElementDetails(ElementInfo),
-}
-
-#[derive(Resource)]
-struct Bridge {
-    pub sender: Sender<ThreadboundMessage>,
-    pub receiver: Receiver<GameboundMessage>,
 }
 
 impl InspectToolAction {
@@ -107,6 +96,20 @@ impl ToolAction for InspectToolAction {
     }
 }
 
+#[derive(Debug)]
+enum ThreadboundMessage {
+    PrintUnderMouse(i32, i32),
+}
+#[derive(Debug)]
+enum GameboundMessage {
+    ElementDetails(ElementInfo),
+}
+
+#[derive(Resource)]
+struct Bridge {
+    pub sender: Sender<ThreadboundMessage>,
+    pub receiver: Receiver<GameboundMessage>,
+}
 fn process_thread_message(
     action: ThreadboundMessage,
     reply_tx: &Sender<GameboundMessage>,

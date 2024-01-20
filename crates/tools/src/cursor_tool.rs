@@ -49,7 +49,11 @@ fn toolbelt_events(
         } = e
         {
             spawn_tool(
-                file!(),
+                Tool::create(
+                    file!(),
+                    "Positions the Windows cursor based on the game pointer".to_string(),
+                    &asset_server,
+                ),
                 e,
                 &mut commands,
                 *toolbelt_id,

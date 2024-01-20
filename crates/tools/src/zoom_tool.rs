@@ -34,7 +34,7 @@ fn toolbelt_events(
         } = e
         {
             spawn_action_tool::<ZoomToolAction>(
-                file!(),
+                Tool::create_with_actions::<ZoomToolAction>(file!(), "".to_string(), &asset_server),
                 e,
                 &mut commands,
                 *toolbelt_id,

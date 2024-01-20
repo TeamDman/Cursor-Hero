@@ -1,7 +1,6 @@
 use super::types::*;
 use bevy::prelude::*;
 use bevy_xpbd_2d::components::CollidingEntities;
-use cursor_hero_bevy::NameOrEntityDisplay;
 use cursor_hero_pointer::pointer_plugin::Pointer;
 
 #[allow(clippy::type_complexity)]
@@ -9,19 +8,13 @@ pub fn hover_detection(
     mut commands: Commands,
     pointer_query: Query<Entity, With<Pointer>>,
     hoverable_query: Query<
-        (
-            Entity,
-            &CollidingEntities,
-            &Visibility,
-            Option<&Hovered>,
-            Option<&Name>,
-        ),
+        (Entity, &CollidingEntities, &Visibility, Option<&Hovered>),
         Or<(With<Tool>, With<ToolHelpTrigger>)>,
     >,
     mut events: EventWriter<ToolHoveredEvent>,
 ) {
     let pointers = pointer_query.iter().collect::<Vec<_>>();
-    for (hoverable_id, hoverable_touching, hoverable_visible, hoverable_hovered, hoverable_name) in
+    for (hoverable_id, hoverable_touching, hoverable_visible, hoverable_hovered) in
         hoverable_query.iter()
     {
         if hoverable_visible == Visibility::Hidden {

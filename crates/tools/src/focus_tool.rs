@@ -40,7 +40,11 @@ fn toolbelt_events(
         } = e
         {
             spawn_action_tool::<FocusToolAction>(
-                file!(),
+                Tool::create_with_actions::<FocusToolAction>(
+                    file!(),
+                    "".to_string(),
+                    &asset_server,
+                ),
                 e,
                 &mut commands,
                 *toolbelt_id,

@@ -66,7 +66,11 @@ fn toolbelt_events(
         } = e
         {
             spawn_action_tool::<SprintToolAction>(
-                file!(),
+                Tool::create_with_actions::<SprintToolAction>(
+                    file!(),
+                    "".to_string(),
+                    &asset_server,
+                ),
                 e,
                 &mut commands,
                 *toolbelt_id,

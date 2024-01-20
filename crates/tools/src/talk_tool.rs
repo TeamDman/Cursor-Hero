@@ -38,7 +38,7 @@ fn toolbelt_events(
         } = e
         {
             spawn_action_tool::<TalkToolAction>(
-                file!(),
+                Tool::create_with_actions::<TalkToolAction>(file!(), "".to_string(), &asset_server),
                 e,
                 &mut commands,
                 *toolbelt_id,

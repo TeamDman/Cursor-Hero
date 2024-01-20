@@ -35,7 +35,11 @@ fn toolbelt_events(
         } = e
         {
             spawn_action_tool::<RestartToolAction>(
-                file!(),
+                Tool::create_with_actions::<RestartToolAction>(
+                    file!(),
+                    "".to_string(),
+                    &asset_server,
+                ),
                 e,
                 &mut commands,
                 *toolbelt_id,

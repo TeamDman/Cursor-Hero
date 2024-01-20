@@ -42,7 +42,11 @@ fn toolbelt_events(
         } = e
         {
             spawn_action_tool::<ClickToolAction>(
-                file!(),
+                Tool::create_with_actions::<ClickToolAction>(
+                    file!(),
+                    "".to_string(),
+                    &asset_server,
+                ),
                 e,
                 &mut commands,
                 *toolbelt_id,
@@ -92,6 +96,7 @@ impl ClickToolAction {
         }
     }
 }
+
 impl ToolAction for ClickToolAction {
     fn default_input_map() -> InputMap<ClickToolAction> {
         let mut input_map = InputMap::default();
