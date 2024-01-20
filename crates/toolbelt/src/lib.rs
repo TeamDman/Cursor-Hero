@@ -14,3 +14,4 @@ pub mod toolbelt_plugin;
 pub mod types;
 pub mod wheel_audio;
 pub mod wheel_opening;
+pub mod tool_help_cleanup;

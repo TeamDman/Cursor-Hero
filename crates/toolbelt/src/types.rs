@@ -245,3 +245,8 @@ pub enum ToolActivationEvent {
     Activate(Entity),
     Deactivate(Entity),
 }
+
+#[derive(Component, Reflect, Debug)]
+pub struct ToolHelp {
+    pub timer: Timer,
+}

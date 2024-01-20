@@ -36,19 +36,50 @@ pub fn tool_help_activation(
 
 pub fn spawn_help_for_tool(commands: &mut Commands, position: Vec3, tool: &Tool) {
     info!("Spawning help for tool: {:?}", tool.name);
-    commands.spawn((
+    let mut parent_commands = commands.spawn((
         Name::new(format!("Help for {}", tool.name)),
         SpriteBundle {
             sprite: Sprite {
                 custom_size: Some(Vec2::new(100.0, 100.0)),
-                color: Color::rgba(0.5, 0.5, 1.0, 0.5),
+                // color: Color::rgba(0.5, 0.5, 1.0, 0.5),
                 ..default()
             },
+            texture: tool.texture.clone(),
             transform: Transform::from_translation(position),
             ..default()
         },
-        Sensor,
+        ToolHelp {
+            timer: Timer::from_seconds(25.0, TimerMode::Once),
+        },
         RigidBody::Dynamic,
         Collider::cuboid(100.0, 100.0),
     ));
+    parent_commands.with_children(|parent| {
+        parent.spawn(Text2dBundle {
+            text: Text::from_section(
+                tool.name.clone(),
+                TextStyle {
+                    font_size: 20.0,
+                    color: Color::WHITE,
+                    ..default()
+                },
+            )
+            .with_alignment(TextAlignment::Center),
+            transform: Transform::from_xyz(0.0, 60.0, 0.0),
+            ..default()
+        });
+        parent.spawn(Text2dBundle {
+            text: Text::from_section(
+                tool.description.clone(),
+                TextStyle {
+                    font_size: 20.0,
+                    color: Color::WHITE,
+                    ..default()
+                },
+            )
+            .with_alignment(TextAlignment::Center),
+            transform: Transform::from_xyz(0.0, -60.0, 0.0),
+            ..default()
+        });
+    });
 }
