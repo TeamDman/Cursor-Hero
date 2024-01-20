@@ -109,10 +109,7 @@ fn apply_movement(
     }
 }
 
-fn handle_events(
-    mut commands: Commands,
-    mut movement_events: EventReader<MovementEvent>,
-) {
+fn handle_events(mut commands: Commands, mut movement_events: EventReader<MovementEvent>) {
     for event in movement_events.read() {
         match event {
             MovementEvent::AddMovement { target_id } => {

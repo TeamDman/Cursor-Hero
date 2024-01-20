@@ -12,5 +12,5 @@ pub mod tool_help_lifecycle;
 pub mod tool_visibility;
 pub mod toolbelt_plugin;
 pub mod types;
-pub mod wheel_opening;
 pub mod wheel_audio;
+pub mod wheel_opening;

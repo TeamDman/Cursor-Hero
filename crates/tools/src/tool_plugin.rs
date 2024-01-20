@@ -2,10 +2,10 @@ use bevy::prelude::*;
 
 use crate::click_tool::ClickToolPlugin;
 use crate::cube_tool::CubeToolPlugin;
+use crate::cursor_tool::CursorToolPlugin;
 use crate::focus_tool::FocusToolPlugin;
 use crate::inspect_tool::InspectToolPlugin;
 use crate::placeholder_tool::PlaceholderToolPlugin;
-use crate::cursor_tool::CursorToolPlugin;
 #[cfg(debug_assertions)]
 use crate::restart_tool::RestartToolPlugin;
 use crate::sprint_tool::SprintToolPlugin;

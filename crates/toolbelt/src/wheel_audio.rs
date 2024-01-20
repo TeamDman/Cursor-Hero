@@ -19,7 +19,6 @@ pub fn wheel_audio(
                         AudioBundle {
                             // source: asset_server
                             //     .load("sounds/plastic toy snapping shut 1 reversed.ogg"),
-
                             source: asset_server.load("sounds/plastic toy snapping shut 1.ogg"),
                             settings: PlaybackSettings::ONCE
                                 .with_spatial(true)

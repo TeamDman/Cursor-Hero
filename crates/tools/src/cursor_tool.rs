@@ -107,9 +107,9 @@ fn snap_mouse_to_pointer(
 
     // only when focused, do repositioning logic for when the cursor is over the window
     let (window_handle, window) = window_query.get_single().expect("Need a single window");
-    
+
     let dragging_window = true; // TODO: get this from the window
-    // for now we will force this to true to disable the inside-window logic since it breaks repositioning the window with the controller
+                                // for now we will force this to true to disable the inside-window logic since it breaks repositioning the window with the controller
 
     if window.focused && !dragging_window {
         // get the window bounds

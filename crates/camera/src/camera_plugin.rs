@@ -72,7 +72,7 @@ pub fn update_camera_zoom(
     mut cam: Query<&mut Transform, With<MainCamera>>,
     mut scroll: EventReader<MouseWheel>,
     egui_context_query: Query<&EguiContext, With<PrimaryWindow>>,
-) { 
+) {
     let Ok(egui_context) = egui_context_query.get_single() else {
         return;
     };
@@ -82,7 +82,6 @@ pub fn update_camera_zoom(
         return;
     }
     for event in scroll.read() {
-
         let mut scale = cam.single_mut().scale;
         scale *= Vec2::splat(1.0 - event.y / 10.0).extend(1.0);
         scale = scale.clamp(Vec3::splat(0.1), Vec3::splat(10.0));
