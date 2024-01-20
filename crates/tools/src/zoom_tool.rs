@@ -34,7 +34,11 @@ fn toolbelt_events(
         } = e
         {
             spawn_action_tool::<ZoomToolAction>(
-                Tool::create_with_actions::<ZoomToolAction>(file!(), "".to_string(), &asset_server),
+                Tool::create_with_actions::<ZoomToolAction>(
+                    file!(),
+                    "Send scroll events".to_string(),
+                    &asset_server,
+                ),
                 e,
                 &mut commands,
                 *toolbelt_id,

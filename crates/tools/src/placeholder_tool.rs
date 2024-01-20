@@ -72,7 +72,7 @@ fn toolbelt_events(
                 spawn_action_tool::<PlaceholderToolAction>(
                     Tool::create_with_actions::<PlaceholderToolAction>(
                         file!(),
-                        "".to_string(),
+                        "Balances the wheel".to_string(),
                         &asset_server,
                     ),
                     e,

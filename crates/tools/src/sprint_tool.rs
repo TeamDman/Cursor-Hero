@@ -68,7 +68,7 @@ fn toolbelt_events(
             spawn_action_tool::<SprintToolAction>(
                 Tool::create_with_actions::<SprintToolAction>(
                     file!(),
-                    "".to_string(),
+                    "Go faster, reach further".to_string(),
                     &asset_server,
                 ),
                 e,

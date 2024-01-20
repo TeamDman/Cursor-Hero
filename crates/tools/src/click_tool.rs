@@ -44,7 +44,7 @@ fn toolbelt_events(
             spawn_action_tool::<ClickToolAction>(
                 Tool::create_with_actions::<ClickToolAction>(
                     file!(),
-                    "".to_string(),
+                    "Send mouse clicks".to_string(),
                     &asset_server,
                 ),
                 e,

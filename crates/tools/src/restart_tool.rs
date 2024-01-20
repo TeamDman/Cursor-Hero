@@ -37,7 +37,7 @@ fn toolbelt_events(
             spawn_action_tool::<RestartToolAction>(
                 Tool::create_with_actions::<RestartToolAction>(
                     file!(),
-                    "".to_string(),
+                    "Send Ctrl+C, uparrow, enter".to_string(),
                     &asset_server,
                 ),
                 e,

@@ -36,7 +36,11 @@ fn toolbelt_events(
         } = e
         {
             spawn_action_tool::<CubeToolAction>(
-                Tool::create_with_actions::<CubeToolAction>(file!(), "".to_string(), &asset_server),
+                Tool::create_with_actions::<CubeToolAction>(
+                    file!(),
+                    "Spawn and attract cubes".to_string(),
+                    &asset_server,
+                ),
                 e,
                 &mut commands,
                 *toolbelt_id,

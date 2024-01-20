@@ -30,7 +30,7 @@ fn toolbelt_events(
             spawn_action_tool::<PauseToolAction>(
                 Tool::create_with_actions::<PauseToolAction>(
                     file!(),
-                    "".to_string(),
+                    "Pauses the game (not yet implemented)".to_string(),
                     &asset_server,
                 ),
                 e,

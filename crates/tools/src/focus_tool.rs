@@ -42,7 +42,7 @@ fn toolbelt_events(
             spawn_action_tool::<FocusToolAction>(
                 Tool::create_with_actions::<FocusToolAction>(
                     file!(),
-                    "".to_string(),
+                    "Camera follows the character".to_string(),
                     &asset_server,
                 ),
                 e,
