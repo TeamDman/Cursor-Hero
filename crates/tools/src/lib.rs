@@ -4,8 +4,6 @@ pub mod click_tool;
 pub mod cube_tool;
 pub mod cursor_tool;
 pub mod focus_tool;
-pub mod inspect_tool;
-pub mod inspect_wheel_tool;
 pub mod placeholder_tool;
 pub mod restart_tool;
 pub mod sprint_tool;

@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use cursor_hero_tools::prelude::*;
 use bevy::prelude::*;
 use cursor_hero_toolbelt::types::*;
 

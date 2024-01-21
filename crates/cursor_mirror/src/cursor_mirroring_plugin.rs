@@ -17,7 +17,7 @@ impl Plugin for CursorMirroringPlugin {
 pub struct CursorMirror;
 
 #[derive(Resource, Deref, Default)]
-pub struct CursorPosition(pub Vec2);
+pub struct CursorPosition(pub IVec2);
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
@@ -48,7 +48,7 @@ fn update_visuals(
     cursor_position: Res<CursorPosition>,
 ) {
     for (mut transform, _) in &mut cursor_mirrors.iter_mut() {
-        transform.translation.x = cursor_position.x;
-        transform.translation.y = -cursor_position.y;
+        transform.translation.x = cursor_position.x as f32;
+        transform.translation.y = -cursor_position.y as f32;
     }
 }

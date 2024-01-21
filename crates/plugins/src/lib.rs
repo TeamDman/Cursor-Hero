@@ -4,7 +4,10 @@ use cursor_hero_camera::camera_plugin::CameraPlugin;
 use cursor_hero_character::character_plugin::CharacterPlugin;
 use cursor_hero_cursor_mirror::cursor_mirroring_plugin::CursorMirroringPlugin;
 use cursor_hero_hover::afterimage_plugin::AfterimagePlugin;
+use cursor_hero_hover::hover_tool::HoverToolPlugin;
 use cursor_hero_hover::hover_ui_automation_plugin::HoverUiAutomationPlugin;
+use cursor_hero_hover::inspect_tool::InspectToolPlugin;
+use cursor_hero_hover::inspect_wheel_tool::InspectWheelToolPlugin;
 use cursor_hero_input::InputPlugin;
 use cursor_hero_level_bounds::level_bounds_plugin::LevelBoundsPlugin;
 use cursor_hero_movement::MovementPlugin;
@@ -29,7 +32,6 @@ pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(PauseToolPlugin);
         app.add_plugins(WallpaperPlugin);
         app.add_plugins(ToolPlugin);
         app.add_plugins(ToolbeltPlugin);
@@ -51,6 +53,12 @@ impl Plugin for MyPlugin {
         app.add_plugins(LevelBoundsPlugin);
         app.add_plugins(IconPlugin);
         app.add_plugins(PhysicsPlugin);
+        
+        app.add_plugins(InspectToolPlugin);
+        app.add_plugins(InspectWheelToolPlugin);
+        app.add_plugins(HoverToolPlugin);
+        app.add_plugins(PauseToolPlugin);
+
         //app.add_plugins(ClickDragMovementPlugin);
         //app.add_plugins(HoverShowerRelayPlugin);
         //app.add_plugins(HoverShowerServicePlugin);

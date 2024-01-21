@@ -6,12 +6,21 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+image = { workspace = true}
+bevy_egui = {workspace = true}
+cursor_hero_tools = { workspace = true }
+cursor_hero_physics = { workspace = true }
+cursor_hero_toolbelt = { workspace = true}
 cursor_hero_pressure_plate = { workspace = true}
+cursor_hero_screen = { workspace = true}
+cursor_hero_pointer = { workspace = true}
+cursor_hero_character = { workspace = true}
 cursor_hero_camera = { workspace = true}
 cursor_hero_winutils = { workspace = true}
 bevy = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+leafwing-input-manager = { workspace = true }
 uiautomation = { workspace = true }
 windows = { workspace = true, features = [
   "Win32_Foundation",

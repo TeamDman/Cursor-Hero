@@ -5,6 +5,7 @@ use bevy_inspector_egui::InspectorOptions;
 use bevy_xpbd_2d::prelude::*;
 
 use cursor_hero_camera::camera_plugin::CameraEvent;
+use cursor_hero_glam::NegativeY;
 use cursor_hero_input::active_input_state_plugin::ActiveInput;
 use cursor_hero_movement::Movement;
 use cursor_hero_physics::damping_plugin::MovementDamping;
@@ -96,7 +97,7 @@ fn spawn_character(
                 )
                 .into(),
             material: default_material,
-            transform: Transform::from_xyz(os_cursor_pos.x, -os_cursor_pos.y, 100.0),
+            transform: Transform::from_translation(os_cursor_pos.as_vec2().neg_y().extend(100.0)),
             ..default()
         },
         Character::default(),

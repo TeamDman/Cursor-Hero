@@ -58,6 +58,7 @@ enum CubeToolAction {
     Spawn,
     Remove,
     Attract,
+    KillAll,
 }
 
 impl CubeToolAction {
@@ -66,6 +67,7 @@ impl CubeToolAction {
             Self::Spawn => GamepadButtonType::South.into(),
             Self::Remove => GamepadButtonType::East.into(),
             Self::Attract => GamepadButtonType::LeftTrigger.into(),
+            Self::KillAll => GamepadButtonType::West.into(),
         }
     }
 
@@ -74,6 +76,7 @@ impl CubeToolAction {
             Self::Spawn => KeyCode::ControlLeft.into(),
             Self::Remove => KeyCode::ControlRight.into(),
             Self::Attract => KeyCode::AltRight.into(),
+            Self::KillAll => KeyCode::Delete.into(),
         }
     }
 }
@@ -149,6 +152,13 @@ fn handle_input(
             }
             if let Some(cube) = closest_cube {
                 commands.entity(cube).despawn_recursive();
+            }
+        }
+        if t_act.just_pressed(CubeToolAction::KillAll) {
+            info!("Kill All Cubes");
+            // remove all cubes
+            for (c_e, _, _) in cubes.iter() {
+                commands.entity(c_e).despawn_recursive();
             }
         }
         if t_act.pressed(CubeToolAction::Attract) {

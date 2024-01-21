@@ -47,8 +47,8 @@ fn main() {
                     #[cfg(debug_assertions)]
                     resolution: (
                         // %BEGIN_RESOLUTION%
-                        1233.0,
-                        781.0
+                        2048.0,
+                        1089.0
                         // %END_RESOLUTION%
                     )
                         .into(),
@@ -57,8 +57,8 @@ fn main() {
                     position: WindowPosition::At(
                         (
                             // %BEGIN_POSITION%
-                        240,
-                        78
+                        -2056,
+                        -85
                         // %END_POSITION%
                         )
                             .into(),

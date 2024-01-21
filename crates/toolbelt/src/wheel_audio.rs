@@ -21,7 +21,7 @@ pub fn wheel_audio(
                 commands.spawn((
                     AudioBundle {
                         source: asset_server.load("sounds/plastic toy snapping shut 1.ogg"),
-                        settings: PlaybackSettings::ONCE
+                        settings: PlaybackSettings::DESPAWN
                             .with_spatial(true)
                             .with_volume(Volume::Relative(VolumeLevel::new(0.5))),
                     },
@@ -41,7 +41,7 @@ pub fn wheel_audio(
                     AudioBundle {
                         source: asset_server
                             .load("sounds/plastic toy snapping shut 1 reversed.ogg"),
-                        settings: PlaybackSettings::ONCE
+                        settings: PlaybackSettings::DESPAWN
                             .with_spatial(true)
                             .with_volume(Volume::Relative(VolumeLevel::new(0.5))),
                     },
@@ -54,17 +54,6 @@ pub fn wheel_audio(
                 ));
             }
             _ => {}
-        }
-    }
-}
-
-pub fn wheel_audio_cleanup(
-    mut commands: Commands,
-    wheel_audio_query: Query<(Entity, &SpatialAudioSink), With<WheelAudio>>,
-) {
-    for (entity, sink) in wheel_audio_query.iter() {
-        if sink.empty() {
-            commands.entity(entity).despawn_recursive();
         }
     }
 }

@@ -1,28 +1,27 @@
-use std::thread;
-
+use crate::hover_ui_automation_plugin::get_element_info;
+use crate::hover_ui_automation_plugin::ElementInfo;
+use bevy::audio::Volume;
+use bevy::audio::VolumeLevel;
 use bevy::prelude::*;
-use image::DynamicImage;
-use image::RgbImage;
-
+use bevy::window::PrimaryWindow;
+use bevy_egui::EguiContext;
 use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
-use crossbeam_channel::Receiver;
-use cursor_hero_hover::hover_ui_automation_plugin::get_element_info;
-use cursor_hero_physics::damping_plugin::MovementDamping;
-use cursor_hero_screen::screen_plugin::Screen;
-use leafwing_input_manager::prelude::*;
-
 use crossbeam_channel::bounded;
+use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
 use cursor_hero_character::character_plugin::Character;
-use cursor_hero_hover::hover_ui_automation_plugin::ElementInfo;
+use cursor_hero_physics::damping_plugin::MovementDamping;
 use cursor_hero_pointer::pointer_plugin::Pointer;
-use cursor_hero_winutils::win_mouse::find_element_at;
-
+use cursor_hero_screen::screen_plugin::Screen;
 use cursor_hero_toolbelt::types::*;
-
-use crate::cube_tool::CubeToolInteractable;
-use crate::prelude::*;
+use cursor_hero_tools::cube_tool::CubeToolInteractable;
+use cursor_hero_tools::prelude::*;
+use cursor_hero_winutils::win_mouse::find_element_at;
+use image::DynamicImage;
+use image::RgbImage;
+use leafwing_input_manager::prelude::*;
+use std::thread;
 
 pub struct InspectToolPlugin;
 
@@ -81,7 +80,7 @@ impl InspectToolAction {
 
     fn default_mkb_binding(&self) -> UserInput {
         match self {
-            Self::PrintUnderMouse => KeyCode::ControlLeft.into(),
+            Self::PrintUnderMouse => MouseButton::Left.into(),
         }
     }
 }
@@ -157,9 +156,8 @@ fn handle_input(
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<&Children, With<Character>>,
     pointers: Query<&GlobalTransform, With<Pointer>>,
-    // window: Query<(Entity, &Window), With<PrimaryWindow>>,
-    // winit_windows: NonSendMut<WinitWindows>,
     bridge: ResMut<Bridge>,
+    egui_context_query: Query<&EguiContext, With<PrimaryWindow>>,
 ) {
     for (t_act, t_enabled, t_parent) in tools.iter() {
         if t_enabled.is_none() {
@@ -180,6 +178,14 @@ fn handle_input(
             .expect("Character should have a pointer");
         let p_pos = p.translation();
         if t_act.just_pressed(InspectToolAction::PrintUnderMouse) {
+            let hovering_over_egui = egui_context_query
+                .get_single()
+                .ok()
+                .map(|egui_context| egui_context.clone().get_mut().is_pointer_over_area())
+                .unwrap_or(false);
+            if hovering_over_egui {
+                continue;
+            }
             info!("PrintUnderMouse button");
             match bridge.sender.send(ThreadboundMessage::PrintUnderMouse(
                 p_pos.x as i32,
@@ -199,6 +205,7 @@ fn handle_replies(
     bridge: Res<Bridge>,
     mut images: ResMut<Assets<Image>>,
     screens: Query<(&Handle<Image>, &GlobalTransform), With<Screen>>,
+    asset_server: Res<AssetServer>,
 ) {
     while let Ok(msg) = bridge.receiver.try_recv() {
         match msg {
@@ -296,6 +303,11 @@ fn handle_replies(
                         },
                         texture: texture_handle,
                         ..default()
+                    },
+                    AudioBundle {
+                        source: asset_server.load("sounds/spring strung light 4.ogg"),
+                        settings: PlaybackSettings::REMOVE
+                            .with_spatial(true)
                     },
                     CubeToolInteractable,
                     RigidBody::Dynamic,

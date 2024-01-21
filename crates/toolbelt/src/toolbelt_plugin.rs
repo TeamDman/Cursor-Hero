@@ -17,7 +17,6 @@ use crate::tool_help_lifecycle::tool_help_lifecycle;
 use crate::tool_visibility::tool_visibility;
 use crate::types::*;
 use crate::wheel_audio::wheel_audio;
-use crate::wheel_audio::wheel_audio_cleanup;
 use crate::wheel_opening::wheel_opening;
 pub struct ToolbeltPlugin;
 
@@ -41,7 +40,6 @@ impl Plugin for ToolbeltPlugin {
                     remove_hover_frame,
                     tool_color,
                     tool_activation,
-                    wheel_audio_cleanup,
                     tool_help_cleanup,
                     (
                         wheel_opening,

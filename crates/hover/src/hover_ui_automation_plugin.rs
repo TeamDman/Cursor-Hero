@@ -5,10 +5,9 @@ use bevy::window::PrimaryWindow;
 use crossbeam_channel::bounded;
 use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
+use cursor_hero_winutils::win_mouse::get_cursor_position;
 use uiautomation::UIAutomation;
 use uiautomation::UIElement;
-use windows::Win32::Foundation::POINT;
-use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
 
 use cursor_hero_camera::camera_plugin::MainCamera;
 
@@ -16,6 +15,7 @@ pub struct HoverUiAutomationPlugin;
 
 impl Plugin for HoverUiAutomationPlugin {
     fn build(&self, app: &mut App) {
+        info!("Adding HoverInfo resource");
         app.insert_resource(HoverInfo::default())
             .register_type::<Element>()
             .add_systems(Startup, setup)
@@ -51,10 +51,32 @@ struct Bridge {
     pub receiver: Receiver<GameboundMessage>,
 }
 
-#[derive(Resource, Default)]
-struct HoverInfo {
+#[derive(Resource, Reflect)]
+pub struct HoverInfo {
     screen_element: Option<ElementInfo>,
     game_element: Option<ElementInfo>,
+    enabled: bool,
+}
+impl HoverInfo {
+    pub fn set_enabled(&mut self, enabled: bool) {
+        self.enabled = enabled;
+        if !enabled {
+            self.screen_element = None;
+            self.game_element = None;
+        }
+    }
+    pub fn is_enabled(&self) -> bool {
+        self.enabled
+    }
+}
+impl Default for HoverInfo {
+    fn default() -> Self {
+        Self {
+            screen_element: None,
+            game_element: None,
+            enabled: false,
+        }
+    }
 }
 
 #[derive(Debug, Reflect, Clone)]
@@ -176,7 +198,11 @@ fn update_game_mouse_position(
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     window_query: Query<&Window, With<PrimaryWindow>>,
     mut debounce: Local<Option<IVec2>>,
+    hover_info: Res<HoverInfo>,
 ) {
+    if !hover_info.enabled {
+        return;
+    }
     let (camera, camera_transform) = camera_query.single();
     let window = window_query.single();
     let value = window
@@ -200,6 +226,10 @@ fn update_game_mouse_position(
 }
 
 fn update_hover_info(mut hovered: ResMut<HoverInfo>, bridge: Res<Bridge>) {
+    if !hovered.enabled {
+        bridge.receiver.try_iter().for_each(drop);
+        return;
+    }
     if let Ok(msg) = bridge.receiver.try_recv() {
         match msg {
             GameboundMessage::ScreenHoverInfo(info) => {
@@ -319,13 +349,5 @@ fn show_hovered_rect(
             GameHoveredIndicatorTag,
             Element { info: info.clone() },
         ));
-    }
-}
-
-fn get_cursor_position() -> Result<POINT, windows::core::Error> {
-    unsafe {
-        let mut point = POINT::default();
-        GetCursorPos(&mut point)?;
-        Ok(point)
     }
 }

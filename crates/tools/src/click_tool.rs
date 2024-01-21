@@ -1,5 +1,7 @@
 use std::thread;
 
+use bevy::audio::Volume;
+use bevy::audio::VolumeLevel;
 use bevy::prelude::*;
 use leafwing_input_manager::prelude::*;
 
@@ -131,11 +133,13 @@ fn spawn_worker_thread(mut commands: Commands) {
 }
 
 fn handle_input(
+    mut commands: Commands,
     tools: Query<(&ActionState<ClickToolAction>, Option<&ActiveTool>, &Parent)>,
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<&Children, With<Character>>,
     pointers: Query<&GlobalTransform, With<Pointer>>,
     bridge: ResMut<ClickBridge>,
+    asset_server: Res<AssetServer>,
 ) {
     for (t_act, t_enabled, t_parent) in tools.iter() {
         if t_enabled.is_none() {
@@ -162,7 +166,18 @@ fn handle_input(
                 p_pos.x as i32,
                 -p_pos.y as i32,
             )) {
-                Ok(_) => {}
+                Ok(_) => {
+                    commands.spawn((
+                        SpatialBundle {
+                            transform: Transform::from_translation(p_pos),
+                            ..default()
+                        },
+                        AudioBundle {
+                            source: asset_server.load("sounds/mouse1down.ogg"),
+                            settings: PlaybackSettings::REMOVE.with_spatial(true).with_volume(Volume::Relative(VolumeLevel::new(0.5))),
+                        },
+                    ));
+                }
                 Err(e) => {
                     error!("Failed to send click: {:?}", e);
                 }
@@ -175,7 +190,18 @@ fn handle_input(
                 p_pos.x as i32,
                 -p_pos.y as i32,
             )) {
-                Ok(_) => {}
+                Ok(_) => {
+                    commands.spawn((
+                        SpatialBundle {
+                            transform: Transform::from_translation(p_pos),
+                            ..default()
+                        },
+                        AudioBundle {
+                            source: asset_server.load("sounds/mouse1up.ogg"),
+                            settings: PlaybackSettings::REMOVE.with_spatial(true).with_volume(Volume::Relative(VolumeLevel::new(0.5))),
+                        },
+                    ));
+                }
                 Err(e) => {
                     error!("Failed to send click: {:?}", e);
                 }
@@ -188,7 +214,18 @@ fn handle_input(
                 p_pos.x as i32,
                 -p_pos.y as i32,
             )) {
-                Ok(_) => {}
+                Ok(_) => {
+                    commands.spawn((
+                        SpatialBundle {
+                            transform: Transform::from_translation(p_pos),
+                            ..default()
+                        },
+                        AudioBundle {
+                            source: asset_server.load("sounds/mouse1down.ogg"),
+                            settings: PlaybackSettings::REMOVE.with_spatial(true).with_volume(Volume::Relative(VolumeLevel::new(0.5))),
+                        },
+                    ));
+                }
                 Err(e) => {
                     error!("Failed to send click: {:?}", e);
                 }
@@ -201,7 +238,18 @@ fn handle_input(
                 p_pos.x as i32,
                 -p_pos.y as i32,
             )) {
-                Ok(_) => {}
+                Ok(_) => {
+                    commands.spawn((
+                        SpatialBundle {
+                            transform: Transform::from_translation(p_pos),
+                            ..default()
+                        },
+                        AudioBundle {
+                            source: asset_server.load("sounds/mouse1up.ogg"),
+                            settings: PlaybackSettings::REMOVE.with_spatial(true).with_volume(Volume::Relative(VolumeLevel::new(0.5))),
+                        },
+                    ));
+                }
                 Err(e) => {
                     error!("Failed to send click: {:?}", e);
                 }
