@@ -68,19 +68,22 @@ fn toolbelt_events(
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
 enum InspectToolAction {
+    DupeUnderMouse,
     PrintUnderMouse,
 }
 
 impl InspectToolAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
-            Self::PrintUnderMouse => GamepadButtonType::RightTrigger.into(),
+            Self::DupeUnderMouse => GamepadButtonType::RightTrigger.into(),
+            Self::PrintUnderMouse => GamepadButtonType::North.into(),
         }
     }
 
     fn default_mkb_binding(&self) -> UserInput {
         match self {
-            Self::PrintUnderMouse => MouseButton::Left.into(),
+            Self::DupeUnderMouse => MouseButton::Left.into(),
+            Self::PrintUnderMouse => MouseButton::Right.into(),
         }
     }
 }
@@ -98,11 +101,13 @@ impl ToolAction for InspectToolAction {
 
 #[derive(Debug)]
 enum ThreadboundMessage {
+    DupeUnderMouse(i32, i32),
     PrintUnderMouse(i32, i32),
 }
 #[derive(Debug)]
 enum GameboundMessage {
-    ElementDetails(ElementInfo),
+    DupeElementDetails(ElementInfo),
+    PrintElementDetails(ElementInfo),
 }
 
 #[derive(Resource)]
@@ -115,6 +120,17 @@ fn process_thread_message(
     reply_tx: &Sender<GameboundMessage>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match action {
+        ThreadboundMessage::DupeUnderMouse(x, y) => {
+            debug!("Worker received click: {:?} {} {}", action, x, y);
+
+            let elem = find_element_at(x, y)?;
+            info!("{} - {}", elem.get_classname()?, elem.get_name()?);
+
+            let id = elem.get_automation_id()?;
+            info!("Automation ID: {}", id);
+            let info = get_element_info(elem)?;
+            reply_tx.send(GameboundMessage::DupeElementDetails(info))?;
+        }
         ThreadboundMessage::PrintUnderMouse(x, y) => {
             debug!("Worker received click: {:?} {} {}", action, x, y);
 
@@ -124,7 +140,7 @@ fn process_thread_message(
             let id = elem.get_automation_id()?;
             info!("Automation ID: {}", id);
             let info = get_element_info(elem)?;
-            reply_tx.send(GameboundMessage::ElementDetails(info))?;
+            reply_tx.send(GameboundMessage::PrintElementDetails(info))?;
         }
     }
 
@@ -177,6 +193,26 @@ fn handle_input(
             .next()
             .expect("Character should have a pointer");
         let p_pos = p.translation();
+        if t_act.just_pressed(InspectToolAction::DupeUnderMouse) {
+            let hovering_over_egui = egui_context_query
+                .get_single()
+                .ok()
+                .map(|egui_context| egui_context.clone().get_mut().is_pointer_over_area())
+                .unwrap_or(false);
+            if hovering_over_egui {
+                continue;
+            }
+            info!("PrintUnderMouse button");
+            match bridge.sender.send(ThreadboundMessage::DupeUnderMouse(
+                p_pos.x as i32,
+                -p_pos.y as i32,
+            )) {
+                Ok(_) => {}
+                Err(e) => {
+                    error!("Failed to send click: {:?}", e);
+                }
+            }
+        }
         if t_act.just_pressed(InspectToolAction::PrintUnderMouse) {
             let hovering_over_egui = egui_context_query
                 .get_single()
@@ -209,7 +245,7 @@ fn handle_replies(
 ) {
     while let Ok(msg) = bridge.receiver.try_recv() {
         match msg {
-            GameboundMessage::ElementDetails(info) => {
+            GameboundMessage::DupeElementDetails(info) => {
                 info!("Received info for element {:?}", info.name);
                 let elem_rect = info.bounding_rect;
                 debug!("elem_rect: {:?}", elem_rect);
@@ -306,14 +342,23 @@ fn handle_replies(
                     },
                     AudioBundle {
                         source: asset_server.load("sounds/spring strung light 4.ogg"),
-                        settings: PlaybackSettings::REMOVE
-                            .with_spatial(true)
+                        settings: PlaybackSettings::REMOVE.with_spatial(true),
                     },
                     CubeToolInteractable,
                     RigidBody::Dynamic,
                     Collider::cuboid(elem_size.x, elem_size.y),
                     MovementDamping::default(),
                     Name::new(format!("Element - {}", info.name)),
+                ));
+            }
+            GameboundMessage::PrintElementDetails(info) => {
+                info!("Received info for element {:?}", info);
+                commands.spawn((
+                    AudioBundle {
+                        source: asset_server.load("sounds/tape recorder eject 4.ogg"),
+                        settings: PlaybackSettings::REMOVE,
+                    },
+                    Name::new(format!("SFX Element - {}", info.name)),
                 ));
             }
         }
