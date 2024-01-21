@@ -8,6 +8,7 @@ use cursor_hero_camera::camera_plugin::CameraEvent;
 use cursor_hero_movement::Movement;
 use cursor_hero_physics::damping_plugin::MovementDamping;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
+use cursor_hero_input::active_input_state_plugin::ActiveInput;
 
 #[derive(SystemSet, Clone, Hash, Debug, PartialEq, Eq)]
 pub enum CharacterSystemSet {
@@ -21,6 +22,8 @@ impl Plugin for CharacterPlugin {
         app.configure_sets(Startup, CharacterSystemSet::Spawn)
             .add_systems(Startup, spawn_character.in_set(CharacterSystemSet::Spawn))
             .add_systems(Update, handle_camera_events)
+            .add_systems(OnEnter(ActiveInput::MouseKeyboard), set_mnk_speed)
+            .add_systems(OnEnter(ActiveInput::Gamepad), set_gamepad_speed)
             .register_type::<Character>();
     }
 }
@@ -133,5 +136,17 @@ fn handle_camera_events(
                 }
             }
         }
+    }
+}
+
+fn set_mnk_speed(mut query: Query<&mut Movement, With<MainCharacter>>) {
+    for mut movement in &mut query.iter_mut() {
+        *movement = Movement::default_mnk();
+    }
+}
+
+fn set_gamepad_speed(mut query: Query<&mut Movement, With<MainCharacter>>) {
+    for mut movement in &mut query.iter_mut() {
+        *movement = Movement::default_gamepad();
     }
 }

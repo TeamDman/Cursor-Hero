@@ -1751,6 +1751,7 @@ dependencies = [
  "bevy-inspector-egui",
  "bevy_xpbd_2d",
  "cursor_hero_camera",
+ "cursor_hero_input",
  "cursor_hero_movement",
  "cursor_hero_physics",
  "cursor_hero_winutils",

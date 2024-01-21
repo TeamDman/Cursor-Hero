@@ -87,6 +87,18 @@ pub struct Movement {
 
 impl Default for Movement {
     fn default() -> Self {
+        Self::default_mnk()
+    }
+}
+impl Movement {
+    pub fn default_mnk() -> Self {
+        Self {
+            speed: 8000.0,
+            default_speed: 8000.0,
+            sprint_speed: 40000.0,
+        }
+    }
+    pub fn default_gamepad() -> Self {
         Self {
             speed: 800.0,
             default_speed: 800.0,
