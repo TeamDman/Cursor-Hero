@@ -53,6 +53,7 @@ fn toolbelt_events(
                 *character_id,
                 &asset_server,
                 ClickTool,
+                StartingState::Active,
             );
         }
     }

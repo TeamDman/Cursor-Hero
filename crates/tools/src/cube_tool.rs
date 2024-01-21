@@ -47,6 +47,7 @@ fn toolbelt_events(
                 *character_id,
                 &asset_server,
                 CubeTool,
+                StartingState::Active,
             );
         }
     }

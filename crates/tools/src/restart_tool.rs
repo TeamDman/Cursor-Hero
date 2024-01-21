@@ -28,11 +28,15 @@ fn toolbelt_events(
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltEvent>,
 ) {
-    for e in reader.read() {
+    for event in reader.read() {
         if let ToolbeltEvent::PopulateDefaultToolbelt {
             toolbelt_id,
             character_id,
-        } = e
+        }
+        | ToolbeltEvent::PopulateInspectorToolbelt {
+            toolbelt_id,
+            character_id,
+        } = event
         {
             spawn_action_tool::<RestartToolAction>(
                 Tool::create_with_actions::<RestartToolAction>(
@@ -40,12 +44,13 @@ fn toolbelt_events(
                     "Send Ctrl+C, uparrow, enter".to_string(),
                     &asset_server,
                 ),
-                e,
+                event,
                 &mut commands,
                 *toolbelt_id,
                 *character_id,
                 &asset_server,
                 RestartTool,
+                StartingState::Active,
             );
         }
     }

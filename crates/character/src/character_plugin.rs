@@ -5,10 +5,10 @@ use bevy_inspector_egui::InspectorOptions;
 use bevy_xpbd_2d::prelude::*;
 
 use cursor_hero_camera::camera_plugin::CameraEvent;
+use cursor_hero_input::active_input_state_plugin::ActiveInput;
 use cursor_hero_movement::Movement;
 use cursor_hero_physics::damping_plugin::MovementDamping;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
-use cursor_hero_input::active_input_state_plugin::ActiveInput;
 
 #[derive(SystemSet, Clone, Hash, Debug, PartialEq, Eq)]
 pub enum CharacterSystemSet {

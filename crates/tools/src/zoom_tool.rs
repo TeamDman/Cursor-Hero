@@ -27,11 +27,15 @@ fn toolbelt_events(
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltEvent>,
 ) {
-    for e in reader.read() {
+    for event in reader.read() {
         if let ToolbeltEvent::PopulateDefaultToolbelt {
             toolbelt_id,
             character_id,
-        } = e
+        }
+        | ToolbeltEvent::PopulateInspectorToolbelt {
+            toolbelt_id,
+            character_id,
+        } = event
         {
             spawn_action_tool::<ZoomToolAction>(
                 Tool::create_with_actions::<ZoomToolAction>(
@@ -39,12 +43,13 @@ fn toolbelt_events(
                     "Send scroll events".to_string(),
                     &asset_server,
                 ),
-                e,
+                event,
                 &mut commands,
                 *toolbelt_id,
                 *character_id,
                 &asset_server,
                 ZoomTool,
+                StartingState::Active,
             );
         }
     }
@@ -61,10 +66,10 @@ enum ZoomToolAction {
 impl ZoomToolAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
-            Self::ZoomOut => GamepadButtonType::East.into(),
-            Self::ZoomIn => GamepadButtonType::North.into(),
-            Self::ScrollUp => GamepadButtonType::West.into(),
-            Self::ScrollDown => GamepadButtonType::South.into(),
+            Self::ZoomOut => GamepadButtonType::DPadLeft.into(),
+            Self::ZoomIn => GamepadButtonType::DPadRight.into(),
+            Self::ScrollUp => GamepadButtonType::DPadUp.into(),
+            Self::ScrollDown => GamepadButtonType::DPadDown.into(),
         }
     }
 

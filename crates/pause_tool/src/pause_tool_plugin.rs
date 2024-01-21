@@ -39,6 +39,7 @@ fn toolbelt_events(
                 *character_id,
                 &asset_server,
                 PauseTool,
+                StartingState::Active,
             );
         }
     }
@@ -76,12 +77,11 @@ impl ToolAction for PauseToolAction {
 
 fn handle_input(
     mut _commands: Commands,
-    tools: Query<(&ActionState<PauseToolAction>, Option<&ActiveTool>, &Parent)>,
+    tool_query: Query<&ActionState<PauseToolAction>, (With<ActiveTool>, With<PauseTool>)>,
 ) {
-    for (t_act, t_enabled, _t_parent) in tools.iter() {
-        if t_enabled.is_none() {
-            continue;
+    for t_act in tool_query.iter() {
+        if t_act.just_pressed(PauseToolAction::TogglePause) {
+            warn!("TODO: PauseToolAction: {:?}", t_act);
         }
-        warn!("TODO: PauseToolAction: {:?}", t_act);
     }
 }

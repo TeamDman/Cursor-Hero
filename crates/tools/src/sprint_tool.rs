@@ -59,11 +59,15 @@ fn toolbelt_events(
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltEvent>,
 ) {
-    for e in reader.read() {
+    for event in reader.read() {
         if let ToolbeltEvent::PopulateDefaultToolbelt {
             toolbelt_id,
             character_id,
-        } = e
+        }
+        | ToolbeltEvent::PopulateInspectorToolbelt {
+            toolbelt_id,
+            character_id,
+        } = event
         {
             spawn_action_tool::<SprintToolAction>(
                 Tool::create_with_actions::<SprintToolAction>(
@@ -71,12 +75,13 @@ fn toolbelt_events(
                     "Go faster, reach further".to_string(),
                     &asset_server,
                 ),
-                e,
+                event,
                 &mut commands,
                 *toolbelt_id,
                 *character_id,
                 &asset_server,
                 SprintTool,
+                StartingState::Active,
             );
         }
     }

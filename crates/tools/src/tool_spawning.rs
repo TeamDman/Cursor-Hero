@@ -11,6 +11,7 @@ fn spawn_tool_impl(
     _asset_server: &Res<AssetServer>,
     tool_component: impl Component,
     input_manager: Option<impl Bundle>,
+    starting_state: StartingState,
 ) {
     let tool_name = tool.name.clone();
     commands.entity(toolbelt_id).with_children(|toolbelt| {
@@ -32,8 +33,10 @@ fn spawn_tool_impl(
             Sensor,
             RigidBody::Kinematic,
             Collider::cuboid(100.0, 100.0),
-            ActiveTool,
         ));
+        if let StartingState::Active = starting_state {
+            tool.insert(ActiveTool);
+        }
         if let Some(bundle) = input_manager {
             tool.insert(bundle);
         }
@@ -49,6 +52,7 @@ pub fn spawn_action_tool<T>(
     _character_id: Entity,
     asset_server: &Res<AssetServer>,
     tool_component: impl Component,
+    starting_state: StartingState,
 ) where
     T: ToolAction + Actionlike,
 {
@@ -63,11 +67,17 @@ pub fn spawn_action_tool<T>(
             input_map: T::default_input_map(),
             ..default()
         }),
+        starting_state,
     )
 }
 
 #[derive(Bundle)]
 struct WeAintGotNoBundle {}
+
+pub enum StartingState {
+    Active,
+    Inactive,
+}
 
 pub fn spawn_tool(
     tool: Tool,
@@ -77,6 +87,7 @@ pub fn spawn_tool(
     _character_id: Entity,
     asset_server: &Res<AssetServer>,
     tool_component: impl Component,
+    starting_state: StartingState,
 ) {
     spawn_tool_impl(
         tool,
@@ -86,5 +97,6 @@ pub fn spawn_tool(
         asset_server,
         tool_component,
         None::<WeAintGotNoBundle>,
+        starting_state,
     )
 }

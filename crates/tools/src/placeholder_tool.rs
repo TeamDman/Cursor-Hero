@@ -7,7 +7,7 @@ use leafwing_input_manager::Actionlike;
 
 use cursor_hero_toolbelt::types::*;
 
-use crate::tool_spawning::spawn_action_tool;
+use crate::tool_spawning::{spawn_action_tool, StartingState};
 pub struct PlaceholderToolPlugin;
 
 impl Plugin for PlaceholderToolPlugin {
@@ -68,7 +68,8 @@ fn toolbelt_events(
             character_id,
         } = e
         {
-            for _ in 0..1 {
+            for _ in 0..0 {
+                // for _ in 0..1 {
                 spawn_action_tool::<PlaceholderToolAction>(
                     Tool::create_with_actions::<PlaceholderToolAction>(
                         file!(),
@@ -81,6 +82,7 @@ fn toolbelt_events(
                     *character_id,
                     &asset_server,
                     PlaceholderTool,
+                    StartingState::Active,
                 );
             }
         }

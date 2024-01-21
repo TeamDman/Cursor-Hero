@@ -49,6 +49,7 @@ fn toolbelt_events(
                 *character_id,
                 &asset_server,
                 TalkTool,
+                StartingState::Active,
             );
         }
     }
