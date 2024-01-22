@@ -2,18 +2,24 @@ use bevy::math::IRect;
 use bevy::math::IVec2;
 use windows::core::PCSTR;
 use windows::Win32::Foundation::HWND;
+use windows::Win32::Foundation::LPARAM;
 use windows::Win32::Foundation::RECT;
+use windows::Win32::Foundation::WPARAM;
+use windows::Win32::UI::Input::KeyboardAndMouse::ReleaseCapture;
 use windows::Win32::UI::WindowsAndMessaging::FindWindowA;
 use windows::Win32::UI::WindowsAndMessaging::GetClientRect;
 use windows::Win32::UI::WindowsAndMessaging::GetForegroundWindow;
 use windows::Win32::UI::WindowsAndMessaging::GetSystemMetrics;
 use windows::Win32::UI::WindowsAndMessaging::GetWindowRect;
 use windows::Win32::UI::WindowsAndMessaging::IsWindowVisible;
+use windows::Win32::UI::WindowsAndMessaging::SendMessageW;
 use windows::Win32::UI::WindowsAndMessaging::SetForegroundWindow;
 use windows::Win32::UI::WindowsAndMessaging::ShowWindow;
+use windows::Win32::UI::WindowsAndMessaging::HTCAPTION;
 use windows::Win32::UI::WindowsAndMessaging::SM_CYCAPTION;
 use windows::Win32::UI::WindowsAndMessaging::SM_CYFRAME;
 use windows::Win32::UI::WindowsAndMessaging::SW_RESTORE;
+use windows::Win32::UI::WindowsAndMessaging::WM_NCLBUTTONDOWN;
 
 pub trait ToBevyRect {
     fn to_bevy_rect(&self) -> IRect;
@@ -69,6 +75,28 @@ pub fn get_window_inner_bounds(hwnd: isize) -> Result<IRect, WindowBoundsError> 
     }
 }
 
+pub fn begin_dragging(hwnd: isize) -> Result<(), windows::core::Error> {
+    unsafe {
+        let _join_handle = std::thread::Builder::new()
+            .name("Begin move".to_string())
+            .spawn(move || {
+                if let Err(e) = ReleaseCapture() {
+                    eprintln!("Failed to release capture: {:?}", e);
+                }
+                let hwnd = HWND(hwnd);
+                SendMessageW(
+                    hwnd,
+                    WM_NCLBUTTONDOWN,
+                    WPARAM(HTCAPTION as usize),
+                    LPARAM(0),
+                )
+                .0;
+                println!("Sent message");
+            });
+        Ok(())
+    }
+}
+
 pub fn get_window_title_bar_center_position(hwnd: isize) -> Result<IVec2, WindowBoundsError> {
     unsafe {
         let bounds = get_window_bounds(hwnd)?;
@@ -79,11 +107,8 @@ pub fn get_window_title_bar_center_position(hwnd: isize) -> Result<IVec2, Window
         // SM_CYFRAME includes the height of the window frame (border)
         let frame_height = GetSystemMetrics(SM_CYFRAME);
 
-        let pos = bounds.min
-            + IVec2::new(
-                (bounds.width()) / 2,
-                (caption_height / 2) + frame_height,
-            );
+        let pos =
+            bounds.min + IVec2::new((bounds.width()) / 2, (caption_height / 2) + frame_height);
         Ok(pos)
     }
 }

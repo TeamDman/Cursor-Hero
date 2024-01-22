@@ -8,50 +8,50 @@ use uiautomation::UIAutomation;
 use crate::win_window::ToBevyRect;
 
 #[derive(Debug)]
-pub enum ToolbarError {
+pub enum TaskbarError {
     UIAutomation(uiautomation::Error),
 }
 
-pub struct Toolbar {
-    pub entries: Vec<ToolbarEntry>,
+pub struct Taskbar {
+    pub entries: Vec<TaskbarEntry>,
 }
 #[derive(Debug)]
-pub struct ToolbarEntry {
+pub struct TaskbarEntry {
     pub name: String,
     pub bounds: IRect,
 }
-pub fn get_toolbar() -> Result<Toolbar, ToolbarError> {
-    let automation = UIAutomation::new().map_err(ToolbarError::UIAutomation)?;
+pub fn get_taskbar() -> Result<Taskbar, TaskbarError> {
+    let automation = UIAutomation::new().map_err(TaskbarError::UIAutomation)?;
     let root = automation
         .get_root_element()
-        .map_err(ToolbarError::UIAutomation)?;
-    let toolbar_matcher = automation
+        .map_err(TaskbarError::UIAutomation)?;
+    let taskbar_matcher = automation
         .create_matcher()
         .from(root)
         .classname("MSTaskListWClass")
-        .control_type(ControlType::ToolBar);
-    let toolbar = toolbar_matcher
+        .control_type(ControlType::Taskbar);
+    let taskbar = taskbar_matcher
         .find_first()
-        .map_err(ToolbarError::UIAutomation)?;
-    let toolbar_entry_filter = automation
+        .map_err(TaskbarError::UIAutomation)?;
+    let taskbar_entry_filter = automation
         .create_property_condition(
             UIProperty::ControlType,
             Variant::from(ControlType::Button as i32),
             None,
         )
-        .map_err(ToolbarError::UIAutomation)?;
-    let toolbar_entry_walker = automation
-        .filter_tree_walker(toolbar_entry_filter)
-        .map_err(ToolbarError::UIAutomation)?;
+        .map_err(TaskbarError::UIAutomation)?;
+    let taskbar_entry_walker = automation
+        .filter_tree_walker(taskbar_entry_filter)
+        .map_err(TaskbarError::UIAutomation)?;
 
-    let mut toolbar_entries = Vec::new();
-    if let Ok(first) = toolbar_entry_walker.get_first_child(&toolbar)
-        && let Ok(last) = toolbar_entry_walker.get_last_child(&toolbar)
+    let mut taskbar_entries = Vec::new();
+    if let Ok(first) = taskbar_entry_walker.get_first_child(&taskbar)
+        && let Ok(last) = taskbar_entry_walker.get_last_child(&taskbar)
     {
-        toolbar_entries.push(first.clone());
+        taskbar_entries.push(first.clone());
         let mut next = first;
-        while let Ok(sibling) = toolbar_entry_walker.get_next_sibling(&next) {
-            toolbar_entries.push(sibling.clone());
+        while let Ok(sibling) = taskbar_entry_walker.get_next_sibling(&next) {
+            taskbar_entries.push(sibling.clone());
             next = sibling;
             if next.get_runtime_id() == last.get_runtime_id() {
                 break;
@@ -59,9 +59,9 @@ pub fn get_toolbar() -> Result<Toolbar, ToolbarError> {
         }
     }
 
-    let entries = toolbar_entries
+    let entries = taskbar_entries
         .into_iter()
-        .map(|entry| ToolbarEntry {
+        .map(|entry| TaskbarEntry {
             name: entry.get_name().unwrap_or_default(),
             bounds: entry
                 .get_bounding_rectangle()
@@ -69,7 +69,7 @@ pub fn get_toolbar() -> Result<Toolbar, ToolbarError> {
                 .to_bevy_rect(),
         })
         .collect();
-    Ok(Toolbar { entries })
+    Ok(Taskbar { entries })
 }
 
 impl ToBevyRect for uiautomation::types::Rect {
@@ -86,11 +86,11 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_get_toolbar() {
-        let toolbar = get_toolbar().unwrap();
-        assert!(toolbar.entries.len() > 0);
+    fn test_get_taskbar() {
+        let taskbar = get_taskbar().unwrap();
+        assert!(taskbar.entries.len() > 0);
         // print the entries
-        for entry in toolbar.entries {
+        for entry in taskbar.entries {
             println!("entry: {:?}", entry);
         }
     }

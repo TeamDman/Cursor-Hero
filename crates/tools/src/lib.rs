@@ -12,6 +12,8 @@ pub mod tool_plugin;
 pub mod tool_spawning;
 pub mod zoom_tool;
 pub mod default_wheel_tool;
+pub mod taskbar_wheel_tool;
+pub mod window_drag_tool;
 
 pub use crate::tool_plugin::ToolPlugin;
 

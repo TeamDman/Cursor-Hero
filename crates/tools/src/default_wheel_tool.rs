@@ -20,19 +20,19 @@ fn toolbelt_events(
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltEvent>,
 ) {
-    for e in reader.read() {
+    for event in reader.read() {
         if let ToolbeltEvent::PopulateInspectorToolbelt {
             toolbelt_id,
             character_id,
-        } = e
+        }
+        | ToolbeltEvent::PopulateTaskbarToolbelt {
+            toolbelt_id,
+            character_id,
+        } = event
         {
             spawn_tool(
-                Tool::create(
-                    file!(),
-                    "Swaps to default tools".to_string(),
-                    &asset_server,
-                ),
-                e,
+                Tool::create(file!(), "Swaps to default tools".to_string(), &asset_server),
+                event,
                 &mut commands,
                 *toolbelt_id,
                 *character_id,

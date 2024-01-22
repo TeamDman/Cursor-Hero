@@ -62,27 +62,17 @@ impl Default for ToolbeltBundle {
     }
 }
 
-// #[derive(SystemSet, Clone, Hash, Debug, PartialEq, Eq)]
-
-// pub enum ToolbeltSystemSet {
-//     Spawn,
-// }
-
 #[derive(Event, Debug, Reflect)]
 pub enum ToolbeltEvent {
-    EquipDefaultToolbelt {
-        toolbelt_id: Entity,
-        character_id: Entity,
-    },
     PopulateDefaultToolbelt {
         toolbelt_id: Entity,
         character_id: Entity,
     },
-    EquipInspectorToolbelt {
+    PopulateInspectorToolbelt {
         toolbelt_id: Entity,
         character_id: Entity,
     },
-    PopulateInspectorToolbelt {
+    PopulateTaskbarToolbelt {
         toolbelt_id: Entity,
         character_id: Entity,
     },
@@ -176,6 +166,7 @@ impl Tool {
         description: String,
         asset_server: &Res<AssetServer>,
     ) -> Tool {
+        // TODO: structural edit, make first param name; use jetbrains IDE to do this
         let name = Self::format_tool_name_from_source(source_file_path);
         let texture = asset_server.load(Self::format_tool_image_from_source(source_file_path));
         let actions = HashMap::default();

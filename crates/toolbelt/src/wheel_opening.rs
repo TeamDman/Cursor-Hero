@@ -24,7 +24,7 @@ pub fn wheel_opening(
                 .min(1.0);
             wheel.radius = wheel.radius_start
                 + ((wheel.radius_end
-                    + wheel.radius_end_bonus_per_tool_after_8 * (tool_count - 8).max(0) as f32)
+                    + wheel.radius_end_bonus_per_tool_after_8 * (tool_count as isize - 8).max(0) as f32)
                     - wheel.radius_start)
                     * open;
             wheel.spin = wheel.spin_start + (wheel.spin_end - wheel.spin_start) * open;
