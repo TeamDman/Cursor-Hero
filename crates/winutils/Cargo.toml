@@ -19,8 +19,8 @@ windows = { workspace = true, features = [
     # "Win32_Gaming",
     # "Win32_System_Threading",
 ] }
-image = "0.24.7"
-anyhow = "1.0.75"
-uiautomation = "0.7.3"
-fxhash = "0.2.1"
-widestring = "1.0.2"
+image = {workspace = true}
+anyhow = {workspace = true}
+uiautomation = {workspace = true}
+fxhash = {workspace = true}
+widestring = {workspace = true}

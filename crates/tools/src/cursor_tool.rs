@@ -130,7 +130,7 @@ fn snap_mouse_to_pointer(
         };
 
         // get the viewport position of the pointer
-        let is_over_window = window_bounds.contains(destination_position.neg_y().as_vec2());
+        let is_over_window = window_bounds.contains(destination_position.neg_y());
         let viewport_position = match is_over_window {
             true => {
                 let (camera_transform, camera) =
@@ -143,7 +143,7 @@ fn snap_mouse_to_pointer(
 
         // if the pointer is in view, position the cursor _over_ the pointer instead
         if let Some(viewport_position) = viewport_position {
-            destination_position = (viewport_position + window_bounds.min).as_ivec2().neg_y();
+            destination_position = (viewport_position.as_ivec2() + window_bounds.min).neg_y();
 
             // accomodate window decorations
             let mut offset = get_window_inner_offset().neg_y();

@@ -81,7 +81,6 @@ fn note_window_info(
             get_window_inner_bounds(hwnd)
                 .map_err(PersistError::WindowBounds)?
                 .size()
-                .as_ivec2()
         }
     };
 

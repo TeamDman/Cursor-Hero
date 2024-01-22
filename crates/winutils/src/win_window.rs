@@ -1,6 +1,5 @@
+use bevy::math::IRect;
 use bevy::math::IVec2;
-use bevy::math::Rect;
-use bevy::math::Vec2;
 use windows::core::PCSTR;
 use windows::Win32::Foundation::HWND;
 use windows::Win32::Foundation::RECT;
@@ -17,14 +16,14 @@ use windows::Win32::UI::WindowsAndMessaging::SM_CYFRAME;
 use windows::Win32::UI::WindowsAndMessaging::SW_RESTORE;
 
 pub trait ToBevyRect {
-    fn to_bevy_rect(&self) -> Rect;
+    fn to_bevy_rect(&self) -> IRect;
 }
 
 impl ToBevyRect for RECT {
-    fn to_bevy_rect(&self) -> Rect {
-        Rect {
-            min: Vec2::new(self.left as f32, self.top as f32),
-            max: Vec2::new(self.right as f32, self.bottom as f32),
+    fn to_bevy_rect(&self) -> IRect {
+        IRect {
+            min: IVec2::new(self.left, self.top),
+            max: IVec2::new(self.right, self.bottom),
         }
     }
 }
@@ -36,7 +35,7 @@ pub enum WindowBoundsError {
 }
 
 #[allow(dead_code)]
-pub fn get_window_bounds_from_title(title: &str) -> Result<Rect, WindowBoundsError> {
+pub fn get_window_bounds_from_title(title: &str) -> Result<IRect, WindowBoundsError> {
     unsafe {
         let hwnd = FindWindowA(PCSTR::null(), PCSTR(title.as_ptr() as _));
         if hwnd.0 == 0 {
@@ -48,7 +47,7 @@ pub fn get_window_bounds_from_title(title: &str) -> Result<Rect, WindowBoundsErr
     }
 }
 
-pub fn get_window_bounds(hwnd: isize) -> Result<Rect, WindowBoundsError> {
+pub fn get_window_bounds(hwnd: isize) -> Result<IRect, WindowBoundsError> {
     unsafe {
         let mut rect = RECT::default();
         GetWindowRect(HWND(hwnd), &mut rect).map_err(WindowBoundsError::WindowsError)?;
@@ -56,7 +55,7 @@ pub fn get_window_bounds(hwnd: isize) -> Result<Rect, WindowBoundsError> {
     }
 }
 
-pub fn get_window_inner_bounds(hwnd: isize) -> Result<Rect, WindowBoundsError> {
+pub fn get_window_inner_bounds(hwnd: isize) -> Result<IRect, WindowBoundsError> {
     unsafe {
         let hwnd = HWND(hwnd);
         let mut rect = RECT::default();
@@ -81,11 +80,11 @@ pub fn get_window_title_bar_center_position(hwnd: isize) -> Result<IVec2, Window
         let frame_height = GetSystemMetrics(SM_CYFRAME);
 
         let pos = bounds.min
-            + Vec2::new(
-                (bounds.width()) / 2.0,
-                ((caption_height / 2) + frame_height) as f32,
+            + IVec2::new(
+                (bounds.width()) / 2,
+                (caption_height / 2) + frame_height,
             );
-        Ok(pos.as_ivec2())
+        Ok(pos)
     }
 }
 
@@ -116,7 +115,7 @@ pub fn focus_window(hwnd: isize) {
     }
 }
 
-pub fn note_window_info(hwnd: isize) -> Result<Rect, WindowBoundsError> {
+pub fn note_window_info(hwnd: isize) -> Result<IRect, WindowBoundsError> {
     unsafe {
         let hwnd = HWND(hwnd);
 

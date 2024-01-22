@@ -65,6 +65,8 @@ quote = "1.0.35"
 proc-macro2 = "1.0.76"
 bevy_embedded_assets = { version = "0.9.1", git = "https://github.com/TeamDman/bevy_embedded_assets.git", branch = "cursor_hero" }
 winit = "0.28.7"
+fxhash = "0.2.1"
+widestring = "1.0.2"
 
 [dependencies]
 cursor_hero_plugins = { workspace = true }
