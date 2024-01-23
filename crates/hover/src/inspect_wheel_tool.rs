@@ -18,10 +18,10 @@ struct InspectWheelTool;
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<ToolbeltEvent>,
+    mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for e in reader.read() {
-        if let ToolbeltEvent::PopulateDefaultToolbelt {
+        if let ToolbeltPopulateEvent::Default {
             toolbelt_id,
             character_id,
         } = e
@@ -39,6 +39,7 @@ fn toolbelt_events(
                 &asset_server,
                 InspectWheelTool,
                 StartingState::Inactive,
+                None,
             );
         }
     }
@@ -48,14 +49,14 @@ fn tick(
     mut commands: Commands,
     tool_query: Query<&Parent, (Added<ActiveTool>, With<InspectWheelTool>)>,
     toolbelt_query: Query<&Parent, With<Toolbelt>>,
-    mut toolbelt_events: EventWriter<ToolbeltEvent>,
+    mut toolbelt_events: EventWriter<ToolbeltPopulateEvent>,
 ) {
     for toolbelt_id in tool_query.iter() {
         let toolbelt_id = toolbelt_id.get();
         if let Ok(character_id) = toolbelt_query.get(toolbelt_id) {
             let character_id = character_id.get();
             commands.entity(toolbelt_id).despawn_descendants();
-            toolbelt_events.send(ToolbeltEvent::PopulateInspectorToolbelt {
+            toolbelt_events.send(ToolbeltPopulateEvent::Inspector {
                 toolbelt_id: toolbelt_id,
                 character_id: character_id,
             });

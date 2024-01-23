@@ -4,6 +4,35 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/examples" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/bevy/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/camera/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/character/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/click_drag_character_movement/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/cursor_mirror/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/data/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/glam/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/hover/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/icon/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/input/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/level_bounds/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/metrics/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/movement/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/pause_tool/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/physics/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/plugins/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/pointer/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/pressure_plate/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/restart_memory/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/screen/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/toolbelt/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/tools/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/ui/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/version/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/wallpaper/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/winutils/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/xelu_prompts/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/other/gamepad_hell/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/other/uparrow-enter/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />

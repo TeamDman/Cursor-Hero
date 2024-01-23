@@ -19,10 +19,10 @@ struct PauseTool;
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<ToolbeltEvent>,
+    mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for e in reader.read() {
-        if let ToolbeltEvent::PopulateInspectorToolbelt {
+        if let ToolbeltPopulateEvent::Inspector {
             toolbelt_id,
             character_id,
         } = e
@@ -40,6 +40,7 @@ fn toolbelt_events(
                 &asset_server,
                 PauseTool,
                 StartingState::Active,
+                None,
             );
         }
     }

@@ -1,48 +1,37 @@
 use bevy::math::IRect;
 use bevy::math::IVec2;
+use bevy::reflect::Reflect;
 use uiautomation::controls::ControlType;
+use uiautomation::types::Point;
 use uiautomation::types::UIProperty;
 use uiautomation::variants::Variant;
 use uiautomation::UIAutomation;
 
 use crate::win_window::ToBevyRect;
 
-#[derive(Debug)]
-pub enum TaskbarError {
-    UIAutomation(uiautomation::Error),
-}
-
 pub struct Taskbar {
     pub entries: Vec<TaskbarEntry>,
 }
-#[derive(Debug)]
+#[derive(Debug, Reflect)]
 pub struct TaskbarEntry {
     pub name: String,
     pub bounds: IRect,
 }
-pub fn get_taskbar() -> Result<Taskbar, TaskbarError> {
-    let automation = UIAutomation::new().map_err(TaskbarError::UIAutomation)?;
-    let root = automation
-        .get_root_element()
-        .map_err(TaskbarError::UIAutomation)?;
+pub fn get_taskbar() -> Result<Taskbar, uiautomation::Error> {
+    let automation = UIAutomation::new()?;
+    let root = automation.get_root_element()?;
     let taskbar_matcher = automation
         .create_matcher()
         .from(root)
         .classname("MSTaskListWClass")
-        .control_type(ControlType::Taskbar);
-    let taskbar = taskbar_matcher
-        .find_first()
-        .map_err(TaskbarError::UIAutomation)?;
-    let taskbar_entry_filter = automation
-        .create_property_condition(
-            UIProperty::ControlType,
-            Variant::from(ControlType::Button as i32),
-            None,
-        )
-        .map_err(TaskbarError::UIAutomation)?;
-    let taskbar_entry_walker = automation
-        .filter_tree_walker(taskbar_entry_filter)
-        .map_err(TaskbarError::UIAutomation)?;
+        .control_type(ControlType::ToolBar);
+    let taskbar = taskbar_matcher.find_first()?;
+    let taskbar_entry_filter = automation.create_property_condition(
+        UIProperty::ControlType,
+        Variant::from(ControlType::Button as i32),
+        None,
+    )?;
+    let taskbar_entry_walker = automation.filter_tree_walker(taskbar_entry_filter)?;
 
     let mut taskbar_entries = Vec::new();
     if let Ok(first) = taskbar_entry_walker.get_first_child(&taskbar)
@@ -79,6 +68,12 @@ impl ToBevyRect for uiautomation::types::Rect {
             max: IVec2::new(self.get_right(), self.get_bottom()),
         }
     }
+}
+
+pub fn get_element_at(pos: IVec2) -> Result<uiautomation::UIElement, uiautomation::Error> {
+    let automation = UIAutomation::new()?;
+    let element = automation.element_from_point(Point::new(pos.x, pos.y))?;
+    Ok(element)
 }
 
 #[cfg(test)]

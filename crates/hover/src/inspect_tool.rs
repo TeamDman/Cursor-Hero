@@ -1,7 +1,5 @@
 use crate::hover_ui_automation_plugin::get_element_info;
 use crate::hover_ui_automation_plugin::ElementInfo;
-use bevy::audio::Volume;
-use bevy::audio::VolumeLevel;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy_egui::EguiContext;
@@ -13,13 +11,12 @@ use crossbeam_channel::Sender;
 use cursor_hero_character::character_plugin::Character;
 use cursor_hero_physics::damping_plugin::MovementDamping;
 use cursor_hero_pointer::pointer_plugin::Pointer;
-use cursor_hero_screen::screen_plugin::Screen;
+use cursor_hero_screen::get_image::get_image;
+use cursor_hero_screen::get_image::ScreensToImageParam;
 use cursor_hero_toolbelt::types::*;
 use cursor_hero_tools::cube_tool::CubeToolInteractable;
 use cursor_hero_tools::prelude::*;
 use cursor_hero_winutils::win_mouse::find_element_at;
-use image::DynamicImage;
-use image::RgbImage;
 use leafwing_input_manager::prelude::*;
 use std::thread;
 
@@ -40,10 +37,10 @@ struct InspectTool;
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<ToolbeltEvent>,
+    mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for e in reader.read() {
-        if let ToolbeltEvent::PopulateInspectorToolbelt {
+        if let ToolbeltPopulateEvent::Inspector {
             toolbelt_id,
             character_id,
         } = e
@@ -61,6 +58,7 @@ fn toolbelt_events(
                 &asset_server,
                 InspectTool,
                 StartingState::Active,
+                None,
             );
         }
     }
@@ -239,101 +237,25 @@ fn handle_input(
 fn handle_replies(
     mut commands: Commands,
     bridge: Res<Bridge>,
-    mut images: ResMut<Assets<Image>>,
-    screens: Query<(&Handle<Image>, &GlobalTransform), With<Screen>>,
+    access: ScreensToImageParam,
     asset_server: Res<AssetServer>,
 ) {
     while let Ok(msg) = bridge.receiver.try_recv() {
         match msg {
             GameboundMessage::DupeElementDetails(info) => {
-                info!("Received info for element {:?}", info.name);
-                let elem_rect = info.bounding_rect;
-                debug!("elem_rect: {:?}", elem_rect);
-                if elem_rect.is_empty() {
-                    warn!("Element was empty, skipping");
+                let Ok(image) = get_image(info.bounding_rect, &access) else {
                     continue;
-                }
-                let elem_size = info.bounding_rect.max - info.bounding_rect.min;
-                let mut tex = RgbImage::new(elem_size.x as u32, elem_size.y as u32);
-
-                // find out what parts of each screen are intersecting with the element
-                for (screen_image_handle, screen_trans) in screens.iter() {
-                    // find out the image size
-                    let screen_center_pos = screen_trans.translation();
-                    match images.get(screen_image_handle) {
-                        None => {}
-                        Some(screen_image) => {
-                            // Calculate the overlapping area
-                            let screen_size = screen_image.texture_descriptor.size;
-                            let mut screen_origin = screen_center_pos.xy();
-                            screen_origin.y *= -1.0;
-                            let screen_rect = Rect::from_center_size(
-                                screen_origin,
-                                Vec2::new(screen_size.width as f32, screen_size.height as f32),
-                            );
-
-                            // find the overlap
-                            // debug!("screen_rect: {:?}", screen_rect);
-                            let intersection = screen_rect.intersect(elem_rect);
-                            // debug!("intersection rect: {:?}", intersection);
-
-                            // convert to monitor coordinates
-                            let origin = intersection.center() - screen_rect.min.xy();
-                            let tex_grab_rect = Rect::from_center_size(origin, intersection.size());
-                            // debug!("tex_grab_rect: {:?}", tex_grab_rect);
-
-                            if !tex_grab_rect.is_empty() {
-                                // debug!(
-                                //     "Copying pixel range {} by {}",
-                                //     tex_grab_rect.size().x,
-                                //     tex_grab_rect.size().y
-                                // );
-
-                                // Calculate where to start placing pixels in the element's texture
-                                let texture_start_x = (intersection.min.x - elem_rect.min.x) as u32;
-                                let texture_start_y = (intersection.min.y - elem_rect.min.y) as u32;
-                                // debug!("Texture start: {} {}", texture_start_x, texture_start_y);
-                                // Copy the overlapping part of the screen texture to the element's texture.
-                                for y in tex_grab_rect.min.y as usize..tex_grab_rect.max.y as usize
-                                {
-                                    for x in
-                                        tex_grab_rect.min.x as usize..tex_grab_rect.max.x as usize
-                                    {
-                                        let start = (y * screen_size.width as usize + x) * 4;
-                                        if start + 4 <= screen_image.data.len() {
-                                            let pixel: [u8; 3] = [
-                                                screen_image.data[start],
-                                                screen_image.data[start + 1],
-                                                screen_image.data[start + 2],
-                                                // screen_image.data[start + 3],
-                                            ];
-                                            tex.put_pixel(
-                                                texture_start_x + x as u32
-                                                    - tex_grab_rect.min.x as u32,
-                                                texture_start_y + y as u32
-                                                    - tex_grab_rect.min.y as u32,
-                                                image::Rgb(pixel),
-                                            );
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                let dynamic_image = DynamicImage::ImageRgb8(tex);
-                let image = Image::from_dynamic(dynamic_image, true);
-                let texture_handle = images.add(image);
+                };
+                let texture_handle = asset_server.add(image);
 
                 // spawn the element image
-                let mut elem_center_pos = (info.bounding_rect.min + elem_size / 2.0).extend(20.0);
+                let mut elem_center_pos = info.bounding_rect.center().extend(20.0);
                 elem_center_pos.y *= -1.0;
                 commands.spawn((
                     SpriteBundle {
                         transform: Transform::from_translation(elem_center_pos),
                         sprite: Sprite {
-                            custom_size: Some(elem_size),
+                            custom_size: Some(info.bounding_rect.size()),
                             // color: Color::PURPLE,
                             ..default()
                         },
@@ -346,7 +268,7 @@ fn handle_replies(
                     },
                     CubeToolInteractable,
                     RigidBody::Dynamic,
-                    Collider::cuboid(elem_size.x, elem_size.y),
+                    Collider::cuboid(info.bounding_rect.width(), info.bounding_rect.height()),
                     MovementDamping::default(),
                     Name::new(format!("Element - {}", info.name)),
                 ));

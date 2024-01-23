@@ -63,24 +63,31 @@ impl Default for ToolbeltBundle {
 }
 
 #[derive(Event, Debug, Reflect)]
-pub enum ToolbeltEvent {
-    PopulateDefaultToolbelt {
+pub enum ToolbeltPopulateEvent {
+    Default {
         toolbelt_id: Entity,
         character_id: Entity,
     },
-    PopulateInspectorToolbelt {
+    Inspector {
         toolbelt_id: Entity,
         character_id: Entity,
     },
-    PopulateTaskbarToolbelt {
+    Taskbar {
         toolbelt_id: Entity,
         character_id: Entity,
     },
+}
+
+
+#[derive(Event, Debug, Reflect)]
+pub enum ToolbeltStateEvent {
     Opened {
         toolbelt_id: Entity,
+        character_id: Entity,
     },
     Closed {
         toolbelt_id: Entity,
+        character_id: Entity,
     },
 }
 
@@ -170,6 +177,20 @@ impl Tool {
         let name = Self::format_tool_name_from_source(source_file_path);
         let texture = asset_server.load(Self::format_tool_image_from_source(source_file_path));
         let actions = HashMap::default();
+        Self {
+            name,
+            description,
+            actions,
+            texture,
+        }
+    }
+
+    pub fn new(
+        name: String,
+        description: String,
+        actions: HashMap<String, Vec<UserInput>>,
+        texture: Handle<Image>,
+    ) -> Self {
         Self {
             name,
             description,

@@ -9,12 +9,12 @@ pub struct WheelAudio;
 pub fn wheel_audio(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut toolbelt_events: EventReader<ToolbeltEvent>,
+    mut toolbelt_events: EventReader<ToolbeltStateEvent>,
     toolbelt_query: Query<&GlobalTransform>,
 ) {
     for event in toolbelt_events.read() {
         match event {
-            ToolbeltEvent::Opened { toolbelt_id } => {
+            ToolbeltStateEvent::Opened { toolbelt_id, character_id: _ } => {
                 let Ok(toolbelt_transform) = toolbelt_query.get(*toolbelt_id) else {
                     continue;
                 };
@@ -33,7 +33,7 @@ pub fn wheel_audio(
                     Name::new("opening sound"),
                 ));
             }
-            ToolbeltEvent::Closed { toolbelt_id } => {
+            ToolbeltStateEvent::Closed { toolbelt_id, character_id: _ } => {
                 let Ok(toolbelt_transform) = toolbelt_query.get(*toolbelt_id) else {
                     continue;
                 };
@@ -53,7 +53,6 @@ pub fn wheel_audio(
                     Name::new("closing sound"),
                 ));
             }
-            _ => {}
         }
     }
 }

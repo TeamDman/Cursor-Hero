@@ -6,7 +6,6 @@ use crate::screen_plugin::Screen;
 use bevy::prelude::*;
 use bevy::utils::HashMap;
 use bevy::window::PrimaryWindow;
-use bevy::window::RawHandleWrapper;
 use bevy::winit::WinitWindows;
 use cursor_hero_metrics::Metrics;
 use cursor_hero_winutils::win_screen_capture::get_full_monitor_capturers;
@@ -29,6 +28,7 @@ struct FrameHolderResource {
 }
 
 pub struct ScreenUpdatePlugin;
+
 impl Plugin for ScreenUpdatePlugin {
     fn build(&self, app: &mut App) {
         // Create a shared resource for captured frames
@@ -89,10 +89,10 @@ fn update_screens(
     mut textures: ResMut<Assets<Image>>,
     time: Res<Time>,
     frames: Res<FrameHolderResource>,
-    window_query: Query<(Entity, &RawHandleWrapper, &Window), With<PrimaryWindow>>,
+    window_query: Query<Entity, With<PrimaryWindow>>,
     winit_windows: NonSend<WinitWindows>,
 ) {
-    let (window_id, window_handle, window) = window_query.single();
+    let window_id = window_query.single();
     let winit_window = winit_windows
         .get_window(window_id)
         .expect("Window not found");

@@ -1,11 +1,9 @@
 use super::types::*;
 use bevy::prelude::*;
-use bevy::text::Text2dBounds;
 use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
 use cursor_hero_xelu_prompts::texture_path_for_input;
 use leafwing_input_manager::prelude::*;
-use leafwing_input_manager::user_input::InputKind;
 
 pub fn tool_help_activation(
     mut commands: Commands,

@@ -5,13 +5,14 @@ use leafwing_input_manager::prelude::*;
 
 fn spawn_tool_impl(
     tool: Tool,
-    event: &ToolbeltEvent,
+    event: &ToolbeltPopulateEvent,
     commands: &mut Commands,
     toolbelt_id: Entity,
     _asset_server: &Res<AssetServer>,
     tool_component: impl Component,
     input_manager: Option<impl Bundle>,
     starting_state: StartingState,
+    custom_size: Option<Vec2>,
 ) {
     let tool_name = tool.name.clone();
     commands.entity(toolbelt_id).with_children(|toolbelt| {
@@ -22,7 +23,7 @@ fn spawn_tool_impl(
             name,
             SpriteBundle {
                 sprite: Sprite {
-                    custom_size: Some(Vec2::new(100.0, 100.0)),
+                    custom_size: custom_size.or(Some(Vec2::new(100.0, 100.0))),
                     ..default()
                 },
                 texture,
@@ -46,13 +47,14 @@ fn spawn_tool_impl(
 
 pub fn spawn_action_tool<T>(
     tool: Tool,
-    event: &ToolbeltEvent,
+    event: &ToolbeltPopulateEvent,
     commands: &mut Commands,
     toolbelt_id: Entity,
     _character_id: Entity,
     asset_server: &Res<AssetServer>,
     tool_component: impl Component,
     starting_state: StartingState,
+    custom_size: Option<Vec2>,
 ) where
     T: ToolAction + Actionlike,
 {
@@ -68,6 +70,7 @@ pub fn spawn_action_tool<T>(
             ..default()
         }),
         starting_state,
+        custom_size
     )
 }
 
@@ -81,13 +84,14 @@ pub enum StartingState {
 
 pub fn spawn_tool(
     tool: Tool,
-    event: &ToolbeltEvent,
+    event: &ToolbeltPopulateEvent,
     commands: &mut Commands,
     toolbelt_id: Entity,
     _character_id: Entity,
     asset_server: &Res<AssetServer>,
     tool_component: impl Component,
     starting_state: StartingState,
+    custom_size: Option<Vec2>,
 ) {
     spawn_tool_impl(
         tool,
@@ -98,5 +102,6 @@ pub fn spawn_tool(
         tool_component,
         None::<WeAintGotNoBundle>,
         starting_state,
+        custom_size
     )
 }

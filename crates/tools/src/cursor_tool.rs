@@ -40,14 +40,14 @@ struct CursorTool;
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<ToolbeltEvent>,
+    mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for event in reader.read() {
-        if let ToolbeltEvent::PopulateDefaultToolbelt {
+        if let ToolbeltPopulateEvent::Default {
             toolbelt_id,
             character_id,
         }
-        | ToolbeltEvent::PopulateInspectorToolbelt {
+        | ToolbeltPopulateEvent::Inspector {
             toolbelt_id,
             character_id,
         } = event
@@ -65,6 +65,7 @@ fn toolbelt_events(
                 &asset_server,
                 CursorTool,
                 StartingState::Active,
+                None,
             );
         }
     }

@@ -18,14 +18,14 @@ struct DefaultWheelTool;
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<ToolbeltEvent>,
+    mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for event in reader.read() {
-        if let ToolbeltEvent::PopulateInspectorToolbelt {
+        if let ToolbeltPopulateEvent::Inspector {
             toolbelt_id,
             character_id,
         }
-        | ToolbeltEvent::PopulateTaskbarToolbelt {
+        | ToolbeltPopulateEvent::Taskbar {
             toolbelt_id,
             character_id,
         } = event
@@ -39,6 +39,7 @@ fn toolbelt_events(
                 &asset_server,
                 DefaultWheelTool,
                 StartingState::Inactive,
+                None,
             );
         }
     }
@@ -48,14 +49,14 @@ fn tick(
     mut commands: Commands,
     tool_query: Query<&Parent, (Added<ActiveTool>, With<DefaultWheelTool>)>,
     toolbelt_query: Query<&Parent, With<Toolbelt>>,
-    mut toolbelt_events: EventWriter<ToolbeltEvent>,
+    mut toolbelt_events: EventWriter<ToolbeltPopulateEvent>,
 ) {
     for toolbelt_id in tool_query.iter() {
         let toolbelt_id = toolbelt_id.get();
         if let Ok(character_id) = toolbelt_query.get(toolbelt_id) {
             let character_id = character_id.get();
             commands.entity(toolbelt_id).despawn_descendants();
-            toolbelt_events.send(ToolbeltEvent::PopulateDefaultToolbelt {
+            toolbelt_events.send(ToolbeltPopulateEvent::Default {
                 toolbelt_id: toolbelt_id,
                 character_id: character_id,
             });

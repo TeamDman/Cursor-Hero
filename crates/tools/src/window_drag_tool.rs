@@ -1,9 +1,7 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
-use bevy::window::RawHandleWrapper;
 use bevy::winit::WinitWindows;
 use cursor_hero_toolbelt::types::*;
-use cursor_hero_winutils::win_window::begin_dragging;
 use leafwing_input_manager::prelude::*;
 
 use crate::prelude::*;
@@ -25,10 +23,10 @@ struct WindowDragTool;
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<ToolbeltEvent>,
+    mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for e in reader.read() {
-        if let ToolbeltEvent::PopulateDefaultToolbelt {
+        if let ToolbeltPopulateEvent::Default {
             toolbelt_id,
             character_id,
         } = e
@@ -46,6 +44,7 @@ fn toolbelt_events(
                 &asset_server,
                 WindowDragTool,
                 StartingState::Active,
+                None,
             );
         }
     }
@@ -93,7 +92,7 @@ fn handle_input(
         if action_state.just_pressed(WindowDragToolAction::Drag) {
             let window_id = window_query.get_single().expect("Need a single window");
             if let Some(winit_window) = winit_windows.get_window(window_id) {
-                winit_window.window_state_lock
+                // winit_window.window_state_lock
                 if let Err(x) = winit_window.drag_window() {
                     error!("Failed to drag window: {:?}", x);
                 }

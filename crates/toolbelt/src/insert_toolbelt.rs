@@ -5,13 +5,13 @@ use super::types::*;
 
 pub fn insert_toolbelt(
     mut commands: Commands,
-    mut writer: EventWriter<ToolbeltEvent>,
+    mut writer: EventWriter<ToolbeltPopulateEvent>,
     fresh_characters: Query<Entity, Added<Character>>,
 ) {
     for character_id in fresh_characters.iter() {
         commands.entity(character_id).with_children(|c_commands| {
             let toolbelt = c_commands.spawn(ToolbeltBundle::default());
-            writer.send(ToolbeltEvent::PopulateDefaultToolbelt {
+            writer.send(ToolbeltPopulateEvent::Default {
                 toolbelt_id: toolbelt.id(),
                 character_id,
             });
