@@ -67,6 +67,7 @@ fn toolbelt_events(
                 .with_description("Swaps to taskbar tools")
                 .with_image(asset_server.add(image))
                 .with_size(entry.bounds.size().as_vec2())
+                .with_starting_state(StartingState::Inactive)
                 .spawn(&mut commands);
             }
         }
