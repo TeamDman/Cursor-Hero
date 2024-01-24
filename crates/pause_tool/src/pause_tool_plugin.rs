@@ -13,7 +13,7 @@ impl Plugin for PauseToolPlugin {
     }
 }
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Default)]
 struct PauseTool;
 
 fn toolbelt_events(
@@ -21,27 +21,16 @@ fn toolbelt_events(
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
-    for e in reader.read() {
+    for event in reader.read() {
         if let ToolbeltPopulateEvent::Inspector {
             toolbelt_id,
-            character_id,
-        } = e
+        } = event
         {
-            spawn_action_tool::<PauseToolAction>(
-                Tool::create_with_actions::<PauseToolAction>(
-                    file!(),
-                    "Pauses the game (not yet implemented)".to_string(),
-                    &asset_server,
-                ),
-                e,
-                &mut commands,
-                *toolbelt_id,
-                *character_id,
-                &asset_server,
-                PauseTool,
-                StartingState::Active,
-                None,
-            );
+            ToolSpawnConfig::<PauseTool, PauseToolAction>::new(PauseTool, *toolbelt_id, event)
+                .guess_name(file!())
+                .guess_image(file!(), &asset_server)
+                .with_description("Pauses the game (not yet implemented)")
+                .spawn(&mut commands);
         }
     }
 }
@@ -65,14 +54,14 @@ impl PauseToolAction {
     }
 }
 impl ToolAction for PauseToolAction {
-    fn default_input_map() -> InputMap<PauseToolAction> {
+    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<PauseToolAction>> {
         let mut input_map = InputMap::default();
 
         for variant in PauseToolAction::variants() {
             input_map.insert(variant.default_mkb_binding(), variant);
             input_map.insert(variant.default_gamepad_binding(), variant);
         }
-        input_map
+        Some(input_map)
     }
 }
 

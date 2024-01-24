@@ -21,7 +21,7 @@ impl Plugin for SprintToolPlugin {
     }
 }
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Default)]
 struct SprintTool;
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
@@ -43,14 +43,14 @@ impl SprintToolAction {
     }
 }
 impl ToolAction for SprintToolAction {
-    fn default_input_map() -> InputMap<SprintToolAction> {
+    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<SprintToolAction>> {
         let mut input_map = InputMap::default();
 
         for variant in SprintToolAction::variants() {
             input_map.insert(variant.default_mkb_binding(), variant);
             input_map.insert(variant.default_gamepad_binding(), variant);
         }
-        input_map
+        Some(input_map)
     }
 }
 
@@ -62,28 +62,19 @@ fn toolbelt_events(
     for event in reader.read() {
         if let ToolbeltPopulateEvent::Default {
             toolbelt_id,
-            character_id,
         }
         | ToolbeltPopulateEvent::Inspector {
             toolbelt_id,
-            character_id,
+        }
+        | ToolbeltPopulateEvent::Keyboard {
+            toolbelt_id,
         } = event
         {
-            spawn_action_tool::<SprintToolAction>(
-                Tool::create_with_actions::<SprintToolAction>(
-                    file!(),
-                    "Go faster, reach further".to_string(),
-                    &asset_server,
-                ),
-                event,
-                &mut commands,
-                *toolbelt_id,
-                *character_id,
-                &asset_server,
-                SprintTool,
-                StartingState::Active,
-                None,
-            );
+            ToolSpawnConfig::<SprintTool, SprintToolAction>::new(SprintTool, *toolbelt_id, event)
+                .guess_name(file!())
+                .guess_image(file!(), &asset_server)
+                .with_description("Go faster, reach further")
+                .spawn(&mut commands);
         }
     }
 }

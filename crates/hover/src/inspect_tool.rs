@@ -31,7 +31,7 @@ impl Plugin for InspectToolPlugin {
     }
 }
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Default)]
 struct InspectTool;
 
 fn toolbelt_events(
@@ -39,27 +39,16 @@ fn toolbelt_events(
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
-    for e in reader.read() {
+    for event in reader.read() {
         if let ToolbeltPopulateEvent::Inspector {
             toolbelt_id,
-            character_id,
-        } = e
+        } = event
         {
-            spawn_action_tool::<InspectToolAction>(
-                Tool::create_with_actions::<InspectToolAction>(
-                    file!(),
-                    "Inspect UI automation properties".to_string(),
-                    &asset_server,
-                ),
-                e,
-                &mut commands,
-                *toolbelt_id,
-                *character_id,
-                &asset_server,
-                InspectTool,
-                StartingState::Active,
-                None,
-            );
+            ToolSpawnConfig::<InspectTool, InspectToolAction>::new(InspectTool, *toolbelt_id, event)
+                .guess_name(file!())
+                .guess_image(file!(), &asset_server)
+                .with_description("Inspect UI automation properties")
+                .spawn(&mut commands);
         }
     }
 }
@@ -86,14 +75,14 @@ impl InspectToolAction {
     }
 }
 impl ToolAction for InspectToolAction {
-    fn default_input_map() -> InputMap<InspectToolAction> {
+    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<InspectToolAction>> {
         let mut input_map = InputMap::default();
 
         for variant in InspectToolAction::variants() {
             input_map.insert(variant.default_mkb_binding(), variant);
             input_map.insert(variant.default_gamepad_binding(), variant);
         }
-        input_map
+        Some(input_map)
     }
 }
 

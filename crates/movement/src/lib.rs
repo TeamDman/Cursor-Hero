@@ -45,6 +45,7 @@ impl MovementAction {
         }
     }
 
+    // TODO: convert movement to the normal tool structure
     fn default_input_map() -> InputMap<MovementAction> {
         let mut input_map = InputMap::default();
 

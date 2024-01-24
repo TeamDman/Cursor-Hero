@@ -21,7 +21,7 @@ impl Plugin for CubeToolPlugin {
     }
 }
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Default)]
 struct CubeTool;
 
 fn toolbelt_events(
@@ -29,27 +29,16 @@ fn toolbelt_events(
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
-    for e in reader.read() {
+    for event in reader.read() {
         if let ToolbeltPopulateEvent::Inspector {
             toolbelt_id,
-            character_id,
-        } = e
+        } = event
         {
-            spawn_action_tool::<CubeToolAction>(
-                Tool::create_with_actions::<CubeToolAction>(
-                    file!(),
-                    "Spawn and attract cubes".to_string(),
-                    &asset_server,
-                ),
-                e,
-                &mut commands,
-                *toolbelt_id,
-                *character_id,
-                &asset_server,
-                CubeTool,
-                StartingState::Active,
-                None,
-            );
+            ToolSpawnConfig::<CubeTool, CubeToolAction>::new(CubeTool, *toolbelt_id, event)
+                .guess_name(file!())
+                .guess_image(file!(), &asset_server)
+                .with_description("Spawn and attract cubes")
+                .spawn(&mut commands);
         }
     }
 }
@@ -82,14 +71,14 @@ impl CubeToolAction {
     }
 }
 impl ToolAction for CubeToolAction {
-    fn default_input_map() -> InputMap<CubeToolAction> {
+    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<CubeToolAction>> {
         let mut input_map = InputMap::default();
 
         for variant in CubeToolAction::variants() {
             input_map.insert(variant.default_mkb_binding(), variant);
             input_map.insert(variant.default_gamepad_binding(), variant);
         }
-        input_map
+        Some(input_map)
     }
 }
 

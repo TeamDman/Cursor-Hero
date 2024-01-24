@@ -5,6 +5,8 @@ use crate::cube_tool::CubeToolPlugin;
 use crate::cursor_tool::CursorToolPlugin;
 use crate::default_wheel_tool::DefaultWheelToolPlugin;
 use crate::focus_tool::FocusToolPlugin;
+use crate::keyboard_tool::KeyboardToolPlugin;
+use crate::keyboard_wheel_tool::KeyboardWheelToolPlugin;
 use crate::placeholder_tool::PlaceholderToolPlugin;
 #[cfg(debug_assertions)]
 use crate::restart_tool::RestartToolPlugin;
@@ -28,6 +30,8 @@ impl Plugin for ToolPlugin {
         app.add_plugins(DefaultWheelToolPlugin);
         app.add_plugins(TaskbarWheelToolPlugin);
         app.add_plugins(WindowDragToolPlugin);
+        app.add_plugins(KeyboardToolPlugin);
+        app.add_plugins(KeyboardWheelToolPlugin);
         #[cfg(debug_assertions)]
         app.add_plugins(RestartToolPlugin);
     }

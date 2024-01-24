@@ -59,6 +59,7 @@ impl PointerAction {
         }
     }
 
+    // TODO: convert pointer to normal tool structure
     fn default_input_map() -> InputMap<PointerAction> {
         let mut input_map = InputMap::default();
 

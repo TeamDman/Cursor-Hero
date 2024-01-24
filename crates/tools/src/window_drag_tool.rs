@@ -17,7 +17,7 @@ impl Plugin for WindowDragToolPlugin {
     }
 }
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Default)]
 struct WindowDragTool;
 
 fn toolbelt_events(
@@ -25,27 +25,16 @@ fn toolbelt_events(
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
-    for e in reader.read() {
+    for event in reader.read() {
         if let ToolbeltPopulateEvent::Default {
             toolbelt_id,
-            character_id,
-        } = e
+        } = event
         {
-            spawn_action_tool::<WindowDragToolAction>(
-                Tool::create_with_actions::<WindowDragToolAction>(
-                    file!(),
-                    "Drag the window from its body".to_string(),
-                    &asset_server,
-                ),
-                e,
-                &mut commands,
-                *toolbelt_id,
-                *character_id,
-                &asset_server,
-                WindowDragTool,
-                StartingState::Active,
-                None,
-            );
+            ToolSpawnConfig::<WindowDragTool, WindowDragToolAction>::new(WindowDragTool, *toolbelt_id, event)
+                .guess_name(file!())
+                .guess_image(file!(), &asset_server)
+                .with_description("Drag the window from its body")
+                .spawn(&mut commands);
         }
     }
 }
@@ -69,14 +58,14 @@ impl WindowDragToolAction {
     }
 }
 impl ToolAction for WindowDragToolAction {
-    fn default_input_map() -> InputMap<WindowDragToolAction> {
+    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<WindowDragToolAction>> {
         let mut input_map = InputMap::default();
 
         for variant in WindowDragToolAction::variants() {
             input_map.insert(variant.default_mkb_binding(), variant);
             input_map.insert(variant.default_gamepad_binding(), variant);
         }
-        input_map
+        Some(input_map)
     }
 }
 

@@ -25,7 +25,7 @@ impl Plugin for FocusToolPlugin {
             .add_systems(Update, (toolbelt_events, handle_input));
     }
 }
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Default)]
 struct FocusTool;
 
 fn toolbelt_events(
@@ -36,28 +36,16 @@ fn toolbelt_events(
     for event in reader.read() {
         if let ToolbeltPopulateEvent::Default {
             toolbelt_id,
-            character_id,
         }
         | ToolbeltPopulateEvent::Inspector {
             toolbelt_id,
-            character_id,
         } = event
         {
-            spawn_action_tool::<FocusToolAction>(
-                Tool::create_with_actions::<FocusToolAction>(
-                    file!(),
-                    "Camera follows the character".to_string(),
-                    &asset_server,
-                ),
-                event,
-                &mut commands,
-                *toolbelt_id,
-                *character_id,
-                &asset_server,
-                FocusTool,
-                StartingState::Active,
-                None,
-            );
+            ToolSpawnConfig::<FocusTool, FocusToolAction>::new(FocusTool, *toolbelt_id, event)
+                .guess_name(file!())
+                .guess_image(file!(), &asset_server)
+                .with_description("Camera follows the character")
+                .spawn(&mut commands);
         }
     }
 }
@@ -84,14 +72,14 @@ impl FocusToolAction {
     }
 }
 impl ToolAction for FocusToolAction {
-    fn default_input_map() -> InputMap<FocusToolAction> {
+    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<FocusToolAction>> {
         let mut input_map = InputMap::default();
 
         for variant in FocusToolAction::variants() {
             input_map.insert(variant.default_mkb_binding(), variant);
             input_map.insert(variant.default_gamepad_binding(), variant);
         }
-        input_map
+        Some(input_map)
     }
 }
 

@@ -4,7 +4,6 @@ use bevy::prelude::*;
 use bevy::utils::HashMap;
 use leafwing_input_manager::prelude::*;
 use leafwing_input_manager::user_input::InputKind;
-use std::path::Path;
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
 pub enum ToolbeltAction {
@@ -22,6 +21,8 @@ impl ToolbeltAction {
             Self::Show => GamepadButtonType::RightTrigger2.into(),
         }
     }
+
+    // TODO: convert toolbelt to normal tool structure
     pub fn default_input_map() -> InputMap<ToolbeltAction> {
         let mut input_map = InputMap::default();
 
@@ -62,22 +63,13 @@ impl Default for ToolbeltBundle {
     }
 }
 
-#[derive(Event, Debug, Reflect)]
+#[derive(Event, Debug, Reflect, Clone, Copy)]
 pub enum ToolbeltPopulateEvent {
-    Default {
-        toolbelt_id: Entity,
-        character_id: Entity,
-    },
-    Inspector {
-        toolbelt_id: Entity,
-        character_id: Entity,
-    },
-    Taskbar {
-        toolbelt_id: Entity,
-        character_id: Entity,
-    },
+    Default { toolbelt_id: Entity },
+    Inspector { toolbelt_id: Entity },
+    Taskbar { toolbelt_id: Entity },
+    Keyboard { toolbelt_id: Entity },
 }
-
 
 #[derive(Event, Debug, Reflect)]
 pub enum ToolbeltStateEvent {
@@ -138,108 +130,27 @@ pub struct Tool {
     pub texture: Handle<Image>,
 }
 
-impl Tool {
-    pub fn actions_as_info<T>() -> HashMap<String, Vec<UserInput>>
-    where
-        T: ToolAction + Actionlike + Debug,
-    {
-        T::default_input_map()
-            .iter()
-            .map(|v| (format!("{:?}", v.0), v.1.clone()))
-            .collect()
-    }
-
-    pub fn create_with_actions<T>(
-        source_file_path: &str,
-        description: String,
-        asset_server: &Res<AssetServer>,
-    ) -> Tool
-    where
-        T: ToolAction + Actionlike + Debug,
-    {
-        let name = Self::format_tool_name_from_source(source_file_path);
-        let texture = asset_server.load(Self::format_tool_image_from_source(source_file_path));
-        let actions = Self::actions_as_info::<T>();
-        Self {
-            name,
-            description,
-            actions,
-            texture,
-        }
-    }
-
-    pub fn create(
-        source_file_path: &str,
-        description: String,
-        asset_server: &Res<AssetServer>,
-    ) -> Tool {
-        // TODO: structural edit, make first param name; use jetbrains IDE to do this
-        let name = Self::format_tool_name_from_source(source_file_path);
-        let texture = asset_server.load(Self::format_tool_image_from_source(source_file_path));
-        let actions = HashMap::default();
-        Self {
-            name,
-            description,
-            actions,
-            texture,
-        }
-    }
-
-    pub fn new(
-        name: String,
-        description: String,
-        actions: HashMap<String, Vec<UserInput>>,
-        texture: Handle<Image>,
-    ) -> Self {
-        Self {
-            name,
-            description,
-            actions,
-            texture,
-        }
-    }
-
-    fn format_tool_name_from_source(file_path: &str) -> String {
-        // Extract the file name from the path
-        let file_name = Path::new(file_path)
-            .file_stem() // Get the file stem (file name without extension)
-            .and_then(|stem| stem.to_str()) // Convert OsStr to &str
-            .unwrap_or("");
-
-        file_name
-            .split('_')
-            .map(|word| {
-                word.chars()
-                    .enumerate()
-                    .map(|(i, c)| {
-                        if i == 0 {
-                            c.to_uppercase().to_string()
-                        } else {
-                            c.to_string()
-                        }
-                    })
-                    .collect::<String>()
-            })
-            .collect::<Vec<_>>()
-            .join(" ")
-    }
-
-    fn format_tool_image_from_source(file_path: &str) -> String {
-        // Extract the file name from the path
-        let file_name = Path::new(file_path)
-            .file_stem() // Get the file stem (file name without extension)
-            .and_then(|stem| stem.to_str()) // Convert OsStr to &str
-            .unwrap_or("")
-            .trim_end_matches("_plugin");
-        format!("textures/tools/{}.png", file_name)
-    }
-}
-
 #[derive(Component, Reflect, Clone, Copy, Debug)]
 pub struct ToolHelpTrigger;
 
 pub trait ToolAction: Actionlike {
-    fn default_input_map() -> InputMap<Self>;
+    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<Self>>;
+    fn with_defaults<G, K>(gamepad: G, keyboard: K) -> InputMap<Self>
+    where
+        G: Fn(&Self) -> UserInput,
+        K: Fn(&Self) -> UserInput,
+        Self: Clone,
+    {
+        let mut input_map = InputMap::default();
+
+        for variant in Self::variants() {
+            let g = gamepad(&variant);
+            let k = keyboard(&variant);
+            input_map.insert(g, variant.clone());
+            input_map.insert(k, variant);
+        }
+        input_map
+    }
 }
 
 #[derive(Component, Reflect, Debug)]

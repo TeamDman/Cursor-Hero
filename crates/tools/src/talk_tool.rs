@@ -23,7 +23,7 @@ impl Plugin for TalkToolPlugin {
     }
 }
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Default)]
 struct TalkTool;
 
 fn toolbelt_events(
@@ -31,27 +31,13 @@ fn toolbelt_events(
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
-    for e in reader.read() {
-        if let ToolbeltPopulateEvent::Default {
-            toolbelt_id,
-            character_id,
-        } = e
-        {
-            spawn_action_tool::<TalkToolAction>(
-                Tool::create_with_actions::<TalkToolAction>(
-                    file!(),
-                    "Presses F23".to_string(),
-                    &asset_server,
-                ),
-                e,
-                &mut commands,
-                *toolbelt_id,
-                *character_id,
-                &asset_server,
-                TalkTool,
-                StartingState::Active,
-                None,
-            );
+    for event in reader.read() {
+        if let ToolbeltPopulateEvent::Keyboard { toolbelt_id } = event {
+            ToolSpawnConfig::<TalkTool, TalkToolAction>::new(TalkTool, *toolbelt_id, event)
+                .guess_name(file!())
+                .guess_image(file!(), &asset_server)
+                .with_description("Presses F23")
+                .spawn(&mut commands);
         }
     }
 }
@@ -78,27 +64,42 @@ struct Bridge {
 }
 
 impl TalkToolAction {
-    fn default_gamepad_binding(&self) -> UserInput {
+    fn default_wheel_gamepad_binding(&self) -> UserInput {
         match self {
             Self::Listen => GamepadButtonType::Select.into(),
         }
     }
 
-    fn default_mkb_binding(&self) -> UserInput {
+    fn default_wheel_mkb_binding(&self) -> UserInput {
+        match self {
+            Self::Listen => KeyCode::ShiftRight.into(),
+        }
+    }
+    fn talk_wheel_gamepad_binding(&self) -> UserInput {
+        match self {
+            Self::Listen => GamepadButtonType::LeftTrigger2.into(),
+        }
+    }
+
+    fn talk_wheel_mkb_binding(&self) -> UserInput {
         match self {
             Self::Listen => KeyCode::ShiftRight.into(),
         }
     }
 }
 impl ToolAction for TalkToolAction {
-    fn default_input_map() -> InputMap<TalkToolAction> {
-        let mut input_map = InputMap::default();
-
-        for variant in TalkToolAction::variants() {
-            input_map.insert(variant.default_mkb_binding(), variant);
-            input_map.insert(variant.default_gamepad_binding(), variant);
+    fn default_input_map(event: &ToolbeltPopulateEvent) -> Option<InputMap<TalkToolAction>> {
+        match event {
+            ToolbeltPopulateEvent::Default { .. } => Some(Self::with_defaults(
+                Self::default_wheel_gamepad_binding,
+                Self::default_wheel_mkb_binding,
+            )),
+            ToolbeltPopulateEvent::Keyboard { .. } => Some(Self::with_defaults(
+                Self::talk_wheel_gamepad_binding,
+                Self::talk_wheel_mkb_binding,
+            )),
+            _ => None,
         }
-        input_map
     }
 }
 

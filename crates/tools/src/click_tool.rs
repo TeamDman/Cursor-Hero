@@ -29,7 +29,7 @@ impl Plugin for ClickToolPlugin {
     }
 }
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Default)]
 struct ClickTool;
 
 fn toolbelt_events(
@@ -37,27 +37,19 @@ fn toolbelt_events(
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
-    for e in reader.read() {
+    for event in reader.read() {
         if let ToolbeltPopulateEvent::Default {
             toolbelt_id,
-            character_id,
-        } = e
+        }
+        | ToolbeltPopulateEvent::Keyboard {
+            toolbelt_id,
+        } = event
         {
-            spawn_action_tool::<ClickToolAction>(
-                Tool::create_with_actions::<ClickToolAction>(
-                    file!(),
-                    "Send mouse clicks".to_string(),
-                    &asset_server,
-                ),
-                e,
-                &mut commands,
-                *toolbelt_id,
-                *character_id,
-                &asset_server,
-                ClickTool,
-                StartingState::Active,
-                None,
-            );
+            ToolSpawnConfig::<ClickTool, ClickToolAction>::new(ClickTool, *toolbelt_id, event)
+                .guess_name(file!())
+                .guess_image(file!(), &asset_server)
+                .with_description("Send mouse clicks")
+                .spawn(&mut commands);
         }
     }
 }
@@ -86,14 +78,27 @@ struct ClickBridge {
 }
 
 impl ClickToolAction {
-    fn default_gamepad_binding(&self) -> UserInput {
+    fn default_wheel_gamepad_binding(&self) -> UserInput {
         match self {
             Self::LeftClick => GamepadButtonType::RightTrigger.into(),
             Self::RightClick => GamepadButtonType::LeftTrigger.into(),
         }
     }
 
-    fn default_mkb_binding(&self) -> UserInput {
+    fn default_wheel_keyboard_binding(&self) -> UserInput {
+        match self {
+            Self::LeftClick => KeyCode::ControlLeft.into(),
+            Self::RightClick => KeyCode::ControlRight.into(),
+        }
+    }
+    fn keyboard_wheel_gamepad_binding(&self) -> UserInput {
+        match self {
+            Self::LeftClick => GamepadButtonType::RightThumb.into(),
+            Self::RightClick => GamepadButtonType::LeftThumb.into(),
+        }
+    }
+
+    fn keyboard_wheel_keyboard_binding(&self) -> UserInput {
         match self {
             Self::LeftClick => KeyCode::ControlLeft.into(),
             Self::RightClick => KeyCode::ControlRight.into(),
@@ -102,14 +107,18 @@ impl ClickToolAction {
 }
 
 impl ToolAction for ClickToolAction {
-    fn default_input_map() -> InputMap<ClickToolAction> {
-        let mut input_map = InputMap::default();
-
-        for variant in ClickToolAction::variants() {
-            input_map.insert(variant.default_mkb_binding(), variant);
-            input_map.insert(variant.default_gamepad_binding(), variant);
+    fn default_input_map(event: &ToolbeltPopulateEvent) -> Option<InputMap<ClickToolAction>> {
+        match event {
+            ToolbeltPopulateEvent::Default { .. } => Some(Self::with_defaults(
+                Self::default_wheel_gamepad_binding,
+                Self::default_wheel_keyboard_binding,
+            )),
+            ToolbeltPopulateEvent::Keyboard { .. } => Some(Self::with_defaults(
+                Self::keyboard_wheel_gamepad_binding,
+                Self::keyboard_wheel_keyboard_binding,
+            )),
+            _ => None,
         }
-        input_map
     }
 }
 
@@ -175,7 +184,9 @@ fn handle_input(
                         },
                         AudioBundle {
                             source: asset_server.load("sounds/mouse1down.ogg"),
-                            settings: PlaybackSettings::REMOVE.with_spatial(true).with_volume(Volume::Relative(VolumeLevel::new(0.5))),
+                            settings: PlaybackSettings::REMOVE
+                                .with_spatial(true)
+                                .with_volume(Volume::Relative(VolumeLevel::new(0.5))),
                         },
                     ));
                 }
@@ -199,7 +210,9 @@ fn handle_input(
                         },
                         AudioBundle {
                             source: asset_server.load("sounds/mouse1up.ogg"),
-                            settings: PlaybackSettings::REMOVE.with_spatial(true).with_volume(Volume::Relative(VolumeLevel::new(0.5))),
+                            settings: PlaybackSettings::REMOVE
+                                .with_spatial(true)
+                                .with_volume(Volume::Relative(VolumeLevel::new(0.5))),
                         },
                     ));
                 }
@@ -223,7 +236,9 @@ fn handle_input(
                         },
                         AudioBundle {
                             source: asset_server.load("sounds/mouse1down.ogg"),
-                            settings: PlaybackSettings::REMOVE.with_spatial(true).with_volume(Volume::Relative(VolumeLevel::new(0.5))),
+                            settings: PlaybackSettings::REMOVE
+                                .with_spatial(true)
+                                .with_volume(Volume::Relative(VolumeLevel::new(0.5))),
                         },
                     ));
                 }
@@ -247,7 +262,9 @@ fn handle_input(
                         },
                         AudioBundle {
                             source: asset_server.load("sounds/mouse1up.ogg"),
-                            settings: PlaybackSettings::REMOVE.with_spatial(true).with_volume(Volume::Relative(VolumeLevel::new(0.5))),
+                            settings: PlaybackSettings::REMOVE
+                                .with_spatial(true)
+                                .with_volume(Volume::Relative(VolumeLevel::new(0.5))),
                         },
                     ));
                 }

@@ -13,7 +13,6 @@ pub fn insert_toolbelt(
             let toolbelt = c_commands.spawn(ToolbeltBundle::default());
             writer.send(ToolbeltPopulateEvent::Default {
                 toolbelt_id: toolbelt.id(),
-                character_id,
             });
         });
 

@@ -370,11 +370,11 @@ pub fn texture_path_for_input(kind: &InputKind) -> Option<&'static str> {
                     Some("textures/xelu_prompts/Xbox Series/XboxSeriesX_View.png")
                 }
                 // XboxSeriesX_X.png
-                GamepadButtonType::North => {
+                GamepadButtonType::West => {
                     Some("textures/xelu_prompts/Xbox Series/XboxSeriesX_X.png")
                 }
                 // XboxSeriesX_Y.png
-                GamepadButtonType::West => {
+                GamepadButtonType::North => {
                     Some("textures/xelu_prompts/Xbox Series/XboxSeriesX_Y.png")
                 }
                 _ => None,

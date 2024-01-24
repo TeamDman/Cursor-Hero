@@ -1,15 +1,12 @@
 use crate::prelude::*;
 use bevy::prelude::*;
-use bevy::utils::HashMap;
 use bevy_xpbd_2d::components::Position;
 use cursor_hero_glam::NegativeY;
 use cursor_hero_screen::get_image::get_image;
 use cursor_hero_screen::get_image::ScreensToImageParam;
 use cursor_hero_toolbelt::types::*;
-use cursor_hero_winutils::ui_automation::get_element_at;
 use cursor_hero_winutils::ui_automation::get_taskbar;
 use cursor_hero_winutils::ui_automation::TaskbarEntry;
-use cursor_hero_winutils::win_window::focus_window;
 
 pub struct TaskbarWheelToolPlugin;
 
@@ -23,7 +20,7 @@ impl Plugin for TaskbarWheelToolPlugin {
     }
 }
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Default)]
 struct TaskbarWheelTool;
 
 #[derive(Component, Reflect)]
@@ -38,55 +35,39 @@ fn toolbelt_events(
     access: ScreensToImageParam,
 ) {
     for event in reader.read() {
-        if let ToolbeltPopulateEvent::Default {
-            toolbelt_id,
-            character_id,
-        } = event
-        {
-            spawn_tool(
-                Tool::create(file!(), "Swaps to taskbar tools".to_string(), &asset_server),
-                event,
-                &mut commands,
-                *toolbelt_id,
-                *character_id,
-                &asset_server,
+        if let ToolbeltPopulateEvent::Default { toolbelt_id } = event {
+            ToolSpawnConfig::<TaskbarWheelTool, NoInputs>::new(
                 TaskbarWheelTool,
-                StartingState::Inactive,
-                None,
-            );
+                *toolbelt_id,
+                event,
+            )
+            .guess_name(file!())
+            .guess_image(file!(), &asset_server)
+            .with_description("Swaps to taskbar tools")
+            .with_starting_state(StartingState::Inactive)
+            .spawn(&mut commands);
         }
-        if let ToolbeltPopulateEvent::Taskbar {
-            toolbelt_id,
-            character_id,
-        } = event
-        {
+        if let ToolbeltPopulateEvent::Taskbar { toolbelt_id } = event {
             let Ok(taskbar) = get_taskbar() else {
                 continue;
             };
-            // TODO: ensure tool wheel getting populated according to taskbar
             for entry in taskbar.entries {
                 let Ok(image) = get_image(entry.bounds.as_rect(), &access) else {
                     warn!("Failed to get image for {:?}", &entry);
                     continue;
                 };
-                let texture = asset_server.add(image);
-                let size = Some(entry.bounds.size().as_vec2());
-                spawn_tool(
-                    Tool::new(
-                        entry.name.clone(),
-                        "Swaps to taskbar tools".to_string(),
-                        HashMap::default(),
-                        texture,
-                    ),
-                    event,
-                    &mut commands,
+                ToolSpawnConfig::<TaskbarEntryTool, NoInputs>::new(
+                    TaskbarEntryTool {
+                        entry: entry.clone(),
+                    },
                     *toolbelt_id,
-                    *character_id,
-                    &asset_server,
-                    TaskbarEntryTool { entry },
-                    StartingState::Inactive,
-                    size,
-                );
+                    event,
+                )
+                .with_name(entry.name)
+                .with_description("Swaps to taskbar tools")
+                .with_image(asset_server.add(image))
+                .with_size(entry.bounds.size().as_vec2())
+                .spawn(&mut commands);
             }
         }
     }
@@ -95,19 +76,14 @@ fn toolbelt_events(
 fn tick_wheel_switcher(
     mut commands: Commands,
     tool_query: Query<&Parent, (Added<ActiveTool>, With<TaskbarWheelTool>)>,
-    toolbelt_query: Query<&Parent, With<Toolbelt>>,
     mut toolbelt_events: EventWriter<ToolbeltPopulateEvent>,
 ) {
     for toolbelt_id in tool_query.iter() {
         let toolbelt_id = toolbelt_id.get();
-        if let Ok(character_id) = toolbelt_query.get(toolbelt_id) {
-            let character_id = character_id.get();
-            commands.entity(toolbelt_id).despawn_descendants();
-            toolbelt_events.send(ToolbeltPopulateEvent::Taskbar {
-                toolbelt_id: toolbelt_id,
-                character_id: character_id,
-            });
-        }
+        commands.entity(toolbelt_id).despawn_descendants();
+        toolbelt_events.send(ToolbeltPopulateEvent::Taskbar {
+            toolbelt_id: toolbelt_id,
+        });
     }
 }
 
@@ -121,11 +97,11 @@ fn tick_taskbar_switcher(
     for (toolbelt_id, tool) in tool_query.iter() {
         let toolbelt_id = toolbelt_id.get();
         if let Ok(character_id) = toolbelt_query.get(toolbelt_id) {
+            info!("Switching toolbelt {:?} to default tools", toolbelt_id);
             let character_id = character_id.get();
             commands.entity(toolbelt_id).despawn_descendants();
             toolbelt_events.send(ToolbeltPopulateEvent::Default {
                 toolbelt_id: toolbelt_id,
-                character_id: character_id,
             });
             if let Ok(mut position) = character_query.get_mut(character_id) {
                 position.0 = tool.entry.bounds.center().as_vec2().neg_y();

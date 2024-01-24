@@ -14,7 +14,7 @@ impl Plugin for HoverToolPlugin {
     }
 }
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Default)]
 struct HoverTool;
 
 fn toolbelt_events(
@@ -22,34 +22,20 @@ fn toolbelt_events(
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
-    for e in reader.read() {
-        if let ToolbeltPopulateEvent::Inspector {
-            toolbelt_id,
-            character_id,
-        } = e
-        {
-            spawn_tool(
-                Tool::create(
-                    file!(),
-                    "UI hover visuals".to_string(),
-                    &asset_server,
-                ),
-                e,
-                &mut commands,
-                *toolbelt_id,
-                *character_id,
-                &asset_server,
-                HoverTool,
-                StartingState::Active,
-                None,
-            );
+    for event in reader.read() {
+        if let ToolbeltPopulateEvent::Inspector { toolbelt_id } = event {
+            ToolSpawnConfig::<HoverTool, NoInputs>::new(HoverTool, *toolbelt_id, event)
+                .guess_name(file!())
+                .guess_image(file!(), &asset_server)
+                .with_description("UI hover visuals")
+                .spawn(&mut commands);
         }
     }
 }
 
 fn tick(
     tool_query: Query<Entity, (With<ActiveTool>, With<HoverTool>)>,
-    mut hover_info: ResMut<HoverInfo>
+    mut hover_info: ResMut<HoverInfo>,
 ) {
     if let Some(_) = tool_query.iter().next() {
         if !hover_info.is_enabled() {

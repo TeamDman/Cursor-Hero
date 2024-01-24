@@ -36,3 +36,4 @@ windows = { workspace = true, features = [
     "Win32_Gaming",
     "Win32_System_Threading",
 ] }
+enigo = { workspace = true }

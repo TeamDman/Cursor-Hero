@@ -46,6 +46,7 @@ bevy_xpbd_2d = { git = "https://github.com/TeamDman/bevy_xpbd.git", branch = "cu
   "parallel",
 ] }
 bevy_egui = { git = "https://github.com/TeamDman/bevy_egui.git", branch = "cursor_hero", version = "0.24" }
+enigo = "0.1.3"
 egui = "0.24"
 crossbeam-channel = "0.5.8"
 itertools = "0.12.0"

@@ -34,7 +34,7 @@ impl Plugin for CursorToolPlugin {
     }
 }
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Default)]
 struct CursorTool;
 
 fn toolbelt_events(
@@ -45,28 +45,16 @@ fn toolbelt_events(
     for event in reader.read() {
         if let ToolbeltPopulateEvent::Default {
             toolbelt_id,
-            character_id,
         }
         | ToolbeltPopulateEvent::Inspector {
             toolbelt_id,
-            character_id,
         } = event
         {
-            spawn_tool(
-                Tool::create(
-                    file!(),
-                    "Positions the Windows cursor based on the game pointer".to_string(),
-                    &asset_server,
-                ),
-                event,
-                &mut commands,
-                *toolbelt_id,
-                *character_id,
-                &asset_server,
-                CursorTool,
-                StartingState::Active,
-                None,
-            );
+            ToolSpawnConfig::<CursorTool, NoInputs>::new(CursorTool, *toolbelt_id, event)
+                .guess_name(file!())
+                .guess_image(file!(), &asset_server)
+                .with_description("Positions the Windows cursor based on the game pointer")
+                .spawn(&mut commands);
         }
     }
 }

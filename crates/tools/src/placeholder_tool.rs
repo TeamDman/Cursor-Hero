@@ -7,7 +7,7 @@ use leafwing_input_manager::Actionlike;
 
 use cursor_hero_toolbelt::types::*;
 
-use crate::tool_spawning::{spawn_action_tool, StartingState};
+use crate::prelude::*;
 pub struct PlaceholderToolPlugin;
 
 impl Plugin for PlaceholderToolPlugin {
@@ -18,7 +18,7 @@ impl Plugin for PlaceholderToolPlugin {
     }
 }
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Default)]
 struct PlaceholderTool;
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
@@ -46,14 +46,14 @@ impl PlaceholderToolAction {
     }
 }
 impl ToolAction for PlaceholderToolAction {
-    fn default_input_map() -> InputMap<PlaceholderToolAction> {
+    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<PlaceholderToolAction>> {
         let mut input_map = InputMap::default();
 
         for variant in PlaceholderToolAction::variants() {
             input_map.insert(variant.default_mkb_binding(), variant);
             input_map.insert(variant.default_gamepad_binding(), variant);
         }
-        input_map
+        Some(input_map)
     }
 }
 
@@ -62,29 +62,21 @@ fn toolbelt_events(
     asset_server: Res<AssetServer>,
     mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
-    for e in reader.read() {
+    for event in reader.read() {
         if let ToolbeltPopulateEvent::Default {
             toolbelt_id,
-            character_id,
-        } = e
+        } = event
         {
-            for _ in 0..0 {
-                // for _ in 0..1 {
-                spawn_action_tool::<PlaceholderToolAction>(
-                    Tool::create_with_actions::<PlaceholderToolAction>(
-                        file!(),
-                        "Balances the wheel".to_string(),
-                        &asset_server,
-                    ),
-                    e,
-                    &mut commands,
-                    *toolbelt_id,
-                    *character_id,
-                    &asset_server,
+            for _ in 0..0 { // disabled for now
+                ToolSpawnConfig::<PlaceholderTool, PlaceholderToolAction>::new(
                     PlaceholderTool,
-                    StartingState::Active,
-                    None,
-                );
+                    *toolbelt_id,
+                    event,
+                )
+                .guess_name(file!())
+                .guess_image(file!(), &asset_server)
+                .with_description("Balances the wheel")
+                .spawn(&mut commands);
             }
         }
     }

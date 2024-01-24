@@ -1,7 +1,180 @@
+use std::path::Path;
 use bevy::prelude::*;
+use bevy::utils::HashMap;
 use bevy_xpbd_2d::prelude::*;
 use cursor_hero_toolbelt::types::*;
 use leafwing_input_manager::prelude::*;
+
+#[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
+pub enum NoInputs {}
+
+impl ToolAction for NoInputs {
+    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<Self>> {
+        None
+    }
+}
+
+pub struct ToolSpawnConfig<T, Action>
+where
+    T: Component,
+    Action: ToolAction + Actionlike,
+{
+    tag: T,
+    event: ToolbeltPopulateEvent,
+    name: String,
+    description: String,
+    display_actions: HashMap<String, Vec<UserInput>>,
+    texture: Handle<Image>,
+    toolbelt_id: Entity,
+    starting_state: StartingState,
+    size: Option<Vec2>,
+    input_map: Option<InputMap<Action>>,
+}
+
+impl<T, Action> ToolSpawnConfig<T, Action>
+where
+    T: Component,
+    Action: ToolAction + Actionlike + core::fmt::Debug,
+{
+    pub fn new(tag: T, toolbelt_id: Entity, event: &ToolbeltPopulateEvent) -> Self {
+        let input_map = Action::default_input_map(event);
+        let display_actions = match input_map {
+            None => HashMap::new(),
+            Some(ref input_map) => input_map
+                .iter()
+                .map(|v| (format!("{:?}", v.0), v.1.clone()))
+                .collect(),
+        };
+        Self {
+            tag,
+            event: *event,
+            name: "Unnamed Tool".to_string(),
+            description: "Who knows what this does?".to_string(),
+            display_actions,
+            texture: Handle::default(),
+            toolbelt_id,
+            starting_state: StartingState::Active,
+            size: Some(Vec2::new(100.0, 100.0)),
+            input_map,
+        }
+    }
+
+    pub fn with_name(mut self, name: String) -> Self {
+        self.name = name;
+        self
+    }
+
+    pub fn with_description(mut self, description: &'static str) -> Self {
+        self.description = description.to_string();
+        self
+    }
+
+    pub fn guess_name(mut self, file_path: &str) -> Self {
+        self.name = Self::format_tool_name_from_source(file_path);
+        self
+    }
+
+    fn format_tool_name_from_source(file_path: &str) -> String {
+        // Extract the file name from the path
+        let file_name = Path::new(file_path)
+            .file_stem() // Get the file stem (file name without extension)
+            .and_then(|stem| stem.to_str()) // Convert OsStr to &str
+            .unwrap_or("");
+
+        file_name
+            .split('_')
+            .map(|word| {
+                word.chars()
+                    .enumerate()
+                    .map(|(i, c)| {
+                        if i == 0 {
+                            c.to_uppercase().to_string()
+                        } else {
+                            c.to_string()
+                        }
+                    })
+                    .collect::<String>()
+            })
+            .collect::<Vec<_>>()
+            .join(" ")
+    }
+
+    pub fn guess_image(mut self, file_path: &str, asset_server: &Res<AssetServer>) -> Self {
+        self.texture = asset_server.load(Self::format_tool_image_from_source(file_path));
+        self
+    }
+
+    fn format_tool_image_from_source(file_path: &str) -> String {
+        // Extract the file name from the path
+        let file_name = Path::new(file_path)
+            .file_stem() // Get the file stem (file name without extension)
+            .and_then(|stem| stem.to_str()) // Convert OsStr to &str
+            .unwrap_or("")
+            .trim_end_matches("_plugin");
+        format!("textures/tools/{}.png", file_name)
+    }
+
+    pub fn with_asset_image(
+        mut self,
+        file_name: &'static str,
+        asset_server: &Res<AssetServer>,
+    ) -> Self {
+        self.texture = asset_server.load(format!("textures/tools/{}", file_name));
+        self
+    }
+
+    pub fn with_image(mut self, texture: Handle<Image>) -> Self {
+        self.texture = texture;
+        self
+    }
+
+    pub fn with_starting_state(mut self, state: StartingState) -> Self {
+        self.starting_state = state;
+        self
+    }
+
+    pub fn with_size(mut self, size: Vec2) -> Self {
+        self.size = Some(size);
+        self
+    }
+
+    pub fn spawn(self, commands: &mut Commands) {
+        commands.entity(self.toolbelt_id).with_children(|toolbelt| {
+            let mut tool = toolbelt.spawn((
+                Tool {
+                    name: self.name.clone(),
+                    description: self.description,
+                    actions: self.display_actions,
+                    texture: self.texture.clone(),
+                },
+                self.tag,
+                Name::new(self.name.clone()),
+                SpriteBundle {
+                    sprite: Sprite {
+                        custom_size: self.size,
+                        ..default()
+                    },
+                    texture: self.texture,
+                    visibility: Visibility::Hidden,
+                    ..default()
+                },
+                Sensor,
+                RigidBody::Kinematic,
+                Collider::cuboid(100.0, 100.0),
+            ));
+            if let StartingState::Active = self.starting_state {
+                tool.insert(ActiveTool);
+            }
+            if let Some(input_map) = self.input_map {
+                tool.insert(InputManagerBundle {
+                    input_map,
+                    ..default()
+                });
+            }
+        });
+        info!("{:?} => {:?}", self.event, self.name);
+    }
+}
 
 fn spawn_tool_impl(
     tool: Tool,
@@ -65,17 +238,17 @@ pub fn spawn_action_tool<T>(
         toolbelt_id,
         asset_server,
         tool_component,
-        Some(InputManagerBundle::<T> {
-            input_map: T::default_input_map(),
+        T::default_input_map(event).map(|input_map| InputManagerBundle::<T> {
+            input_map,
             ..default()
         }),
         starting_state,
-        custom_size
+        custom_size,
     )
 }
 
 #[derive(Bundle)]
-struct WeAintGotNoBundle {}
+pub struct NoopBundle {}
 
 pub enum StartingState {
     Active,
@@ -100,8 +273,8 @@ pub fn spawn_tool(
         toolbelt_id,
         asset_server,
         tool_component,
-        None::<WeAintGotNoBundle>,
+        None::<NoopBundle>,
         starting_state,
-        custom_size
+        custom_size,
     )
 }

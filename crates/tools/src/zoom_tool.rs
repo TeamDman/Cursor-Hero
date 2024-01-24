@@ -19,7 +19,7 @@ impl Plugin for ZoomToolPlugin {
     }
 }
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Default)]
 struct ZoomTool;
 
 fn toolbelt_events(
@@ -30,28 +30,16 @@ fn toolbelt_events(
     for event in reader.read() {
         if let ToolbeltPopulateEvent::Default {
             toolbelt_id,
-            character_id,
         }
         | ToolbeltPopulateEvent::Inspector {
             toolbelt_id,
-            character_id,
         } = event
         {
-            spawn_action_tool::<ZoomToolAction>(
-                Tool::create_with_actions::<ZoomToolAction>(
-                    file!(),
-                    "Send scroll events".to_string(),
-                    &asset_server,
-                ),
-                event,
-                &mut commands,
-                *toolbelt_id,
-                *character_id,
-                &asset_server,
-                ZoomTool,
-                StartingState::Active,
-                None,
-            );
+            ToolSpawnConfig::<ZoomTool, ZoomToolAction>::new(ZoomTool, *toolbelt_id, event)
+                .guess_name(file!())
+                .guess_image(file!(), &asset_server)
+                .with_description("Send scroll events")
+                .spawn(&mut commands);
         }
     }
 }
@@ -84,14 +72,14 @@ impl ZoomToolAction {
     }
 }
 impl ToolAction for ZoomToolAction {
-    fn default_input_map() -> InputMap<ZoomToolAction> {
+    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<ZoomToolAction>> {
         let mut input_map = InputMap::default();
 
         for variant in ZoomToolAction::variants() {
             input_map.insert(variant.default_mkb_binding(), variant);
             input_map.insert(variant.default_gamepad_binding(), variant);
         }
-        input_map
+        Some(input_map)
     }
 }
 

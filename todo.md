@@ -1,3 +1,5 @@
+- window switcher tool; window wheel -> focus, teleport
+
 - Github releases in world
 
 - File browser in world
