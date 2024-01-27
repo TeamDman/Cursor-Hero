@@ -12,7 +12,7 @@ use leafwing_input_manager::user_input::InputKind;
 use bevy_inspector_egui::prelude::ReflectInspectorOptions;
 use bevy_inspector_egui::InspectorOptions;
 use cursor_hero_character::character_plugin::Character;
-use cursor_hero_character::character_plugin::CharacterColor;
+use cursor_hero_character::character_plugin::CharacterAppearance;
 
 pub struct PointerPlugin;
 #[derive(SystemSet, Clone, Hash, Debug, PartialEq, Eq)]
@@ -107,7 +107,7 @@ fn insert_pointer(
                     texture: asset_server.load("textures/cursor.png"),
                     transform: Transform::from_xyz(0.0, 0.0, 2.0),
                     sprite: Sprite {
-                        color: CharacterColor::default().as_color(),
+                        color: Color::rgb(0.149, 0.549, 0.184),
                         anchor: Anchor::TopLeft,
                         ..default()
                     },
