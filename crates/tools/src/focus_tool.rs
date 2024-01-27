@@ -34,12 +34,8 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Default {
-            toolbelt_id,
-        }
-        | PopulateToolbeltEvent::Inspector {
-            toolbelt_id,
-        } = event
+        if let PopulateToolbeltEvent::Default { toolbelt_id }
+        | PopulateToolbeltEvent::Inspector { toolbelt_id } = event
         {
             ToolSpawnConfig::<FocusTool, FocusToolAction>::new(FocusTool, *toolbelt_id, event)
                 .guess_name(file!())
@@ -86,50 +82,58 @@ impl ToolAction for FocusToolAction {
 #[allow(clippy::type_complexity)]
 #[allow(clippy::too_many_arguments)]
 fn handle_input(
-    tools: Query<(&ActionState<FocusToolAction>, Option<&ActiveTool>, &Parent)>,
-    toolbelts: Query<&Parent, With<Toolbelt>>,
-    mut characters: Query<(Entity, Option<&FollowWithMainCamera>), With<Character>>,
-    camera_query: Query<Entity, With<MainCamera>>,
+    tool_query: Query<(&ActionState<FocusToolAction>, Option<&ActiveTool>, &Parent)>,
+    toolbelt_query: Query<&Parent, With<Toolbelt>>,
+    mut character_query: Query<
+        (Entity, &mut Transform, Option<&FollowWithMainCamera>),
+        (With<Character>, Without<MainCamera>),
+    >,
+    camera_query: Query<(Entity, &Transform), (With<MainCamera>, Without<Character>)>,
     window_query: Query<&RawHandleWrapper, With<PrimaryWindow>>,
     mut camera_events: EventWriter<CameraEvent>,
     mut movement_events: EventWriter<MovementEvent>,
 ) {
-    for (t_act, t_enabled, t_parent) in tools.iter() {
+    for (t_act, t_enabled, t_parent) in tool_query.iter() {
         if t_enabled.is_none() {
             continue;
         }
         if t_act.just_pressed(FocusToolAction::ToggleFollowCharacter) {
             info!("Toggle follow character");
-            let toolbelt = toolbelts
+            let toolbelt = toolbelt_query
                 .get(t_parent.get())
                 .expect("Toolbelt should have a parent");
-            let character = characters
+
+            let character = character_query
                 .get_mut(toolbelt.get())
                 .expect("Toolbelt should have a character");
-            let (character_id, character_is_followed) = character;
+            let (character_id, mut character_transform, character_is_followed) = character;
 
+            let camera = camera_query.single();
+            let (camera_id, camera_transform) = camera;
             if character_is_followed.is_none() {
                 camera_events.send(CameraEvent::BeginFollowing {
                     target_id: character_id,
                 });
                 movement_events.send(MovementEvent::RemoveMovement {
-                    target_id: camera_query.single(),
+                    target_id: camera_id,
                 });
                 movement_events.send(MovementEvent::AddMovement {
                     target_id: character_id,
                 });
-                info!("sent follow events");
+                info!("Sent follow events");
+                info!("Updating character to be at camera position");
+                character_transform.translation = camera_transform.translation;
             } else {
                 camera_events.send(CameraEvent::StopFollowing {
                     target_id: character_id,
                 });
                 movement_events.send(MovementEvent::AddMovement {
-                    target_id: camera_query.single(),
+                    target_id: camera_id,
                 });
                 movement_events.send(MovementEvent::RemoveMovement {
                     target_id: character_id,
                 });
-                info!("sent unfollow events");
+                info!("Sent unfollow events");
             }
         }
         if t_act.just_pressed(FocusToolAction::FocusMainWindow) {
