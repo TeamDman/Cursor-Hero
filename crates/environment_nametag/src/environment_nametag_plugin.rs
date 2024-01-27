@@ -152,10 +152,10 @@ fn handle_nametag_recalculate_position_event(
                 if let Ok(environment_children) = environment_query.get(*environment_id) {
                     let mut max_extents = Rect::default();
                     for environment_child_id in environment_children.iter() {
-                        debug!(
-                            "Checking environment child {:?} for environment {:?}",
-                            environment_child_id, environment_id
-                        );
+                        // debug!(
+                        //     "Checking environment child {:?} for environment {:?}",
+                        //     environment_child_id, environment_id
+                        // );
                         if let Ok(screen_parent_children) =
                             screen_parent_query.get(*environment_child_id)
                         {
