@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use cursor_hero_camera::camera_plugin::CameraPlugin;
 use cursor_hero_character::character_plugin::CharacterPlugin;
 use cursor_hero_cursor_mirror::cursor_mirroring_plugin::CursorMirroringPlugin;
+use cursor_hero_environment::environment_nametag_plugin::EnvironmentNametagPlugin;
 use cursor_hero_hover::afterimage_plugin::AfterimagePlugin;
 use cursor_hero_hover::hover_tool::HoverToolPlugin;
 use cursor_hero_hover::hover_ui_automation_plugin::HoverUiAutomationPlugin;
@@ -34,6 +35,7 @@ pub struct MyPlugin;
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(EnvironmentPlugin);
+        app.add_plugins(EnvironmentNametagPlugin);
         app.add_plugins(WallpaperPlugin);
         app.add_plugins(ToolPlugin);
         app.add_plugins(ToolbeltPlugin);

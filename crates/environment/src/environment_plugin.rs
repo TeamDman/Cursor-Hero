@@ -38,7 +38,7 @@ fn handle_create_events(mut commands: Commands, mut create_events: EventReader<C
     for event in create_events.read() {
         match event {
             CreateEnvironmentEvent::Host { origin, name } => {
-                println!("CreateEnvironmentEvent::Host {:?}", origin);
+                info!("Creating host environment at {:?}", origin);
                 let environment_id = commands.spawn((
                     SpatialBundle {
                         transform: Transform::from_translation(origin.extend(0.0)),
@@ -47,10 +47,11 @@ fn handle_create_events(mut commands: Commands, mut create_events: EventReader<C
                     Environment,
                     Name::new(name.clone()),
                 )).id();
+                info!("Broadcasting environment population event");
                 populate_events.send(PopulateEnvironmentEvent::Host { environment_id })
             }
             CreateEnvironmentEvent::Game { origin, name } => {
-                println!("CreateEnvironmentEvent::Game {:?}", origin);
+                info!("Creating game environment at {:?}", origin);
                 let environment_id = commands.spawn((
                     SpatialBundle {
                         transform: Transform::from_translation(origin.extend(0.0)),
@@ -59,6 +60,7 @@ fn handle_create_events(mut commands: Commands, mut create_events: EventReader<C
                     Environment,
                     Name::new(name.clone()),
                 )).id();
+                info!("Broadcasting environment population event");
                 populate_events.send(PopulateEnvironmentEvent::Game { environment_id })
             }
         }

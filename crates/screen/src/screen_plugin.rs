@@ -39,7 +39,7 @@ fn spawn_screens_in_new_environments(
     for environment_event in environment_reader.read() {
         match environment_event {
             PopulateEnvironmentEvent::Host { environment_id } => {
-                info!("Spawning screens for host environment");
+                info!("Populating host environment with screens");
                 commands.entity(*environment_id).with_children(|parent| {
                     let mut screen_parent_commands = parent.spawn((
                         SpatialBundle::default(),
@@ -84,6 +84,7 @@ fn spawn_screens_in_new_environments(
                             level_bounds.push(region.expand((400, 400).into()));
                         }
                     });
+                    info!("Broadcasting {} level bounds events", level_bounds.len());
                     for area in level_bounds {
                         level_bounds_events.send(LevelBoundsEvent::AddPlayArea {
                             environment_id: *environment_id,

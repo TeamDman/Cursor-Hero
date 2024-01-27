@@ -30,7 +30,7 @@ impl Plugin for LevelBoundsPlugin {
     }
 }
 
-#[derive(Event, Reflect, Debug)]
+#[derive(Event, Reflect, Debug, Clone, Copy)]
 pub enum LevelBoundsEvent {
     AddPlayArea { environment_id: Entity, area: Rect },
 }
@@ -55,7 +55,10 @@ fn handle_populate_environment_events(
         match event {
             PopulateEnvironmentEvent::Host { environment_id }
             | PopulateEnvironmentEvent::Game { environment_id } => {
-                info!("Spawning level bounds parent for {:?}", event);
+                info!(
+                    "Populating environment {:?} with level bounds parent",
+                    event
+                );
                 let mut level_bounds_holder_id = None;
                 commands.entity(*environment_id).with_children(|parent| {
                     level_bounds_holder_id = Some(
@@ -68,13 +71,11 @@ fn handle_populate_environment_events(
                             .id(),
                     );
                 });
-                if let Some(level_bounds_holder_id) = level_bounds_holder_id {
-                    commands
-                        .entity(*environment_id)
-                        .insert(LevelBoundsParentRef(level_bounds_holder_id));
-                } else {
-                    unreachable!("Level bounds parent should exist by now");
-                }
+                commands
+                    .entity(*environment_id)
+                    .insert(LevelBoundsParentRef(
+                        level_bounds_holder_id.expect("we just created this entity"),
+                    ));
             }
         }
     }
@@ -84,8 +85,10 @@ pub fn handle_level_bounds_events(
     mut events: EventReader<LevelBoundsEvent>,
     environment_query: Query<(&Name, &LevelBoundsParentRef), With<Environment>>,
     mut commands: Commands,
+    mut deferred: Local<Vec<LevelBoundsEvent>>,
 ) {
-    for event in events.read() {
+    let mut new_deferred = Vec::new();
+    for event in events.read().chain(deferred.into_iter()) {
         match event {
             LevelBoundsEvent::AddPlayArea {
                 environment_id,
@@ -124,11 +127,13 @@ pub fn handle_level_bounds_events(
                             ));
                         });
                 } else {
-                    unreachable!("Level bounds parent should exist by now");
+                    info!("Deferring level bounds event {:?}", event);
+                    new_deferred.push(event.clone());
                 }
             }
         }
     }
+    *deferred = new_deferred;
 }
 
 #[allow(clippy::type_complexity)]
