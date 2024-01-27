@@ -78,25 +78,34 @@ impl CharacterColor {
 
 fn spawn_character(
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
+    asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut camera_events: EventWriter<CameraEvent>,
 ) {
     let default_material = materials.add(CharacterColor::FocusedWithCamera.as_material());
     let os_cursor_pos = get_cursor_position().expect("Should be able to fetch cursor pos from OS");
     let character = commands.spawn((
-        MaterialMesh2dBundle {
-            mesh: meshes
-                .add(
-                    shape::Capsule {
-                        radius: 12.5,
-                        depth: 20.0,
-                        ..default()
-                    }
-                    .into(),
-                )
-                .into(),
-            material: default_material,
+        // MaterialMesh2dBundle {
+        //     mesh: meshes
+        //         .add(
+        //             shape::Capsule {
+        //                 radius: 12.5,
+        //                 depth: 20.0,
+        //                 ..default()
+        //             }
+        //             .into(),
+        //         )
+        //         .into(),
+        //     material: default_material,
+        //     transform: Transform::from_translation(os_cursor_pos.as_vec2().neg_y().extend(100.0)),
+        //     ..default()
+        // },
+        SpriteBundle {
+            texture: asset_server.load("textures/character/default_character.png"),
+            sprite: Sprite {
+                custom_size: Some(Vec2::new(50.0, 50.0)),
+                ..default()
+            },
             transform: Transform::from_translation(os_cursor_pos.as_vec2().neg_y().extend(100.0)),
             ..default()
         },
@@ -105,7 +114,7 @@ fn spawn_character(
         MovementDamping { factor: 0.90 },
         Name::new("Character"),
         RigidBody::Kinematic,
-        Collider::capsule(20.0, 12.5),
+        Collider::capsule(15.0, 12.5),
         SpatialListener::new(7.0),
         Movement::default(),
     ));
