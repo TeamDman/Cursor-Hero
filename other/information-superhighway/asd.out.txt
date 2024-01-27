@@ -1,0 +1,89 @@
+ To demonstrate your understanding, create a new tool following this pattern:
+
+1. Create an empty file called `observation_tool.rs` in the `src/tools` folder.
+2. Add the required boilerplate code to create a new struct for your tool.
+3. Implement the `Tool` trait for your struct.
+4. Add a function to enable/disable the tool, following the naming pattern used in other tools (e.g., `enable_tool` and `disable_tool`).
+5. Implement the `update` method for your tool, which will be called when the tool is activated.
+6. In the `update` method, check if the tool is enabled and print "hello world" at the info level if it is.
+7. Add the new tool to the `tools_plugin::tools_plugin!` macro in the `Cargo.toml`.
+
+Now, let's start with step 1: Create an empty file called `observation_tool.rs` in the `src/tools` folder.
+
+```bash
+mkdir -p src/tools && touch src/tools/observation_tool.rs
+```
+
+Next, add the required boilerplate code to create a new struct for your tool:
+
+```rust
+use crate::*;
+
+pub struct ObservationTool;
+```
+
+Now implement the `Tool` trait for your struct:
+
+```rust
+impl Tool for ObservationTool {
+    fn name(&self) -> String {
+        "Observation Tool".to_string()
+    }
+}
+```
+
+Add a function to enable/disable the tool, following the naming pattern used in other tools (e.g., `enable_tool` and `disable_tool`):
+
+```rust
+impl ObservationTool {
+    pub fn enable_tool(&mut self) {
+        // Enable the tool here
+    }
+
+    pub fn disable_tool(&mut self) {
+        // Disable the tool here
+    }
+}
+```
+
+Implement the `update` method for your tool, which will be called when the tool is activated:
+
+```rust
+impl ObservationTool {
+    fn update(&mut self, _state: &mut State) {
+        if self.is_enabled() {
+            info!("hello world");
+        }
+    }
+}
+```
+
+Finally, add the new tool to the `tools_plugin::tools_plugin!` macro in the `Cargo.toml`:
+
+```toml
+[plugins.tools_plugin]
+activation = "window"
+tools = [
+    "click_tool",
+    "cube_tool",
+    "cursor_tool",
+    "default_wheel_tool",
+    "focus_tool",
+    "keyboard_tool",
+    "keyboard_wheel_tool",
+    "lib",
+    "placeholder_tool",
+    "restart_tool",
+    "sprint_tool",
+    "talk_tool",
+    "taskbar_wheel_tool",
+    "tool_plugin",
+    "tool_spawning",
+    "window_drag_tool",
+    "zoom_tool",
+    "observation_tool"
+]
+```
+
+Now the new tool `observation_tool.rs` has been added to the code base, and you can compile and run it following the instructions provided in the main README file.
+

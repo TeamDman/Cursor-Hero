@@ -1,0 +1,30 @@
+Cursor-Hero on  main [$] is 📦 v0.3.0 via 🦀 v1.75.0
+❯ ls --tree ./crates/tools/
+./crates/tools
+├── Cargo.toml
+└── src
+   ├── click_tool.rs
+   ├── cube_tool.rs
+   ├── cursor_tool.rs
+   ├── default_wheel_tool.rs
+   ├── focus_tool.rs
+   ├── keyboard_tool.rs
+   ├── keyboard_wheel_tool.rs
+   ├── lib.rs
+   ├── placeholder_tool.rs
+   ├── restart_tool.rs
+   ├── sprint_tool.rs
+   ├── talk_tool.rs
+   ├── taskbar_wheel_tool.rs
+   ├── tool_plugin.rs
+   ├── tool_spawning.rs
+   ├── window_drag_tool.rs
+   └── zoom_tool.rs
+
+Your goal is to create a new tool, called observation_tool.rs.
+The tool will add a deactivated-by-default tool that, when activated, will print "hello world" at the info level.
+
+Analyze existing tools to identify the structure your code should have to fit in the code base.
+
+Code blocks in your response will be interpreted as shell commands.
+

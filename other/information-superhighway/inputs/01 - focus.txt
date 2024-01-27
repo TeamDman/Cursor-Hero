@@ -1,0 +1,15 @@
+## Goal
+
+Make VSCode the active window
+
+## Environment Observation
+
+Taskbar entries: [TaskbarEntry { name: "Bulk 28 - 1 running window", bounds: IRect { min: IVec2(51, 1040), max: IVec2(212, 1080) } }, TaskbarEntry { name: "ui_automation.rs - Untitled (Workspace) - Visual Studio Code - 1 running window", bounds: IRect { min: IVec2(212, 1040), max: IVec2(373, 1080) } }, TaskbarEntry { name: "Obsidian", bounds: IRect { min: IVec2(373, 1040), max: IVec2(422, 1080) } }, TaskbarEntry { name: "Cursor Hero: Complex Game Environment and 42 more pages - Personal - Microsoft\u{200b} Edge - 1 running window", bounds: IRect { min: IVec2(422, 1040), max: IVec2(583, 1080) } }, TaskbarEntry { name: "Discord", bounds: IRect { min: IVec2(583, 1040), max: IVec2(632, 1080) } }, TaskbarEntry { name: "Spotify", bounds: IRect { min: IVec2(632, 1040), max: IVec2(681, 1080) } }, TaskbarEntry { name: "PowerShell - 1 running window", bounds: IRect { min: IVec2(681, 1040), max: IVec2(842, 1080) } }, TaskbarEntry { name: "Cursor Hero v0.3.0 - 1 running window", bounds: IRect { min: IVec2(842, 1040), max: IVec2(1003, 1080) } }]
+Mouse position: (0,0)
+
+## Available Actions
+
+move_cursor(pos: Vec2)
+
+## Next Action
+
