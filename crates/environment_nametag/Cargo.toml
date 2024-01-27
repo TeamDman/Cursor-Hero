@@ -1,0 +1,11 @@
+[package]
+name = "cursor_hero_environment_nametag"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+cursor_hero_environment = { workspace = true}
+cursor_hero_screen = { workspace = true}
+bevy = { workspace = true }

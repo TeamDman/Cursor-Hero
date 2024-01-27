@@ -14,6 +14,7 @@ pub struct LevelBoundsPlugin;
 impl Plugin for LevelBoundsPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<LevelBounds>()
+        .register_type::<LevelBoundsParent>()
             .add_event::<LevelBoundsEvent>()
             .add_systems(
                 Update,
@@ -95,8 +96,7 @@ pub fn handle_level_bounds_events(
                 area,
             } => {
                 info!(
-                    "Adding play area {:?} ({:?}) to level bounds for environment {:?}",
-                    area,
+                    "Adding play area with size {:?} to level bounds for environment {:?}",
                     area.size(),
                     environment_id
                 );
@@ -127,7 +127,7 @@ pub fn handle_level_bounds_events(
                             ));
                         });
                 } else {
-                    info!("Deferring level bounds event {:?}", event);
+                    debug!("Deferring level bounds event for environment {:?}", environment_id);
                     new_deferred.push(event.clone());
                 }
             }
