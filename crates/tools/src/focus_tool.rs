@@ -66,7 +66,7 @@ impl FocusToolAction {
 
     fn default_mkb_binding(&self) -> UserInput {
         match self {
-            Self::ToggleFollowCharacter => KeyCode::Backslash.into(),
+            Self::ToggleFollowCharacter => KeyCode::Space.into(),
             Self::FocusMainWindow => KeyCode::Home.into(),
         }
     }
