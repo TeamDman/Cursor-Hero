@@ -1,39 +1,134 @@
 use bevy::prelude::*;
+use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::CollidingEntities;
 use bevy_xpbd_2d::components::LinearVelocity;
 
+use bevy_xpbd_2d::components::RigidBody;
+use bevy_xpbd_2d::components::Sensor;
 use cursor_hero_character::character_plugin::Character;
+use cursor_hero_environment::environment_plugin::Environment;
+use cursor_hero_environment::environment_plugin::PopulateEnvironmentEvent;
 
 pub struct LevelBoundsPlugin;
-
-#[derive(SystemSet, Clone, Hash, Debug, PartialEq, Eq)]
-pub enum LevelBoundsSystemSet {
-    Spawn,
-    Enforce,
-}
 
 impl Plugin for LevelBoundsPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<LevelBounds>()
-            .configure_sets(Startup, LevelBoundsSystemSet::Spawn)
-            .configure_sets(Update, LevelBoundsSystemSet::Enforce)
-            .add_systems(Startup, spawn_parent.in_set(LevelBoundsSystemSet::Spawn))
-            .add_systems(Update, enforce.in_set(LevelBoundsSystemSet::Enforce));
+            .add_event::<LevelBoundsEvent>()
+            .add_systems(
+                Update,
+                (
+                    (
+                        handle_populate_environment_events,
+                        apply_deferred,
+                        handle_level_bounds_events,
+                    )
+                        .chain(),
+                    enforce,
+                ),
+            );
     }
+}
+
+#[derive(Event, Reflect, Debug)]
+pub enum LevelBoundsEvent {
+    AddPlayArea { environment_id: Entity, area: Rect },
 }
 
 #[derive(Component, Reflect)]
 pub struct LevelBoundsParent;
 #[derive(Component, Reflect)]
+pub struct LevelBoundsParentRef(Entity);
+impl LevelBoundsParentRef {
+    pub fn get(&self) -> Entity {
+        self.0
+    }
+}
+#[derive(Component, Reflect)]
 pub struct LevelBounds;
 
-fn spawn_parent(mut commands: Commands) {
-    info!("Spawning level bounds");
-    commands.spawn((
-        SpatialBundle::default(),
-        LevelBoundsParent,
-        Name::new("Level Bounds"),
-    ));
+fn handle_populate_environment_events(
+    mut commands: Commands,
+    mut events: EventReader<PopulateEnvironmentEvent>,
+) {
+    for event in events.read() {
+        match event {
+            PopulateEnvironmentEvent::Host { environment_id }
+            | PopulateEnvironmentEvent::Game { environment_id } => {
+                info!("Spawning level bounds parent for {:?}", event);
+                let mut level_bounds_holder_id = None;
+                commands.entity(*environment_id).with_children(|parent| {
+                    level_bounds_holder_id = Some(
+                        parent
+                            .spawn((
+                                SpatialBundle::default(),
+                                LevelBoundsParent,
+                                Name::new("Level Bounds"),
+                            ))
+                            .id(),
+                    );
+                });
+                if let Some(level_bounds_holder_id) = level_bounds_holder_id {
+                    commands
+                        .entity(*environment_id)
+                        .insert(LevelBoundsParentRef(level_bounds_holder_id));
+                } else {
+                    unreachable!("Level bounds parent should exist by now");
+                }
+            }
+        }
+    }
+}
+
+pub fn handle_level_bounds_events(
+    mut events: EventReader<LevelBoundsEvent>,
+    environment_query: Query<(&Name, &LevelBoundsParentRef), With<Environment>>,
+    mut commands: Commands,
+) {
+    for event in events.read() {
+        match event {
+            LevelBoundsEvent::AddPlayArea {
+                environment_id,
+                area,
+            } => {
+                info!(
+                    "Adding play area {:?} ({:?}) to level bounds for environment {:?}",
+                    area,
+                    area.size(),
+                    environment_id
+                );
+                if let Ok((environment_name, level_bounds_parent_ref)) =
+                    environment_query.get(*environment_id)
+                {
+                    commands
+                        .entity(level_bounds_parent_ref.get())
+                        .with_children(|parent| {
+                            parent.spawn((
+                                SpriteBundle {
+                                    sprite: Sprite {
+                                        custom_size: Some(area.size()),
+                                        color: Color::ORANGE,
+                                        ..default()
+                                    },
+                                    transform: Transform::from_translation(
+                                        area.center().extend(-2.0),
+                                    ),
+                                    visibility: Visibility::Hidden,
+                                    ..default()
+                                },
+                                Sensor,
+                                RigidBody::Static,
+                                Collider::cuboid(area.size().x, area.size().y),
+                                LevelBounds,
+                                Name::new("Level Bounds"),
+                            ));
+                        });
+                } else {
+                    unreachable!("Level bounds parent should exist by now");
+                }
+            }
+        }
+    }
 }
 
 #[allow(clippy::type_complexity)]

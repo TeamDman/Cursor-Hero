@@ -20,10 +20,10 @@ struct HoverTool;
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<ToolbeltPopulateEvent>,
+    mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let ToolbeltPopulateEvent::Inspector { toolbelt_id } = event {
+        if let PopulateToolbeltEvent::Inspector { toolbelt_id } = event {
             ToolSpawnConfig::<HoverTool, NoInputs>::new(HoverTool, *toolbelt_id, event)
                 .guess_name(file!())
                 .guess_image(file!(), &asset_server)

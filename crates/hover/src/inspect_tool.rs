@@ -37,10 +37,10 @@ struct InspectTool;
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<ToolbeltPopulateEvent>,
+    mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let ToolbeltPopulateEvent::Inspector {
+        if let PopulateToolbeltEvent::Inspector {
             toolbelt_id,
         } = event
         {
@@ -75,7 +75,7 @@ impl InspectToolAction {
     }
 }
 impl ToolAction for InspectToolAction {
-    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<InspectToolAction>> {
+    fn default_input_map(_event: &PopulateToolbeltEvent) -> Option<InputMap<InspectToolAction>> {
         let mut input_map = InputMap::default();
 
         for variant in InspectToolAction::variants() {

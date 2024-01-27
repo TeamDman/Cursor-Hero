@@ -31,13 +31,13 @@ struct FocusTool;
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<ToolbeltPopulateEvent>,
+    mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let ToolbeltPopulateEvent::Default {
+        if let PopulateToolbeltEvent::Default {
             toolbelt_id,
         }
-        | ToolbeltPopulateEvent::Inspector {
+        | PopulateToolbeltEvent::Inspector {
             toolbelt_id,
         } = event
         {
@@ -72,7 +72,7 @@ impl FocusToolAction {
     }
 }
 impl ToolAction for FocusToolAction {
-    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<FocusToolAction>> {
+    fn default_input_map(_event: &PopulateToolbeltEvent) -> Option<InputMap<FocusToolAction>> {
         let mut input_map = InputMap::default();
 
         for variant in FocusToolAction::variants() {

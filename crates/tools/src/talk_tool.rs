@@ -29,10 +29,10 @@ struct TalkTool;
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<ToolbeltPopulateEvent>,
+    mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let ToolbeltPopulateEvent::Keyboard { toolbelt_id } = event {
+        if let PopulateToolbeltEvent::Keyboard { toolbelt_id } = event {
             ToolSpawnConfig::<TalkTool, TalkToolAction>::new(TalkTool, *toolbelt_id, event)
                 .guess_name(file!())
                 .guess_image(file!(), &asset_server)
@@ -88,13 +88,13 @@ impl TalkToolAction {
     }
 }
 impl ToolAction for TalkToolAction {
-    fn default_input_map(event: &ToolbeltPopulateEvent) -> Option<InputMap<TalkToolAction>> {
+    fn default_input_map(event: &PopulateToolbeltEvent) -> Option<InputMap<TalkToolAction>> {
         match event {
-            ToolbeltPopulateEvent::Default { .. } => Some(Self::with_defaults(
+            PopulateToolbeltEvent::Default { .. } => Some(Self::with_defaults(
                 Self::default_wheel_gamepad_binding,
                 Self::default_wheel_mkb_binding,
             )),
-            ToolbeltPopulateEvent::Keyboard { .. } => Some(Self::with_defaults(
+            PopulateToolbeltEvent::Keyboard { .. } => Some(Self::with_defaults(
                 Self::talk_wheel_gamepad_binding,
                 Self::talk_wheel_mkb_binding,
             )),

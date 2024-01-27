@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use bevy::prelude::*;
 use bevy_xpbd_2d::components::Position;
-use cursor_hero_glam::NegativeY;
+use cursor_hero_bevy::NegativeYVec2;
 use cursor_hero_screen::get_image::get_image;
 use cursor_hero_screen::get_image::ScreensToImageParam;
 use cursor_hero_toolbelt::types::*;
@@ -31,11 +31,11 @@ struct TaskbarEntryTool {
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<ToolbeltPopulateEvent>,
+    mut reader: EventReader<PopulateToolbeltEvent>,
     access: ScreensToImageParam,
 ) {
     for event in reader.read() {
-        if let ToolbeltPopulateEvent::Default { toolbelt_id } = event {
+        if let PopulateToolbeltEvent::Default { toolbelt_id } = event {
             ToolSpawnConfig::<TaskbarWheelTool, NoInputs>::new(
                 TaskbarWheelTool,
                 *toolbelt_id,
@@ -47,7 +47,7 @@ fn toolbelt_events(
             .with_starting_state(StartingState::Inactive)
             .spawn(&mut commands);
         }
-        if let ToolbeltPopulateEvent::Taskbar { toolbelt_id } = event {
+        if let PopulateToolbeltEvent::Taskbar { toolbelt_id } = event {
             let Ok(taskbar) = get_taskbar() else {
                 continue;
             };
@@ -77,12 +77,12 @@ fn toolbelt_events(
 fn tick_wheel_switcher(
     mut commands: Commands,
     tool_query: Query<&Parent, (Added<ActiveTool>, With<TaskbarWheelTool>)>,
-    mut toolbelt_events: EventWriter<ToolbeltPopulateEvent>,
+    mut toolbelt_events: EventWriter<PopulateToolbeltEvent>,
 ) {
     for toolbelt_id in tool_query.iter() {
         let toolbelt_id = toolbelt_id.get();
         commands.entity(toolbelt_id).despawn_descendants();
-        toolbelt_events.send(ToolbeltPopulateEvent::Taskbar {
+        toolbelt_events.send(PopulateToolbeltEvent::Taskbar {
             toolbelt_id: toolbelt_id,
         });
     }
@@ -93,7 +93,7 @@ fn tick_taskbar_switcher(
     tool_query: Query<(&Parent, &TaskbarEntryTool), Added<ActiveTool>>,
     toolbelt_query: Query<&Parent, With<Toolbelt>>,
     mut character_query: Query<&mut Position>,
-    mut toolbelt_events: EventWriter<ToolbeltPopulateEvent>,
+    mut toolbelt_events: EventWriter<PopulateToolbeltEvent>,
 ) {
     for (toolbelt_id, tool) in tool_query.iter() {
         let toolbelt_id = toolbelt_id.get();
@@ -101,7 +101,7 @@ fn tick_taskbar_switcher(
             info!("Switching toolbelt {:?} to default tools", toolbelt_id);
             let character_id = character_id.get();
             commands.entity(toolbelt_id).despawn_descendants();
-            toolbelt_events.send(ToolbeltPopulateEvent::Default {
+            toolbelt_events.send(PopulateToolbeltEvent::Default {
                 toolbelt_id: toolbelt_id,
             });
             if let Ok(mut position) = character_query.get_mut(character_id) {

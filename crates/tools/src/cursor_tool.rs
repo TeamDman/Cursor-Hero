@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy::transform::TransformSystem;
 use bevy_xpbd_2d::prelude::*;
-use cursor_hero_glam::NegativeYI;
+use cursor_hero_bevy::NegativeYIVec2;
 use cursor_hero_input::active_input_state_plugin::ActiveInput;
 use itertools::Itertools;
 
@@ -40,16 +40,16 @@ struct CursorTool;
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<ToolbeltPopulateEvent>,
+    mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let ToolbeltPopulateEvent::Default {
+        if let PopulateToolbeltEvent::Default {
             toolbelt_id,
         }
-        | ToolbeltPopulateEvent::Inspector {
+        | PopulateToolbeltEvent::Inspector {
             toolbelt_id,
         }
-        | ToolbeltPopulateEvent::Keyboard {
+        | PopulateToolbeltEvent::Keyboard {
             toolbelt_id,
         } = event
         {

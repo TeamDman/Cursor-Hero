@@ -27,7 +27,7 @@ impl Plugin for ToolbeltPlugin {
             .register_type::<Tool>()
             .register_type::<ActiveTool>()
             .register_type::<Hovered>()
-            .add_event::<ToolbeltPopulateEvent>()
+            .add_event::<PopulateToolbeltEvent>()
             .add_event::<ToolbeltStateEvent>()
             .add_event::<ToolHoveredEvent>()
             .add_event::<ToolActivationEvent>()

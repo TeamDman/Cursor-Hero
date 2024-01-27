@@ -21,12 +21,10 @@ use windows::Win32::UI::WindowsAndMessaging::SM_CYFRAME;
 use windows::Win32::UI::WindowsAndMessaging::SW_RESTORE;
 use windows::Win32::UI::WindowsAndMessaging::WM_NCLBUTTONDOWN;
 
-pub trait ToBevyRect {
-    fn to_bevy_rect(&self) -> IRect;
-}
+use crate::ToBevyIRect;
 
-impl ToBevyRect for RECT {
-    fn to_bevy_rect(&self) -> IRect {
+impl ToBevyIRect for RECT {
+    fn to_bevy_irect(&self) -> IRect {
         IRect {
             min: IVec2::new(self.left, self.top),
             max: IVec2::new(self.right, self.bottom),
@@ -49,7 +47,7 @@ pub fn get_window_bounds_from_title(title: &str) -> Result<IRect, WindowBoundsEr
         }
         let mut rect = RECT::default();
         GetWindowRect(hwnd, &mut rect).map_err(WindowBoundsError::WindowsError)?;
-        Ok(rect.to_bevy_rect())
+        Ok(rect.to_bevy_irect())
     }
 }
 
@@ -57,7 +55,7 @@ pub fn get_window_bounds(hwnd: isize) -> Result<IRect, WindowBoundsError> {
     unsafe {
         let mut rect = RECT::default();
         GetWindowRect(HWND(hwnd), &mut rect).map_err(WindowBoundsError::WindowsError)?;
-        Ok(rect.to_bevy_rect())
+        Ok(rect.to_bevy_irect())
     }
 }
 
@@ -66,7 +64,7 @@ pub fn get_window_inner_bounds(hwnd: isize) -> Result<IRect, WindowBoundsError> 
         let hwnd = HWND(hwnd);
         let mut rect = RECT::default();
         if GetClientRect(hwnd, &mut rect).is_ok() {
-            Ok(rect.to_bevy_rect())
+            Ok(rect.to_bevy_irect())
         } else {
             Err(WindowBoundsError::WindowsError(
                 windows::core::Error::from_win32(),
@@ -147,7 +145,7 @@ pub fn note_window_info(hwnd: isize) -> Result<IRect, WindowBoundsError> {
         // Get the window's size and location
         let mut rect = RECT::default();
         GetWindowRect(hwnd, &mut rect).map_err(WindowBoundsError::WindowsError)?;
-        Ok(rect.to_bevy_rect())
+        Ok(rect.to_bevy_irect())
     }
 }
 

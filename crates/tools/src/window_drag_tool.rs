@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy::winit::WinitWindows;
+use bevy_inspector_egui::bevy_egui::EguiContext;
 use cursor_hero_toolbelt::types::*;
 use leafwing_input_manager::prelude::*;
 
@@ -23,10 +24,10 @@ struct WindowDragTool;
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<ToolbeltPopulateEvent>,
+    mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let ToolbeltPopulateEvent::Default {
+        if let PopulateToolbeltEvent::Default {
             toolbelt_id,
         } = event
         {
@@ -58,7 +59,7 @@ impl WindowDragToolAction {
     }
 }
 impl ToolAction for WindowDragToolAction {
-    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<WindowDragToolAction>> {
+    fn default_input_map(_event: &PopulateToolbeltEvent) -> Option<InputMap<WindowDragToolAction>> {
         let mut input_map = InputMap::default();
 
         for variant in WindowDragToolAction::variants() {
@@ -76,9 +77,17 @@ fn handle_input(
     tool_query: Query<&ActionState<WindowDragToolAction>, With<ActiveTool>>,
     window_query: Query<Entity, With<PrimaryWindow>>,
     winit_windows: NonSend<WinitWindows>,
+    egui_context_query: Query<&EguiContext, With<PrimaryWindow>>,
 ) {
+    let Ok(egui_context) = egui_context_query.get_single() else {
+        return;
+    };
+    let hovering_over_egui = egui_context.clone().get_mut().is_pointer_over_area();
     for action_state in tool_query.iter() {
         if action_state.just_pressed(WindowDragToolAction::Drag) {
+            if hovering_over_egui {
+                continue;
+            }
             let window_id = window_query.get_single().expect("Need a single window");
             if let Some(winit_window) = winit_windows.get_window(window_id) {
                 // winit_window.window_state_lock

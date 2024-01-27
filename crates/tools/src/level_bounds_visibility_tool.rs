@@ -1,20 +1,20 @@
 use crate::prelude::*;
 use bevy::prelude::*;
+use cursor_hero_level_bounds::level_bounds_plugin::LevelBounds;
 use cursor_hero_toolbelt::types::*;
-use cursor_hero_winutils::ui_automation::get_taskbar;
 
-pub struct ObservationToolPlugin;
+pub struct LevelBoundsVisibilityToolPlugin;
 
-impl Plugin for ObservationToolPlugin {
+impl Plugin for LevelBoundsVisibilityToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<ObservationTool>()
+        app.register_type::<LevelBoundsVisibilityTool>()
             .add_systems(Update, toolbelt_events)
             .add_systems(Update, tick);
     }
 }
 
 #[derive(Component, Reflect, Default)]
-struct ObservationTool;
+struct LevelBoundsVisibilityTool;
 
 fn toolbelt_events(
     mut commands: Commands,
@@ -23,14 +23,14 @@ fn toolbelt_events(
 ) {
     for event in reader.read() {
         if let PopulateToolbeltEvent::Inspector { toolbelt_id } = event {
-            ToolSpawnConfig::<ObservationTool, NoInputs>::new(
-                ObservationTool,
+            ToolSpawnConfig::<LevelBoundsVisibilityTool, NoInputs>::new(
+                LevelBoundsVisibilityTool,
                 *toolbelt_id,
                 event,
             )
             .guess_name(file!())
             .guess_image(file!(), &asset_server)
-            .with_description("Logs information about the environment to the console.")
+            .with_description("Shows the play area.")
             .with_starting_state(StartingState::Inactive)
             .spawn(&mut commands);
         }
@@ -39,14 +39,17 @@ fn toolbelt_events(
 
 fn tick(
     mut commands: Commands,
-    tool_query: Query<Entity, (Added<ActiveTool>, With<ObservationTool>)>,
+    tool_query: Query<Entity, (Added<ActiveTool>, With<LevelBoundsVisibilityTool>)>,
+    mut level_bounds_query: Query<&mut Visibility, With<LevelBounds>>,
 ) {
     for tool_id in tool_query.iter() {
         commands.entity(tool_id).remove::<ActiveTool>();
-        let Ok(taskbar) = get_taskbar() else {
-            warn!("Failed to get taskbar");
-            continue;
-        };
-        info!("Taskbar entries: {:?}", &taskbar.entries);
+        for mut visibility in level_bounds_query.iter_mut() {
+            *visibility = match *visibility {
+                Visibility::Visible => Visibility::Hidden,
+                Visibility::Hidden => Visibility::Visible,
+                Visibility::Inherited => Visibility::Visible,
+            };
+        }
     }
 }

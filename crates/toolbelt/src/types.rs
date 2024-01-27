@@ -64,7 +64,7 @@ impl Default for ToolbeltBundle {
 }
 
 #[derive(Event, Debug, Reflect, Clone, Copy)]
-pub enum ToolbeltPopulateEvent {
+pub enum PopulateToolbeltEvent {
     Default { toolbelt_id: Entity },
     Inspector { toolbelt_id: Entity },
     Taskbar { toolbelt_id: Entity },
@@ -134,7 +134,7 @@ pub struct Tool {
 pub struct ToolHelpTrigger;
 
 pub trait ToolAction: Actionlike {
-    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<Self>>;
+    fn default_input_map(_event: &PopulateToolbeltEvent) -> Option<InputMap<Self>>;
     fn with_defaults<G, K>(gamepad: G, keyboard: K) -> InputMap<Self>
     where
         G: Fn(&Self) -> UserInput,

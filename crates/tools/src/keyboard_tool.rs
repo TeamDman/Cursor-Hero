@@ -21,10 +21,10 @@ struct KeyboardTool;
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<ToolbeltPopulateEvent>,
+    mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let ToolbeltPopulateEvent::Keyboard { toolbelt_id } = event {
+        if let PopulateToolbeltEvent::Keyboard { toolbelt_id } = event {
             ToolSpawnConfig::<KeyboardTool, KeyboardToolAction>::new(
                 KeyboardTool,
                 *toolbelt_id,
@@ -110,7 +110,7 @@ impl KeyboardToolAction {
 }
 
 impl ToolAction for KeyboardToolAction {
-    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<KeyboardToolAction>> {
+    fn default_input_map(_event: &PopulateToolbeltEvent) -> Option<InputMap<KeyboardToolAction>> {
         let mut input_map = InputMap::default();
 
         for variant in KeyboardToolAction::variants() {
@@ -138,25 +138,27 @@ fn handle_input(tool_query: Query<&ActionState<KeyboardToolAction>, With<ActiveT
         for variant in KeyboardToolAction::variants() {
             if tool_actions.just_pressed(variant) {
                 info!("{:?} key down (scan: {:?})", variant, scan);
-                enigo.key_down_scan(variant.to_enigo(), scan);
+                enigo.key_down(variant.to_enigo());
+                // TODO: fix enigo not sending shift status when sending arrow keys; selection isn't working
+                // enigo.key_down_scan(variant.to_enigo(), scan);
             }
             if tool_actions.just_released(variant) {
                 info!("{:?} key up (scan: {:?})", variant, scan);
-                enigo.key_up_scan(variant.to_enigo(), scan);
+                enigo.key_up(variant.to_enigo());
+                // enigo.key_up_scan(variant.to_enigo(), scan);
             }
         }
     }
 }
-
 
 #[cfg(test)]
 mod tests {
     // test that sending shift + arrow keys is highlighting text
     #[test]
     fn test_shift_arrow() {
+        use enigo::*;
         use std::thread::sleep;
         use std::time::Duration;
-        use enigo::*;
         let mut enigo = Enigo::new();
         sleep(Duration::from_secs(3));
         enigo.key_down(Key::Shift);

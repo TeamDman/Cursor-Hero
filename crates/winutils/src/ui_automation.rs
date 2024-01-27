@@ -6,8 +6,7 @@ use uiautomation::types::Point;
 use uiautomation::types::UIProperty;
 use uiautomation::variants::Variant;
 use uiautomation::UIAutomation;
-
-use crate::win_window::ToBevyRect;
+use crate::ToBevyIRect;
 
 pub struct Taskbar {
     pub entries: Vec<TaskbarEntry>,
@@ -55,14 +54,14 @@ pub fn get_taskbar() -> Result<Taskbar, uiautomation::Error> {
             bounds: entry
                 .get_bounding_rectangle()
                 .unwrap_or_default()
-                .to_bevy_rect(),
+                .to_bevy_irect(),
         })
         .collect();
     Ok(Taskbar { entries })
 }
 
-impl ToBevyRect for uiautomation::types::Rect {
-    fn to_bevy_rect(&self) -> IRect {
+impl ToBevyIRect for uiautomation::types::Rect {
+    fn to_bevy_irect(&self) -> IRect {
         IRect {
             min: IVec2::new(self.get_left(), self.get_top()),
             max: IVec2::new(self.get_right(), self.get_bottom()),

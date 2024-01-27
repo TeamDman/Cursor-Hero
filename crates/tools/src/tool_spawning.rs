@@ -9,7 +9,7 @@ use leafwing_input_manager::prelude::*;
 pub enum NoInputs {}
 
 impl ToolAction for NoInputs {
-    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<Self>> {
+    fn default_input_map(_event: &PopulateToolbeltEvent) -> Option<InputMap<Self>> {
         None
     }
 }
@@ -20,7 +20,7 @@ where
     Action: ToolAction + Actionlike,
 {
     tag: T,
-    event: ToolbeltPopulateEvent,
+    event: PopulateToolbeltEvent,
     name: String,
     description: String,
     display_actions: HashMap<String, Vec<UserInput>>,
@@ -36,7 +36,7 @@ where
     T: Component,
     Action: ToolAction + Actionlike + core::fmt::Debug,
 {
-    pub fn new(tag: T, toolbelt_id: Entity, event: &ToolbeltPopulateEvent) -> Self {
+    pub fn new(tag: T, toolbelt_id: Entity, event: &PopulateToolbeltEvent) -> Self {
         let input_map = Action::default_input_map(event);
         let display_actions = match input_map {
             None => HashMap::new(),
@@ -178,7 +178,7 @@ where
 
 fn spawn_tool_impl(
     tool: Tool,
-    event: &ToolbeltPopulateEvent,
+    event: &PopulateToolbeltEvent,
     commands: &mut Commands,
     toolbelt_id: Entity,
     _asset_server: &Res<AssetServer>,
@@ -220,7 +220,7 @@ fn spawn_tool_impl(
 
 pub fn spawn_action_tool<T>(
     tool: Tool,
-    event: &ToolbeltPopulateEvent,
+    event: &PopulateToolbeltEvent,
     commands: &mut Commands,
     toolbelt_id: Entity,
     _character_id: Entity,
@@ -257,7 +257,7 @@ pub enum StartingState {
 
 pub fn spawn_tool(
     tool: Tool,
-    event: &ToolbeltPopulateEvent,
+    event: &PopulateToolbeltEvent,
     commands: &mut Commands,
     toolbelt_id: Entity,
     _character_id: Entity,

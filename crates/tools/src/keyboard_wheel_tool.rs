@@ -18,10 +18,10 @@ struct KeyboardWheelTool;
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<ToolbeltPopulateEvent>,
+    mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let ToolbeltPopulateEvent::Default { toolbelt_id } = event {
+        if let PopulateToolbeltEvent::Default { toolbelt_id } = event {
             ToolSpawnConfig::<KeyboardWheelTool, NoInputs>::new(
                 KeyboardWheelTool,
                 *toolbelt_id,
@@ -39,13 +39,13 @@ fn toolbelt_events(
 fn tick(
     mut commands: Commands,
     tool_query: Query<&Parent, (Added<ActiveTool>, With<KeyboardWheelTool>)>,
-    mut toolbelt_events: EventWriter<ToolbeltPopulateEvent>,
+    mut toolbelt_events: EventWriter<PopulateToolbeltEvent>,
 ) {
     for toolbelt_id in tool_query.iter() {
         info!("Switching toolbelt {:?} to keyboard tools", toolbelt_id);
         let toolbelt_id = toolbelt_id.get();
         commands.entity(toolbelt_id).despawn_descendants();
-        toolbelt_events.send(ToolbeltPopulateEvent::Keyboard {
+        toolbelt_events.send(PopulateToolbeltEvent::Keyboard {
             toolbelt_id: toolbelt_id,
         });
     }

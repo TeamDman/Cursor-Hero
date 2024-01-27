@@ -35,13 +35,13 @@ struct ClickTool;
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<ToolbeltPopulateEvent>,
+    mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let ToolbeltPopulateEvent::Default {
+        if let PopulateToolbeltEvent::Default {
             toolbelt_id,
         }
-        | ToolbeltPopulateEvent::Keyboard {
+        | PopulateToolbeltEvent::Keyboard {
             toolbelt_id,
         } = event
         {
@@ -107,13 +107,13 @@ impl ClickToolAction {
 }
 
 impl ToolAction for ClickToolAction {
-    fn default_input_map(event: &ToolbeltPopulateEvent) -> Option<InputMap<ClickToolAction>> {
+    fn default_input_map(event: &PopulateToolbeltEvent) -> Option<InputMap<ClickToolAction>> {
         match event {
-            ToolbeltPopulateEvent::Default { .. } => Some(Self::with_defaults(
+            PopulateToolbeltEvent::Default { .. } => Some(Self::with_defaults(
                 Self::default_wheel_gamepad_binding,
                 Self::default_wheel_keyboard_binding,
             )),
-            ToolbeltPopulateEvent::Keyboard { .. } => Some(Self::with_defaults(
+            PopulateToolbeltEvent::Keyboard { .. } => Some(Self::with_defaults(
                 Self::keyboard_wheel_gamepad_binding,
                 Self::keyboard_wheel_keyboard_binding,
             )),

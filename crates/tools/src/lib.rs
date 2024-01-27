@@ -18,6 +18,7 @@ pub mod window_drag_tool;
 pub mod zoom_tool;
 pub mod observation_tool;
 pub mod hello_tool;
+pub mod level_bounds_visibility_tool;
 
 pub use crate::tool_plugin::ToolPlugin;
 
