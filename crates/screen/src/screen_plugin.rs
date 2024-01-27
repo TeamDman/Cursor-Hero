@@ -1,7 +1,8 @@
 use bevy::prelude::*;
-use cursor_hero_bevy::{IExpandable, NegativeYIRect};
-use cursor_hero_environment::environment_plugin::PopulateEnvironmentEvent;
+use cursor_hero_bevy::IExpandable;
+use cursor_hero_bevy::NegativeYIRect;
 use cursor_hero_bevy::NegativeYIVec2;
+use cursor_hero_environment::environment_plugin::PopulateEnvironmentEvent;
 use cursor_hero_level_bounds::level_bounds_plugin::LevelBoundsEvent;
 use cursor_hero_winutils::win_screen_capture::get_all_monitors;
 use image::DynamicImage;
@@ -24,7 +25,7 @@ impl Plugin for ScreenPlugin {
 pub struct Screen {
     pub id: u32,
     pub name: String,
-    pub refresh_rate: Timer,
+    pub refresh_rate: Option<Timer>,
 }
 
 #[derive(Component, Reflect)]
@@ -76,7 +77,7 @@ fn spawn_screens_in_new_environments(
                                 Screen {
                                     name: name.clone(),
                                     id: screen.display_info.id,
-                                    refresh_rate: Timer::from_seconds(0.1, TimerMode::Repeating),
+                                    refresh_rate: Some(Timer::from_seconds(0.1, TimerMode::Repeating)),
                                 },
                                 Name::new(format!("Screen {}", name)),
                             ));
@@ -93,7 +94,51 @@ fn spawn_screens_in_new_environments(
                     }
                 });
             }
-            _ => {}
+            PopulateEnvironmentEvent::Game { environment_id } => {
+                commands.entity(*environment_id).with_children(|parent| {
+                    info!("Populating game environment with screens");
+                    let mut screen_parent_commands = parent.spawn((
+                        SpatialBundle::default(),
+                        ScreenParent,
+                        Name::new("Screens"),
+                    ));
+
+                    let mut level_bounds = vec![];
+
+                    screen_parent_commands.with_children(|screen_parent| {
+                        let region =
+                            IRect::from_corners(IVec2::new(0, 0), IVec2::new(1920, 1080)).neg_y();
+                        let name = "Game Screen".to_string();
+                        screen_parent.spawn((
+                            SpriteBundle {
+                                sprite: Sprite {
+                                    custom_size: Some(region.size().as_vec2()),
+                                    ..default()
+                                },
+                                transform: Transform::from_translation(
+                                    region.center().extend(-1).as_vec3(),
+                                ),
+                                ..Default::default()
+                            },
+                            Screen {
+                                name: name.to_string(),
+                                id: 1,
+                                refresh_rate: None,
+                            },
+                            Name::new(format!("Screen {}", name)),
+                        ));
+
+                        level_bounds.push(region.expand((400, 400).into()));
+                    });
+                    info!("Broadcasting {} level bounds events", level_bounds.len());
+                    for area in level_bounds {
+                        level_bounds_events.send(LevelBoundsEvent::AddPlayArea {
+                            environment_id: *environment_id,
+                            area: area.as_rect(),
+                        });
+                    }
+                });
+            }
         }
     }
 }

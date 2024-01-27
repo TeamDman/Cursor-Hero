@@ -105,10 +105,15 @@ fn update_screens(
 
     let monitor_frames = frames.frames.lock().unwrap();
     for (mut screen, texture) in &mut query {
-        // tick the refresh rate timer
-        screen.refresh_rate.tick(time.delta());
-        // skip if not time to refresh
-        if !screen.refresh_rate.finished() {
+        if let Some(refresh_rate) = screen.refresh_rate.as_mut() {
+            // tick the refresh rate timer
+            refresh_rate.tick(time.delta());
+            // skip if not time to refresh
+            if !refresh_rate.finished() {
+                continue;
+            }
+        } else {
+            // skip if no refresh rate
             continue;
         }
 

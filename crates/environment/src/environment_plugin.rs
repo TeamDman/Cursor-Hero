@@ -8,6 +8,7 @@ impl Plugin for EnvironmentPlugin {
             .add_event::<CreateEnvironmentEvent>()
             .add_event::<PopulateEnvironmentEvent>()
             .add_systems(Startup, send_create_host_event)
+            .add_systems(Startup, send_create_game_event)
             .add_systems(Update, handle_create_events);
     }
 }
@@ -31,6 +32,13 @@ fn send_create_host_event(mut events: EventWriter<CreateEnvironmentEvent>) {
     events.send(CreateEnvironmentEvent::Host {
         origin: Vec2::new(0.0, 0.0),
         name: "Host Environment".to_string(),
+    });
+}
+
+fn send_create_game_event(mut events: EventWriter<CreateEnvironmentEvent>) {
+    events.send(CreateEnvironmentEvent::Game {
+        origin: Vec2::new(0.0, -3000.0),
+        name: "Game Environment".to_string(),
     });
 }
 
