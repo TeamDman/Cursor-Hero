@@ -89,13 +89,23 @@ pub fn update_camera_zoom(
     }
 }
 
-fn handle_events(mut commands: Commands, mut camera_events: EventReader<CameraEvent>) {
+fn handle_events(
+    mut commands: Commands,
+    mut camera_events: EventReader<CameraEvent>,
+    character_query: Query<&GlobalTransform, Without<MainCamera>>,
+    mut camera_query: Query<&mut Transform, With<MainCamera>>,
+) {
     for event in camera_events.read() {
         match event {
             CameraEvent::BeginFollowing { target_id } => {
                 info!("Camera following character '{:?}'", target_id);
                 // tag character to mark it as being followed
                 commands.entity(*target_id).insert(FollowWithMainCamera);
+                if let Ok(mut camera_transform) = camera_query.get_single_mut()
+                    && let Ok(character_transform) = character_query.get_single()
+                {
+                    camera_transform.translation = character_transform.translation();
+                }
             }
             CameraEvent::StopFollowing { target_id } => {
                 info!("Camera stopped following character '{:?}'", target_id);

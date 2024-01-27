@@ -48,6 +48,9 @@ fn toolbelt_events(
         }
         | ToolbeltPopulateEvent::Inspector {
             toolbelt_id,
+        }
+        | ToolbeltPopulateEvent::Keyboard {
+            toolbelt_id,
         } = event
         {
             ToolSpawnConfig::<CursorTool, NoInputs>::new(CursorTool, *toolbelt_id, event)

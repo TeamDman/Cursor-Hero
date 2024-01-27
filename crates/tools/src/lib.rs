@@ -16,6 +16,8 @@ pub mod tool_plugin;
 pub mod tool_spawning;
 pub mod window_drag_tool;
 pub mod zoom_tool;
+pub mod observation_tool;
+pub mod hello_tool;
 
 pub use crate::tool_plugin::ToolPlugin;
 

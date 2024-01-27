@@ -1,3 +1,7 @@
+- post to openai discord use-cases channel https://discord.com/channels/974519864045756446/1155775326253756456
+  - tag @abdubs (Alex)
+- give the character eyes
+- 
 - window switcher tool; window wheel -> focus, teleport
 
 - Github releases in world

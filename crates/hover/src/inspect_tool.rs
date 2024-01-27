@@ -124,6 +124,10 @@ fn process_thread_message(
             let elem = find_element_at(x, y)?;
             info!("{} - {}", elem.get_classname()?, elem.get_name()?);
 
+            // Can we click on elements with this?
+            // elem.send_keys(keys, interval) exists!
+
+            // Send the info
             let id = elem.get_automation_id()?;
             info!("Automation ID: {}", id);
             let info = get_element_info(elem)?;
