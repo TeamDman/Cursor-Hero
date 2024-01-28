@@ -1,3 +1,4 @@
+- set clippy rule to flag unwrap calls
 - post to openai discord use-cases channel https://discord.com/channels/974519864045756446/1155775326253756456
   - tag @abdubs (Alex)
 - give the character eyes

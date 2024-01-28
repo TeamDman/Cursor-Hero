@@ -107,7 +107,13 @@ fn spawn_worker_thread(mut commands: Commands) {
     let (tx, rx) = bounded::<_>(10);
     commands.insert_resource(Bridge { sender: tx });
     thread::spawn(move || loop {
-        let action = rx.recv().unwrap();
+        let action = match rx.recv() {
+            Ok(action) => action,
+            Err(e) => {
+                error!("Failed to receive thread message, exiting: {:?}", e);
+                break;
+            }
+        };
         debug!("Worker received thread message: {:?}", action);
         match match action {
             ThreadMessage::ListenButton(Motion::Down) => press_f23_key(),

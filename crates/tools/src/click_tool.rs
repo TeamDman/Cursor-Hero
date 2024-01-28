@@ -151,7 +151,13 @@ fn spawn_worker_thread(mut commands: Commands) {
     let (tx, rx) = bounded::<_>(10);
     commands.insert_resource(ClickBridge { sender: tx });
     thread::spawn(move || loop {
-        let (action, x, y) = rx.recv().unwrap();
+        let (action, x, y) = match rx.recv() {
+            Ok(v) => v,
+            Err(e) => {
+                error!("Failed to receive thread message, exiting: {:?}", e);
+                break;
+            }
+        };
         debug!("Worker received click: {:?} {} {}", action, x, y);
         match match action {
             ClickThreadMessage::LeftMouse(Motion::Down) => left_mouse_down(),

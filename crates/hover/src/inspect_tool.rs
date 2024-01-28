@@ -148,7 +148,13 @@ fn spawn_worker_thread(mut commands: Commands) {
         receiver: reply_rx,
     });
     thread::spawn(move || loop {
-        let action = rx.recv().unwrap();
+        let action = match rx.recv() {
+            Ok(action) => action,
+            Err(e) => {
+                error!("Failed to receive thread message, exiting: {:?}", e);
+                break;
+            }
+        };
         if let Err(e) = process_thread_message(action, &reply_tx) {
             error!("Failed to process thread message: {:?}", e);
         }

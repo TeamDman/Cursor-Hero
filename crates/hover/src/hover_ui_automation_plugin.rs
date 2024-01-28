@@ -151,7 +151,13 @@ fn setup(mut commands: Commands) {
             let automation = UIAutomation::new().unwrap();
             loop {
                 // Block until at least one message is available
-                let mut msg = thread_rx.recv().unwrap();
+                let mut msg = match thread_rx.recv() {
+                    Ok(msg) => msg,
+                    Err(e) => {
+                        error!("Failed to receive thread message, exiting: {:?}", e);
+                        break;
+                    }
+                };
 
                 // Check for and use the latest message available
                 while let Ok(newer_msg) = thread_rx.try_recv() {
