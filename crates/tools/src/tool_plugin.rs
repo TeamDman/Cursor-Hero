@@ -15,7 +15,7 @@ use crate::observation_tool::ObservationToolPlugin;
 use crate::restart_tool::RestartToolPlugin;
 use crate::sprint_tool::SprintToolPlugin;
 use crate::talk_tool::TalkToolPlugin;
-use crate::window_drag_tool::WindowDragToolPlugin;
+// use crate::window_drag_tool::WindowDragToolPlugin;
 use crate::zoom_tool::ZoomToolPlugin;
 
 pub struct ToolPlugin;
@@ -30,7 +30,7 @@ impl Plugin for ToolPlugin {
         app.add_plugins(FocusToolPlugin);
         app.add_plugins(SprintToolPlugin);
         app.add_plugins(DefaultWheelToolPlugin);
-        app.add_plugins(WindowDragToolPlugin);
+        // app.add_plugins(WindowDragToolPlugin);
         app.add_plugins(KeyboardToolPlugin);
         app.add_plugins(KeyboardWheelToolPlugin);
         app.add_plugins(HelloToolPlugin);

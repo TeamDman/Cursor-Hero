@@ -2,6 +2,8 @@ use bevy::prelude::*;
 use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
 use bevy_xpbd_2d::components::Sensor;
+use cursor_hero_pointer::pointer_click_plugin::ClickEvent;
+use cursor_hero_pointer::pointer_click_plugin::Clickable;
 use cursor_hero_pointer::pointer_hover_plugin::Hoverable;
 
 use crate::game_screen_taskbar_plugin::Taskbar;
@@ -10,14 +12,14 @@ pub struct StartMenuButtonPlugin;
 
 impl Plugin for StartMenuButtonPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<StartMenuButton>()
-            .add_systems(Update, add_start_menu_button_to_new_taskbars);
+        app.register_type::<StartMenuButton>();
+        app.add_systems(Update, add_start_menu_button_to_new_taskbars);
+        app.add_systems(Update, click_listener);
     }
 }
 
 #[derive(Component, Debug, Reflect)]
 pub struct StartMenuButton;
-
 
 fn add_start_menu_button_to_new_taskbars(
     asset_server: Res<AssetServer>,
@@ -50,8 +52,16 @@ fn add_start_menu_button_to_new_taskbars(
                 Name::new("Start Menu Button"),
                 StartMenuButton,
                 Hoverable,
+                Clickable,
             ));
         });
     }
 }
 
+fn click_listener(
+    mut click_events: EventReader<ClickEvent>,
+) {
+    for event in click_events.read() {
+        debug!("Click event: {:?}", event);
+    }
+}

@@ -1931,6 +1931,7 @@ dependencies = [
  "cursor_hero_camera",
  "cursor_hero_character",
  "cursor_hero_input",
+ "cursor_hero_winutils",
  "leafwing-input-manager",
 ]
 

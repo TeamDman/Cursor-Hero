@@ -96,10 +96,12 @@ pub fn press_detection(
 
         // for each element the pointer is touching
         for touching_id in pointer_touching.iter() {
+            debug!("Pointer {:?} touching {:?}", pointer_id, touching_id);
             // ensure it is a clickable element
             let Ok((target_id, target_visible, target_pressed)) =
                 target_query.get_mut(*touching_id)
             else {
+                debug!("Target {:?} not valid", touching_id);
                 continue;
             };
             // ensure the element is visible
@@ -275,8 +277,8 @@ fn release_detection(
                 }
             }
             None => {
-                warn!(
-                    "Pointer {:?} didn't know it was pressing anything",
+                debug!(
+                    "Pointer {:?} wasn't pressing anything",
                     pointer_id
                 );
             }

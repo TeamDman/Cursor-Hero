@@ -9,6 +9,7 @@ edition = "2021"
 cursor_hero_character = { workspace = true }
 cursor_hero_camera = { workspace = true }
 cursor_hero_input = { workspace = true }
+cursor_hero_winutils = { workspace = true }
 bevy = { workspace = true }
 leafwing-input-manager = { workspace = true }
 bevy_xpbd_2d = { workspace = true }
