@@ -20,9 +20,8 @@ use cursor_hero_physics::damping_plugin::DampingPlugin;
 use cursor_hero_physics::physics_plugin::PhysicsPlugin;
 use cursor_hero_pointer::pointer_plugin::PointerPlugin;
 use cursor_hero_pressure_plate::pressure_plate_plugin::PressurePlatePlugin;
-use cursor_hero_restart_memory::main_character_memory_plugin::MainCharacterMemoryPlugin;
+use cursor_hero_restart_memory::MemoryPlugin;
 #[cfg(debug_assertions)]
-use cursor_hero_restart_memory::primary_window_memory_plugin::PrimaryWindowMemoryPlugin;
 use cursor_hero_screen::screen_plugin::ScreenPlugin;
 use cursor_hero_screen::screen_update_plugin::ScreenUpdatePlugin;
 use cursor_hero_taskbar::taskbar_plugin::TaskbarPlugin;
@@ -69,10 +68,6 @@ impl Plugin for MyPlugin {
         //app.add_plugins(ClickDragMovementPlugin);
         //app.add_plugins(HoverShowerRelayPlugin);
         //app.add_plugins(HoverShowerServicePlugin);
-
-        #[cfg(debug_assertions)]
-        app.add_plugins(PrimaryWindowMemoryPlugin);
-        #[cfg(debug_assertions)]
-        app.add_plugins(MainCharacterMemoryPlugin);
+        app.add_plugins(MemoryPlugin);
     }
 }

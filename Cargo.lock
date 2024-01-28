@@ -1949,6 +1949,7 @@ name = "cursor_hero_restart_memory"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "cursor_hero_camera",
  "cursor_hero_character",
  "cursor_hero_winutils",
  "raw-window-handle",

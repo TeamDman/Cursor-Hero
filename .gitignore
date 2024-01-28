@@ -1,3 +1,2 @@
 /target/
-main_character.json
-primary_window.json
+crates/restart_memory/src/*.json

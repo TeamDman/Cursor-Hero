@@ -1,7 +1,8 @@
 #![feature(stmt_expr_attributes)]
 
-pub mod main_character_memory_plugin;
-pub mod primary_window_memory_plugin;
+mod main_camera_memory_plugin;
+mod main_character_memory_plugin;
+mod primary_window_memory_plugin;
 
 use std::fs::File;
 use std::fs::OpenOptions;
@@ -9,6 +10,20 @@ use std::io::Read;
 use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
+
+use bevy::prelude::*;
+
+pub struct MemoryPlugin;
+
+impl Plugin for MemoryPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_plugins((
+            main_character_memory_plugin::MainCharacterMemoryPlugin,
+            primary_window_memory_plugin::PrimaryWindowMemoryPlugin,
+            main_camera_memory_plugin::MainCameraMemoryPlugin,
+        ));
+    }
+}
 
 #[derive(Debug)]
 enum PersistError {
