@@ -60,10 +60,10 @@ impl CubeToolAction {
 
     fn default_mkb_binding(&self) -> UserInput {
         match self {
-            Self::Spawn => KeyCode::ControlLeft.into(),
-            Self::Remove => KeyCode::ControlRight.into(),
-            Self::Attract => KeyCode::AltRight.into(),
-            Self::KillAll => KeyCode::Delete.into(),
+            Self::Spawn => KeyCode::Q.into(),
+            Self::Remove => KeyCode::R.into(),
+            Self::Attract => KeyCode::F.into(),
+            Self::KillAll => KeyCode::X.into(),
         }
     }
 }
