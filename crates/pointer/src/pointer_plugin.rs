@@ -12,7 +12,6 @@ use leafwing_input_manager::user_input::InputKind;
 use bevy_inspector_egui::prelude::ReflectInspectorOptions;
 use bevy_inspector_egui::InspectorOptions;
 use cursor_hero_character::character_plugin::Character;
-use cursor_hero_character::character_plugin::CharacterAppearance;
 
 pub struct PointerPlugin;
 #[derive(SystemSet, Clone, Hash, Debug, PartialEq, Eq)]

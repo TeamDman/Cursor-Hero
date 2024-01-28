@@ -27,15 +27,16 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Default {
-            toolbelt_id,
-        } = event
-        {
-            ToolSpawnConfig::<WindowDragTool, WindowDragToolAction>::new(WindowDragTool, *toolbelt_id, event)
-                .guess_name(file!())
-                .guess_image(file!(), &asset_server)
-                .with_description("Drag the window from its body")
-                .spawn(&mut commands);
+        if let PopulateToolbeltEvent::Default { toolbelt_id } = event {
+            ToolSpawnConfig::<WindowDragTool, WindowDragToolAction>::new(
+                WindowDragTool,
+                *toolbelt_id,
+                event,
+            )
+            .guess_name(file!())
+            .guess_image(file!(), &asset_server)
+            .with_description("Drag the window from its body")
+            .spawn(&mut commands);
         }
     }
 }

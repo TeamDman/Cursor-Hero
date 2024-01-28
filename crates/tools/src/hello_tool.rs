@@ -22,24 +22,17 @@ fn toolbelt_events(
 ) {
     for event in reader.read() {
         if let PopulateToolbeltEvent::Inspector { toolbelt_id } = event {
-            ToolSpawnConfig::<HelloTool, NoInputs>::new(
-                HelloTool,
-                *toolbelt_id,
-                event,
-            )
-            .guess_name(file!())
-            .guess_image(file!(), &asset_server)
-            .with_description("Prints hello.")
-            .with_starting_state(StartingState::Inactive)
-            .spawn(&mut commands);
+            ToolSpawnConfig::<HelloTool, NoInputs>::new(HelloTool, *toolbelt_id, event)
+                .guess_name(file!())
+                .guess_image(file!(), &asset_server)
+                .with_description("Prints hello.")
+                .with_starting_state(StartingState::Inactive)
+                .spawn(&mut commands);
         }
     }
 }
 
-fn tick(
-    mut commands: Commands,
-    tool_query: Query<Entity, (Added<ActiveTool>, With<HelloTool>)>,
-) {
+fn tick(mut commands: Commands, tool_query: Query<Entity, (Added<ActiveTool>, With<HelloTool>)>) {
     for tool_id in tool_query.iter() {
         commands.entity(tool_id).remove::<ActiveTool>();
         info!("Hello, world!");

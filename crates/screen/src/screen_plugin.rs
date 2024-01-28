@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use cursor_hero_bevy::IExpandable;
 use cursor_hero_bevy::NegativeYIRect;
-use cursor_hero_bevy::NegativeYIVec2;
 use cursor_hero_environment::environment_plugin::PopulateEnvironmentEvent;
 use cursor_hero_level_bounds::level_bounds_plugin::LevelBoundsEvent;
 use cursor_hero_winutils::win_screen_capture::get_all_monitors;
@@ -77,7 +76,10 @@ fn spawn_screens_in_new_environments(
                                 Screen {
                                     name: name.clone(),
                                     id: screen.display_info.id,
-                                    refresh_rate: Some(Timer::from_seconds(0.1, TimerMode::Repeating)),
+                                    refresh_rate: Some(Timer::from_seconds(
+                                        0.1,
+                                        TimerMode::Repeating,
+                                    )),
                                 },
                                 Name::new(format!("Screen {}", name)),
                             ));

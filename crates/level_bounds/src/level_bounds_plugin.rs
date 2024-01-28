@@ -84,7 +84,7 @@ fn handle_populate_environment_events(
 
 pub fn handle_level_bounds_events(
     mut events: EventReader<LevelBoundsEvent>,
-    environment_query: Query<(&Name, &LevelBoundsParentRef), With<Environment>>,
+    environment_query: Query<&LevelBoundsParentRef, With<Environment>>,
     mut commands: Commands,
     mut deferred: Local<Vec<LevelBoundsEvent>>,
 ) {
@@ -100,9 +100,7 @@ pub fn handle_level_bounds_events(
                     area.size(),
                     environment_id
                 );
-                if let Ok((environment_name, level_bounds_parent_ref)) =
-                    environment_query.get(*environment_id)
-                {
+                if let Ok(level_bounds_parent_ref) = environment_query.get(*environment_id) {
                     commands
                         .entity(level_bounds_parent_ref.get())
                         .with_children(|parent| {
@@ -131,7 +129,7 @@ pub fn handle_level_bounds_events(
                         "Deferring level bounds event for environment {:?}",
                         environment_id
                     );
-                    new_deferred.push(event.clone());
+                    new_deferred.push(*event);
                 }
             }
         }

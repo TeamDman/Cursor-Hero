@@ -55,7 +55,7 @@ enum KeyboardToolAction {
 }
 
 impl KeyboardToolAction {
-    fn to_enigo(&self) -> Key {
+    fn to_enigo(self) -> Key {
         match self {
             Self::Ctrl => Key::Control,
             Self::Tab => Key::Tab,

@@ -30,10 +30,7 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Inspector {
-            toolbelt_id,
-        } = event
-        {
+        if let PopulateToolbeltEvent::Inspector { toolbelt_id } = event {
             ToolSpawnConfig::<CubeTool, CubeToolAction>::new(CubeTool, *toolbelt_id, event)
                 .guess_name(file!())
                 .guess_image(file!(), &asset_server)

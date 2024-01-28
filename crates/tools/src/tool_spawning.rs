@@ -1,9 +1,9 @@
-use std::path::Path;
 use bevy::prelude::*;
 use bevy::utils::HashMap;
 use bevy_xpbd_2d::prelude::*;
 use cursor_hero_toolbelt::types::*;
 use leafwing_input_manager::prelude::*;
+use std::path::Path;
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
 pub enum NoInputs {}
@@ -176,6 +176,7 @@ where
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn spawn_tool_impl(
     tool: Tool,
     event: &PopulateToolbeltEvent,
@@ -218,6 +219,7 @@ fn spawn_tool_impl(
     info!("{:?} => {:?}", event, tool_name);
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn spawn_action_tool<T>(
     tool: Tool,
     event: &PopulateToolbeltEvent,
@@ -255,6 +257,7 @@ pub enum StartingState {
     Inactive,
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn spawn_tool(
     tool: Tool,
     event: &PopulateToolbeltEvent,

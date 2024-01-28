@@ -23,16 +23,12 @@ fn toolbelt_events(
 ) {
     for event in reader.read() {
         if let PopulateToolbeltEvent::Inspector { toolbelt_id } = event {
-            ToolSpawnConfig::<ObservationTool, NoInputs>::new(
-                ObservationTool,
-                *toolbelt_id,
-                event,
-            )
-            .guess_name(file!())
-            .guess_image(file!(), &asset_server)
-            .with_description("Logs information about the environment to the console.")
-            .with_starting_state(StartingState::Inactive)
-            .spawn(&mut commands);
+            ToolSpawnConfig::<ObservationTool, NoInputs>::new(ObservationTool, *toolbelt_id, event)
+                .guess_name(file!())
+                .guess_image(file!(), &asset_server)
+                .with_description("Logs information about the environment to the console.")
+                .with_starting_state(StartingState::Inactive)
+                .spawn(&mut commands);
         }
     }
 }

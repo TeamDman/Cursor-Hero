@@ -42,32 +42,40 @@ fn send_create_game_event(mut events: EventWriter<CreateEnvironmentEvent>) {
     });
 }
 
-fn handle_create_events(mut commands: Commands, mut create_events: EventReader<CreateEnvironmentEvent>, mut populate_events: EventWriter<PopulateEnvironmentEvent>) {
+fn handle_create_events(
+    mut commands: Commands,
+    mut create_events: EventReader<CreateEnvironmentEvent>,
+    mut populate_events: EventWriter<PopulateEnvironmentEvent>,
+) {
     for event in create_events.read() {
         match event {
             CreateEnvironmentEvent::Host { origin, name } => {
                 info!("Creating host environment at {:?}", origin);
-                let environment_id = commands.spawn((
-                    SpatialBundle {
-                        transform: Transform::from_translation(origin.extend(0.0)),
-                        ..default()
-                    },
-                    Environment,
-                    Name::new(name.clone()),
-                )).id();
+                let environment_id = commands
+                    .spawn((
+                        SpatialBundle {
+                            transform: Transform::from_translation(origin.extend(0.0)),
+                            ..default()
+                        },
+                        Environment,
+                        Name::new(name.clone()),
+                    ))
+                    .id();
                 info!("Broadcasting environment population event");
                 populate_events.send(PopulateEnvironmentEvent::Host { environment_id })
             }
             CreateEnvironmentEvent::Game { origin, name } => {
                 info!("Creating game environment at {:?}", origin);
-                let environment_id = commands.spawn((
-                    SpatialBundle {
-                        transform: Transform::from_translation(origin.extend(0.0)),
-                        ..default()
-                    },
-                    Environment,
-                    Name::new(name.clone()),
-                )).id();
+                let environment_id = commands
+                    .spawn((
+                        SpatialBundle {
+                            transform: Transform::from_translation(origin.extend(0.0)),
+                            ..default()
+                        },
+                        Environment,
+                        Name::new(name.clone()),
+                    ))
+                    .id();
                 info!("Broadcasting environment population event");
                 populate_events.send(PopulateEnvironmentEvent::Game { environment_id })
             }

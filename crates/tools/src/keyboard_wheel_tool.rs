@@ -45,8 +45,6 @@ fn tick(
         info!("Switching toolbelt {:?} to keyboard tools", toolbelt_id);
         let toolbelt_id = toolbelt_id.get();
         commands.entity(toolbelt_id).despawn_descendants();
-        toolbelt_events.send(PopulateToolbeltEvent::Keyboard {
-            toolbelt_id: toolbelt_id,
-        });
+        toolbelt_events.send(PopulateToolbeltEvent::Keyboard { toolbelt_id });
     }
 }

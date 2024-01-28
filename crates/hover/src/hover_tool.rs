@@ -37,7 +37,7 @@ fn tick(
     tool_query: Query<Entity, (With<ActiveTool>, With<HoverTool>)>,
     mut hover_info: ResMut<HoverInfo>,
 ) {
-    if let Some(_) = tool_query.iter().next() {
+    if tool_query.iter().next().is_some() {
         if !hover_info.is_enabled() {
             info!("Enabling hover info");
             hover_info.set_enabled(true);

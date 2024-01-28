@@ -6,13 +6,6 @@ use bevy::window::PrimaryWindow;
 use bevy_egui::EguiContext;
 use bevy_xpbd_2d::prelude::*;
 use cursor_hero_physics::damping_plugin::MovementDamping;
-use leafwing_input_manager::action_state::ActionState;
-use leafwing_input_manager::input_map::InputMap;
-use leafwing_input_manager::plugin::InputManagerPlugin;
-use leafwing_input_manager::user_input::InputKind;
-use leafwing_input_manager::Actionlike;
-use leafwing_input_manager::InputManagerBundle;
-
 pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {

@@ -46,7 +46,9 @@ impl PlaceholderToolAction {
     }
 }
 impl ToolAction for PlaceholderToolAction {
-    fn default_input_map(_event: &PopulateToolbeltEvent) -> Option<InputMap<PlaceholderToolAction>> {
+    fn default_input_map(
+        _event: &PopulateToolbeltEvent,
+    ) -> Option<InputMap<PlaceholderToolAction>> {
         let mut input_map = InputMap::default();
 
         for variant in PlaceholderToolAction::variants() {
@@ -63,11 +65,9 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Default {
-            toolbelt_id,
-        } = event
-        {
-            for _ in 0..0 { // disabled for now
+        if let PopulateToolbeltEvent::Default { toolbelt_id } = event {
+            for _ in 0..1 {
+                // disabled for now
                 ToolSpawnConfig::<PlaceholderTool, PlaceholderToolAction>::new(
                     PlaceholderTool,
                     *toolbelt_id,

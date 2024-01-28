@@ -38,12 +38,8 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Default {
-            toolbelt_id,
-        }
-        | PopulateToolbeltEvent::Keyboard {
-            toolbelt_id,
-        } = event
+        if let PopulateToolbeltEvent::Default { toolbelt_id }
+        | PopulateToolbeltEvent::Keyboard { toolbelt_id } = event
         {
             ToolSpawnConfig::<ClickTool, ClickToolAction>::new(ClickTool, *toolbelt_id, event)
                 .guess_name(file!())

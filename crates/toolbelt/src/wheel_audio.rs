@@ -14,7 +14,10 @@ pub fn wheel_audio(
 ) {
     for event in toolbelt_events.read() {
         match event {
-            ToolbeltStateEvent::Opened { toolbelt_id, character_id: _ } => {
+            ToolbeltStateEvent::Opened {
+                toolbelt_id,
+                character_id: _,
+            } => {
                 let Ok(toolbelt_transform) = toolbelt_query.get(*toolbelt_id) else {
                     continue;
                 };
@@ -33,7 +36,10 @@ pub fn wheel_audio(
                     Name::new("opening sound"),
                 ));
             }
-            ToolbeltStateEvent::Closed { toolbelt_id, character_id: _ } => {
+            ToolbeltStateEvent::Closed {
+                toolbelt_id,
+                character_id: _,
+            } => {
                 let Ok(toolbelt_transform) = toolbelt_query.get(*toolbelt_id) else {
                     continue;
                 };

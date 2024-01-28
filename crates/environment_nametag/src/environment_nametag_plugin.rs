@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use bevy::render::primitives::Aabb;
 use bevy::utils::HashSet;
+use cursor_hero_bevy::AabbToRect;
 use cursor_hero_environment::environment_plugin::Environment;
 use cursor_hero_environment::environment_plugin::PopulateEnvironmentEvent;
 use cursor_hero_screen::screen_plugin::Screen;
@@ -107,28 +108,27 @@ fn handle_nametag_update_event(
     mut nametag_query: Query<(&mut Text, &mut Transform), With<Nametag>>,
 ) {
     for nametag_event in nametag_events.read() {
-        match nametag_event {
-            NametagEvent::Update {
-                environment_id,
-                name,
-            } => {
-                info!(
-                    "Updating nametag for environment {:?} to {}",
-                    environment_id, name
-                );
-                if let Ok(environment_children) = environment_query.get(*environment_id) {
-                    for child in environment_children.iter() {
-                        if let Ok((mut nametag_text, _)) = nametag_query.get_mut(*child) {
-                            nametag_text.sections[0].value = name.clone();
-                        }
+        if let NametagEvent::Update {
+            environment_id,
+            name,
+        } = nametag_event
+        {
+            info!(
+                "Updating nametag for environment {:?} to {}",
+                environment_id, name
+            );
+            if let Ok(environment_children) = environment_query.get(*environment_id) {
+                for child in environment_children.iter() {
+                    if let Ok((mut nametag_text, _)) = nametag_query.get_mut(*child) {
+                        nametag_text.sections[0].value = name.clone();
                     }
                 }
             }
-            _ => {}
         }
     }
 }
 
+#[allow(clippy::type_complexity)]
 fn handle_nametag_recalculate_position_event(
     mut nametag_events: EventReader<NametagEvent>,
     environment_query: Query<&Children, With<Environment>>,
@@ -138,69 +138,69 @@ fn handle_nametag_recalculate_position_event(
 ) {
     let mut debounce = HashSet::new();
     for nametag_event in nametag_events.read() {
-        match nametag_event {
-            NametagEvent::RecalculatePosition { environment_id } => {
-                if debounce.contains(environment_id) {
-                    debug!("Debounced recalculate position event for environment {:?}, skipping", environment_id);
-                    continue;
-                }
-                info!(
-                    "Recalculating nametag position for environment {:?}",
+        if let NametagEvent::RecalculatePosition { environment_id } = nametag_event {
+            if debounce.contains(environment_id) {
+                debug!(
+                    "Debounced recalculate position event for environment {:?}, skipping",
                     environment_id
                 );
-                debounce.insert(environment_id);
-                if let Ok(environment_children) = environment_query.get(*environment_id) {
-                    let mut max_extents = Rect::default();
-                    for environment_child_id in environment_children.iter() {
-                        // debug!(
-                        //     "Checking environment child {:?} for environment {:?}",
-                        //     environment_child_id, environment_id
-                        // );
-                        if let Ok(screen_parent_children) =
-                            screen_parent_query.get(*environment_child_id)
-                        {
-                            debug!(
-                                "Found screen parent children {:?} for environment {:?}",
-                                screen_parent_children, environment_id
-                            );
-                            for screen_id in screen_parent_children.iter() {
-                                if let Ok((screen_bounds, screen_transform)) =
-                                    screen_query.get(*screen_id)
-                                {
-                                    max_extents = max_extents.union(Rect::from_center_half_size(
-                                        screen_bounds.center.xy()
-                                            + screen_transform.translation.xy(),
-                                        screen_bounds.half_extents.xy(),
-                                    ));
-                                }
+                continue;
+            }
+            info!(
+                "Recalculating nametag position for environment {:?}",
+                environment_id
+            );
+            debounce.insert(environment_id);
+            if let Ok(environment_children) = environment_query.get(*environment_id) {
+                let mut max_extents = Rect::default();
+                for environment_child_id in environment_children.iter() {
+                    // debug!(
+                    //     "Checking environment child {:?} for environment {:?}",
+                    //     environment_child_id, environment_id
+                    // );
+                    if let Ok(screen_parent_children) =
+                        screen_parent_query.get(*environment_child_id)
+                    {
+                        debug!(
+                            "Found screen parent children {:?} for environment {:?}",
+                            screen_parent_children, environment_id
+                        );
+                        for screen_id in screen_parent_children.iter() {
+                            if let Ok((screen_bounds, screen_transform)) =
+                                screen_query.get(*screen_id)
+                            {
+                                max_extents =
+                                    max_extents
+                                        .union(screen_bounds.to_rect_with_offset(
+                                            screen_transform.translation.xy(),
+                                        ));
                             }
                         }
                     }
-                    if max_extents.is_empty() {
-                        warn!(
-                            "Max extents for environment {:?} was empty, skipping",
-                            environment_id
-                        );
-                        continue;
-                    }
-                    info!(
-                        "Max extents for environment {:?} is {:?}",
-                        environment_id, max_extents
-                    );
-                    for child in environment_children.iter() {
-                        if let Ok((_, mut nametag_transform)) = nametag_query.get_mut(*child) {
-                            nametag_transform.translation.x = max_extents.center().x;
-                            nametag_transform.translation.y = max_extents.max.y + 200.0;
-                        }
-                    }
-                } else {
+                }
+                if max_extents.is_empty() {
                     warn!(
-                        "Could not find environment children for environment {:?}",
+                        "Max extents for environment {:?} was empty, skipping",
                         environment_id
                     );
+                    continue;
                 }
+                info!(
+                    "Max extents for environment {:?} is {:?}",
+                    environment_id, max_extents
+                );
+                for child in environment_children.iter() {
+                    if let Ok((_, mut nametag_transform)) = nametag_query.get_mut(*child) {
+                        nametag_transform.translation.x = max_extents.center().x;
+                        nametag_transform.translation.y = max_extents.max.y + 200.0;
+                    }
+                }
+            } else {
+                warn!(
+                    "Could not find environment children for environment {:?}",
+                    environment_id
+                );
             }
-            _ => {}
         }
     }
 }

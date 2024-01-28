@@ -51,7 +51,7 @@ struct Bridge {
     pub receiver: Receiver<GameboundMessage>,
 }
 
-#[derive(Resource, Reflect)]
+#[derive(Resource, Reflect, Default)]
 pub struct HoverInfo {
     screen_element: Option<ElementInfo>,
     game_element: Option<ElementInfo>,
@@ -67,15 +67,6 @@ impl HoverInfo {
     }
     pub fn is_enabled(&self) -> bool {
         self.enabled
-    }
-}
-impl Default for HoverInfo {
-    fn default() -> Self {
-        Self {
-            screen_element: None,
-            game_element: None,
-            enabled: false,
-        }
     }
 }
 

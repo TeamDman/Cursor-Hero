@@ -1,6 +1,7 @@
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
-use image::{DynamicImage, RgbImage};
+use image::DynamicImage;
+use image::RgbImage;
 
 use crate::screen_plugin::Screen;
 

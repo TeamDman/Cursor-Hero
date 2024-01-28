@@ -29,18 +29,18 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Default {
-            toolbelt_id,
-        }
-        | PopulateToolbeltEvent::Inspector {
-            toolbelt_id,
-        } = event
+        if let PopulateToolbeltEvent::Default { toolbelt_id }
+        | PopulateToolbeltEvent::Inspector { toolbelt_id } = event
         {
-            ToolSpawnConfig::<RestartTool, RestartToolAction>::new(RestartTool, *toolbelt_id, event)
-                .guess_name(file!())
-                .guess_image(file!(), &asset_server)
-                .with_description("Send Ctrl+C, uparrow, enter")
-                .spawn(&mut commands);
+            ToolSpawnConfig::<RestartTool, RestartToolAction>::new(
+                RestartTool,
+                *toolbelt_id,
+                event,
+            )
+            .guess_name(file!())
+            .guess_image(file!(), &asset_server)
+            .with_description("Send Ctrl+C, uparrow, enter")
+            .spawn(&mut commands);
         }
     }
 }

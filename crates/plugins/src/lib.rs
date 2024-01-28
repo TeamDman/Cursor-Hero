@@ -12,6 +12,8 @@ use cursor_hero_input::InputPlugin;
 use cursor_hero_level_bounds::level_bounds_plugin::LevelBoundsPlugin;
 use cursor_hero_movement::MovementPlugin;
 // use cursor_hero_click_drag_character_movement::ClickDragMovementPlugin;
+use cursor_hero_environment::environment_plugin::EnvironmentPlugin;
+use cursor_hero_environment_nametag::environment_nametag_plugin::EnvironmentNametagPlugin;
 use cursor_hero_icon::IconPlugin;
 use cursor_hero_pause_tool::pause_tool_plugin::PauseToolPlugin;
 use cursor_hero_physics::damping_plugin::DampingPlugin;
@@ -22,18 +24,18 @@ use cursor_hero_pressure_plate::pressure_plate_plugin::PressurePlatePlugin;
 use cursor_hero_restart_memory::primary_window_memory_plugin::PrimaryWindowMemoryPlugin;
 use cursor_hero_screen::screen_plugin::ScreenPlugin;
 use cursor_hero_screen::screen_update_plugin::ScreenUpdatePlugin;
+use cursor_hero_taskbar::taskbar_plugin::TaskbarPlugin;
 use cursor_hero_toolbelt::toolbelt_plugin::ToolbeltPlugin;
 use cursor_hero_tools::ToolPlugin;
 use cursor_hero_ui::about_text_plugin::AboutTextPlugin;
 use cursor_hero_ui::fps_text_plugin::FpsTextPlugin;
 use cursor_hero_ui::position_text_plugin::PositionTextPlugin;
 use cursor_hero_wallpaper::wallpaper_plugin::WallpaperPlugin;
-use cursor_hero_environment::environment_plugin::EnvironmentPlugin;
-use cursor_hero_environment_nametag::environment_nametag_plugin::EnvironmentNametagPlugin;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(TaskbarPlugin);
         app.add_plugins(EnvironmentNametagPlugin);
         app.add_plugins(EnvironmentPlugin);
         app.add_plugins(WallpaperPlugin);
@@ -57,7 +59,7 @@ impl Plugin for MyPlugin {
         app.add_plugins(LevelBoundsPlugin);
         app.add_plugins(IconPlugin);
         app.add_plugins(PhysicsPlugin);
-        
+
         app.add_plugins(InspectToolPlugin);
         app.add_plugins(InspectWheelToolPlugin);
         app.add_plugins(HoverToolPlugin);

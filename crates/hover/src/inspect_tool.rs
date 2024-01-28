@@ -40,15 +40,16 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Inspector {
-            toolbelt_id,
-        } = event
-        {
-            ToolSpawnConfig::<InspectTool, InspectToolAction>::new(InspectTool, *toolbelt_id, event)
-                .guess_name(file!())
-                .guess_image(file!(), &asset_server)
-                .with_description("Inspect UI automation properties")
-                .spawn(&mut commands);
+        if let PopulateToolbeltEvent::Inspector { toolbelt_id } = event {
+            ToolSpawnConfig::<InspectTool, InspectToolAction>::new(
+                InspectTool,
+                *toolbelt_id,
+                event,
+            )
+            .guess_name(file!())
+            .guess_image(file!(), &asset_server)
+            .with_description("Inspect UI automation properties")
+            .spawn(&mut commands);
         }
     }
 }

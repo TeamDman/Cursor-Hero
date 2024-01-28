@@ -87,8 +87,7 @@ pub fn begin_dragging(hwnd: isize) -> Result<(), windows::core::Error> {
                     WM_NCLBUTTONDOWN,
                     WPARAM(HTCAPTION as usize),
                     LPARAM(0),
-                )
-                .0;
+                );
                 println!("Sent message");
             });
         Ok(())

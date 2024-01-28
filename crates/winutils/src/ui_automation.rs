@@ -1,3 +1,4 @@
+use crate::ToBevyIRect;
 use bevy::math::IRect;
 use bevy::math::IVec2;
 use bevy::reflect::Reflect;
@@ -6,7 +7,6 @@ use uiautomation::types::Point;
 use uiautomation::types::UIProperty;
 use uiautomation::variants::Variant;
 use uiautomation::UIAutomation;
-use crate::ToBevyIRect;
 
 pub struct Taskbar {
     pub entries: Vec<TaskbarEntry>,

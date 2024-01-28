@@ -1,4 +1,5 @@
-use bevy::math::{IRect, IVec2};
+use bevy::math::IRect;
+use bevy::math::IVec2;
 use screenshots::display_info::DisplayInfo;
 
 pub mod get_image;
