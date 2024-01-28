@@ -83,7 +83,7 @@ fn spawn_character(
         Name::new("Character"),
         RigidBody::Kinematic,
         Collider::capsule(15.0, 12.5),
-        SpatialListener::new(7.0),
+        SpatialListener::new(-7.0),
         Movement::default(),
     ));
     camera_events.send(CameraEvent::BeginFollowing {
