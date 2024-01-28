@@ -174,7 +174,8 @@ fn update_pointer_from_mouse(
 ) {
     let (camera, camera_global_transform) = camera_query.single();
     let window = window_query.single();
-    if let Some(current_screen_position) = window.cursor_position().or(*last_known_cursor_position) {
+    if let Some(current_screen_position) = window.cursor_position().or(*last_known_cursor_position)
+    {
         // for some reason, window.cursor_position starts returning None when not moving the mouse
         // this causes problems when the character moves and the pointer should follow
         // so let's just track it to fill in the gaps

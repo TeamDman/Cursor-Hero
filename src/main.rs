@@ -44,26 +44,7 @@ fn main() {
                 primary_window: Some(Window {
                     transparent: true,
                     title: format!("Cursor Hero v{}", env!("CARGO_PKG_VERSION")),
-                    #[cfg(debug_assertions)]
-                    resolution: (
-                        // %BEGIN_RESOLUTION%
-                        1596.0,
-                        794.0
-                        // %END_RESOLUTION%
-                    )
-                        .into(),
                     resizable: true,
-                    #[cfg(debug_assertions)]
-                    position: WindowPosition::At(
-                        (
-                            // %BEGIN_POSITION%
-                        -1708,
-                        56
-                        // %END_POSITION%
-                        )
-                            .into(),
-                    ),
-
                     ..default()
                 }),
                 ..default()

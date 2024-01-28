@@ -15,7 +15,6 @@ impl Plugin for PointerHoverPlugin {
     }
 }
 
-
 #[derive(Event, Debug, Reflect)]
 pub enum HoverEvent {
     Start {
@@ -75,7 +74,7 @@ pub fn hover_detection(
                             debug!("HoverEnd: {:?}", entry);
                             events.send(HoverEvent::End {
                                 target_id: *entry,
-                                pointer_id: pointer_id,
+                                pointer_id,
                             });
                         }
                     }
@@ -85,7 +84,7 @@ pub fn hover_detection(
                 } else {
                     pointer_hovering.hovering = still_touching;
                 }
-            },
+            }
             None => {
                 commands.entity(pointer_id).insert(Hovering {
                     hovering: still_touching,

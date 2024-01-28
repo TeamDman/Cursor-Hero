@@ -4,7 +4,6 @@ use bevy::audio::Volume;
 use bevy::audio::VolumeLevel;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
-use bevy::window::RawHandleWrapper;
 use cursor_hero_pointer::pointer_click_plugin::ToolClickEvent;
 use cursor_hero_pointer::pointer_click_plugin::Way;
 use leafwing_input_manager::prelude::*;
@@ -77,11 +76,11 @@ impl ClickToolAction {
         }
     }
 }
-impl Into<Way> for ClickToolAction {
-    fn into(self) -> Way {
-        match self {
-            Self::LeftClick => Way::Left,
-            Self::RightClick => Way::Right,
+impl From<ClickToolAction> for Way {
+    fn from(action: ClickToolAction) -> Self {
+        match action {
+            ClickToolAction::LeftClick => Way::Left,
+            ClickToolAction::RightClick => Way::Right,
         }
     }
 }
@@ -168,6 +167,7 @@ fn spawn_worker_thread(mut commands: Commands) {
     });
 }
 
+#[allow(clippy::too_many_arguments)]
 fn handle_input(
     mut commands: Commands,
     tools: Query<(&ActionState<ClickToolAction>, &Parent), With<ActiveTool>>,

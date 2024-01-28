@@ -27,7 +27,6 @@ fn add_start_menu_button_to_new_taskbars(
     taskbar_query: Query<(Entity, &Sprite), Added<Taskbar>>,
 ) {
     for (taskbar_id, taskbar_sprite) in taskbar_query.iter() {
-        let taskbar_sprite = taskbar_sprite;
         let Some(taskbar_size) = taskbar_sprite.custom_size else {
             warn!("Taskbar {:?} has no custom size", taskbar_id);
             continue;
@@ -58,9 +57,7 @@ fn add_start_menu_button_to_new_taskbars(
     }
 }
 
-fn click_listener(
-    mut click_events: EventReader<ClickEvent>,
-) {
+fn click_listener(mut click_events: EventReader<ClickEvent>) {
     for event in click_events.read() {
         debug!("Click event: {:?}", event);
     }

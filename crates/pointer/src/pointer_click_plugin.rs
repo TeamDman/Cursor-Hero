@@ -86,8 +86,7 @@ pub fn press_detection(
         };
 
         // find the pointer for the event
-        let Ok((pointer_touching, pointer_pressing)) = pointer_query.get_mut(*pointer_id)
-        else {
+        let Ok((pointer_touching, pointer_pressing)) = pointer_query.get_mut(*pointer_id) else {
             warn!("Pointer {:?} not found", pointer_id);
             continue;
         };
@@ -155,7 +154,7 @@ pub fn press_detection(
                         warn!("Pointer {:?} already pressing {:?}", pointer_id, target_id);
                     } else {
                         pointer_pressing.pressing.push(TargetPress {
-                            target_id: target_id,
+                            target_id,
                             way: *way,
                         });
                     }
@@ -165,7 +164,7 @@ pub fn press_detection(
                 for target_id in pressed.into_iter() {
                     commands.entity(*pointer_id).insert(Pressing {
                         pressing: vec![TargetPress {
-                            target_id: target_id,
+                            target_id,
                             way: *way,
                         }],
                     });
@@ -238,7 +237,7 @@ fn release_detection(
 
             clicked.push(target_id);
             click_events.send(ClickEvent::Clicked {
-                target_id: target_id,
+                target_id,
                 pointer_id: *pointer_id,
                 way: *way,
             });
@@ -277,10 +276,7 @@ fn release_detection(
                 }
             }
             None => {
-                debug!(
-                    "Pointer {:?} wasn't pressing anything",
-                    pointer_id
-                );
+                debug!("Pointer {:?} wasn't pressing anything", pointer_id);
             }
         }
     }

@@ -1952,6 +1952,8 @@ dependencies = [
  "cursor_hero_character",
  "cursor_hero_winutils",
  "raw-window-handle",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
