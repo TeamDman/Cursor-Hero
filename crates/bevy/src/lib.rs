@@ -4,8 +4,6 @@ use bevy::math::IVec2;
 use bevy::math::Rect;
 use bevy::math::Vec2;
 use bevy::prelude::Name;
-use bevy::prelude::Vec3Swizzles;
-use bevy::render::primitives::Aabb;
 
 // Define a trait that provides a method to return a string from an Option<&Name>
 pub trait NameOrEntityDisplay {
@@ -67,15 +65,35 @@ impl NegativeYIVec2 for IVec2 {
     }
 }
 
-pub trait AabbToRect {
-    fn to_rect(&self) -> Rect;
-    fn to_rect_with_offset(&self, offset: Vec2) -> Rect;
+pub trait Vec2ToRect {
+    fn to_rect_with_center(&self, center: &Vec2) -> Rect;
 }
-impl AabbToRect for Aabb {
-    fn to_rect(&self) -> Rect {
-        Rect::from_center_half_size(self.center.xy(), self.half_extents.xy())
+impl Vec2ToRect for Vec2 {
+    fn to_rect_with_center(&self, center: &Vec2) -> Rect {
+        Rect::from_center_size(*center, *self)
     }
-    fn to_rect_with_offset(&self, offset: Vec2) -> Rect {
-        Rect::from_center_half_size(self.center.xy() + offset, self.half_extents.xy())
+}
+
+pub trait RectWithHeight {
+    fn with_height(&self, height: f32) -> Rect;
+}
+impl RectWithHeight for Rect {
+    fn with_height(&self, height: f32) -> Rect {
+        Rect::from_center_size(self.center(), Vec2::new(self.width(), height))
+    }
+}
+
+pub trait AtInsideBottom {
+    fn at_inside_bottom(&self, other: &Rect) -> Rect;
+}
+impl AtInsideBottom for Rect {
+    fn at_inside_bottom(&self, other: &Rect) -> Rect {
+        Rect::from_center_size(
+            Vec2::new(
+                other.center().x,
+                other.center().y - other.height() / 2.0 + self.height() / 2.0,
+            ),
+            self.size(),
+        )
     }
 }

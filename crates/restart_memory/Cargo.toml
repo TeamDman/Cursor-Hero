@@ -8,4 +8,5 @@ edition = "2021"
 [dependencies]
 bevy = { workspace = true }
 cursor_hero_winutils = { workspace = true }
+cursor_hero_character = { workspace = true }
 raw-window-handle = { workspace = true }

@@ -1,8 +1,6 @@
 use bevy::prelude::*;
-
-use bevy::render::primitives::Aabb;
 use bevy::utils::HashSet;
-use cursor_hero_bevy::AabbToRect;
+use cursor_hero_bevy::Vec2ToRect;
 use cursor_hero_environment::environment_plugin::Environment;
 use cursor_hero_environment::environment_plugin::PopulateEnvironmentEvent;
 use cursor_hero_screen::screen_plugin::Screen;
@@ -134,7 +132,7 @@ fn handle_nametag_recalculate_position_event(
     environment_query: Query<&Children, With<Environment>>,
     mut nametag_query: Query<(&mut Text, &mut Transform), (With<Nametag>, Without<Screen>)>,
     screen_parent_query: Query<&Children, With<ScreenParent>>,
-    screen_query: Query<(&Aabb, &Transform), (With<Screen>, Without<Nametag>)>,
+    screen_query: Query<(&Sprite, &GlobalTransform), (With<Screen>, Without<Nametag>)>,
 ) {
     let mut debounce = HashSet::new();
     for nametag_event in nametag_events.read() {
@@ -166,14 +164,19 @@ fn handle_nametag_recalculate_position_event(
                             screen_parent_children, environment_id
                         );
                         for screen_id in screen_parent_children.iter() {
-                            if let Ok((screen_bounds, screen_transform)) =
+                            if let Ok((screen_sprite, screen_transform)) =
                                 screen_query.get(*screen_id)
                             {
-                                max_extents =
-                                    max_extents
-                                        .union(screen_bounds.to_rect_with_offset(
-                                            screen_transform.translation.xy(),
+                                if let Some(screen_size) = screen_sprite.custom_size {
+                                    max_extents =
+                                        max_extents.union(screen_size.to_rect_with_center(
+                                            &screen_transform.translation().xy(),
                                         ));
+                                } else {
+                                    warn!(
+                                        "Screen {:?} did not have custom size, skipping",
+                                        screen_id);
+                                }
                             }
                         }
                     }

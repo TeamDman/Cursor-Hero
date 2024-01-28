@@ -20,6 +20,7 @@ use cursor_hero_physics::damping_plugin::DampingPlugin;
 use cursor_hero_physics::physics_plugin::PhysicsPlugin;
 use cursor_hero_pointer::pointer_plugin::PointerPlugin;
 use cursor_hero_pressure_plate::pressure_plate_plugin::PressurePlatePlugin;
+use cursor_hero_restart_memory::main_character_memory_plugin::MainCharacterMemoryPlugin;
 #[cfg(debug_assertions)]
 use cursor_hero_restart_memory::primary_window_memory_plugin::PrimaryWindowMemoryPlugin;
 use cursor_hero_screen::screen_plugin::ScreenPlugin;
@@ -71,5 +72,7 @@ impl Plugin for MyPlugin {
 
         #[cfg(debug_assertions)]
         app.add_plugins(PrimaryWindowMemoryPlugin);
+        #[cfg(debug_assertions)]
+        app.add_plugins(MainCharacterMemoryPlugin);
     }
 }

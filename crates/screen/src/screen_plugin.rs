@@ -26,6 +26,10 @@ pub struct Screen {
     pub name: String,
     pub refresh_rate: Option<Timer>,
 }
+#[derive(Component, Default, Reflect)]
+pub struct GameScreen;
+#[derive(Component, Default, Reflect)]
+pub struct HostScreen;
 
 #[derive(Component, Reflect)]
 pub struct ScreenParent;
@@ -71,6 +75,10 @@ fn spawn_screens_in_new_environments(
                                     transform: Transform::from_translation(
                                         region.center().extend(-1).as_vec3(),
                                     ),
+                                    sprite: Sprite {
+                                        custom_size: Some(region.size().as_vec2()),
+                                        ..default()
+                                    },
                                     ..Default::default()
                                 },
                                 Screen {
@@ -81,6 +89,7 @@ fn spawn_screens_in_new_environments(
                                         TimerMode::Repeating,
                                     )),
                                 },
+                                HostScreen,
                                 Name::new(format!("Screen {}", name)),
                             ));
 
@@ -110,7 +119,7 @@ fn spawn_screens_in_new_environments(
                     screen_parent_commands.with_children(|screen_parent| {
                         let region =
                             IRect::from_corners(IVec2::new(0, 0), IVec2::new(1920, 1080)).neg_y();
-                        let name = "Game Screen".to_string();
+                        let name = "Primary Screen".to_string();
                         screen_parent.spawn((
                             SpriteBundle {
                                 sprite: Sprite {
@@ -127,7 +136,8 @@ fn spawn_screens_in_new_environments(
                                 id: 1,
                                 refresh_rate: None,
                             },
-                            Name::new(format!("Screen {}", name)),
+                            GameScreen,
+                            Name::new(name),
                         ));
 
                         level_bounds.push(region.expand((400, 400).into()));
