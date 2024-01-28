@@ -86,9 +86,11 @@ pub fn hover_detection(
                 }
             }
             None => {
-                commands.entity(pointer_id).insert(Hovering {
-                    hovering: still_touching,
-                });
+                if !still_touching.is_empty() {
+                    commands.entity(pointer_id).insert(Hovering {
+                        hovering: still_touching,
+                    });
+                }
             }
         }
     }

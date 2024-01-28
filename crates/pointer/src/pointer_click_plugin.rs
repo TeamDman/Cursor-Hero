@@ -10,6 +10,7 @@ impl Plugin for PointerClickPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<Clickable>();
         app.register_type::<Pressed>();
+        app.register_type::<Pressing>();
         app.add_event::<ClickEvent>();
         app.add_event::<ToolClickEvent>();
         app.add_systems(Update, press_detection);
@@ -30,7 +31,7 @@ pub struct Pressed {
     presses: Vec<PointerPress>,
 }
 
-#[derive(Reflect, Debug, Hash, PartialEq, Eq)]
+#[derive(Reflect, Debug, Hash, PartialEq, Eq, Copy, Clone)]
 struct TargetPress {
     target_id: Entity,
     way: Way,
@@ -95,12 +96,12 @@ pub fn press_detection(
 
         // for each element the pointer is touching
         for touching_id in pointer_touching.iter() {
-            debug!("Pointer {:?} touching {:?}", pointer_id, touching_id);
+            // debug!("Pointer {:?} touching {:?}", pointer_id, touching_id);
             // ensure it is a clickable element
             let Ok((target_id, target_visible, target_pressed)) =
                 target_query.get_mut(*touching_id)
             else {
-                debug!("Target {:?} not valid", touching_id);
+                // debug!("Target {:?} not valid", touching_id);
                 continue;
             };
             // ensure the element is visible
@@ -111,6 +112,7 @@ pub fn press_detection(
             // track in the element what is pressing it
             if target_pressed.is_none() {
                 // nothing is pressing this element yet
+                // note: two presses on the same frame will cause a clobber to occur here
                 commands.entity(target_id).insert(Pressed {
                     presses: vec![PointerPress {
                         pointer_id: *pointer_id,
@@ -122,7 +124,7 @@ pub fn press_detection(
                 if target_pressed
                     .presses
                     .iter()
-                    .any(|press| press.pointer_id == *pointer_id)
+                    .any(|press| press.pointer_id == *pointer_id && press.way == *way)
                 {
                     warn!("Pointer {:?} already pressing {:?}", pointer_id, target_id);
                 } else {
@@ -162,6 +164,8 @@ pub fn press_detection(
             }
             None => {
                 for target_id in pressed.into_iter() {
+                    // note: two presses on the same frame will cause a clobber to occur here
+                    // TODO: fix click clobbering
                     commands.entity(*pointer_id).insert(Pressing {
                         pressing: vec![TargetPress {
                             target_id,
@@ -216,7 +220,7 @@ fn release_detection(
                 if let Some(press_index) = pressed
                     .presses
                     .iter()
-                    .position(|press| press.pointer_id == *pointer_id)
+                    .position(|press| press.pointer_id == *pointer_id && press.way == *way)
                 {
                     if pressed.presses.len() == 1 {
                         // this is the last press, remove the tracker
@@ -230,17 +234,12 @@ fn release_detection(
                 }
             } else {
                 warn!(
-                    "Target {:?} didn't know it was pressed by {:?}",
+                    "Target {:?} didn't know it was pressed by pointer {:?}. Did you press elsewhere and release here?",
                     target_id, pointer_id
                 );
             }
 
             clicked.push(target_id);
-            click_events.send(ClickEvent::Clicked {
-                target_id,
-                pointer_id: *pointer_id,
-                way: *way,
-            });
         }
 
         match pointer_pressing {
@@ -251,27 +250,34 @@ fn release_detection(
                     .pressing
                     .iter()
                     .filter(|press| press.way == *way)
-                    .for_each(|press| {
+                    .for_each(|press: &TargetPress| {
                         click_events.send(ClickEvent::Released {
                             target_id: press.target_id,
                             pointer_id: *pointer_id,
                             way: *way,
                         });
-                        remove.insert(press.target_id);
+                        remove.insert(*press);
                     });
-                pressing
-                    .pressing
-                    .retain(|press| !remove.contains(&press.target_id));
+                pressing.pressing.retain(|press| !remove.contains(press));
                 if pressing.pressing.is_empty() {
                     commands.entity(*pointer_id).remove::<Pressing>();
                 }
                 // ensure all clicked are present in remove
-                for click in clicked.iter() {
-                    if !remove.contains(click) {
+                for target_id in clicked.iter() {
+                    if !remove.contains(&TargetPress {
+                        target_id: *target_id,
+                        way: *way,
+                    }) {
                         warn!(
                             "Pointer {:?} didn't know it was clicking {:?}",
-                            pointer_id, click
+                            pointer_id, target_id
                         );
+                    } else {
+                        click_events.send(ClickEvent::Clicked {
+                            target_id: *target_id,
+                            pointer_id: *pointer_id,
+                            way: *way,
+                        });
                     }
                 }
             }
