@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy::utils::HashMap;
 use bevy_xpbd_2d::prelude::*;
+use cursor_hero_pointer::pointer_hover_plugin::Hoverable;
 use cursor_hero_toolbelt::types::*;
 use leafwing_input_manager::prelude::*;
 use std::path::Path;
@@ -160,6 +161,7 @@ where
                 },
                 Sensor,
                 RigidBody::Kinematic,
+                Hoverable,
                 Collider::cuboid(100.0, 100.0),
             ));
             if let StartingState::Active = self.starting_state {

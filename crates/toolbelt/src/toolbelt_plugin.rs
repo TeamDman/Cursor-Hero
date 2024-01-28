@@ -3,7 +3,6 @@ use bevy::transform::TransformSystem;
 use bevy_xpbd_2d::PhysicsSet;
 use leafwing_input_manager::prelude::*;
 
-use crate::hover_detection::hover_detection;
 use crate::hover_frame::insert_hover_frame;
 use crate::hover_frame::remove_hover_frame;
 use crate::insert_toolbelt::insert_toolbelt;
@@ -26,16 +25,13 @@ impl Plugin for ToolbeltPlugin {
             .register_type::<Wheel>()
             .register_type::<Tool>()
             .register_type::<ActiveTool>()
-            .register_type::<Hovered>()
             .add_event::<PopulateToolbeltEvent>()
             .add_event::<ToolbeltStateEvent>()
-            .add_event::<ToolHoveredEvent>()
             .add_event::<ToolActivationEvent>()
             .add_plugins(InputManagerPlugin::<ToolbeltAction>::default())
             .add_systems(
                 Update,
                 (
-                    hover_detection,
                     insert_hover_frame,
                     insert_toolbelt,
                     remove_hover_frame,

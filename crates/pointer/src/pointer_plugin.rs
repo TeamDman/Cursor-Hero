@@ -13,19 +13,22 @@ use bevy_inspector_egui::prelude::ReflectInspectorOptions;
 use bevy_inspector_egui::InspectorOptions;
 use cursor_hero_character::character_plugin::Character;
 
+use crate::pointer_click_plugin::PointerClickPlugin;
+use crate::pointer_hover_plugin::PointerHoverPlugin;
+
 pub struct PointerPlugin;
 #[derive(SystemSet, Clone, Hash, Debug, PartialEq, Eq)]
 pub enum PointerSystemSet {
-    Spawn,
     Position,
 }
 
 impl Plugin for PointerPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<Pointer>()
+        app.add_plugins((PointerHoverPlugin, PointerClickPlugin))
+            .register_type::<Pointer>()
             .configure_sets(Update, PointerSystemSet::Position)
             .add_plugins(InputManagerPlugin::<PointerAction>::default())
-            .add_systems(Update, insert_pointer.in_set(PointerSystemSet::Spawn))
+            .add_systems(Update, insert_pointer)
             .add_systems(
                 Update,
                 update_pointer_from_mouse.run_if(in_state(ActiveInput::MouseKeyboard)),
@@ -167,11 +170,15 @@ fn update_pointer_from_mouse(
     camera_query: Query<(&Camera, &GlobalTransform), (With<MainCamera>, Without<Character>)>,
     character_query: Query<&Children, (With<MainCharacter>, Without<MainCamera>, Without<Pointer>)>,
     mut pointer_query: Query<&mut Position, With<Pointer>>,
+    mut last_known_cursor_position: Local<Option<Vec2>>,
 ) {
     let (camera, camera_global_transform) = camera_query.single();
     let window = window_query.single();
-
-    if let Some(current_screen_position) = window.cursor_position() {
+    if let Some(current_screen_position) = window.cursor_position().or(*last_known_cursor_position) {
+        // for some reason, window.cursor_position starts returning None when not moving the mouse
+        // this causes problems when the character moves and the pointer should follow
+        // so let's just track it to fill in the gaps
+        *last_known_cursor_position = Some(current_screen_position);
         // mouse is inside the window, convert to world coords
         if let Some(current_world_position) = camera
             .viewport_to_world(camera_global_transform, current_screen_position)

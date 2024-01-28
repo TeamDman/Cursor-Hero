@@ -1,6 +1,5 @@
 #![feature(let_chains)]
 
-pub mod hover_detection;
 pub mod hover_frame;
 pub mod insert_toolbelt;
 pub mod pointer_reach;

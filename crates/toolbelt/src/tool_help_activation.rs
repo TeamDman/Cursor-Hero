@@ -2,6 +2,7 @@ use super::types::*;
 use bevy::prelude::*;
 use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
+use cursor_hero_pointer::pointer_hover_plugin::Hovered;
 use cursor_hero_xelu_prompts::texture_path_for_input;
 use leafwing_input_manager::prelude::*;
 

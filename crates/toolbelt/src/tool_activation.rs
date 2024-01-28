@@ -1,6 +1,7 @@
 use super::types::*;
 use bevy::prelude::*;
 use cursor_hero_bevy::NameOrEntityDisplay;
+use cursor_hero_pointer::pointer_hover_plugin::Hovered;
 use leafwing_input_manager::action_state::ActionState;
 
 #[allow(clippy::type_complexity)]

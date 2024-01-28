@@ -1977,6 +1977,7 @@ dependencies = [
  "bevy_xpbd_2d",
  "cursor_hero_bevy",
  "cursor_hero_environment",
+ "cursor_hero_pointer",
  "cursor_hero_screen",
  "cursor_hero_toolbelt",
  "cursor_hero_tools",

@@ -4,6 +4,7 @@ use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
 use bevy_xpbd_2d::components::Sensor;
 use cursor_hero_bevy::NameOrEntityDisplay;
+use cursor_hero_pointer::pointer_hover_plugin::Hoverable;
 use leafwing_input_manager::action_state::ActionState;
 
 #[allow(clippy::type_complexity)]
@@ -37,6 +38,7 @@ pub fn tool_help_lifecycle(
                                     .load("textures/toolbelt_wheel/help_trigger.png"),
                                 ..default()
                             },
+                            Hoverable,
                             ToolHelpTrigger,
                             Sensor,
                             RigidBody::Kinematic,
