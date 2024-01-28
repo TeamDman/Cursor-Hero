@@ -19,6 +19,6 @@ impl Plugin for PhysicsPlugin {
             });
 
         // side effect: enabling this will cause tools to spawn visible instead of hidden
-        app.add_plugins(bevy_xpbd_2d::plugins::PhysicsDebugPlugin::default());
+        // app.add_plugins(bevy_xpbd_2d::plugins::PhysicsDebugPlugin::default());
     }
 }
