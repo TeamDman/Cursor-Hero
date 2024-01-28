@@ -56,7 +56,7 @@ fn parse_vec3(s: &str) -> Result<bevy::math::Vec3, Vec3ParseError> {
 fn restore_main_character_position(
     mut character_query: Query<&mut Transform, Added<MainCharacter>>,
 ) {
-    let Ok(mut character_transform) =  character_query.get_single_mut() else {
+    let Ok(mut character_transform) = character_query.get_single_mut() else {
         // No new character, nothing to do
         return;
     };
@@ -156,7 +156,7 @@ fn remember_main_character_position(
         file,
         "{}\n{}",
         since_the_epoch.as_secs(),
-        character_position.to_string()
+        character_position
     ) {
         warn!("Couldn't write to {:?}: {}", file_path, e);
         return;

@@ -175,7 +175,8 @@ fn handle_nametag_recalculate_position_event(
                                 } else {
                                     warn!(
                                         "Screen {:?} did not have custom size, skipping",
-                                        screen_id);
+                                        screen_id
+                                    );
                                 }
                             }
                         }

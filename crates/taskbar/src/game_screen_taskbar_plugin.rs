@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use cursor_hero_screen::screen_plugin::GameScreen;
 use cursor_hero_screen::screen_plugin::Screen;
-use cursor_hero_winutils::win_colors::get_accent_color;
 use cursor_hero_winutils::win_colors::get_start_color;
 
 pub struct GameScreenTaskbarPlugin;
@@ -41,7 +40,7 @@ fn detect_new_game_screens_and_send_taskbar_create_event(
 fn handle_taskbar_create_events(
     mut taskbar_events: EventReader<TaskbarEvent>,
     mut commands: Commands,
-    screen_query: Query<(&Transform, &Sprite), With<Screen>>,
+    screen_query: Query<&Sprite, With<Screen>>,
 ) {
     for event in taskbar_events.read() {
         let TaskbarEvent::Create { screen_id } = event else {
@@ -51,7 +50,7 @@ fn handle_taskbar_create_events(
             warn!("Couldn't find screen with id {:?}", screen_id);
             continue;
         };
-        let (screen_transform, screen_sprite) = screen;
+        let screen_sprite = screen;
         let Some(screen_size) = screen_sprite.custom_size else {
             warn!("Screen {:?} has no custom size", screen_id);
             continue;
