@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::utils::HashMap;
 use bevy::utils::HashSet;
 use bevy_xpbd_2d::components::CollidingEntities;
 
@@ -80,6 +81,8 @@ pub fn press_detection(
     mut pointer_query: Query<(&CollidingEntities, Option<&mut Pressing>), With<Pointer>>,
     mut target_query: Query<(Entity, &Visibility, Option<&mut Pressed>), With<Clickable>>,
 ) {
+    let mut pointer_target_ways: Vec<(Entity, Entity, Way)> = vec![];
+    let mut target_pointer_ways: Vec<(Entity, Entity, Way)> = vec![];
     for tool_click_event in tool_click_events.read() {
         // only check pressed events
         let ToolClickEvent::Pressed { pointer_id, way } = tool_click_event else {
@@ -112,13 +115,7 @@ pub fn press_detection(
             // track in the element what is pressing it
             if target_pressed.is_none() {
                 // nothing is pressing this element yet
-                // note: two presses on the same frame will cause a clobber to occur here
-                commands.entity(target_id).insert(Pressed {
-                    presses: vec![PointerPress {
-                        pointer_id: *pointer_id,
-                        way: *way,
-                    }],
-                });
+                target_pointer_ways.push((*touching_id, *pointer_id, *way));
             } else if let Some(mut target_pressed) = target_pressed {
                 // something is already pressing this element
                 if target_pressed
@@ -164,18 +161,45 @@ pub fn press_detection(
             }
             None => {
                 for target_id in pressed.into_iter() {
-                    // note: two presses on the same frame will cause a clobber to occur here
-                    // TODO: fix click clobbering
-                    commands.entity(*pointer_id).insert(Pressing {
-                        pressing: vec![TargetPress {
-                            target_id,
-                            way: *way,
-                        }],
-                    });
+                    pointer_target_ways.push((*pointer_id, target_id, *way));
                 }
             }
         }
     }
+
+    // We have deferred the insertion of the Pressed and Pressing components
+    // This is because doing it in the event loop causes clobbering when simultaneous events occur
+    let pointer_target_ways = group_by_entity(pointer_target_ways);
+    for (pointer_id, target_presses) in pointer_target_ways {
+        commands.entity(pointer_id).insert(Pressing {
+            pressing: target_presses
+                .into_iter()
+                .map(|(target_id, way)| TargetPress { target_id, way })
+                .collect(),
+        });
+    }
+    let target_pointer_ways = group_by_entity(target_pointer_ways);
+    for (target_id, pointer_presses) in target_pointer_ways {
+        commands.entity(target_id).insert(Pressed {
+            presses: pointer_presses
+                .into_iter()
+                .map(|(pointer_id, way)| PointerPress { pointer_id, way })
+                .collect(),
+        });
+    }
+}
+
+fn group_by_entity(ways: Vec<(Entity, Entity, Way)>) -> HashMap<Entity, Vec<(Entity, Way)>> {
+    let mut groups: HashMap<Entity, Vec<(Entity, Way)>> = HashMap::new();
+
+    for (pointer, target, way) in ways {
+        groups
+            .entry(pointer)
+            .or_insert_with(Vec::new)
+            .push((target, way));
+    }
+
+    groups
 }
 
 #[allow(clippy::type_complexity)]
