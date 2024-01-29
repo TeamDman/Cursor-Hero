@@ -8,6 +8,8 @@ edition = "2021"
 [dependencies]
 cursor_hero_character = { workspace = true }
 cursor_hero_camera = { workspace = true }
+cursor_hero_level_bounds = { workspace = true }
+cursor_hero_environment = { workspace = true }
 cursor_hero_input = { workspace = true }
 cursor_hero_winutils = { workspace = true }
 bevy = { workspace = true }

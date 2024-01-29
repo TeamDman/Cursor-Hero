@@ -14,6 +14,7 @@ use bevy_inspector_egui::InspectorOptions;
 use cursor_hero_character::character_plugin::Character;
 
 use crate::pointer_click_plugin::PointerClickPlugin;
+use crate::pointer_environment_plugin::PointerEnvironmentPlugin;
 use crate::pointer_hover_plugin::PointerHoverPlugin;
 
 pub struct PointerPlugin;
@@ -24,22 +25,26 @@ pub enum PointerSystemSet {
 
 impl Plugin for PointerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins((PointerHoverPlugin, PointerClickPlugin))
-            .register_type::<Pointer>()
-            .configure_sets(Update, PointerSystemSet::Position)
-            .add_plugins(InputManagerPlugin::<PointerAction>::default())
-            .add_systems(Update, insert_pointer)
-            .add_systems(
-                Update,
-                update_pointer_from_mouse.run_if(in_state(ActiveInput::MouseKeyboard)),
-            )
-            .add_systems(
-                PostUpdate,
-                update_pointer_position
-                    .in_set(PointerSystemSet::Position)
-                    .after(PhysicsSet::Sync)
-                    .before(TransformSystem::TransformPropagate),
-            );
+        app.register_type::<Pointer>();
+        app.add_plugins((
+            InputManagerPlugin::<PointerAction>::default(),
+            PointerHoverPlugin,
+            PointerClickPlugin,
+            PointerEnvironmentPlugin,
+        ));
+        app.configure_sets(Update, PointerSystemSet::Position);
+        app.add_systems(Update, insert_pointer);
+        app.add_systems(
+            Update,
+            update_pointer_from_mouse.run_if(in_state(ActiveInput::MouseKeyboard)),
+        );
+        app.add_systems(
+            PostUpdate,
+            update_pointer_position
+                .in_set(PointerSystemSet::Position)
+                .after(PhysicsSet::Sync)
+                .before(TransformSystem::TransformPropagate),
+        );
     }
 }
 

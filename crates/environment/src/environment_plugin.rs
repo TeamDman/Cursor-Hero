@@ -4,17 +4,22 @@ pub struct EnvironmentPlugin;
 
 impl Plugin for EnvironmentPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<Environment>()
-            .add_event::<CreateEnvironmentEvent>()
-            .add_event::<PopulateEnvironmentEvent>()
-            .add_systems(Startup, send_create_host_event)
-            .add_systems(Startup, send_create_game_event)
-            .add_systems(Update, handle_create_events);
+        app.register_type::<Environment>();
+        app.register_type::<HostEnvironment>();
+        app.add_event::<CreateEnvironmentEvent>();
+        app.add_event::<PopulateEnvironmentEvent>();
+        app.add_systems(Startup, send_create_host_event);
+        app.add_systems(Startup, send_create_game_event);
+        app.add_systems(Update, handle_create_events);
     }
 }
 
 #[derive(Component, Debug, Reflect)]
 pub struct Environment;
+#[derive(Component, Debug, Reflect)]
+pub struct HostEnvironment;
+#[derive(Component, Debug, Reflect)]
+pub struct GameEnvironment;
 
 #[derive(Event, Debug, Reflect)]
 pub enum CreateEnvironmentEvent {
@@ -58,6 +63,7 @@ fn handle_create_events(
                             ..default()
                         },
                         Environment,
+                        HostEnvironment,
                         Name::new(name.clone()),
                     ))
                     .id();
@@ -73,6 +79,7 @@ fn handle_create_events(
                             ..default()
                         },
                         Environment,
+                        GameEnvironment,
                         Name::new(name.clone()),
                     ))
                     .id();

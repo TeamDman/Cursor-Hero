@@ -1930,7 +1930,9 @@ dependencies = [
  "bevy_xpbd_2d",
  "cursor_hero_camera",
  "cursor_hero_character",
+ "cursor_hero_environment",
  "cursor_hero_input",
+ "cursor_hero_level_bounds",
  "cursor_hero_winutils",
  "leafwing-input-manager",
 ]
@@ -2018,6 +2020,7 @@ dependencies = [
  "cursor_hero_character",
  "cursor_hero_click_drag_character_movement",
  "cursor_hero_data",
+ "cursor_hero_environment",
  "cursor_hero_input",
  "cursor_hero_level_bounds",
  "cursor_hero_movement",

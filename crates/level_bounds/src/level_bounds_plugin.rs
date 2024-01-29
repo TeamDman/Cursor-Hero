@@ -14,7 +14,7 @@ pub struct LevelBoundsPlugin;
 impl Plugin for LevelBoundsPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<LevelBounds>()
-            .register_type::<LevelBoundsParent>()
+            .register_type::<LevelBoundsHolder>()
             .add_event::<LevelBoundsEvent>()
             .add_systems(
                 Update,
@@ -37,7 +37,7 @@ pub enum LevelBoundsEvent {
 }
 
 #[derive(Component, Reflect)]
-pub struct LevelBoundsParent;
+pub struct LevelBoundsHolder;
 #[derive(Component, Reflect)]
 pub struct LevelBoundsParentRef(Entity);
 impl LevelBoundsParentRef {
@@ -66,7 +66,7 @@ fn handle_populate_environment_events(
                         parent
                             .spawn((
                                 SpatialBundle::default(),
-                                LevelBoundsParent,
+                                LevelBoundsHolder,
                                 Name::new("Level Bounds"),
                             ))
                             .id(),
