@@ -104,7 +104,7 @@ fn snap_mouse_to_pointer(
     let mut destination_position = pointer_position.translation().xy().as_ivec2();
 
     // only when focused, do repositioning logic for when the cursor is over the window
-    let (window_handle, window) = window_query.get_single().expect("Need a single window");
+    let (window_handle, _window) = window_query.get_single().expect("Need a single window");
 
     let is_in_game_environment = pointer_environment
         .and_then(|pointer_environment| {

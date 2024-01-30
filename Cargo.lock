@@ -1930,6 +1930,8 @@ dependencies = [
  "cursor_hero_pressure_plate",
  "cursor_hero_restart_memory",
  "cursor_hero_screen",
+ "cursor_hero_sprint_tool",
+ "cursor_hero_sprint_tool_types",
  "cursor_hero_taskbar",
  "cursor_hero_toolbelt",
  "cursor_hero_tools",
@@ -1951,6 +1953,7 @@ dependencies = [
  "cursor_hero_environment",
  "cursor_hero_input",
  "cursor_hero_level_bounds",
+ "cursor_hero_sprint_tool_types",
  "cursor_hero_winutils",
  "leafwing-input-manager",
 ]
@@ -1994,6 +1997,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "cursor_hero_sprint_tool"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy-inspector-egui",
+ "bevy_xpbd_2d",
+ "cursor_hero_character",
+ "cursor_hero_sprint_tool_types",
+ "cursor_hero_toolbelt",
+ "cursor_hero_tools",
+ "leafwing-input-manager",
+]
+
+[[package]]
+name = "cursor_hero_sprint_tool_types"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy-inspector-egui",
+]
+
+[[package]]
 name = "cursor_hero_taskbar"
 version = "0.1.0"
 dependencies = [
@@ -2020,6 +2045,7 @@ dependencies = [
  "cursor_hero_character",
  "cursor_hero_input",
  "cursor_hero_pointer",
+ "cursor_hero_sprint_tool_types",
  "cursor_hero_xelu_prompts",
  "itertools 0.12.0",
  "leafwing-input-manager",
@@ -2045,6 +2071,7 @@ dependencies = [
  "cursor_hero_physics",
  "cursor_hero_pointer",
  "cursor_hero_screen",
+ "cursor_hero_sprint_tool_types",
  "cursor_hero_toolbelt",
  "cursor_hero_winutils",
  "enigo",

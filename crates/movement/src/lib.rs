@@ -26,7 +26,7 @@ impl Plugin for MovementPlugin {
 }
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
-pub enum MovementAction {
+enum MovementAction {
     Move,
 }
 // Exhaustively match `Action` and define the default binding to the input

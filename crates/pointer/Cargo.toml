@@ -11,6 +11,7 @@ cursor_hero_camera = { workspace = true }
 cursor_hero_level_bounds = { workspace = true }
 cursor_hero_environment = { workspace = true }
 cursor_hero_input = { workspace = true }
+cursor_hero_sprint_tool_types = { workspace = true }
 cursor_hero_winutils = { workspace = true }
 bevy = { workspace = true }
 leafwing-input-manager = { workspace = true }

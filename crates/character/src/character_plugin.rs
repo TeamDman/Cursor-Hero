@@ -5,7 +5,6 @@ use bevy_xpbd_2d::prelude::*;
 
 use cursor_hero_bevy::NegativeYVec2;
 use cursor_hero_camera::camera_plugin::CameraEvent;
-use cursor_hero_input::active_input_state_plugin::ActiveInput;
 use cursor_hero_movement::Movement;
 use cursor_hero_physics::damping_plugin::MovementDamping;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
@@ -16,35 +15,17 @@ impl Plugin for CharacterPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_character)
             .add_systems(Update, update_character_appearance_from_camera_events)
-            .add_systems(OnEnter(ActiveInput::MouseKeyboard), set_mnk_speed)
-            .add_systems(OnEnter(ActiveInput::Gamepad), set_gamepad_speed)
             .register_type::<Character>();
     }
 }
 
-#[derive(Component, InspectorOptions, Reflect)]
+#[derive(Component, InspectorOptions, Reflect, Default)]
 #[reflect(Component, InspectorOptions)]
-pub struct Character {
-    #[inspector(min = 0.0)]
-    pub zoom_speed: f32,
-    #[inspector(min = 0.0)]
-    pub zoom_default_speed: f32,
-    #[inspector(min = 0.0)]
-    pub zoom_sprint_speed: f32,
-}
+pub struct Character;
 
 #[derive(Component)]
 pub struct MainCharacter;
 
-impl Default for Character {
-    fn default() -> Self {
-        Self {
-            zoom_speed: 1.0,
-            zoom_default_speed: 1.0,
-            zoom_sprint_speed: 150.0,
-        }
-    }
-}
 
 #[derive(Component, Reflect, Eq, PartialEq, Debug)]
 pub enum CharacterAppearance {
@@ -112,17 +93,5 @@ fn update_character_appearance_from_camera_events(
                 }
             }
         }
-    }
-}
-
-fn set_mnk_speed(mut query: Query<&mut Movement, With<MainCharacter>>) {
-    for mut movement in &mut query.iter_mut() {
-        *movement = Movement::default_mnk();
-    }
-}
-
-fn set_gamepad_speed(mut query: Query<&mut Movement, With<MainCharacter>>) {
-    for mut movement in &mut query.iter_mut() {
-        *movement = Movement::default_gamepad();
     }
 }

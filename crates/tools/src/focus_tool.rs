@@ -82,7 +82,7 @@ impl ToolAction for FocusToolAction {
 #[allow(clippy::type_complexity)]
 #[allow(clippy::too_many_arguments)]
 fn handle_input(
-    tool_query: Query<(&ActionState<FocusToolAction>, Option<&ActiveTool>, &Parent)>,
+    tool_query: Query<(&ActionState<FocusToolAction>, &Parent),With<ActiveTool>>,
     toolbelt_query: Query<&Parent, With<Toolbelt>>,
     mut character_query: Query<
         (Entity, &mut Transform, Option<&FollowWithMainCamera>),
@@ -93,10 +93,7 @@ fn handle_input(
     mut camera_events: EventWriter<CameraEvent>,
     mut movement_events: EventWriter<MovementEvent>,
 ) {
-    for (t_act, t_enabled, t_parent) in tool_query.iter() {
-        if t_enabled.is_none() {
-            continue;
-        }
+    for (t_act, t_parent) in tool_query.iter() {
         if t_act.just_pressed(FocusToolAction::ToggleFollowCharacter) {
             info!("Toggle follow character");
             let toolbelt = toolbelt_query

@@ -17,7 +17,7 @@ impl ToolAction for NoInputs {
 
 pub struct ToolSpawnConfig<T, Action>
 where
-    T: Component,
+    T: Bundle,
     Action: ToolAction + Actionlike,
 {
     tag: T,
@@ -34,7 +34,7 @@ where
 
 impl<T, Action> ToolSpawnConfig<T, Action>
 where
-    T: Component,
+    T: Bundle,
     Action: ToolAction + Actionlike + core::fmt::Debug,
 {
     pub fn new(tag: T, toolbelt_id: Entity, event: &PopulateToolbeltEvent) -> Self {

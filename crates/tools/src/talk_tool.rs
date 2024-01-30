@@ -128,13 +128,10 @@ fn spawn_worker_thread(mut commands: Commands) {
 }
 
 fn handle_input(
-    tools: Query<(&ActionState<TalkToolAction>, Option<&ActiveTool>)>,
+    tools: Query<&ActionState<TalkToolAction>,With<ActiveTool>>,
     bridge: ResMut<Bridge>,
 ) {
-    for (t_act, t_enabled) in tools.iter() {
-        if t_enabled.is_none() {
-            continue;
-        }
+    for t_act in tools.iter() {
         if t_act.just_pressed(TalkToolAction::Listen) {
             info!("Listen button pressed");
             match bridge

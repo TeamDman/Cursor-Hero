@@ -76,11 +76,8 @@ impl ToolAction for RestartToolAction {
 }
 
 #[allow(clippy::type_complexity)]
-fn handle_input(tools: Query<(&ActionState<RestartToolAction>, Option<&ActiveTool>)>) {
-    for (t_act, t_enabled) in tools.iter() {
-        if t_enabled.is_none() {
-            continue;
-        }
+fn handle_input(tools: Query<&ActionState<RestartToolAction>, With<ActiveTool>>) {
+    for t_act in tools.iter() {
         if t_act.just_pressed(RestartToolAction::CancelAndRunPreviousTerminalCommand) {
             // run target/release/uparrow-enter.exe
 

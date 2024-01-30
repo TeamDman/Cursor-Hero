@@ -6,11 +6,10 @@ use bevy_xpbd_2d::prelude::*;
 use cursor_hero_camera::camera_plugin::MainCamera;
 use cursor_hero_character::character_plugin::MainCharacter;
 use cursor_hero_input::active_input_state_plugin::ActiveInput;
+use cursor_hero_sprint_tool_types::sprint_tool_types_plugin::SprintData;
 use leafwing_input_manager::prelude::*;
 use leafwing_input_manager::user_input::InputKind;
 
-use bevy_inspector_egui::prelude::ReflectInspectorOptions;
-use bevy_inspector_egui::InspectorOptions;
 use cursor_hero_character::character_plugin::Character;
 
 use crate::pointer_click_plugin::PointerClickPlugin;
@@ -78,23 +77,24 @@ impl PointerAction {
     }
 }
 
-#[derive(Component, InspectorOptions, Reflect)]
-#[reflect(Component, InspectorOptions)]
-pub struct Pointer {
-    #[inspector(min = 0.0)]
-    pub reach: f32,
-    #[inspector(min = 0.0)]
-    pub default_reach: f32,
-    #[inspector(min = 0.0)]
-    pub sprint_reach: f32,
-}
+#[derive(Component, Default, Debug, Reflect)]
+pub struct Pointer;
 
-impl Default for Pointer {
+#[derive(Bundle, Debug)]
+pub struct PointerBundle {
+    pointer: Pointer,
+    data: SprintData,
+}
+impl Default for PointerBundle {
     fn default() -> Self {
         Self {
-            reach: 50.0,
-            default_reach: 50.0,
-            sprint_reach: 2000.0,
+            pointer: Pointer,
+            data: SprintData {
+                value: 50.0,
+                default_value: 50.0,
+                sprint_value: 2000.0,
+                ..default()
+            },
         }
     }
 }
@@ -108,7 +108,7 @@ fn insert_pointer(
         info!("Creating pointer for character '{:?}'", character_id);
         commands.entity(character_id).with_children(|parent| {
             parent.spawn((
-                Pointer::default(),
+                PointerBundle::default(),
                 Name::new("Pointer"),
                 SpriteBundle {
                     texture: asset_server.load("textures/cursor.png"),
@@ -137,15 +137,15 @@ fn update_pointer_position(
         (
             &mut Position,
             &ActionState<PointerAction>,
-            &Pointer,
+            &SprintData,
             &Parent,
         ),
-        Without<Character>,
+        (Without<Character>, With<Pointer>),
     >,
-    mut character_query: Query<&Position, (With<Character>, Without<Pointer>)>,
+    mut character_query: Query<&Position, (With<Character>, Without<SprintData>)>,
     mut debounce: Local<bool>,
 ) {
-    for (mut pointer_position, pointer_actions, pointer_id, pointer_parent) in
+    for (mut pointer_position, pointer_actions, pointer_reach, pointer_parent) in
         pointer_query.iter_mut()
     {
         let character_position = character_query.get_mut(pointer_parent.get()).unwrap();
@@ -155,7 +155,7 @@ fn update_pointer_position(
                 continue;
             }
 
-            let offset = look * pointer_id.reach;
+            let offset = look * pointer_reach.value;
             let desired_position = character_position.xy() + offset;
             pointer_position.x = desired_position.x;
             pointer_position.y = desired_position.y;

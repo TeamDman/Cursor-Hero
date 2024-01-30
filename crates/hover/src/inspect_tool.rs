@@ -164,19 +164,15 @@ fn spawn_worker_thread(mut commands: Commands) {
 fn handle_input(
     tools: Query<(
         &ActionState<InspectToolAction>,
-        Option<&ActiveTool>,
         &Parent,
-    )>,
+    ),With<ActiveTool>>,
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<&Children, With<Character>>,
     pointers: Query<&GlobalTransform, With<Pointer>>,
     bridge: ResMut<Bridge>,
     egui_context_query: Query<&EguiContext, With<PrimaryWindow>>,
 ) {
-    for (t_act, t_enabled, t_parent) in tools.iter() {
-        if t_enabled.is_none() {
-            continue;
-        }
+    for (t_act, t_parent) in tools.iter() {
         let c_kids = characters
             .get(
                 toolbelts

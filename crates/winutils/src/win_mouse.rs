@@ -13,11 +13,12 @@ use windows::Win32::UI::Input::KeyboardAndMouse::MOUSEEVENTF_LEFTDOWN;
 use windows::Win32::UI::Input::KeyboardAndMouse::MOUSEEVENTF_LEFTUP;
 use windows::Win32::UI::Input::KeyboardAndMouse::MOUSEEVENTF_RIGHTDOWN;
 use windows::Win32::UI::Input::KeyboardAndMouse::MOUSEEVENTF_RIGHTUP;
+use windows::Win32::UI::Input::KeyboardAndMouse::MOUSEEVENTF_WHEEL;
 use windows::Win32::UI::Input::KeyboardAndMouse::MOUSEINPUT;
-use windows::Win32::UI::Input::KeyboardAndMouse::MOUSE_EVENT_FLAGS;
 use windows::Win32::UI::Input::KeyboardAndMouse::VIRTUAL_KEY;
 use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
 use windows::Win32::UI::WindowsAndMessaging::SetCursorPos;
+use windows::Win32::UI::WindowsAndMessaging::WHEEL_DELTA;
 
 pub fn get_cursor_position() -> Result<IVec2, windows::core::Error> {
     unsafe {
@@ -201,52 +202,21 @@ pub fn release_f23_key() -> Result<(), windows::core::Error> {
     Ok(())
 }
 
-// Constants for mouse wheel
-const MOUSEEVENTF_WHEEL: u32 = 0x0800;
-// const WHEEL_DELTA: i32 = 120;
-const WHEEL_DELTA: i32 = 12;
-
-pub fn scroll_wheel_up() -> Result<(), windows::core::Error> {
-    // Prepare a mouse input for scrolling up
+pub fn scroll_wheel(scale: f32) -> Result<(), windows::core::Error> {
     let mouse_input = MOUSEINPUT {
         dx: 0,
         dy: 0,
-        mouseData: WHEEL_DELTA,
-        dwFlags: MOUSE_EVENT_FLAGS(MOUSEEVENTF_WHEEL),
+        mouseData: (WHEEL_DELTA as f32 * scale) as i32,
+        dwFlags: MOUSEEVENTF_WHEEL,
         time: 0,
         dwExtraInfo: 0,
     };
 
-    // Prepare an INPUT structure for the scroll event
     let input = INPUT {
         r#type: INPUT_MOUSE,
         Anonymous: INPUT_0 { mi: mouse_input },
     };
 
-    // Send the input for scroll up
-    unsafe { SendInput(&[input], std::mem::size_of::<INPUT>() as i32) };
-
-    Ok(())
-}
-
-pub fn scroll_wheel_down() -> Result<(), windows::core::Error> {
-    // Prepare a mouse input for scrolling down
-    let mouse_input = MOUSEINPUT {
-        dx: 0,
-        dy: 0,
-        mouseData: -(WHEEL_DELTA),
-        dwFlags: MOUSE_EVENT_FLAGS(MOUSEEVENTF_WHEEL),
-        time: 0,
-        dwExtraInfo: 0,
-    };
-
-    // Prepare an INPUT structure for the scroll event
-    let input = INPUT {
-        r#type: INPUT_MOUSE,
-        Anonymous: INPUT_0 { mi: mouse_input },
-    };
-
-    // Send the input for scroll down
     unsafe { SendInput(&[input], std::mem::size_of::<INPUT>() as i32) };
 
     Ok(())

@@ -84,16 +84,13 @@ pub struct CubeToolInteractable;
 
 fn handle_input(
     mut commands: Commands,
-    tools: Query<(&ActionState<CubeToolAction>, Option<&ActiveTool>, &Parent)>,
+    tools: Query<(&ActionState<CubeToolAction>, &Parent), With<ActiveTool>>,
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<&Children, With<Character>>,
     pointers: Query<&GlobalTransform, With<Pointer>>,
     mut cubes: Query<(Entity, &GlobalTransform, &mut LinearVelocity), With<CubeToolInteractable>>,
 ) {
-    for (t_act, t_enabled, t_parent) in tools.iter() {
-        if t_enabled.is_none() {
-            continue;
-        }
+    for (t_act, t_parent) in tools.iter() {
         let c_kids = characters
             .get(
                 toolbelts
