@@ -5,6 +5,7 @@ use cursor_hero_screen::get_image::get_image;
 use cursor_hero_screen::get_image::ScreensToImageParam;
 use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_tools::prelude::*;
+use cursor_hero_winutils::ui_automation::get_element_at;
 use cursor_hero_winutils::ui_automation::get_taskbar;
 use cursor_hero_winutils::ui_automation::TaskbarEntry;
 
@@ -101,7 +102,13 @@ fn tick_taskbar_switcher(
             commands.entity(toolbelt_id).despawn_descendants();
             toolbelt_events.send(PopulateToolbeltEvent::Default { toolbelt_id });
             if let Ok(mut position) = character_query.get_mut(character_id) {
-                position.0 = tool.entry.bounds.center().as_vec2().neg_y();
+                let center = tool.entry.bounds.center();
+                position.0 = center.as_vec2().neg_y();
+                if let Ok(elem) = get_element_at(center) {
+                    if let Err(e) = elem.click() {
+                        warn!("Failed to click taskbar entry: {:?}", e);
+                    }
+                }
             }
         }
     }
