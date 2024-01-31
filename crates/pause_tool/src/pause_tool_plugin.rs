@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use cursor_hero_toolbelt::types::*;
+use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_tools::prelude::*;
 use leafwing_input_manager::prelude::*;
 

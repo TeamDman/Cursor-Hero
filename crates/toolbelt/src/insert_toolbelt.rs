@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use cursor_hero_character::character_plugin::Character;
 
-use super::types::*;
+use cursor_hero_toolbelt_types::types::*;
 
 pub fn insert_toolbelt(
     mut commands: Commands,

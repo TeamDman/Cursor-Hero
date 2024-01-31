@@ -1,40 +1,15 @@
 use bevy::prelude::*;
 use bevy_xpbd_2d::components::CollidingEntities;
-
-use crate::pointer_plugin::Pointer;
+use cursor_hero_pointer_types::prelude::*;
 
 pub struct PointerHoverPlugin;
 
 impl Plugin for PointerHoverPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<Hovered>();
-        app.register_type::<Hoverable>();
-        app.register_type::<Hovering>();
-        app.add_event::<HoverEvent>();
         app.add_systems(Update, hover_detection);
     }
 }
 
-#[derive(Event, Debug, Reflect)]
-pub enum HoverEvent {
-    Start {
-        target_id: Entity,
-        pointer_id: Entity,
-    },
-    End {
-        target_id: Entity,
-        pointer_id: Entity,
-    },
-}
-
-#[derive(Component, Reflect, Debug)]
-pub struct Hovered;
-#[derive(Component, Reflect, Debug)]
-pub struct Hoverable;
-#[derive(Component, Reflect, Debug)]
-pub struct Hovering {
-    hovering: Vec<Entity>,
-}
 
 #[allow(clippy::type_complexity)]
 pub fn hover_detection(

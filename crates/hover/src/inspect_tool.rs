@@ -10,10 +10,11 @@ use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
 use cursor_hero_character::character_plugin::Character;
 use cursor_hero_physics::damping_plugin::MovementDamping;
-use cursor_hero_pointer::pointer_plugin::Pointer;
+use cursor_hero_pointer_types::prelude::*;
+
 use cursor_hero_screen::get_image::get_image;
 use cursor_hero_screen::get_image::ScreensToImageParam;
-use cursor_hero_toolbelt::types::*;
+use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_tools::cube_tool::CubeToolInteractable;
 use cursor_hero_tools::prelude::*;
 use cursor_hero_winutils::win_mouse::find_element_at;

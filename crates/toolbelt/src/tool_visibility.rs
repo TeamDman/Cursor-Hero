@@ -1,4 +1,5 @@
-use super::types::*;
+use cursor_hero_toolbelt_types::types::*;
+
 use bevy::prelude::*;
 use leafwing_input_manager::action_state::ActionState;
 

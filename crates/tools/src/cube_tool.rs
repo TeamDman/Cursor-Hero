@@ -4,9 +4,10 @@ use leafwing_input_manager::prelude::*;
 
 use cursor_hero_character::character_plugin::Character;
 use cursor_hero_physics::damping_plugin::MovementDamping;
-use cursor_hero_pointer::pointer_plugin::Pointer;
+use cursor_hero_pointer_types::prelude::*;
 
-use cursor_hero_toolbelt::types::*;
+
+use cursor_hero_toolbelt_types::prelude::*;
 
 use crate::prelude::*;
 

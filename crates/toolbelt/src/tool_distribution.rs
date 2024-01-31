@@ -1,4 +1,5 @@
-use super::types::*;
+use cursor_hero_toolbelt_types::types::*;
+
 use bevy::prelude::*;
 use bevy_xpbd_2d::math::PI;
 use bevy_xpbd_2d::prelude::*;

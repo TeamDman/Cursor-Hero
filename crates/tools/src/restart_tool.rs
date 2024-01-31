@@ -7,7 +7,7 @@ use leafwing_input_manager::prelude::*;
 use windows::Win32::System::Threading::CREATE_NEW_PROCESS_GROUP;
 
 use cursor_hero_data::paths::CURSOR_HERO_GIT_DIR;
-use cursor_hero_toolbelt::types::*;
+use cursor_hero_toolbelt_types::prelude::*;
 
 use crate::prelude::*;
 pub struct RestartToolPlugin;

@@ -1,6 +1,9 @@
-use super::types::*;
+use cursor_hero_toolbelt_types::types::*;
+
 use bevy::prelude::*;
 use cursor_hero_input::update_gamepad_settings::PRESS_THRESHOLD;
+use cursor_hero_pointer_types::prelude::*;
+
 use leafwing_input_manager::action_state::ActionState;
 
 #[allow(clippy::type_complexity)]
@@ -17,10 +20,11 @@ pub fn wheel_opening(
     >,
     tool_query: Query<Entity, With<Tool>>,
     mut toolbelt_events: EventWriter<ToolbeltStateEvent>,
+    mut pointer_reach_events: EventWriter<PointerReachEvent>,
 ) {
-    for (toolbelt_id, toolbelt_actions, mut wheel, toolbelt_parent, toolbelt_children) in
-        toolbelt_query.iter_mut()
-    {
+    for toolbelt in toolbelt_query.iter_mut() {
+        let (toolbelt_id, toolbelt_actions, mut wheel, toolbelt_parent, toolbelt_children) =
+            toolbelt;
         if toolbelt_actions.pressed(ToolbeltAction::Show) {
             let tool_count = toolbelt_children
                 .iter()
@@ -40,18 +44,27 @@ pub fn wheel_opening(
             wheel.scale = wheel.scale_start + (wheel.scale_end - wheel.scale_start) * open;
             wheel.alpha = wheel.alpha_start + (wheel.alpha_end - wheel.alpha_start) * open;
             if !wheel.open {
+                // just opened
                 toolbelt_events.send(ToolbeltStateEvent::Opened {
                     toolbelt_id,
                     character_id: toolbelt_parent.get(),
                 });
                 wheel.open = true;
             }
+            pointer_reach_events.send(PointerReachEvent::SetCharacter {
+                character_id: toolbelt_parent.get(),
+                reach: wheel.radius,
+            });
         } else if wheel.open {
+            // just closed
             toolbelt_events.send(ToolbeltStateEvent::Closed {
                 toolbelt_id,
                 character_id: toolbelt_parent.get(),
             });
             wheel.open = false;
+            pointer_reach_events.send(PointerReachEvent::ResetCharacter {
+                character_id: toolbelt_parent.get(),
+            });
         }
     }
 }

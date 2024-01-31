@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_inspector_egui::prelude::ReflectInspectorOptions;
 use bevy_inspector_egui::InspectorOptions;
-use cursor_hero_toolbelt::types::*;
+use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_winutils::win_mouse::scroll_wheel;
 use leafwing_input_manager::prelude::*;
 

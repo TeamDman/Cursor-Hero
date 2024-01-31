@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy::winit::WinitWindows;
 use bevy_inspector_egui::bevy_egui::EguiContext;
-use cursor_hero_toolbelt::types::*;
+use cursor_hero_toolbelt_types::prelude::*;
 use leafwing_input_manager::prelude::*;
 
 use crate::prelude::*;

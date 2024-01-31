@@ -4,20 +4,20 @@ use bevy::audio::Volume;
 use bevy::audio::VolumeLevel;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
-use cursor_hero_pointer::pointer_click_plugin::ToolClickEvent;
-use cursor_hero_pointer::pointer_click_plugin::Way;
+use cursor_hero_pointer_types::prelude::*;
+
 use leafwing_input_manager::prelude::*;
 
 use crossbeam_channel::bounded;
 use crossbeam_channel::Sender;
 use cursor_hero_character::character_plugin::Character;
-use cursor_hero_pointer::pointer_plugin::Pointer;
+
 use cursor_hero_winutils::win_mouse::left_mouse_down;
 use cursor_hero_winutils::win_mouse::left_mouse_up;
 use cursor_hero_winutils::win_mouse::right_mouse_down;
 use cursor_hero_winutils::win_mouse::right_mouse_up;
 
-use cursor_hero_toolbelt::types::*;
+use cursor_hero_toolbelt_types::prelude::*;
 
 use crate::prelude::*;
 

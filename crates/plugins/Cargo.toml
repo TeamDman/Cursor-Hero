@@ -7,6 +7,9 @@ edition = "2021"
 
 
 [dependencies]
+cursor_hero_math = { workspace = true }
+cursor_hero_pointer_types = { workspace = true }
+cursor_hero_toolbelt_types = { workspace = true }
 cursor_hero_sprint_tool_types = { workspace = true }
 cursor_hero_sprint_tool = { workspace = true }
 cursor_hero_agent = { workspace = true }

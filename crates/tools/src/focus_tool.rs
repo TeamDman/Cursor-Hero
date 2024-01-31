@@ -12,7 +12,7 @@ use cursor_hero_camera::camera_plugin::CameraEvent;
 use cursor_hero_character::character_plugin::Character;
 use cursor_hero_winutils::win_window::focus_window;
 
-use cursor_hero_toolbelt::types::*;
+use cursor_hero_toolbelt_types::prelude::*;
 
 use crate::prelude::*;
 

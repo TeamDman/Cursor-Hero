@@ -5,7 +5,7 @@ use leafwing_input_manager::prelude::*;
 use leafwing_input_manager::user_input::UserInput;
 use leafwing_input_manager::Actionlike;
 
-use cursor_hero_toolbelt::types::*;
+use cursor_hero_toolbelt_types::prelude::*;
 
 use crate::prelude::*;
 pub struct PlaceholderToolPlugin;

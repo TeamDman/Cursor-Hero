@@ -7,12 +7,11 @@ use bevy_xpbd_2d::prelude::*;
 use cursor_hero_character::character_plugin::Character;
 use cursor_hero_character::character_plugin::MainCharacter;
 use cursor_hero_input::active_input_state_plugin::ActiveInput;
+use cursor_hero_math::Lerp;
 use cursor_hero_physics::damping_plugin::DampingSystemSet;
-use cursor_hero_sprint_tool_types::sprint_tool_types_plugin::SprintData;
-use cursor_hero_toolbelt::types::ActiveTool;
-use cursor_hero_toolbelt::types::PopulateToolbeltEvent;
-use cursor_hero_toolbelt::types::ToolAction;
-use cursor_hero_toolbelt::types::Toolbelt;
+use cursor_hero_sprint_tool_types::sprint_tool_types_plugin::SprintEvent;
+use cursor_hero_toolbelt_types::prelude::*;
+use itertools::Itertools;
 use leafwing_input_manager::prelude::*;
 use leafwing_input_manager::user_input::InputKind;
 
@@ -23,47 +22,45 @@ impl Plugin for MovementToolPlugin {
         app.add_plugins(InputManagerPlugin::<MovementToolAction>::default());
         app.register_type::<MovementTool>();
         app.add_systems(Update, toolbelt_events);
+        app.add_systems(Update, handle_sprint_events);
         app.add_systems(Update, handle_inputs.after(DampingSystemSet::Dampen));
         app.add_systems(OnEnter(ActiveInput::MouseKeyboard), set_mnk_speed);
         app.add_systems(OnEnter(ActiveInput::Gamepad), set_gamepad_speed);
     }
 }
 
-#[derive(Component, Reflect, Debug, Default, InspectorOptions)]
+#[derive(Component, Reflect, Debug, InspectorOptions)]
 #[reflect(Component, InspectorOptions)]
-pub struct MovementTool;
-
-#[derive(Bundle, Debug, Reflect)]
-struct MovementToolBundle {
-    tool: MovementTool,
-    data: SprintData,
+pub struct MovementTool {
+    #[inspector(min = 0.0)]
+    speed: f32,
+    #[inspector(min = 0.0)]
+    default_speed: f32,
+    #[inspector(min = 0.0)]
+    sprint_speed: f32,
 }
-impl Default for MovementToolBundle {
+
+impl Default for MovementTool {
     fn default() -> Self {
-        Self {
-            tool: MovementTool::default(),
-            data: match ActiveInput::default() {
-                ActiveInput::MouseKeyboard => default_mnk_data(),
-                ActiveInput::Gamepad => default_gamepad_data(),
-            },
+        match ActiveInput::default() {
+            ActiveInput::MouseKeyboard => default_mnk(),
+            ActiveInput::Gamepad => default_gamepad(),
         }
     }
 }
 
-fn default_mnk_data() -> SprintData {
-    SprintData {
-        value: 8000.0,
-        default_value: 8000.0,
-        sprint_value: 40000.0,
-        ..default()
+fn default_mnk() -> MovementTool {
+    MovementTool {
+        speed: 8000.0,
+        default_speed: 8000.0,
+        sprint_speed: 40000.0,
     }
 }
-fn default_gamepad_data() -> SprintData {
-    SprintData {
-        value: 800.0,
-        default_value: 800.0,
-        sprint_value: 80000.0,
-        ..default()
+fn default_gamepad() -> MovementTool {
+    MovementTool {
+        speed: 800.0,
+        default_speed: 800.0,
+        sprint_speed: 80000.0,
     }
 }
 
@@ -109,26 +106,23 @@ fn toolbelt_events(
             | PopulateToolbeltEvent::Taskbar { toolbelt_id }
             | PopulateToolbeltEvent::Keyboard { toolbelt_id } => toolbelt_id,
         };
-        ToolSpawnConfig::<_, MovementToolAction>::new(
-            MovementToolBundle::default(),
-            *toolbelt_id,
-            event,
-        )
-        .guess_name(file!())
-        .guess_image(file!(), &asset_server)
-        .with_description("Go faster, reach further")
-        .spawn(&mut commands);
+        ToolSpawnConfig::<_, MovementToolAction>::new(MovementTool::default(), *toolbelt_id, event)
+            .guess_name(file!())
+            .guess_image(file!(), &asset_server)
+            .with_description("Go faster, reach further")
+            .spawn(&mut commands);
     }
 }
 
 fn handle_inputs(
     time: Res<Time>,
-    tool_query: Query<(&ActionState<MovementToolAction>, &SprintData, &Parent), With<ActiveTool>>,
+    tool_query: Query<(&ActionState<MovementToolAction>, &MovementTool, &Parent), With<ActiveTool>>,
     toolbelt_query: Query<&Parent, With<Toolbelt>>,
     mut character_query: Query<&mut LinearVelocity, With<Character>>,
 ) {
     let delta_time = time.delta_seconds_f64().adjust_precision();
-    for (tool_actions, tool_data, tool_parent) in tool_query.iter() {
+    for tool in tool_query.iter() {
+        let (tool_actions, tool, tool_parent) = tool;
         if !tool_actions.pressed(MovementToolAction::Move) {
             continue;
         }
@@ -144,41 +138,83 @@ fn handle_inputs(
                 .clamped_axis_pair(MovementToolAction::Move)
                 .unwrap()
                 .xy();
-        character_velocity.x += move_delta.x * tool_data.value;
-        character_velocity.y += move_delta.y * tool_data.value;
+        character_velocity.x += move_delta.x * tool.speed;
+        character_velocity.y += move_delta.y * tool.speed;
     }
 }
 
 fn set_mnk_speed(
-    mut tool_query: Query<(&mut SprintData, &Parent), With<MovementTool>>,
+    mut tool_query: Query<(&mut MovementTool, &Parent), With<MovementTool>>,
     toolbelt_query: Query<&Parent, With<Toolbelt>>,
     character_query: Query<(), With<MainCharacter>>,
 ) {
     for tool in tool_query.iter_mut() {
-        let (mut tool_data, tool_parent) = tool;
+        let (mut tool, tool_parent) = tool;
         let Ok(toolbelt) = toolbelt_query.get(tool_parent.get()) else {
             continue;
         };
         if character_query.get(toolbelt.get()).is_err() {
             continue;
         }
-        *tool_data = default_mnk_data();
+        *tool = default_mnk();
     }
 }
 
 fn set_gamepad_speed(
-    mut tool_query: Query<(&mut SprintData, &Parent), With<MovementTool>>,
+    mut tool_query: Query<(&mut MovementTool, &Parent), With<MovementTool>>,
     toolbelt_query: Query<&Parent, With<Toolbelt>>,
     character_query: Query<(), With<MainCharacter>>,
 ) {
     for tool in tool_query.iter_mut() {
-        let (mut tool_data, tool_parent) = tool;
+        let (mut tool, tool_parent) = tool;
         let Ok(toolbelt) = toolbelt_query.get(tool_parent.get()) else {
             continue;
         };
         if character_query.get(toolbelt.get()).is_err() {
             continue;
         }
-        *tool_data = default_gamepad_data();
+        *tool = default_gamepad();
+    }
+}
+
+fn handle_sprint_events(
+    mut sprint_events: EventReader<SprintEvent>,
+    character_query: Query<&Children, With<Character>>,
+    toolbelt_query: Query<&Children, With<Toolbelt>>,
+    mut tool_query: Query<&mut MovementTool>,
+) {
+    for event in sprint_events.read() {
+        let character_id = match event {
+            SprintEvent::Active { character_id, .. } => character_id,
+            SprintEvent::Stop { character_id } => character_id,
+        };
+        let Ok(character) = character_query.get(*character_id) else {
+            warn!("Character {:?} does not exist", character_id);
+            continue;
+        };
+        let character_kids = character;
+        
+        let tool_ids = character_kids
+            .iter()
+            .filter_map(|kid| toolbelt_query.get(*kid).ok())
+            .flat_map(|toolbelt| toolbelt.iter())
+            .filter(|kid| tool_query.contains(**kid))
+            .cloned()
+            .collect_vec();
+
+        match event {
+            SprintEvent::Active { throttle, .. } => {
+                let mut iter = tool_query.iter_many_mut(&tool_ids);
+                while let Some(mut tool) = iter.fetch_next() {
+                    tool.speed = (tool.default_speed, tool.sprint_speed).lerp(*throttle);
+                }
+            }
+            SprintEvent::Stop { .. } => {
+                let mut iter = tool_query.iter_many_mut(&tool_ids);
+                while let Some(mut tool) = iter.fetch_next() {
+                    tool.speed = tool.default_speed;
+                }
+            }
+        }
     }
 }

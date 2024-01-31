@@ -31,16 +31,22 @@ use cursor_hero_ui::about_text_plugin::AboutTextPlugin;
 use cursor_hero_ui::fps_text_plugin::FpsTextPlugin;
 use cursor_hero_ui::position_text_plugin::PositionTextPlugin;
 use cursor_hero_wallpaper::wallpaper_plugin::WallpaperPlugin;
-use cursor_hero_agent::agent_plugin::AgentPlugin;
+// use cursor_hero_agent::agent_plugin::AgentPlugin;
 use cursor_hero_sprint_tool::sprint_tool_plugin::SprintToolPlugin;
 use cursor_hero_sprint_tool_types::sprint_tool_types_plugin::SprintToolTypesPlugin;
+use cursor_hero_toolbelt_types::toolbelt_types_plugin::ToolbeltTypesPlugin;
+use cursor_hero_pointer_types::pointer_types_plugin::PointerTypesPlugin;
+use cursor_hero_math::math_plugin::MathPlugin;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(MathPlugin);
+        app.add_plugins(PointerTypesPlugin);
+        app.add_plugins(ToolbeltTypesPlugin);
         app.add_plugins(SprintToolTypesPlugin);
         app.add_plugins(SprintToolPlugin);
-        app.add_plugins(AgentPlugin);
+        // app.add_plugins(AgentPlugin);
         app.add_plugins(TaskbarPlugin);
         app.add_plugins(EnvironmentNametagPlugin);
         app.add_plugins(EnvironmentPlugin);

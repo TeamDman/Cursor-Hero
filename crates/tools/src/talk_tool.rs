@@ -8,7 +8,7 @@ use crossbeam_channel::Sender;
 use cursor_hero_winutils::win_mouse::press_f23_key;
 use cursor_hero_winutils::win_mouse::release_f23_key;
 
-use cursor_hero_toolbelt::types::*;
+use cursor_hero_toolbelt_types::prelude::*;
 
 use crate::prelude::*;
 

@@ -1,4 +1,5 @@
-use super::types::*;
+use cursor_hero_toolbelt_types::types::*;
+
 use bevy::audio::Volume;
 use bevy::audio::VolumeLevel;
 use bevy::prelude::*;

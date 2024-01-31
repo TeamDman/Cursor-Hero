@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use cursor_hero_toolbelt::types::*;
+use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_tools::prelude::*;
 
 use crate::hover_ui_automation_plugin::HoverInfo;

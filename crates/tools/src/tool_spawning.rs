@@ -1,8 +1,9 @@
 use bevy::prelude::*;
 use bevy::utils::HashMap;
 use bevy_xpbd_2d::prelude::*;
-use cursor_hero_pointer::pointer_hover_plugin::Hoverable;
-use cursor_hero_toolbelt::types::*;
+use cursor_hero_pointer_types::prelude::*;
+
+use cursor_hero_toolbelt_types::prelude::*;
 use leafwing_input_manager::prelude::*;
 use std::path::Path;
 

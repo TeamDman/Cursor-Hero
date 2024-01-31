@@ -6,32 +6,29 @@ use bevy_xpbd_2d::prelude::*;
 use cursor_hero_camera::camera_plugin::MainCamera;
 use cursor_hero_character::character_plugin::MainCharacter;
 use cursor_hero_input::active_input_state_plugin::ActiveInput;
-use cursor_hero_sprint_tool_types::sprint_tool_types_plugin::SprintData;
+use cursor_hero_pointer_types::prelude::*;
+
 use leafwing_input_manager::prelude::*;
 use leafwing_input_manager::user_input::InputKind;
+
 
 use cursor_hero_character::character_plugin::Character;
 
 use crate::pointer_click_plugin::PointerClickPlugin;
 use crate::pointer_environment_plugin::PointerEnvironmentPlugin;
 use crate::pointer_hover_plugin::PointerHoverPlugin;
+use crate::pointer_reach_plugin::PointerReachPlugin;
 
 pub struct PointerPlugin;
-#[derive(SystemSet, Clone, Hash, Debug, PartialEq, Eq)]
-pub enum PointerSystemSet {
-    Position,
-}
-
 impl Plugin for PointerPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<Pointer>();
         app.add_plugins((
             InputManagerPlugin::<PointerAction>::default(),
             PointerHoverPlugin,
+            PointerReachPlugin,
             PointerClickPlugin,
             PointerEnvironmentPlugin,
         ));
-        app.configure_sets(Update, PointerSystemSet::Position);
         app.add_systems(Update, insert_pointer);
         app.add_systems(
             Update,
@@ -77,27 +74,6 @@ impl PointerAction {
     }
 }
 
-#[derive(Component, Default, Debug, Reflect)]
-pub struct Pointer;
-
-#[derive(Bundle, Debug)]
-pub struct PointerBundle {
-    pointer: Pointer,
-    data: SprintData,
-}
-impl Default for PointerBundle {
-    fn default() -> Self {
-        Self {
-            pointer: Pointer,
-            data: SprintData {
-                value: 50.0,
-                default_value: 50.0,
-                sprint_value: 2000.0,
-                ..default()
-            },
-        }
-    }
-}
 
 fn insert_pointer(
     mut commands: Commands,
@@ -108,7 +84,7 @@ fn insert_pointer(
         info!("Creating pointer for character '{:?}'", character_id);
         commands.entity(character_id).with_children(|parent| {
             parent.spawn((
-                PointerBundle::default(),
+                Pointer::default(),
                 Name::new("Pointer"),
                 SpriteBundle {
                     texture: asset_server.load("textures/cursor.png"),
@@ -137,17 +113,16 @@ fn update_pointer_position(
         (
             &mut Position,
             &ActionState<PointerAction>,
-            &SprintData,
+            &Pointer,
             &Parent,
         ),
         (Without<Character>, With<Pointer>),
     >,
-    mut character_query: Query<&Position, (With<Character>, Without<SprintData>)>,
+    mut character_query: Query<&Position, (With<Character>, Without<Pointer>)>,
     mut debounce: Local<bool>,
 ) {
-    for (mut pointer_position, pointer_actions, pointer_reach, pointer_parent) in
-        pointer_query.iter_mut()
-    {
+    for pointer in pointer_query.iter_mut() {
+        let (mut pointer_position, pointer_actions, pointer, pointer_parent) = pointer;
         let character_position = character_query.get_mut(pointer_parent.get()).unwrap();
         if pointer_actions.pressed(PointerAction::Move) {
             let look = pointer_actions.axis_pair(PointerAction::Move).unwrap().xy();
@@ -155,7 +130,7 @@ fn update_pointer_position(
                 continue;
             }
 
-            let offset = look * pointer_reach.value;
+            let offset = look * pointer.reach;
             let desired_position = character_position.xy() + offset;
             pointer_position.x = desired_position.x;
             pointer_position.y = desired_position.y;

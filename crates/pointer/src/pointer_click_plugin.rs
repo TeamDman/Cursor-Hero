@@ -2,75 +2,17 @@ use bevy::prelude::*;
 use bevy::utils::HashMap;
 use bevy::utils::HashSet;
 use bevy_xpbd_2d::components::CollidingEntities;
+use cursor_hero_pointer_types::prelude::*;
 
-use crate::pointer_plugin::Pointer;
+
 
 pub struct PointerClickPlugin;
 
 impl Plugin for PointerClickPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<Clickable>();
-        app.register_type::<Pressed>();
-        app.register_type::<Pressing>();
-        app.add_event::<ClickEvent>();
-        app.add_event::<ToolClickEvent>();
         app.add_systems(Update, press_detection);
         app.add_systems(Update, release_detection);
     }
-}
-
-#[derive(Component, Reflect, Debug)]
-pub struct Clickable;
-
-#[derive(Reflect, Debug)]
-struct PointerPress {
-    pointer_id: Entity,
-    way: Way,
-}
-#[derive(Component, Reflect, Debug)]
-pub struct Pressed {
-    presses: Vec<PointerPress>,
-}
-
-#[derive(Reflect, Debug, Hash, PartialEq, Eq, Copy, Clone)]
-struct TargetPress {
-    target_id: Entity,
-    way: Way,
-}
-#[derive(Component, Reflect, Debug)]
-pub struct Pressing {
-    pressing: Vec<TargetPress>,
-}
-
-#[derive(Reflect, Debug, Clone, Copy, Eq, PartialEq, Hash)]
-pub enum Way {
-    Left,
-    Right,
-    Middle,
-}
-
-#[derive(Event, Debug, Reflect)]
-pub enum ClickEvent {
-    Pressed {
-        target_id: Entity,
-        pointer_id: Entity,
-        way: Way,
-    },
-    Released {
-        target_id: Entity,
-        pointer_id: Entity,
-        way: Way,
-    },
-    Clicked {
-        target_id: Entity,
-        pointer_id: Entity,
-        way: Way,
-    },
-}
-#[derive(Event, Debug, Reflect)]
-pub enum ToolClickEvent {
-    Pressed { pointer_id: Entity, way: Way },
-    Released { pointer_id: Entity, way: Way },
 }
 
 #[allow(clippy::type_complexity)]

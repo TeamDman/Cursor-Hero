@@ -1,8 +1,6 @@
 use crate::prelude::*;
 use bevy::prelude::*;
-use cursor_hero_toolbelt::types::ActiveTool;
-use cursor_hero_toolbelt::types::ToolAction;
-use cursor_hero_toolbelt::types::*;
+use cursor_hero_toolbelt_types::prelude::*;
 use enigo::*;
 use leafwing_input_manager::prelude::*;
 

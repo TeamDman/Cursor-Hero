@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use bevy::prelude::*;
 use cursor_hero_level_bounds::level_bounds_plugin::LevelBounds;
-use cursor_hero_toolbelt::types::*;
+use cursor_hero_toolbelt_types::prelude::*;
 
 pub struct LevelBoundsVisibilityToolPlugin;
 

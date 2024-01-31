@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use cursor_hero_character::character_plugin::Character;
-use cursor_hero_sprint_tool_types::sprint_tool_types_plugin::SprintData;
-use cursor_hero_toolbelt::types::*;
+use cursor_hero_sprint_tool_types::sprint_tool_types_plugin::SprintEvent;
+use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_tools::prelude::*;
 use leafwing_input_manager::prelude::*;
 
@@ -70,12 +70,11 @@ fn toolbelt_events(
 #[derive(Component, Reflect)]
 pub struct SpawnedCube;
 
-// TODO: convert this to use events instead
 fn handle_input(
     sprint_tool_query: Query<(&ActionState<SprintToolAction>, &Parent), With<ActiveTool>>,
-    mut sprint_data_query: Query<&mut SprintData>,
-    toolbelt_query: Query<(&Parent, &Children), With<Toolbelt>>,
-    mut character_query: Query<&Children, With<Character>>,
+    toolbelt_query: Query<&Parent, With<Toolbelt>>,
+    mut character_query: Query<Entity, With<Character>>,
+    mut sprint_events: EventWriter<SprintEvent>,
 ) {
     for sprint_tool in sprint_tool_query.iter() {
         let (tool_actions, tool_parent) = sprint_tool;
@@ -84,13 +83,12 @@ fn handle_input(
             warn!("Sprint tool not inside a toolbelt?");
             continue;
         };
-        let (toolbelt_parent, toolbelt_children) = toolbelt;
-
+        let toolbelt_parent = toolbelt;
         let Ok(character) = character_query.get_mut(toolbelt_parent.get()) else {
             warn!("Toolbelt parent not a character?");
             continue;
         };
-        let character_kids = character;
+        let character_id = character;
 
         if tool_actions.pressed(SprintToolAction::Sprint) {
             if tool_actions.just_pressed(SprintToolAction::Sprint) {
@@ -98,23 +96,15 @@ fn handle_input(
             }
             let mut open = tool_actions.value(SprintToolAction::Sprint);
             open = open.powf(2.0);
-            for toolbelt_child in toolbelt_children.iter().chain(character_kids.iter()) {
-                if let Ok(mut sprint_data) = sprint_data_query.get_mut(*toolbelt_child) {
-                    if sprint_data.sprint_enabled {
-                        let sprint_bonus = sprint_data.default_value - sprint_data.sprint_value;
-                        sprint_data.value = sprint_data.default_value + sprint_bonus * open;
-                    }
-                }
-            }
+            sprint_events.send(SprintEvent::Active {
+                character_id: character_id,
+                throttle: open,
+            });
         } else if tool_actions.just_released(SprintToolAction::Sprint) {
             debug!("Sprint tool action released");
-            for toolbelt_child in toolbelt_children.iter().chain(character_kids.iter()) {
-                if let Ok(mut sprint_data) = sprint_data_query.get_mut(*toolbelt_child) {
-                    if sprint_data.sprint_enabled {
-                        sprint_data.value = sprint_data.default_value;
-                    }
-                }
-            }
+            sprint_events.send(SprintEvent::Stop {
+                character_id: character_id,
+            });
         }
     }
 }

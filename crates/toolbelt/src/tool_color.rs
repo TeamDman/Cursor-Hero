@@ -1,6 +1,8 @@
-use super::types::*;
+use cursor_hero_toolbelt_types::types::*;
+
 use bevy::prelude::*;
-use cursor_hero_pointer::pointer_hover_plugin::Hovered;
+use cursor_hero_pointer_types::prelude::*;
+
 
 enum ToolColor {
     Active,

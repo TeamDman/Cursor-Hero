@@ -4,15 +4,14 @@ use bevy_xpbd_2d::prelude::*;
 use cursor_hero_bevy::NegativeYIVec2;
 use cursor_hero_environment::environment_plugin::GameEnvironment;
 use cursor_hero_input::active_input_state_plugin::ActiveInput;
-use cursor_hero_pointer::pointer_environment_plugin::PointerEnvironment;
+use cursor_hero_pointer_types::prelude::*;
+
 use itertools::Itertools;
 
 use bevy::window::PrimaryWindow;
 use bevy::window::RawHandleWrapper;
 use cursor_hero_character::character_plugin::Character;
-use cursor_hero_pointer::pointer_plugin::Pointer;
-use cursor_hero_pointer::pointer_plugin::PointerSystemSet;
-use cursor_hero_toolbelt::types::*;
+use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_winutils::win_mouse::set_cursor_position;
 use cursor_hero_winutils::win_window::get_window_bounds;
 use cursor_hero_winutils::win_window::get_window_inner_offset;

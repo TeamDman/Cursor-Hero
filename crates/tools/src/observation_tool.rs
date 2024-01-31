@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use bevy::prelude::*;
-use cursor_hero_toolbelt::types::*;
+use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_winutils::ui_automation::get_taskbar;
 
 pub struct ObservationToolPlugin;

@@ -9,6 +9,9 @@ members = ["crates/*", "other/gamepad_hell", "other/uparrow-enter"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace.dependencies]
+cursor_hero_math = { path = "./crates/math" }
+cursor_hero_pointer_types = { path = "./crates/pointer_types" }
+cursor_hero_toolbelt_types = { path = "./crates/toolbelt_types" }
 cursor_hero_sprint_tool_types = { path = "./crates/sprint_tool_types" }
 cursor_hero_sprint_tool = { path = "./crates/sprint_tool" }
 cursor_hero_agent = { path = "./crates/agent" }

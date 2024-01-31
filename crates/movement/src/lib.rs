@@ -22,6 +22,12 @@ impl Plugin for MovementPlugin {
                     handle_events,
                 ),
             );
+        warn!("Switch to movement tool");
+        warn!("Switch to movement tool");
+        warn!("Switch to movement tool");
+        warn!("Switch to movement tool");
+        warn!("Switch to movement tool");
+        warn!("Switch to movement tool");
     }
 }
 

@@ -3,22 +3,17 @@ use bevy::utils::HashSet;
 use bevy_xpbd_2d::components::CollidingEntities;
 use cursor_hero_level_bounds::level_bounds_plugin::LevelBounds;
 use cursor_hero_level_bounds::level_bounds_plugin::LevelBoundsHolder;
+use cursor_hero_pointer_types::prelude::*;
 
-use crate::pointer_plugin::Pointer;
 
 pub struct PointerEnvironmentPlugin;
 
 impl Plugin for PointerEnvironmentPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<PointerEnvironment>();
         app.add_systems(Update, track_pointer_environment);
     }
 }
 
-#[derive(Component, Debug, Reflect)]
-pub struct PointerEnvironment {
-    pub environment_id: Entity,
-}
 fn track_pointer_environment(
     mut commands: Commands,
     mut pointer_query: Query<

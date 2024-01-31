@@ -2,12 +2,8 @@ use bevy::prelude::*;
 use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
 use bevy_xpbd_2d::components::Sensor;
-use cursor_hero_pointer::pointer_click_plugin::ClickEvent;
-use cursor_hero_pointer::pointer_click_plugin::Clickable;
-use cursor_hero_pointer::pointer_click_plugin::Pressed;
-use cursor_hero_pointer::pointer_click_plugin::Way;
-use cursor_hero_pointer::pointer_hover_plugin::Hoverable;
-use cursor_hero_pointer::pointer_hover_plugin::Hovered;
+use cursor_hero_pointer_types::prelude::*;
+
 
 use crate::game_screen_taskbar_plugin::Taskbar;
 use crate::start_menu_plugin::StartMenu;

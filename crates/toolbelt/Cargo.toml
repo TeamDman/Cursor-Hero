@@ -8,9 +8,10 @@ edition = "2021"
 [dependencies]
 cursor_hero_character = { workspace = true }
 cursor_hero_bevy = { workspace = true }
-cursor_hero_pointer = { workspace = true }
+cursor_hero_pointer_types = { workspace = true }
 cursor_hero_input = { workspace = true }
 cursor_hero_sprint_tool_types = { workspace = true }
+cursor_hero_toolbelt_types = { workspace = true }
 cursor_hero_xelu_prompts = { workspace = true }
 bevy = { workspace = true }
 bevy-inspector-egui = { workspace = true }
