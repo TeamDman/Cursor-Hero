@@ -77,7 +77,7 @@ impl TalkToolAction {
     }
     fn talk_wheel_gamepad_binding(&self) -> UserInput {
         match self {
-            Self::Listen => GamepadButtonType::LeftTrigger2.into(),
+            Self::Listen => GamepadButtonType::Select.into(),
         }
     }
 
