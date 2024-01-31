@@ -96,6 +96,7 @@ fn snap_mouse_to_pointer(
     let (pointer_position, pointer_environment) = pointer;
     // ensure a change has occurred
     if !pointer_position.is_changed() && !character_position.is_changed() {
+        // debug!("No change in pointer position or character position");
         return;
     }
 

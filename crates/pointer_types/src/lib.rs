@@ -1,14 +1,16 @@
-pub mod click;
-pub mod environment;
-pub mod hover;
+pub mod pointer_click_types;
+pub mod pointer_environment_types;
+pub mod pointer_hover_types;
 pub mod pointer_types_plugin;
-pub mod pointer;
-pub mod reach;
+pub mod pointer_types;
+pub mod pointer_reach_types;
+pub mod pointer_action_types;
 
 pub mod prelude {
-    pub use crate::click::*;
-    pub use crate::environment::*;
-    pub use crate::hover::*;
-    pub use crate::pointer::*;
-    pub use crate::reach::*;
+    pub use crate::pointer_click_types::*;
+    pub use crate::pointer_environment_types::*;
+    pub use crate::pointer_hover_types::*;
+    pub use crate::pointer_types::*;
+    pub use crate::pointer_reach_types::*;
+    pub use crate::pointer_action_types::*;
 }
