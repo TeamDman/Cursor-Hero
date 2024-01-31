@@ -9,7 +9,6 @@ use cursor_hero_sprint_tool_types::sprint_tool_types_plugin::SprintEvent;
 use cursor_hero_toolbelt_types::prelude::*;
 use itertools::Itertools;
 use leafwing_input_manager::prelude::*;
-
 pub struct ZoomToolPlugin;
 
 impl Plugin for ZoomToolPlugin {

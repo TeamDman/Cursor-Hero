@@ -45,6 +45,7 @@ cursor_hero_restart_memory = { path = "./crates/restart_memory" }
 cursor_hero_version = { path = "./crates/version" }
 cursor_hero_plugins = { path = "./crates/plugins" }
 cursor_hero_icon = { path = "./crates/icon" }
+#inline_tweak = {git = "https://github.com/Uriopass/inline_tweak", version = "1.1.0", tag = "v1.1.0"} # features=["derive"]
 anyhow = "1.0.75"
 glam = "0.25.0"
 # bevy = { path = "../bevy", features = ["dynamic_linking"] }
@@ -85,8 +86,6 @@ winreg = "0.52.0"
 cursor_hero_plugins = { workspace = true }
 cursor_hero_version = { workspace = true }
 bevy = { workspace = true }
-bevy-inspector-egui = { workspace = true }
-bevy_embedded_assets = { workspace = true }
 
 [dev-dependencies]
 bevy = { workspace = true, features = ["dynamic_linking"] }

@@ -1717,8 +1717,6 @@ name = "cursor_hero"
 version = "0.3.0"
 dependencies = [
  "bevy",
- "bevy-inspector-egui",
- "bevy_embedded_assets",
  "cursor_hero_plugins",
  "cursor_hero_version",
  "embed-resource",
@@ -1925,6 +1923,8 @@ name = "cursor_hero_plugins"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "bevy-inspector-egui",
+ "bevy_embedded_assets",
  "cursor_hero_agent",
  "cursor_hero_camera",
  "cursor_hero_character",

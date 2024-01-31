@@ -41,6 +41,8 @@ cursor_hero_icon = {workspace = true}
 cursor_hero_winutils = {workspace = true}
 cursor_hero_restart_memory = {workspace = true}
 bevy = {workspace = true}
+bevy_embedded_assets = { workspace = true }
+bevy-inspector-egui = { workspace = true }
 
 [dev-dependencies]
 cursor_hero_restart_memory = {workspace = true}
