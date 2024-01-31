@@ -17,8 +17,5 @@ impl Plugin for PhysicsPlugin {
                 position_to_transform: true,
                 transform_to_position: true,
             });
-
-        // side effect: enabling this will cause tools to spawn visible instead of hidden
-        // app.add_plugins(bevy_xpbd_2d::plugins::PhysicsDebugPlugin::default());
     }
 }

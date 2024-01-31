@@ -1913,6 +1913,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "cursor_hero_physics_debug"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy_xpbd_2d",
+]
+
+[[package]]
 name = "cursor_hero_plugins"
 version = "0.1.0"
 dependencies = [
@@ -1934,6 +1942,7 @@ dependencies = [
  "cursor_hero_movement",
  "cursor_hero_pause_tool",
  "cursor_hero_physics",
+ "cursor_hero_physics_debug",
  "cursor_hero_pointer",
  "cursor_hero_pointer_types",
  "cursor_hero_pressure_plate",

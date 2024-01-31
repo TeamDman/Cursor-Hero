@@ -37,10 +37,12 @@ use cursor_hero_sprint_tool_types::sprint_tool_types_plugin::SprintToolTypesPlug
 use cursor_hero_toolbelt_types::toolbelt_types_plugin::ToolbeltTypesPlugin;
 use cursor_hero_pointer_types::pointer_types_plugin::PointerTypesPlugin;
 use cursor_hero_math::math_plugin::MathPlugin;
+use cursor_hero_physics_debug::physics_debug_plugin::PhysicsDebugPlugin;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(PhysicsDebugPlugin);
         app.add_plugins(MathPlugin);
         app.add_plugins(PointerTypesPlugin);
         app.add_plugins(ToolbeltTypesPlugin);
