@@ -1,6 +1,8 @@
 use crate::prelude::*;
 use bevy::prelude::*;
 use cursor_hero_toolbelt_types::prelude::*;
+use enigo::Direction::Press;
+use enigo::Direction::Release;
 use enigo::*;
 use leafwing_input_manager::prelude::*;
 
@@ -119,53 +121,77 @@ impl ToolAction for KeyboardToolAction {
     }
 }
 
-fn handle_input(tool_query: Query<&ActionState<KeyboardToolAction>, With<ActiveTool>>) {
-    let mut enigo = Enigo::new();
+fn handle_input(
+    tool_query: Query<&ActionState<KeyboardToolAction>, With<ActiveTool>>,
+    mut enigo: Local<Option<Enigo>>,
+    mut cooldown: Local<Option<Timer>>,
+    time: Res<Time>,
+    mut debounce: Local<bool>,
+) {
+    if cooldown.is_none() {
+        *cooldown = Some(Timer::from_seconds(0.1, TimerMode::Repeating));
+    }
+    let Some(ref mut cooldown) = *cooldown else {
+        warn!("Failed to create cooldown timer");
+        return;
+    };
+    cooldown.tick(time.delta());
+    if cooldown.finished() {
+        *debounce = false;
+    }
+
+    if enigo.is_none() {
+        *enigo = Enigo::new(&Settings::default()).ok();
+    }
+    let Some(ref mut enigo) = *enigo else {
+        warn!("Failed to create enigo");
+        return;
+    };
+
     for tool_actions in tool_query.iter() {
-        let ctrl_down = if tool_actions.pressed(KeyboardToolAction::Ctrl) {
-            1
-        } else {
-            0
-        };
-        let shift_down = if tool_actions.pressed(KeyboardToolAction::Shift) {
-            2
-        } else {
-            0
-        };
-        let scan: u16 = ctrl_down | shift_down;
         for variant in KeyboardToolAction::variants() {
-            if tool_actions.just_pressed(variant) {
-                info!("{:?} key down (scan: {:?})", variant, scan);
-                enigo.key_down(variant.to_enigo());
-                // TODO: fix enigo not sending shift status when sending arrow keys; selection isn't working
-                // enigo.key_down_scan(variant.to_enigo(), scan);
+            if tool_actions.pressed(variant) {
+                if *debounce {
+                    continue;
+                }
+                *debounce = true;
+                info!("{:?} key down", variant);
+                if let Err(e) = enigo.key(variant.to_enigo(), Press) {
+                    warn!("Failed to send key: {:?}", e);
+                }
             }
             if tool_actions.just_released(variant) {
-                info!("{:?} key up (scan: {:?})", variant, scan);
-                enigo.key_up(variant.to_enigo());
-                // enigo.key_up_scan(variant.to_enigo(), scan);
+                info!("{:?} key up", variant);
+                if let Err(e) = enigo.key(variant.to_enigo(), Release) {
+                    warn!("Failed to send key: {:?}", e);
+                }
             }
         }
     }
 }
-
 #[cfg(test)]
 mod tests {
     // test that sending shift + arrow keys is highlighting text
     #[test]
     fn test_shift_arrow() {
-        use enigo::*;
+        use enigo::Direction::Press;
+        use enigo::Direction::Release;
+        use enigo::Enigo;
+        use enigo::Key;
+        use enigo::Keyboard;
+        use enigo::Settings;
         use std::thread::sleep;
         use std::time::Duration;
-        let mut enigo = Enigo::new();
-        sleep(Duration::from_secs(3));
-        enigo.key_down(Key::Shift);
-        enigo.key_down(Key::Control);
+
+        let mut enigo = Enigo::new(&Settings::default()).unwrap();
+
         sleep(Duration::from_secs(1));
-        enigo.key_down(Key::RightArrow);
-        sleep(Duration::from_secs(1));
-        enigo.key_up(Key::RightArrow);
-        enigo.key_up(Key::Shift);
-        enigo.key_up(Key::Control);
+        enigo.key(Key::Shift, Press).unwrap();
+        enigo.key(Key::Control, Press).unwrap();
+        enigo.key(Key::RightArrow, Press).unwrap();
+
+        enigo.key(Key::RightArrow, Release).unwrap();
+        enigo.key(Key::Control, Release).unwrap();
+        enigo.key(Key::Shift, Release).unwrap();
     }
 }

@@ -88,14 +88,10 @@ impl Plugin for MyPlugin {
         app.add_plugins(ToolPlugin);
         app.add_plugins(WallpaperPlugin);
 
-        app.add_plugins(
-            WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)),
-        );
+        // must be before the default plugins
         app.add_plugins(EmbeddedAssetPlugin {
             mode: bevy_embedded_assets::PluginMode::ReplaceDefault,
         });
-        app.add_plugins(FrameTimeDiagnosticsPlugin);
-
 
         #[cfg(debug_assertions)]
         let log_plugin = LogPlugin {
@@ -128,5 +124,13 @@ impl Plugin for MyPlugin {
                 .set(log_plugin)
                 .build(),
         );
+
+        
+        // must be after the default plugins
+        app.add_plugins(
+            WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)),
+        );
+        app.add_plugins(FrameTimeDiagnosticsPlugin);
+
     }
 }
