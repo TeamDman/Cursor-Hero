@@ -38,7 +38,7 @@ impl Default for ZoomTool {
         Self {
             speed: 1.0,
             default_speed: 1.0,
-            sprint_speed: 2.0,
+            sprint_speed: 50.0,
         }
     }
 }
