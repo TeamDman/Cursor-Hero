@@ -27,7 +27,6 @@ impl Plugin for CursorToolPlugin {
             .add_systems(
                 PostUpdate,
                 snap_mouse_to_pointer
-                    .run_if(in_state(ActiveInput::Gamepad))
                     .after(PointerSystemSet::Position)
                     .after(PhysicsSet::Sync)
                     .after(TransformSystem::TransformPropagate),
@@ -60,17 +59,16 @@ fn toolbelt_events(
 fn snap_mouse_to_pointer(
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<(Ref<GlobalTransform>, &Children), With<Character>>,
-    pointers: Query<(Ref<GlobalTransform>, Option<&PointerEnvironment>), With<Pointer>>,
-    tools: Query<(Option<&ActiveTool>, &Parent), With<CursorTool>>,
+    pointers: Query<
+        (Ref<GlobalTransform>, Option<&PointerEnvironment>),
+        (With<Pointer>, With<HostCursorFollows>),
+    >,
+    tools: Query<&Parent, (With<CursorTool>, With<ActiveTool>)>,
     camera_query: Query<(&GlobalTransform, &Camera)>,
-    window_query: Query<(&RawHandleWrapper, &Window), With<PrimaryWindow>>,
+    window_query: Query<&RawHandleWrapper, With<PrimaryWindow>>,
     environment_query: Query<(), With<GameEnvironment>>,
 ) {
-    // ensure only a single cursor positioning tool is active
-    let active = tools
-        .iter()
-        .filter(|(t_active, _)| t_active.is_some())
-        .collect_vec();
+    let active = tools.iter().collect_vec();
     let active_count = active.len();
     if active_count > 1 {
         warn!("Only one cursor positioning tool should be active at a time");
@@ -79,32 +77,46 @@ fn snap_mouse_to_pointer(
         return;
     }
 
-    // get the pointer position
-    let (character_position, character_children) = characters
-        .get(
-            toolbelts
-                .get(active.first().unwrap().1.get())
-                .expect("Toolbelt should have a parent")
-                .get(),
-        )
-        .expect("Toolbelt should have a character");
-    let pointer = character_children
+    let Some(tool) = active.first() else {
+        return;
+    };
+    let tool_parent = tool;
+
+    let Ok(toolbelt) = toolbelts.get(tool_parent.get()) else {
+        warn!("Tool not inside a toolbelt?");
+        return;
+    };
+    let toolbelt_parent = toolbelt;
+
+    let Ok(character) = characters.get(toolbelt_parent.get()) else {
+        warn!("Toolbelt parent not a character?");
+        return;
+    };
+    let (character_position, character_children) = character;
+
+    let Some(pointer) = character_children
         .iter()
         .filter_map(|x| pointers.get(*x).ok())
         .next()
-        .expect("Character should have a pointer");
+    else {
+        // may not be any pointers matching With<HostCursorFollows>
+        return;
+    };
     let (pointer_position, pointer_environment) = pointer;
+
     // ensure a change has occurred
     if !pointer_position.is_changed() && !character_position.is_changed() {
         // debug!("No change in pointer position or character position");
         return;
     }
 
-    // get the destination position
     let mut destination_position = pointer_position.translation().xy().as_ivec2();
 
-    // only when focused, do repositioning logic for when the cursor is over the window
-    let (window_handle, _window) = window_query.get_single().expect("Need a single window");
+    let Ok(window) = window_query.get_single() else {
+        error!("No primary window found");
+        return;
+    };
+    let window_handle = window;
 
     let is_in_game_environment = pointer_environment
         .and_then(|pointer_environment| {
@@ -114,20 +126,30 @@ fn snap_mouse_to_pointer(
         })
         .is_some();
     if is_in_game_environment {
+        destination_position += IVec2::new(1, -1);
         // position the cursor over the pointer instead
         let window_bounds = match window_handle.window_handle {
             raw_window_handle::RawWindowHandle::Win32(handle) => {
-                get_window_bounds(handle.hwnd as _).expect("Need a window position")
+                match get_window_bounds(handle.hwnd as _) {
+                    Ok(bounds) => bounds,
+                    Err(e) => {
+                        error!("Failed to get window bounds: {:?}", e);
+                        return;
+                    }
+                }
             }
             _ => panic!("Unsupported window handle"),
         };
 
-        let camera = camera_query.get_single().expect("Need a single camera");
+        let Ok(camera) = camera_query.get_single() else {
+            error!("No camera found");
+            return;
+        };
         let (camera_transform, camera) = camera;
         let viewport_position =
             camera.world_to_viewport(camera_transform, destination_position.as_vec2().extend(0.0));
 
-        // if the pointer is in view, 
+        // if the pointer is in view,
         if let Some(viewport_position) = viewport_position {
             destination_position = (viewport_position.as_ivec2() + window_bounds.min).neg_y();
 
@@ -138,6 +160,7 @@ fn snap_mouse_to_pointer(
         }
     }
 
+    // debug!("Setting cursor position to {:?}", destination_position);
     match set_cursor_position(destination_position.neg_y()) {
         Ok(_) => {}
         Err(e) => warn!("Failed to set cursor position: {}", e),

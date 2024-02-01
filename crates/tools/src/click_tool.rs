@@ -188,8 +188,14 @@ fn handle_input(
     for tool in tools.iter() {
         let (tool_actions, tool_parent) = tool;
 
+        if !ClickToolAction::variants()
+            .any(|action| tool_actions.just_pressed(action) || tool_actions.just_released(action))
+        {
+            continue;
+        }
+
         let Ok(toolbelt) = toolbelts.get(tool_parent.get()) else {
-            warn!("Click tool not inside a toolbelt?");
+            warn!("Tool not inside a toolbelt?");
             continue;
         };
         let toolbelt_parent = toolbelt;
@@ -203,7 +209,9 @@ fn handle_input(
         let Some(pointer) = character_children
             .iter()
             .filter_map(|x| pointers.get(*x).ok())
-            .next() else {
+            .next()
+        else {
+            //TODO: warn if more than one pointer found
             warn!("Character {:?} missing a pointer?", toolbelt_parent.get());
             debug!("Character children: {:?}", character_children);
             continue;

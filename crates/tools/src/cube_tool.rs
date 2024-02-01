@@ -6,7 +6,6 @@ use cursor_hero_character::character_plugin::Character;
 use cursor_hero_physics::damping_plugin::MovementDamping;
 use cursor_hero_pointer_types::prelude::*;
 
-
 use cursor_hero_toolbelt_types::prelude::*;
 
 use crate::prelude::*;
@@ -91,21 +90,34 @@ fn handle_input(
     pointers: Query<&GlobalTransform, With<Pointer>>,
     mut cubes: Query<(Entity, &GlobalTransform, &mut LinearVelocity), With<CubeToolInteractable>>,
 ) {
-    for (t_act, t_parent) in tools.iter() {
-        let c_kids = characters
-            .get(
-                toolbelts
-                    .get(t_parent.get())
-                    .expect("Toolbelt should have a parent")
-                    .get(),
-            )
-            .expect("Toolbelt should have a character");
-        let pointer = c_kids
+    for tool in tools.iter() {
+        let (tool_actions, tool_parent) = tool;
+
+        let Ok(toolbelt) = toolbelts.get(tool_parent.get()) else {
+            warn!("Tool not inside a toolbelt?");
+            continue;
+        };
+        let toolbelt_parent = toolbelt;
+
+        let Ok(character) = characters.get(toolbelt_parent.get()) else {
+            warn!("Toolbelt parent not a character?");
+            continue;
+        };
+        let character_children = character;
+
+        let Some(pointer) = character_children
             .iter()
             .filter_map(|x| pointers.get(*x).ok())
             .next()
-            .expect("Character should have a pointer");
-        if t_act.just_pressed(CubeToolAction::Spawn) {
+        else {
+            //TODO: warn if more than one pointer found
+            warn!("Character {:?} missing a pointer?", toolbelt_parent.get());
+            debug!("Character children: {:?}", character_children);
+            continue;
+        };
+        let pointer_transform = pointer;
+
+        if tool_actions.just_pressed(CubeToolAction::Spawn) {
             info!("Spawn Cube");
             commands.spawn((
                 CubeToolInteractable,
@@ -115,7 +127,7 @@ fn handle_input(
                         custom_size: Some(Vec2::new(15.0, 15.0)),
                         ..default()
                     },
-                    transform: Transform::from_translation(pointer.translation()),
+                    transform: Transform::from_translation(pointer_transform.translation()),
                     ..default()
                 },
                 RigidBody::Dynamic,
@@ -123,13 +135,13 @@ fn handle_input(
                 Name::new("Cube"),
             ));
         }
-        if t_act.just_pressed(CubeToolAction::Remove) {
+        if tool_actions.just_pressed(CubeToolAction::Remove) {
             info!("Remove Cube");
             // remove the cube closest to the pointer
             let mut closest_cube = None;
             let mut closest_dist = f32::MAX;
             for (c_e, c_t, _) in cubes.iter() {
-                let dist = c_t.translation().distance(pointer.translation());
+                let dist = c_t.translation().distance(pointer_transform.translation());
                 if dist < closest_dist {
                     closest_cube = Some(c_e);
                     closest_dist = dist;
@@ -139,15 +151,15 @@ fn handle_input(
                 commands.entity(cube).despawn_recursive();
             }
         }
-        if t_act.just_pressed(CubeToolAction::KillAll) {
+        if tool_actions.just_pressed(CubeToolAction::KillAll) {
             info!("Kill All Cubes");
             // remove all cubes
             for (c_e, _, _) in cubes.iter() {
                 commands.entity(c_e).despawn_recursive();
             }
         }
-        if t_act.pressed(CubeToolAction::Attract) {
-            if t_act.just_pressed(CubeToolAction::Attract) {
+        if tool_actions.pressed(CubeToolAction::Attract) {
+            if tool_actions.just_pressed(CubeToolAction::Attract) {
                 info!("Attract Cube");
             }
             // add a force to all cubes towards the pointer

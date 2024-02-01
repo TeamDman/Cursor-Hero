@@ -96,20 +96,25 @@ fn handle_input(
     mut camera_events: EventWriter<CameraEvent>,
     mut movement_target_events: EventWriter<MovementTargetEvent>,
 ) {
-    for (t_act, t_parent) in focus_tool_query.iter() {
-        if t_act.just_pressed(FocusToolAction::ToggleFollowCharacter) {
+    for tool in focus_tool_query.iter() {
+        let (tool_actions, tool_parent) = tool;
+
+        if tool_actions.just_pressed(FocusToolAction::ToggleFollowCharacter) {
             info!("Toggle follow character");
-            let toolbelt = toolbelt_query
-                .get(t_parent.get())
-                .expect("Toolbelt should have a parent");
+            let Ok(toolbelt) = toolbelt_query.get(tool_parent.get()) else {
+                warn!("Toolbelt should have a parent");
+                continue;
+            };
+
             let (toolbelt_parent, toolbelt_children) = toolbelt;
             let movement_tool_ids = toolbelt_children
                 .iter()
                 .filter_map(|child| movement_tool_query.get(*child).ok());
 
-            let character = character_query
-                .get_mut(toolbelt_parent.get())
-                .expect("Toolbelt should have a character");
+            let Ok(character) = character_query.get_mut(toolbelt_parent.get()) else {
+                warn!("Toolbelt should have a character");
+                continue;
+            };
             let (character_id, mut character_transform, character_is_followed) = character;
 
             let camera = camera_query.single();
@@ -140,9 +145,12 @@ fn handle_input(
                 info!("Sent unfollow events");
             }
         }
-        if t_act.just_pressed(FocusToolAction::FocusMainWindow) {
+        if tool_actions.just_pressed(FocusToolAction::FocusMainWindow) {
             info!("Focus main window");
-            let window_handle = window_query.get_single().expect("Need a single window");
+            let Ok(window_handle) = window_query.get_single() else {
+                error!("No primary window found");
+                return;
+            };
             let win32handle = match window_handle.window_handle {
                 raw_window_handle::RawWindowHandle::Win32(handle) => handle,
                 _ => panic!("Unsupported window handle"),

@@ -6,7 +6,8 @@ pub struct ActiveInputStatePlugin;
 
 impl Plugin for ActiveInputStatePlugin {
     fn build(&self, app: &mut App) {
-        app.add_state::<ActiveInput>().add_systems(
+        app.add_state::<ActiveInput>();
+        app.add_systems(
             Update,
             (
                 activate_gamepad.run_if(in_state(ActiveInput::MouseKeyboard)),

@@ -29,3 +29,8 @@ impl Default for Pointer {
         }
     }
 }
+
+#[derive(Component, Debug, Reflect)]
+pub struct FollowHostCursor;
+#[derive(Component, Debug, Reflect)]
+pub struct HostCursorFollows;

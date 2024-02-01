@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
+use cursor_hero_bevy::NegativeYVec2;
 use cursor_hero_character::character_plugin::Character;
 use cursor_hero_environment::environment_plugin::PopulateEnvironmentEvent;
 use cursor_hero_physics::damping_plugin::MovementDamping;
@@ -41,6 +42,7 @@ fn spawn_agent(
         };
         info!("Spawning agent for game environment {:?}", environment_id);
         commands.entity(*environment_id).with_children(|parent| {
+            let spawn_position = Vec2::new(1920.0, 1080.0).neg_y() / 2.0;
             parent.spawn((
                 SpriteBundle {
                     sprite: Sprite {
@@ -48,14 +50,14 @@ fn spawn_agent(
                         ..default()
                     },
                     texture: asset_server.load(AgentAppearance::Default.get_texture_path()),
-                    transform: Transform::from_translation(Vec3::new(0.0, 0.0, 80.0)),
+                    transform: Transform::from_translation(spawn_position.extend(80.0)),
                     ..default()
                 },
                 Character::default(),
                 Name::new("Agent"),
                 Agent,
-                RigidBody::Kinematic,
-                Collider::capsule(15.0, 12.5),
+                RigidBody::Dynamic,
+                Collider::capsule(25.0, 12.5),
                 MovementDamping { factor: 0.90 },
             ));
         });

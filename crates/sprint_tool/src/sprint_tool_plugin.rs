@@ -80,7 +80,7 @@ fn handle_input(
         let (tool_actions, tool_parent) = sprint_tool;
 
         let Ok(toolbelt) = toolbelt_query.get(tool_parent.get()) else {
-            warn!("Sprint tool not inside a toolbelt?");
+            warn!("Tool not inside a toolbelt?");
             continue;
         };
         let toolbelt_parent = toolbelt;

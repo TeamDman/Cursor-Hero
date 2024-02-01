@@ -173,22 +173,34 @@ fn handle_input(
     bridge: ResMut<Bridge>,
     egui_context_query: Query<&EguiContext, With<PrimaryWindow>>,
 ) {
-    for (t_act, t_parent) in tools.iter() {
-        let c_kids = characters
-            .get(
-                toolbelts
-                    .get(t_parent.get())
-                    .expect("Toolbelt should have a parent")
-                    .get(),
-            )
-            .expect("Toolbelt should have a character");
-        let p = c_kids
+    for tool in tools.iter() {
+        let (tool_actions, tool_parent) = tool;
+
+        let Ok(toolbelt) = toolbelts.get(tool_parent.get()) else {
+            warn!("Tool not inside a toolbelt?");
+            continue;
+        };
+        let toolbelt_parent = toolbelt;
+
+        let Ok(character) = characters.get(toolbelt_parent.get()) else {
+            warn!("Toolbelt parent not a character?");
+            continue;
+        };
+        let character_children = character;
+
+        let Some(pointer) = character_children
             .iter()
             .filter_map(|x| pointers.get(*x).ok())
             .next()
-            .expect("Character should have a pointer");
-        let p_pos = p.translation();
-        if t_act.just_pressed(InspectToolAction::DupeUnderMouse) {
+        else {
+            //TODO: warn if more than one pointer found
+            warn!("Character {:?} missing a pointer?", toolbelt_parent.get());
+            debug!("Character children: {:?}", character_children);
+            continue;
+        };
+        let pointer_transform = pointer;
+        let pointer_translation = pointer_transform.translation();
+        if tool_actions.just_pressed(InspectToolAction::DupeUnderMouse) {
             let hovering_over_egui = egui_context_query
                 .get_single()
                 .ok()
@@ -199,8 +211,8 @@ fn handle_input(
             }
             info!("PrintUnderMouse button");
             match bridge.sender.send(ThreadboundMessage::DupeUnderMouse(
-                p_pos.x as i32,
-                -p_pos.y as i32,
+                pointer_translation.x as i32,
+                -pointer_translation.y as i32,
             )) {
                 Ok(_) => {}
                 Err(e) => {
@@ -208,7 +220,7 @@ fn handle_input(
                 }
             }
         }
-        if t_act.just_pressed(InspectToolAction::PrintUnderMouse) {
+        if tool_actions.just_pressed(InspectToolAction::PrintUnderMouse) {
             let hovering_over_egui = egui_context_query
                 .get_single()
                 .ok()
@@ -219,8 +231,8 @@ fn handle_input(
             }
             info!("PrintUnderMouse button");
             match bridge.sender.send(ThreadboundMessage::PrintUnderMouse(
-                p_pos.x as i32,
-                -p_pos.y as i32,
+                pointer_translation.x as i32,
+                -pointer_translation.y as i32,
             )) {
                 Ok(_) => {}
                 Err(e) => {

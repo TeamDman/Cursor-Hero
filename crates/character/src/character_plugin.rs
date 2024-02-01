@@ -25,7 +25,6 @@ pub struct Character;
 #[derive(Component)]
 pub struct MainCharacter;
 
-
 #[derive(Component, Reflect, Eq, PartialEq, Debug)]
 pub enum CharacterAppearance {
     Focused,
@@ -46,7 +45,13 @@ fn spawn_character(
     asset_server: Res<AssetServer>,
     mut camera_events: EventWriter<CameraEvent>,
 ) {
-    let os_cursor_pos = get_cursor_position().expect("Should be able to fetch cursor pos from OS");
+    let os_cursor_pos = match get_cursor_position() {
+        Ok(pos) => pos,
+        Err(e) => {
+            error!("Failed to get cursor position, spawning character at (0,0): {}", e);
+            IVec2::ZERO
+        }
+    };
     let character = commands.spawn((
         SpriteBundle {
             texture: asset_server.load(CharacterAppearance::Focused.get_texture_path()),

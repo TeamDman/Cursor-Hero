@@ -89,7 +89,10 @@ fn handle_input(
             if hovering_over_egui {
                 continue;
             }
-            let window_id = window_query.get_single().expect("Need a single window");
+            let Ok(window_id) = window_query.get_single() else {
+                error!("No primary window found");
+                return;
+            };
             if let Some(winit_window) = winit_windows.get_window(window_id) {
                 // winit_window.window_state_lock
                 if let Err(x) = winit_window.drag_window() {

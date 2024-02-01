@@ -72,11 +72,16 @@ fn handle_populate_environment_events(
                             .id(),
                     );
                 });
+                let Some(level_bounds_holder_id) = level_bounds_holder_id else {
+                    warn!(
+                        "Failed to create level bounds holder for environment {:?}",
+                        event
+                    );
+                    continue;
+                };
                 commands
                     .entity(*environment_id)
-                    .insert(LevelBoundsParentRef(
-                        level_bounds_holder_id.expect("we just created this entity"),
-                    ));
+                    .insert(LevelBoundsParentRef(level_bounds_holder_id));
             }
         }
     }

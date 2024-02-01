@@ -93,9 +93,10 @@ fn update_screens(
     winit_windows: NonSend<WinitWindows>,
 ) {
     let window_id = window_query.single();
-    let winit_window = winit_windows
-        .get_window(window_id)
-        .expect("Window not found");
+    let Some(winit_window) = winit_windows.get_window(window_id) else {
+        error!("Window not found");
+        return;
+    };
     if winit_window.is_minimized().unwrap_or(false) {
         *frames.enabled.lock().unwrap() = false;
         return;
