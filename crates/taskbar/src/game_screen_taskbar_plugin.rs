@@ -31,7 +31,6 @@ pub enum TaskbarEvent {
 fn detect_new_game_screens_and_send_taskbar_create_event(
     mut taskbar_events: EventWriter<TaskbarEvent>,
     screen_query: Query<Entity, Added<GameScreen>>,
-    // TODO: switch taskbar creation to game environment population event
 ) {
     for screen_id in screen_query.iter() {
         taskbar_events.send(TaskbarEvent::Create { screen_id });
