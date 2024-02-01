@@ -47,7 +47,7 @@ struct MainCameraMemoryConfig {
 impl Default for MainCameraMemoryConfig {
     fn default() -> Self {
         Self {
-            debounce_timer: Timer::from_seconds(0.5, TimerMode::Repeating),
+            debounce_timer: Timer::from_seconds(10.0, TimerMode::Repeating),
         }
     }
 }
