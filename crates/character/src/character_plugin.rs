@@ -5,7 +5,6 @@ use bevy_xpbd_2d::prelude::*;
 
 use cursor_hero_bevy::NegativeYVec2;
 use cursor_hero_camera::camera_plugin::CameraEvent;
-use cursor_hero_movement::Movement;
 use cursor_hero_physics::damping_plugin::MovementDamping;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
 
@@ -65,7 +64,6 @@ fn spawn_character(
         RigidBody::Kinematic,
         Collider::capsule(15.0, 12.5),
         SpatialListener::new(-7.0),
-        Movement::default(),
     ));
     camera_events.send(CameraEvent::BeginFollowing {
         target_id: character.id(),

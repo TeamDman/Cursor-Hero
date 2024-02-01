@@ -1734,7 +1734,6 @@ dependencies = [
  "cursor_hero_character",
  "cursor_hero_environment",
  "cursor_hero_input",
- "cursor_hero_movement",
  "cursor_hero_physics",
  "leafwing-input-manager",
 ]
@@ -1753,7 +1752,6 @@ dependencies = [
  "bevy",
  "bevy_egui",
  "bevy_xpbd_2d",
- "cursor_hero_movement",
  "cursor_hero_physics",
  "leafwing-input-manager",
 ]
@@ -1768,7 +1766,6 @@ dependencies = [
  "cursor_hero_bevy",
  "cursor_hero_camera",
  "cursor_hero_input",
- "cursor_hero_movement",
  "cursor_hero_physics",
  "cursor_hero_winutils",
  "leafwing-input-manager",
@@ -1881,17 +1878,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cursor_hero_movement"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "bevy-inspector-egui",
- "bevy_xpbd_2d",
- "cursor_hero_physics",
- "leafwing-input-manager",
-]
-
-[[package]]
 name = "cursor_hero_pause_tool"
 version = "0.1.0"
 dependencies = [
@@ -1939,7 +1925,6 @@ dependencies = [
  "cursor_hero_level_bounds",
  "cursor_hero_math",
  "cursor_hero_metrics",
- "cursor_hero_movement",
  "cursor_hero_pause_tool",
  "cursor_hero_physics",
  "cursor_hero_physics_debug",
@@ -2109,7 +2094,6 @@ dependencies = [
  "cursor_hero_input",
  "cursor_hero_level_bounds",
  "cursor_hero_math",
- "cursor_hero_movement",
  "cursor_hero_physics",
  "cursor_hero_pointer_types",
  "cursor_hero_screen",

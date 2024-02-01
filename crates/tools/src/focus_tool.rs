@@ -3,7 +3,6 @@ use bevy::window::PrimaryWindow;
 use bevy::window::RawHandleWrapper;
 use cursor_hero_camera::camera_plugin::FollowWithMainCamera;
 use cursor_hero_camera::camera_plugin::MainCamera;
-use cursor_hero_movement::MovementEvent;
 use cursor_hero_winutils::win_mouse::set_cursor_position;
 use cursor_hero_winutils::win_window::get_window_title_bar_center_position;
 use leafwing_input_manager::prelude::*;
@@ -14,6 +13,9 @@ use cursor_hero_winutils::win_window::focus_window;
 
 use cursor_hero_toolbelt_types::prelude::*;
 
+use crate::movement_tool::MovementTarget;
+use crate::movement_tool::MovementTargetEvent;
+use crate::movement_tool::MovementTool;
 use crate::prelude::*;
 
 pub struct FocusToolPlugin;
@@ -82,8 +84,9 @@ impl ToolAction for FocusToolAction {
 #[allow(clippy::type_complexity)]
 #[allow(clippy::too_many_arguments)]
 fn handle_input(
-    tool_query: Query<(&ActionState<FocusToolAction>, &Parent),With<ActiveTool>>,
-    toolbelt_query: Query<&Parent, With<Toolbelt>>,
+    focus_tool_query: Query<(&ActionState<FocusToolAction>, &Parent), With<ActiveTool>>,
+    movement_tool_query: Query<Entity, With<MovementTool>>,
+    toolbelt_query: Query<(&Parent, &Children), With<Toolbelt>>,
     mut character_query: Query<
         (Entity, &mut Transform, Option<&FollowWithMainCamera>),
         (With<Character>, Without<MainCamera>),
@@ -91,17 +94,21 @@ fn handle_input(
     camera_query: Query<(Entity, &Transform), (With<MainCamera>, Without<Character>)>,
     window_query: Query<&RawHandleWrapper, With<PrimaryWindow>>,
     mut camera_events: EventWriter<CameraEvent>,
-    mut movement_events: EventWriter<MovementEvent>,
+    mut movement_target_events: EventWriter<MovementTargetEvent>,
 ) {
-    for (t_act, t_parent) in tool_query.iter() {
+    for (t_act, t_parent) in focus_tool_query.iter() {
         if t_act.just_pressed(FocusToolAction::ToggleFollowCharacter) {
             info!("Toggle follow character");
             let toolbelt = toolbelt_query
                 .get(t_parent.get())
                 .expect("Toolbelt should have a parent");
+            let (toolbelt_parent, toolbelt_children) = toolbelt;
+            let movement_tool_ids = toolbelt_children
+                .iter()
+                .filter_map(|child| movement_tool_query.get(*child).ok());
 
             let character = character_query
-                .get_mut(toolbelt.get())
+                .get_mut(toolbelt_parent.get())
                 .expect("Toolbelt should have a character");
             let (character_id, mut character_transform, character_is_followed) = character;
 
@@ -111,11 +118,11 @@ fn handle_input(
                 camera_events.send(CameraEvent::BeginFollowing {
                     target_id: character_id,
                 });
-                movement_events.send(MovementEvent::RemoveMovement {
-                    target_id: camera_id,
-                });
-                movement_events.send(MovementEvent::AddMovement {
-                    target_id: character_id,
+                movement_tool_ids.for_each(|id| {
+                    movement_target_events.send(MovementTargetEvent::SetTarget {
+                        tool_id: id,
+                        target: MovementTarget::Character,
+                    });
                 });
                 info!("Sent follow events");
                 info!("Updating character to be at camera position");
@@ -124,11 +131,11 @@ fn handle_input(
                 camera_events.send(CameraEvent::StopFollowing {
                     target_id: character_id,
                 });
-                movement_events.send(MovementEvent::AddMovement {
-                    target_id: camera_id,
-                });
-                movement_events.send(MovementEvent::RemoveMovement {
-                    target_id: character_id,
+                movement_tool_ids.for_each(|id| {
+                    movement_target_events.send(MovementTargetEvent::SetTarget {
+                        tool_id: id,
+                        target: MovementTarget::Camera(camera_id),
+                    });
                 });
                 info!("Sent unfollow events");
             }

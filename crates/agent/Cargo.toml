@@ -10,7 +10,6 @@ bevy = { workspace = true }
 cursor_hero_environment = { workspace = true }
 cursor_hero_character = { workspace = true }
 cursor_hero_physics = { workspace = true }
-cursor_hero_movement = { workspace = true }
 cursor_hero_input = { workspace = true }
 cursor_hero_bevy = { workspace = true }
 cursor_hero_camera = { workspace = true }

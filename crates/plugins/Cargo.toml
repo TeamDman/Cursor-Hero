@@ -27,7 +27,6 @@ cursor_hero_level_bounds = {workspace = true}
 cursor_hero_input = {workspace = true}
 cursor_hero_camera = {workspace = true}
 cursor_hero_character = {workspace = true}
-cursor_hero_movement = {workspace = true}
 cursor_hero_data = {workspace = true}
 cursor_hero_metrics = {workspace = true}
 cursor_hero_click_drag_character_movement = {workspace = true}

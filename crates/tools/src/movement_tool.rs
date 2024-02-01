@@ -21,8 +21,10 @@ impl Plugin for MovementToolPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(InputManagerPlugin::<MovementToolAction>::default());
         app.register_type::<MovementTool>();
+        app.add_event::<MovementTargetEvent>();
         app.add_systems(Update, toolbelt_events);
         app.add_systems(Update, handle_sprint_events);
+        app.add_systems(Update, handle_set_movement_events);
         app.add_systems(Update, handle_inputs.after(DampingSystemSet::Dampen));
         app.add_systems(OnEnter(ActiveInput::MouseKeyboard), set_mnk_speed);
         app.add_systems(OnEnter(ActiveInput::Gamepad), set_gamepad_speed);
@@ -38,6 +40,21 @@ pub struct MovementTool {
     default_speed: f32,
     #[inspector(min = 0.0)]
     sprint_speed: f32,
+    target: MovementTarget,
+}
+
+#[derive(Reflect, Debug, Clone, Copy)]
+pub enum MovementTarget {
+    Character,
+    Camera(Entity),
+}
+
+#[derive(Event, Debug, Reflect)]
+pub enum MovementTargetEvent {
+    SetTarget {
+        tool_id: Entity,
+        target: MovementTarget,
+    },
 }
 
 impl Default for MovementTool {
@@ -54,6 +71,7 @@ fn default_mnk() -> MovementTool {
         speed: 8000.0,
         default_speed: 8000.0,
         sprint_speed: 40000.0,
+        target: MovementTarget::Character,
     }
 }
 fn default_gamepad() -> MovementTool {
@@ -61,6 +79,7 @@ fn default_gamepad() -> MovementTool {
         speed: 800.0,
         default_speed: 800.0,
         sprint_speed: 80000.0,
+        target: MovementTarget::Character,
     }
 }
 
@@ -114,11 +133,29 @@ fn toolbelt_events(
     }
 }
 
+fn handle_set_movement_events(
+    mut movement_target_events: EventReader<MovementTargetEvent>,
+    mut tool_query: Query<&mut MovementTool>,
+) {
+    for event in movement_target_events.read() {
+        match event {
+            MovementTargetEvent::SetTarget { tool_id, target } => {
+                let Ok(mut tool) = tool_query.get_mut(*tool_id) else {
+                    warn!("Tool {:?} does not exist", tool_id);
+                    continue;
+                };
+                tool.target = *target;
+            }
+        }
+    }
+}
+
 fn handle_inputs(
     time: Res<Time>,
     tool_query: Query<(&ActionState<MovementToolAction>, &MovementTool, &Parent), With<ActiveTool>>,
     toolbelt_query: Query<&Parent, With<Toolbelt>>,
-    mut character_query: Query<&mut LinearVelocity, With<Character>>,
+    mut character_query: Query<&mut LinearVelocity, (With<Character>, Without<Camera>)>,
+    mut camera_query: Query<&mut LinearVelocity, (With<Camera>, Without<Character>)>,
 ) {
     let delta_time = time.delta_seconds_f64().adjust_precision();
     for tool in tool_query.iter() {
@@ -129,17 +166,31 @@ fn handle_inputs(
         let Ok(toolbelt_parent) = toolbelt_query.get(tool_parent.get()) else {
             continue;
         };
-        let Ok(character) = character_query.get_mut(toolbelt_parent.get()) else {
-            continue;
-        };
-        let mut character_velocity = character;
         let move_delta = delta_time
             * tool_actions
                 .clamped_axis_pair(MovementToolAction::Move)
                 .unwrap()
                 .xy();
-        character_velocity.x += move_delta.x * tool.speed;
-        character_velocity.y += move_delta.y * tool.speed;
+        match tool.target {
+            MovementTarget::Character => {
+                let Ok(character) = character_query.get_mut(toolbelt_parent.get()) else {
+                    warn!("Character {:?} does not exist", toolbelt_parent);
+                    continue;
+                };
+                let mut character_velocity = character;
+                character_velocity.x += move_delta.x * tool.speed;
+                character_velocity.y += move_delta.y * tool.speed;
+            }
+            MovementTarget::Camera(camera_id) => {
+                let Ok(camera) = camera_query.get_mut(camera_id) else {
+                    warn!("Camera {:?} does not exist", camera_id);
+                    continue;
+                };
+                let mut camera_velocity = camera;
+                camera_velocity.x += move_delta.x * tool.speed;
+                camera_velocity.y += move_delta.y * tool.speed;
+            }
+        }
     }
 }
 
@@ -156,7 +207,10 @@ fn set_mnk_speed(
         if character_query.get(toolbelt.get()).is_err() {
             continue;
         }
-        *tool = default_mnk();
+        *tool = MovementTool {
+            target: tool.target,
+            ..default_mnk()
+        };
     }
 }
 
@@ -173,7 +227,10 @@ fn set_gamepad_speed(
         if character_query.get(toolbelt.get()).is_err() {
             continue;
         }
-        *tool = default_gamepad();
+        *tool = MovementTool {
+            target: tool.target,
+            ..default_gamepad()
+        };
     }
 }
 
@@ -193,7 +250,7 @@ fn handle_sprint_events(
             continue;
         };
         let character_kids = character;
-        
+
         let tool_ids = character_kids
             .iter()
             .filter_map(|kid| toolbelt_query.get(*kid).ok())

@@ -21,7 +21,6 @@ use cursor_hero_icon::IconPlugin;
 use cursor_hero_input::InputPlugin;
 use cursor_hero_level_bounds::level_bounds_plugin::LevelBoundsPlugin;
 use cursor_hero_math::math_plugin::MathPlugin;
-use cursor_hero_movement::MovementPlugin;
 use cursor_hero_pause_tool::pause_tool_plugin::PauseToolPlugin;
 use cursor_hero_physics::damping_plugin::DampingPlugin;
 use cursor_hero_physics::physics_plugin::PhysicsPlugin;
@@ -70,7 +69,6 @@ impl Plugin for MyPlugin {
         app.add_plugins(LevelBoundsPlugin);
         app.add_plugins(MathPlugin);
         app.add_plugins(MemoryPlugin);
-        app.add_plugins(MovementPlugin);
         app.add_plugins(PauseToolPlugin);
         app.add_plugins(PhysicsDebugPlugin);
         app.add_plugins(PhysicsPlugin);

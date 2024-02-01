@@ -3,7 +3,6 @@ use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
 use cursor_hero_character::character_plugin::Character;
 use cursor_hero_environment::environment_plugin::PopulateEnvironmentEvent;
-use cursor_hero_movement::Movement;
 use cursor_hero_physics::damping_plugin::MovementDamping;
 
 pub struct AgentPlugin;
@@ -55,7 +54,6 @@ fn spawn_agent(
                 Character::default(),
                 Name::new("Agent"),
                 Agent,
-                Movement::default(),
                 RigidBody::Kinematic,
                 Collider::capsule(15.0, 12.5),
                 MovementDamping { factor: 0.90 },

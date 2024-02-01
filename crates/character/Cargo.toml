@@ -9,7 +9,6 @@ edition = "2021"
 cursor_hero_camera = { workspace = true }
 cursor_hero_bevy = { workspace = true }
 cursor_hero_input = { workspace = true }
-cursor_hero_movement = { workspace = true }
 cursor_hero_physics = { workspace = true }
 cursor_hero_winutils = { workspace = true}
 bevy-inspector-egui = { workspace = true}

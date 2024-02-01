@@ -11,4 +11,3 @@ bevy_xpbd_2d = { workspace = true }
 bevy_egui = {workspace = true}
 leafwing-input-manager = { workspace = true }
 cursor_hero_physics = { workspace = true }
-cursor_hero_movement = { workspace = true }
