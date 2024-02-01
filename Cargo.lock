@@ -1940,6 +1940,7 @@ dependencies = [
  "cursor_hero_toolbelt_types",
  "cursor_hero_tools",
  "cursor_hero_ui",
+ "cursor_hero_version",
  "cursor_hero_wallpaper",
  "cursor_hero_winutils",
  "cursor_hero_xelu_prompts",

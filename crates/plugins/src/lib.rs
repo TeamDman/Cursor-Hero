@@ -7,6 +7,7 @@ use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::log::LogPlugin;
 use bevy_embedded_assets::EmbeddedAssetPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use cursor_hero_agent::agent_plugin::AgentPlugin;
 use cursor_hero_camera::camera_plugin::CameraPlugin;
 use cursor_hero_character::character_plugin::CharacterPlugin;
 use cursor_hero_cursor_mirror::cursor_mirroring_plugin::CursorMirroringPlugin;
@@ -40,14 +41,14 @@ use cursor_hero_toolbelt_types::toolbelt_types_plugin::ToolbeltTypesPlugin;
 use cursor_hero_tools::ToolPlugin;
 use cursor_hero_ui::about_text_plugin::AboutTextPlugin;
 use cursor_hero_ui::fps_text_plugin::FpsTextPlugin;
-use cursor_hero_ui::position_text_plugin::PositionTextPlugin;
+use cursor_hero_version::version_plugin::Version;
 use cursor_hero_wallpaper::wallpaper_plugin::WallpaperPlugin;
 
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
-        //app.add_plugins(AgentPlugin);
+        app.add_plugins(AgentPlugin);
         //app.add_plugins(ClickDragMovementPlugin);
         //app.add_plugins(HoverShowerRelayPlugin);
         //app.add_plugins(HoverShowerServicePlugin);
@@ -74,7 +75,7 @@ impl Plugin for MyPlugin {
         app.add_plugins(PhysicsPlugin);
         app.add_plugins(PointerPlugin);
         app.add_plugins(PointerTypesPlugin);
-        app.add_plugins(PositionTextPlugin);
+        // app.add_plugins(PositionTextPlugin);
         app.add_plugins(PressurePlatePlugin);
         app.add_plugins(ScreenPlugin);
         app.add_plugins(ScreenUpdatePlugin);
@@ -103,6 +104,13 @@ impl Plugin for MyPlugin {
             filter: "info,wgpu_core=warn,wgpu_hal=warn".into(),
         };
         const AUDIO_SCALE: f32 = 1. / 100.0;
+        let version = match app.world.get_resource::<Version>() {
+            Some(version) => version.0.clone(),
+            None => {
+                warn!("Version resource not found");
+                "Unknown".to_string()
+            }
+        };
         app.add_plugins(
             DefaultPlugins
                 .set(ImagePlugin::default_nearest())
@@ -113,7 +121,7 @@ impl Plugin for MyPlugin {
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         transparent: true,
-                        title: format!("Cursor Hero v{}", env!("CARGO_PKG_VERSION")),
+                        title: format!("Cursor Hero v{}", version),
                         resizable: true,
                         ..default()
                     }),
@@ -123,12 +131,10 @@ impl Plugin for MyPlugin {
                 .build(),
         );
 
-        
         // must be after the default plugins
         app.add_plugins(
             WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)),
         );
         app.add_plugins(FrameTimeDiagnosticsPlugin);
-
     }
 }
