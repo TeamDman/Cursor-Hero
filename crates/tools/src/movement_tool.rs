@@ -151,7 +151,7 @@ fn handle_set_movement_events(
 }
 
 fn handle_inputs(
-    time: Res<Time>,
+    time: Res<Time<Physics>>,
     tool_query: Query<(&ActionState<MovementToolAction>, &MovementTool, &Parent), With<ActiveTool>>,
     toolbelt_query: Query<&Parent, With<Toolbelt>>,
     mut character_query: Query<&mut LinearVelocity, (With<Character>, Without<Camera>)>,
