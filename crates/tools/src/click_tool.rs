@@ -174,6 +174,7 @@ fn spawn_worker_thread(mut commands: Commands) {
 }
 
 #[allow(clippy::too_many_arguments)]
+#[allow(clippy::type_complexity)]
 fn handle_input(
     mut commands: Commands,
     tools: Query<(&ActionState<ClickToolAction>, &Parent), (With<ActiveTool>, With<ClickTool>)>,

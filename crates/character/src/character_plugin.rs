@@ -62,7 +62,7 @@ fn spawn_character(
             transform: Transform::from_translation(os_cursor_pos.as_vec2().neg_y().extend(100.0)),
             ..default()
         },
-        Character::default(),
+        Character,
         MainCharacter,
         MovementDamping { factor: 0.90 },
         Name::new("Character"),

@@ -103,7 +103,7 @@ fn handle_close_events(
         };
         let mut removed = vec![];
         for child in start_menu_button_children.iter() {
-            if let Ok(_) = start_menu_query.get(*child) {
+            if start_menu_query.get(*child).is_ok() {
                 commands.entity(*child).despawn_recursive();
                 removed.push(*child);
             }

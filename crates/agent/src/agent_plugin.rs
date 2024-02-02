@@ -53,7 +53,7 @@ fn spawn_agent(
                     transform: Transform::from_translation(spawn_position.extend(80.0)),
                     ..default()
                 },
-                Character::default(),
+                Character,
                 Name::new("Agent"),
                 Agent,
                 RigidBody::Dynamic,

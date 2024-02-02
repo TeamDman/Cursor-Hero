@@ -56,7 +56,7 @@ fn handle_taskbar_create_events(
             continue;
         };
         let taskbar_size = Vec2::new(screen_size.x, 40.0);
-        let taskbar_translation = Vec3::new(0.0, -screen_size.y / 2.0 + 40.0 / 2.0, 2.0);
+        let taskbar_translation = Vec3::new(0.0, -screen_size.y / 2.0 + 40.0 / 2.0, 5.0);
 
         let mut color = match get_start_color() {
             Ok(color) => color,

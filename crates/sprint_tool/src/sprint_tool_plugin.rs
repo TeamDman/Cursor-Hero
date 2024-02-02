@@ -94,17 +94,15 @@ fn handle_input(
             if tool_actions.just_pressed(SprintToolAction::Sprint) {
                 debug!("Sprint tool action just pressed");
             }
-            let mut open = tool_actions.value(SprintToolAction::Sprint);
-            open = open.powf(2.0);
+            let mut throttle = tool_actions.value(SprintToolAction::Sprint);
+            throttle = throttle.powf(2.0);
             sprint_events.send(SprintEvent::Active {
-                character_id: character_id,
-                throttle: open,
+                character_id,
+                throttle,
             });
         } else if tool_actions.just_released(SprintToolAction::Sprint) {
             debug!("Sprint tool action released");
-            sprint_events.send(SprintEvent::Stop {
-                character_id: character_id,
-            });
+            sprint_events.send(SprintEvent::Stop { character_id });
         }
     }
 }

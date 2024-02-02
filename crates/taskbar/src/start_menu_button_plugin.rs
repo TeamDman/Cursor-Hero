@@ -105,6 +105,7 @@ enum VisualState {
     Pressed,
 }
 
+#[allow(clippy::type_complexity)]
 fn visuals(
     mut start_menu_button_query: Query<
         (&mut Sprite, Option<&Pressed>, Option<&Hovered>),
@@ -113,9 +114,9 @@ fn visuals(
 ) {
     for (mut sprite, pressed, hovered) in start_menu_button_query.iter_mut() {
         let mut visual_state = VisualState::Normal;
-        if let Some(_) = pressed {
+        if pressed.is_some() {
             visual_state = VisualState::Pressed;
-        } else if let Some(_) = hovered {
+        } else if hovered.is_some() {
             visual_state = VisualState::Hovered;
         }
         match visual_state {

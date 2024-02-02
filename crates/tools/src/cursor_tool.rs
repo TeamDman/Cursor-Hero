@@ -3,7 +3,6 @@ use bevy::transform::TransformSystem;
 use bevy_xpbd_2d::prelude::*;
 use cursor_hero_bevy::NegativeYIVec2;
 use cursor_hero_environment::environment_plugin::GameEnvironment;
-use cursor_hero_input::active_input_state_plugin::ActiveInput;
 use cursor_hero_pointer_types::prelude::*;
 
 use itertools::Itertools;
@@ -56,6 +55,7 @@ fn toolbelt_events(
     }
 }
 
+#[allow(clippy::type_complexity)]
 fn snap_mouse_to_pointer(
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<(Ref<GlobalTransform>, &Children), With<Character>>,
