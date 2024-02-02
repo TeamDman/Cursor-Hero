@@ -101,7 +101,7 @@ fn handle_events(
 
 fn follow(
     follow_query: Query<&GlobalTransform, With<FollowWithMainCamera>>,
-    mut cam_query: Query<(&mut Transform, &mut Position), With<MainCamera>>,
+    mut cam_query: Query<&mut Transform, With<MainCamera>>,
 ) {
     let follow = match follow_query.get_single() {
         Ok(follow) => follow,
@@ -111,7 +111,7 @@ fn follow(
             return;
         }
     };
-    let follow_transform = follow;
+    let follow_global_transform = follow;
 
     let camera = match cam_query.get_single_mut() {
         Ok(camera) => camera,
@@ -121,8 +121,9 @@ fn follow(
             return;
         }
     };
-    let (mut camera_transform, mut camera_position) = camera;
+    let mut camera_transform = camera;
 
-    camera_position.0 = follow.translation().xy();
-    camera_transform.translation = follow_transform.translation();
+    // update transform
+    let follow_translation = follow_global_transform.translation();
+    camera_transform.translation = follow_translation;
 }

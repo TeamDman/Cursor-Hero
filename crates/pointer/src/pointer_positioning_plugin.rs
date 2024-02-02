@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy::transform::TransformSystem;
 use bevy::window::PrimaryWindow;
 use bevy_xpbd_2d::prelude::*;
+use cursor_hero_camera::camera_plugin::CameraSystemSet;
 use cursor_hero_camera::camera_plugin::MainCamera;
 use cursor_hero_character::character_plugin::Character;
 use cursor_hero_character::character_plugin::MainCharacter;
@@ -39,21 +40,26 @@ impl Plugin for PointerPositioningPlugin {
             remove_host_cursor_follows_tag_from_main_character_pointer,
         );
         app.add_systems(
-            Update,
-            update_pointer_from_mouse.in_set(PointerSystemSet::Position),
-        );
-        app.add_systems(
             PostUpdate,
             update_pointer_position
                 .in_set(PointerSystemSet::Position)
                 .after(PhysicsSet::Sync)
                 .before(TransformSystem::TransformPropagate),
-            // .after(TransformSystem::TransformPropagate),
+        );
+
+        app.add_systems(
+            PostUpdate,
+            update_pointer_from_mouse
+                .in_set(PointerSystemSet::Position)
+                .after(CameraSystemSet::Follow)
+                .after(PhysicsSet::Sync)
+                .after(TransformSystem::TransformPropagate),
         );
     }
 }
 
 // BEGIN NEW POINTER MANAGEMENT
+#[allow(clippy::type_complexity)]
 fn add_follow_host_cursor_tag_to_new_main_character_pointers(
     mut commands: Commands,
     pointer_query: Query<(Entity, &Parent), (Added<Pointer>, Without<FollowHostCursor>)>,
@@ -67,6 +73,8 @@ fn add_follow_host_cursor_tag_to_new_main_character_pointers(
         }
     }
 }
+
+#[allow(clippy::type_complexity)]
 fn add_host_cursor_follows_tag_to_new_main_character_pointers(
     mut commands: Commands,
     pointer_query: Query<(Entity, &Parent), (Added<Pointer>, Without<HostCursorFollows>)>,
@@ -156,7 +164,7 @@ fn remove_host_cursor_follows_tag_from_main_character_pointer(
     }
 }
 // END HOST CURSOR FOLLOWS
-
+#[allow(clippy::type_complexity)]
 fn update_pointer_position(
     mut pointer_query: Query<
         (
@@ -198,32 +206,72 @@ fn update_pointer_position(
 #[allow(clippy::type_complexity)]
 fn update_pointer_from_mouse(
     window_query: Query<&Window, With<PrimaryWindow>>,
-    camera_query: Query<(&Camera, &GlobalTransform), (With<MainCamera>, Without<Character>)>,
-    character_query: Query<&Children, (With<MainCharacter>, Without<MainCamera>, Without<Pointer>)>,
-    mut pointer_query: Query<&mut Position, (With<Pointer>, With<FollowHostCursor>)>,
+    camera_query: Query<
+        (&Camera, &GlobalTransform),
+        (With<MainCamera>, Without<Character>, Without<Pointer>),
+    >,
+    character_query: Query<
+        &GlobalTransform,
+        (With<MainCharacter>, Without<MainCamera>, Without<Pointer>),
+    >,
+    mut pointer_query: Query<
+        (&mut Transform, &mut Position),
+        (
+            With<Pointer>,
+            With<FollowHostCursor>,
+            Without<Character>,
+            Without<MainCamera>,
+        ),
+    >,
     mut last_known_cursor_position: Local<Option<Vec2>>,
 ) {
-    let (camera, camera_global_transform) = camera_query.single();
-    let window = window_query.single();
-    if let Some(current_screen_position) = window.cursor_position().or(*last_known_cursor_position)
-    {
-        // for some reason, window.cursor_position starts returning None when not moving the mouse
-        // this causes problems when the character moves and the pointer should follow
-        // so let's just track it to fill in the gaps
-        *last_known_cursor_position = Some(current_screen_position);
-        // mouse is inside the window, convert to world coords
-        if let Some(current_world_position) = camera
-            .viewport_to_world(camera_global_transform, current_screen_position)
-            .map(|ray| ray.origin.truncate())
-        {
-            if let Ok(character_children) = character_query.get_single() {
-                for child in character_children.iter() {
-                    if let Ok(mut pointer_position) = pointer_query.get_mut(*child) {
-                        pointer_position.x = current_world_position.x;
-                        pointer_position.y = current_world_position.y;
-                    }
-                }
-            }
+    let Ok(camera) = camera_query.get_single() else {
+        warn!("No camera found");
+        return;
+    };
+    let (camera, camera_global_transform) = camera;
+
+    let Ok(window) = window_query.get_single() else {
+        warn!("No window found");
+        return;
+    };
+
+    let Some(cursor_screen_position) = window.cursor_position().or(*last_known_cursor_position)
+    else {
+        // warn!("No cursor position?");
+        return;
+    };
+    // for some reason, window.cursor_position starts returning None when not moving the mouse
+    // this causes problems when the character moves and the pointer should follow
+    // so let's just track it to fill in the gaps
+    *last_known_cursor_position = Some(cursor_screen_position);
+    // debug!("current_screen_position: {:?}", current_screen_position);
+
+    let Some(cursor_world_position) = camera
+        .viewport_to_world(camera_global_transform, cursor_screen_position)
+        .map(|ray| ray.origin.truncate())
+    else {
+        return;
+    };
+
+    for pointer in pointer_query.iter_mut() {
+        let (mut pointer_transform, mut pointer_position) = pointer;
+
+        let Ok(character) = character_query.get_single() else {
+            return;
+        };
+        let character_transform = character;
+
+        let new_position = cursor_world_position;
+        let new_translation = cursor_world_position - character_transform.translation().xy();
+        let diff = new_translation - pointer_transform.translation.xy();
+        if diff == Vec2::ZERO {
+            let pointer_position = pointer_position.bypass_change_detection();
+            pointer_position.x = new_position.x;
+            pointer_position.y = new_position.y;
+        } else {
+            pointer_transform.translation.x = new_translation.x;
+            pointer_transform.translation.y = new_translation.y;
         }
     }
 }
