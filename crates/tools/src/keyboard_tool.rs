@@ -18,7 +18,10 @@ pub struct KeyboardToolPlugin;
 impl Plugin for KeyboardToolPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(InputManagerPlugin::<KeyboardToolAction>::default());
-        app.add_systems(Update, (toolbelt_events, handle_input, handle_sprint_events));
+        app.add_systems(
+            Update,
+            (toolbelt_events, handle_input, handle_sprint_events),
+        );
     }
 }
 
@@ -219,7 +222,6 @@ mod tests {
     }
 }
 
-
 fn handle_sprint_events(
     mut sprint_events: EventReader<SprintEvent>,
     character_query: Query<&Children, With<Character>>,
@@ -248,7 +250,8 @@ fn handle_sprint_events(
             SprintEvent::Active { throttle, .. } => {
                 let mut iter = tool_query.iter_many_mut(&tool_ids);
                 while let Some(mut tool) = iter.fetch_next() {
-                    tool.repeat_delay = (tool.default_repeat_delay, tool.sprint_repeat_delay).lerp(*throttle);
+                    tool.repeat_delay =
+                        (tool.default_repeat_delay, tool.sprint_repeat_delay).lerp(*throttle);
                 }
             }
             SprintEvent::Stop { .. } => {

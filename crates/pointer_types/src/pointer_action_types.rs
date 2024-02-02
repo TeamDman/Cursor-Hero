@@ -27,7 +27,7 @@ impl PointerAction {
             Self::Move => UserInput::VirtualDPad(VirtualDPad::arrow_keys()),
         }
     }
-    
+
     pub fn default_input_map() -> InputMap<PointerAction> {
         let mut input_map = InputMap::default();
 

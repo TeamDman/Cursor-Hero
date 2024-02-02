@@ -3,7 +3,6 @@ use cursor_hero_toolbelt_types::types::*;
 use bevy::prelude::*;
 use cursor_hero_pointer_types::prelude::*;
 
-
 enum ToolColor {
     Active,
     Hovered,

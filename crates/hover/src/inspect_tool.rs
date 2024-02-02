@@ -163,10 +163,7 @@ fn spawn_worker_thread(mut commands: Commands) {
 }
 
 fn handle_input(
-    tools: Query<(
-        &ActionState<InspectToolAction>,
-        &Parent,
-    ),With<ActiveTool>>,
+    tools: Query<(&ActionState<InspectToolAction>, &Parent), With<ActiveTool>>,
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<&Children, With<Character>>,
     pointers: Query<&GlobalTransform, With<Pointer>>,

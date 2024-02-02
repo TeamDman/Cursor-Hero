@@ -10,7 +10,6 @@ impl Plugin for PointerHoverPlugin {
     }
 }
 
-
 #[allow(clippy::type_complexity)]
 pub fn hover_detection(
     mut commands: Commands,

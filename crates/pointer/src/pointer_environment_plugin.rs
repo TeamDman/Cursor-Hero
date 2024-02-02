@@ -5,7 +5,6 @@ use cursor_hero_level_bounds::level_bounds_plugin::LevelBounds;
 use cursor_hero_level_bounds::level_bounds_plugin::LevelBoundsHolder;
 use cursor_hero_pointer_types::prelude::*;
 
-
 pub struct PointerEnvironmentPlugin;
 
 impl Plugin for PointerEnvironmentPlugin {

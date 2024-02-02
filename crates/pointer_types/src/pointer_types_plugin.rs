@@ -12,12 +12,12 @@ impl Plugin for PointerTypesPlugin {
 
         app.add_event::<PointerReachEvent>();
         app.register_type::<PointerEnvironment>();
-        
+
         app.register_type::<Hovered>();
         app.register_type::<Hoverable>();
         app.register_type::<Hovering>();
         app.add_event::<HoverEvent>();
-        
+
         app.register_type::<Clickable>();
         app.register_type::<Pressed>();
         app.register_type::<Pressing>();

@@ -48,7 +48,10 @@ fn spawn_character(
     let os_cursor_pos = match get_cursor_position() {
         Ok(pos) => pos,
         Err(e) => {
-            error!("Failed to get cursor position, spawning character at (0,0): {}", e);
+            error!(
+                "Failed to get cursor position, spawning character at (0,0): {}",
+                e
+            );
             IVec2::ZERO
         }
     };

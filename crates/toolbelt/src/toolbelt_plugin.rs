@@ -21,8 +21,7 @@ pub struct ToolbeltPlugin;
 
 impl Plugin for ToolbeltPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .add_plugins(InputManagerPlugin::<ToolbeltAction>::default())
+        app.add_plugins(InputManagerPlugin::<ToolbeltAction>::default())
             .add_systems(
                 Update,
                 (

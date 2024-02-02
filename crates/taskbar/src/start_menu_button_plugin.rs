@@ -4,7 +4,6 @@ use bevy_xpbd_2d::components::RigidBody;
 use bevy_xpbd_2d::components::Sensor;
 use cursor_hero_pointer_types::prelude::*;
 
-
 use crate::game_screen_taskbar_plugin::Taskbar;
 use crate::start_menu_plugin::StartMenu;
 use crate::start_menu_plugin::StartMenuEvent;

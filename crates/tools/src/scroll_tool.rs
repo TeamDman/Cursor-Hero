@@ -17,7 +17,10 @@ impl Plugin for ScrollToolPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<ScrollTool>()
             .add_plugins(InputManagerPlugin::<ScrollToolAction>::default())
-            .add_systems(Update, (toolbelt_events, handle_input,handle_sprint_events));
+            .add_systems(
+                Update,
+                (toolbelt_events, handle_input, handle_sprint_events),
+            );
     }
 }
 
@@ -121,8 +124,6 @@ fn handle_input(
         }
     }
 }
-
-
 
 fn handle_sprint_events(
     mut sprint_events: EventReader<SprintEvent>,

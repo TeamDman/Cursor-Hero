@@ -3,12 +3,10 @@ use bevy::prelude::*;
 use bevy_inspector_egui::prelude::ReflectInspectorOptions;
 use bevy_inspector_egui::InspectorOptions;
 
-
 #[derive(SystemSet, Clone, Hash, Debug, PartialEq, Eq)]
 pub enum PointerSystemSet {
     Position,
 }
-
 
 #[derive(Component, InspectorOptions, Debug, Reflect)]
 #[reflect(Component, InspectorOptions)]

@@ -4,8 +4,6 @@ use bevy::utils::HashSet;
 use bevy_xpbd_2d::components::CollidingEntities;
 use cursor_hero_pointer_types::prelude::*;
 
-
-
 pub struct PointerClickPlugin;
 
 impl Plugin for PointerClickPlugin {

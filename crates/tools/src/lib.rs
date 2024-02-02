@@ -9,16 +9,16 @@ pub mod hello_tool;
 pub mod keyboard_tool;
 pub mod keyboard_wheel_tool;
 pub mod level_bounds_visibility_tool;
+pub mod movement_tool;
 pub mod observation_tool;
 pub mod placeholder_tool;
 pub mod restart_tool;
+pub mod scroll_tool;
 pub mod talk_tool;
 pub mod tool_plugin;
 pub mod tool_spawning;
 pub mod window_drag_tool;
 pub mod zoom_tool;
-pub mod movement_tool;
-pub mod scroll_tool;
 
 pub use crate::tool_plugin::ToolPlugin;
 

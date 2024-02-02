@@ -128,7 +128,7 @@ fn spawn_worker_thread(mut commands: Commands) {
 }
 
 fn handle_input(
-    tools: Query<&ActionState<TalkToolAction>,With<ActiveTool>>,
+    tools: Query<&ActionState<TalkToolAction>, With<ActiveTool>>,
     bridge: ResMut<Bridge>,
 ) {
     for t_act in tools.iter() {

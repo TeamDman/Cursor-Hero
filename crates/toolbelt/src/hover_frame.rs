@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use cursor_hero_pointer_types::prelude::*;
 
-
 #[derive(Component, Debug)]
 pub struct ToolFrame;
 

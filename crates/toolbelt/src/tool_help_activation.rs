@@ -150,7 +150,10 @@ pub fn spawn_help_for_tool(
                         }
                     },
                     _ => {
-                        warn!("Only single inputs are supported for tool help, got {:?}", action);
+                        warn!(
+                            "Only single inputs are supported for tool help, got {:?}",
+                            action
+                        );
                     }
                 }
             }
