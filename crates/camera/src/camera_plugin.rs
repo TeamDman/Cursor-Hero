@@ -1,4 +1,5 @@
 use bevy::ecs::query::QuerySingleError::MultipleEntities;
+use bevy::ecs::query::QuerySingleError::NoEntities;
 use bevy::input::mouse::MouseWheel;
 use bevy::prelude::*;
 use bevy::transform::TransformSystem;
@@ -7,7 +8,6 @@ use bevy_egui::EguiContext;
 use bevy_xpbd_2d::prelude::*;
 use cursor_hero_physics::damping_plugin::MovementDamping;
 pub struct CameraPlugin;
-
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_camera)
@@ -16,11 +16,17 @@ impl Plugin for CameraPlugin {
             .add_systems(
                 PostUpdate,
                 follow
+                    .in_set(CameraSystemSet::Follow)
                     .after(PhysicsSet::Sync)
                     .before(TransformSystem::TransformPropagate),
             )
             .register_type::<MainCamera>();
     }
+}
+
+#[derive(SystemSet, Clone, Hash, Debug, PartialEq, Eq)]
+pub enum CameraSystemSet {
+    Follow,
 }
 
 #[derive(Component, Reflect)]
@@ -95,23 +101,28 @@ fn handle_events(
 
 fn follow(
     follow_query: Query<&GlobalTransform, With<FollowWithMainCamera>>,
-    mut cam_query: Query<&mut Transform, With<MainCamera>>,
+    mut cam_query: Query<(&mut Transform, &mut Position), With<MainCamera>>,
 ) {
-    match follow_query.get_single() {
-        Ok(follow_transform) => match cam_query.get_single_mut() {
-            Ok(mut cam_transform) => {
-                cam_transform.translation = follow_transform.translation();
-            }
-            Err(e) => {
-                if let MultipleEntities(e) = e {
-                    error!("Error getting camera transform: {:?}", e);
-                }
-            }
-        },
-        Err(e) => {
-            if let MultipleEntities(e) = e {
-                error!("Error getting camera follow transform: {:?}", e);
-            }
+    let follow = match follow_query.get_single() {
+        Ok(follow) => follow,
+        Err(NoEntities(_)) => return,
+        Err(MultipleEntities(e)) => {
+            error!("Multiple entities are being followed: {:?}", e);
+            return;
         }
-    }
+    };
+    let follow_transform = follow;
+
+    let camera = match cam_query.get_single_mut() {
+        Ok(camera) => camera,
+        Err(NoEntities(_)) => return,
+        Err(MultipleEntities(e)) => {
+            error!("Multiple cameras found: {:?}", e);
+            return;
+        }
+    };
+    let (mut camera_transform, mut camera_position) = camera;
+
+    camera_position.0 = follow.translation().xy();
+    camera_transform.translation = follow_transform.translation();
 }
