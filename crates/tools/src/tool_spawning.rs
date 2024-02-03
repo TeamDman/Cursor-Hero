@@ -39,26 +39,19 @@ where
     Action: ToolAction + Actionlike + core::fmt::Debug,
 {
     pub fn new(tag: T, toolbelt_id: Entity, event: &PopulateToolbeltEvent) -> Self {
-        let input_map = Action::default_input_map(event);
-        let display_actions = match input_map {
-            None => HashMap::new(),
-            Some(ref input_map) => input_map
-                .iter()
-                .map(|v| (format!("{:?}", v.0), v.1.clone()))
-                .collect(),
-        };
         Self {
             tag,
             event: *event,
             name: "Unnamed Tool".to_string(),
             description: "Who knows what this does?".to_string(),
-            display_actions,
             texture: Handle::default(),
             toolbelt_id,
             starting_state: StartingState::Active,
             size: Some(Vec2::new(100.0, 100.0)),
-            input_map,
+            input_map: None,
+            display_actions: HashMap::new(),
         }
+        .with_input_map(Action::default_input_map(event))
     }
 
     pub fn with_name(mut self, name: String) -> Self {
@@ -77,6 +70,13 @@ where
     }
 
     pub fn with_input_map(mut self, input_map: Option<InputMap<Action>>) -> Self {
+        self.display_actions = match input_map {
+            None => HashMap::new(),
+            Some(ref input_map) => input_map
+                .iter()
+                .map(|v| (format!("{:?}", v.0), v.1.clone()))
+                .collect(),
+        };
         self.input_map = input_map;
         self
     }

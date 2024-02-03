@@ -25,6 +25,5 @@ pub fn insert_agent_toolbelt(
             });
             info!("Sent populate agent toolbelt event for agent {:?}", character_id);
         });
-
     }
 }
