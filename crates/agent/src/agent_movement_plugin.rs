@@ -14,12 +14,13 @@ impl Plugin for AgentMovementPlugin {
     }
 }
 fn agent_tool_movement(
-    character_query: Query<&Children, (With<Character>, With<Agent>)>,
+    character_query: Query<(&Children, &Transform), (With<Character>, With<Agent>)>,
     toolbelt_query: Query<&Children, With<Toolbelt>>,
     mut tool_query: Query<&mut ActionState<MovementToolAction>>,
+    time: Res<Time>,
 ) {
     for character in character_query.iter() {
-        let character_children = character;
+        let (character_children, character_transform) = character;
         for character_child_id in character_children.iter() {
             let Ok(toolbelt) = toolbelt_query.get(*character_child_id) else {
                 continue;
@@ -30,7 +31,11 @@ fn agent_tool_movement(
                     continue;
                 };
                 let data = tool.action_data_mut(MovementToolAction::Move);
-                data.axis_pair = Some(DualAxisData::from_xy(Vec2::new(1.0, 0.0)));
+                let center = Vec2::new(1920.0, -1080.0) / 2.0;
+                // walk in a circle around the center
+                let desired_position = center + Vec2::from_angle(time.elapsed_seconds()) * 100.0;
+                let direction = desired_position - character_transform.translation.xy();
+                data.axis_pair = Some(DualAxisData::from_xy(direction.clamp_length_max(1.0)));
                 tool.press(MovementToolAction::Move);
             }
         }
