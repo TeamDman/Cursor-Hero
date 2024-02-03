@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use crate::character_types::*;
+use bevy::prelude::*;
 pub struct CharacterTypesPlugin;
 
 impl Plugin for CharacterTypesPlugin {

@@ -4,8 +4,8 @@ use leafwing_input_manager::user_input::InputKind;
 
 use bevy_inspector_egui::prelude::ReflectInspectorOptions;
 use bevy_inspector_egui::InspectorOptions;
-use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_input::active_input_state_plugin::ActiveInput;
+use cursor_hero_toolbelt_types::prelude::*;
 
 #[derive(Component, Reflect, Debug, InspectorOptions)]
 #[reflect(Component, InspectorOptions)]
@@ -58,7 +58,6 @@ pub enum MovementTargetEvent {
         target: MovementTarget,
     },
 }
-
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
 pub enum MovementToolAction {

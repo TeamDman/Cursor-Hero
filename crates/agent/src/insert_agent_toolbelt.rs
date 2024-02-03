@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use cursor_hero_agent_types::agent_types::Agent;
-use cursor_hero_toolbelt_types::types::*;
 use cursor_hero_character_types::prelude::*;
+use cursor_hero_toolbelt_types::types::*;
 
 pub struct InsertAgentToolbeltPlugin;
 
@@ -23,7 +23,10 @@ pub fn insert_agent_toolbelt(
             writer.send(PopulateToolbeltEvent::Agent {
                 toolbelt_id: toolbelt.id(),
             });
-            info!("Sent populate agent toolbelt event for agent {:?}", character_id);
+            info!(
+                "Sent populate agent toolbelt event for agent {:?}",
+                character_id
+            );
         });
     }
 }

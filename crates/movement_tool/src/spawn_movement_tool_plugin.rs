@@ -1,8 +1,7 @@
 use bevy::prelude::*;
-use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_movement_tool_types::prelude::*;
+use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_tools::tool_spawning::ToolSpawnConfig;
-
 
 pub struct SpawnMovementToolPlugin;
 

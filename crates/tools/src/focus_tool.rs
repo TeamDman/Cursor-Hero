@@ -13,8 +13,8 @@ use cursor_hero_winutils::win_window::focus_window;
 
 use cursor_hero_toolbelt_types::prelude::*;
 
-use cursor_hero_movement_tool_types::prelude::*;
 use crate::prelude::*;
+use cursor_hero_movement_tool_types::prelude::*;
 
 pub struct FocusToolPlugin;
 

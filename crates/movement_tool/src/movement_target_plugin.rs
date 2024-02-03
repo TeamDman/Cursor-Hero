@@ -9,7 +9,6 @@ impl Plugin for MovementTargetPlugin {
     }
 }
 
-
 fn handle_set_movement_events(
     mut movement_target_events: EventReader<MovementTargetEvent>,
     mut tool_query: Query<&mut MovementTool>,

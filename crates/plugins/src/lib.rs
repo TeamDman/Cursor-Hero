@@ -7,6 +7,7 @@ use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::log::LogPlugin;
 use bevy_embedded_assets::EmbeddedAssetPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use cursor_hero_agent::agent_plugin::AgentPlugin;
 use cursor_hero_camera::camera_plugin::CameraPlugin;
 use cursor_hero_character::character_plugin::CharacterPlugin;
 use cursor_hero_cursor_mirror::cursor_mirroring_plugin::CursorMirroringPlugin;
@@ -42,7 +43,6 @@ use cursor_hero_ui::about_text_plugin::AboutTextPlugin;
 use cursor_hero_ui::fps_text_plugin::FpsTextPlugin;
 use cursor_hero_version::version_plugin::Version;
 use cursor_hero_wallpaper::wallpaper_plugin::WallpaperPlugin;
-use cursor_hero_agent::agent_plugin::AgentPlugin;
 
 use cursor_hero_agent_types::agent_types_plugin::AgentTypesPlugin;
 use cursor_hero_character_types::character_types_plugin::CharacterTypesPlugin;

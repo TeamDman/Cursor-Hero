@@ -2,18 +2,17 @@ use bevy::prelude::*;
 
 use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
+use cursor_hero_agent_types::prelude::*;
 use cursor_hero_bevy::NegativeYVec2;
+use cursor_hero_character_types::prelude::*;
 use cursor_hero_environment::environment_plugin::PopulateEnvironmentEvent;
 use cursor_hero_physics::damping_plugin::MovementDamping;
-use cursor_hero_agent_types::prelude::*;
-use cursor_hero_character_types::prelude::*;
 
 pub struct SpawnAgentPlugin;
 
 impl Plugin for SpawnAgentPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, spawn_agent);
-        
     }
 }
 
