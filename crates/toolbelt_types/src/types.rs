@@ -69,6 +69,7 @@ pub enum PopulateToolbeltEvent {
     Inspector { toolbelt_id: Entity },
     Taskbar { toolbelt_id: Entity },
     Keyboard { toolbelt_id: Entity },
+    Agent { toolbelt_id: Entity },
 }
 
 #[derive(Event, Debug, Reflect)]

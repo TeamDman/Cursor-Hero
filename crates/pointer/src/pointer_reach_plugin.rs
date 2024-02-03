@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use cursor_hero_character::character_plugin::Character;
+use cursor_hero_character_types::prelude::*;
 use cursor_hero_math::Lerp;
 use cursor_hero_pointer_types::prelude::*;
 

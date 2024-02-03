@@ -7,6 +7,6 @@ edition = "2021"
 
 [dependencies]
 cursor_hero_camera = { workspace = true }
-cursor_hero_character = { workspace = true }
+cursor_hero_character_types = { workspace = true }
 bevy = { workspace = true }
 bevy_xpbd_2d = { workspace = true }

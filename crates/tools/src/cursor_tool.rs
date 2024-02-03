@@ -9,7 +9,7 @@ use itertools::Itertools;
 
 use bevy::window::PrimaryWindow;
 use bevy::window::RawHandleWrapper;
-use cursor_hero_character::character_plugin::Character;
+use cursor_hero_character_types::prelude::*;
 use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_winutils::win_mouse::set_cursor_position;
 use cursor_hero_winutils::win_window::get_window_bounds;

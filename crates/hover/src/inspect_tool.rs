@@ -8,7 +8,7 @@ use bevy_xpbd_2d::components::RigidBody;
 use crossbeam_channel::bounded;
 use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
-use cursor_hero_character::character_plugin::Character;
+use cursor_hero_character_types::prelude::*;
 use cursor_hero_physics::damping_plugin::MovementDamping;
 use cursor_hero_pointer_types::prelude::*;
 

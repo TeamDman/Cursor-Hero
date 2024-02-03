@@ -5,7 +5,7 @@ use bevy_xpbd_2d::components::LinearVelocity;
 
 use bevy_xpbd_2d::components::RigidBody;
 use bevy_xpbd_2d::components::Sensor;
-use cursor_hero_character::character_plugin::Character;
+use cursor_hero_character_types::prelude::*;
 use cursor_hero_environment::environment_plugin::Environment;
 use cursor_hero_environment::environment_plugin::PopulateEnvironmentEvent;
 

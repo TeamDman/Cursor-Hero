@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use cursor_hero_character::character_plugin::Character;
+use cursor_hero_character_types::prelude::*;
 use cursor_hero_sprint_tool_types::sprint_tool_types_plugin::SprintEvent;
 use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_tools::prelude::*;

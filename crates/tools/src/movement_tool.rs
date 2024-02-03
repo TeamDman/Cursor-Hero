@@ -4,8 +4,7 @@ use bevy_inspector_egui::prelude::ReflectInspectorOptions;
 use bevy_inspector_egui::InspectorOptions;
 use bevy_xpbd_2d::math::*;
 use bevy_xpbd_2d::prelude::*;
-use cursor_hero_character::character_plugin::Character;
-use cursor_hero_character::character_plugin::MainCharacter;
+use cursor_hero_character_types::prelude::*;
 use cursor_hero_input::active_input_state_plugin::ActiveInput;
 use cursor_hero_math::Lerp;
 use cursor_hero_physics::damping_plugin::DampingSystemSet;
@@ -119,17 +118,34 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        let toolbelt_id = match event {
+        match event {
             PopulateToolbeltEvent::Default { toolbelt_id }
             | PopulateToolbeltEvent::Inspector { toolbelt_id }
             | PopulateToolbeltEvent::Taskbar { toolbelt_id }
-            | PopulateToolbeltEvent::Keyboard { toolbelt_id } => toolbelt_id,
-        };
-        ToolSpawnConfig::<_, MovementToolAction>::new(MovementTool::default(), *toolbelt_id, event)
-            .guess_name(file!())
-            .guess_image(file!(), &asset_server)
-            .with_description("Go faster, reach further")
-            .spawn(&mut commands);
+            | PopulateToolbeltEvent::Keyboard { toolbelt_id } => {
+                ToolSpawnConfig::<_, MovementToolAction>::new(
+                    MovementTool::default(),
+                    *toolbelt_id,
+                    event,
+                )
+                .guess_name(file!())
+                .guess_image(file!(), &asset_server)
+                .with_description("Go faster, reach further")
+                .spawn(&mut commands);
+            }
+            PopulateToolbeltEvent::Agent { toolbelt_id } => {
+                ToolSpawnConfig::<_, MovementToolAction>::new(
+                    MovementTool::default(),
+                    *toolbelt_id,
+                    event,
+                )
+                .with_input_map(None)
+                .guess_name(file!())
+                .guess_image(file!(), &asset_server)
+                .with_description("Go faster, reach further")
+                .spawn(&mut commands);
+            }
+        }
     }
 }
 

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use cursor_hero_camera::camera_plugin::MainCamera;
-use cursor_hero_character::character_plugin::Character;
+use cursor_hero_character_types::prelude::*;
 
 pub struct PositionTextPlugin;
 

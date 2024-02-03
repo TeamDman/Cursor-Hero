@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 bevy = { workspace = true }
-cursor_hero_character = { workspace = true }
+cursor_hero_character_types = { workspace = true }
 cursor_hero_sprint_tool_types = { workspace = true }
 bevy_xpbd_2d = { workspace = true }
 cursor_hero_toolbelt_types = { workspace = true }

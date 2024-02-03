@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cursor_hero_character = { workspace = true }
+cursor_hero_character_types = { workspace = true }
 cursor_hero_camera = { workspace = true }
 cursor_hero_level_bounds = { workspace = true }
 cursor_hero_math = { workspace = true }

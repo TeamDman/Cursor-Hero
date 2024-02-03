@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use cursor_hero_character::character_plugin::MainCharacter;
+use cursor_hero_character_types::prelude::*;
+
 use serde::Deserialize;
 use serde::Serialize;
 

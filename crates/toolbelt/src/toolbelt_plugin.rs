@@ -5,7 +5,6 @@ use leafwing_input_manager::prelude::*;
 
 use crate::hover_frame::insert_hover_frame;
 use crate::hover_frame::remove_hover_frame;
-use crate::insert_toolbelt::insert_toolbelt;
 use crate::tool_activation::tool_activation;
 use crate::tool_color::tool_color;
 use crate::tool_distribution::tool_distribution;
@@ -26,7 +25,6 @@ impl Plugin for ToolbeltPlugin {
                 Update,
                 (
                     insert_hover_frame,
-                    insert_toolbelt,
                     remove_hover_frame,
                     tool_color,
                     tool_activation,

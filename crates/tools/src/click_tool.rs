@@ -10,7 +10,7 @@ use leafwing_input_manager::prelude::*;
 
 use crossbeam_channel::bounded;
 use crossbeam_channel::Sender;
-use cursor_hero_character::character_plugin::Character;
+use cursor_hero_character_types::prelude::*;
 
 use cursor_hero_winutils::win_mouse::left_mouse_down;
 use cursor_hero_winutils::win_mouse::left_mouse_up;

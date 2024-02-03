@@ -14,7 +14,7 @@ cursor_hero_toolbelt_types = { workspace = true}
 cursor_hero_pressure_plate = { workspace = true}
 cursor_hero_screen = { workspace = true}
 cursor_hero_pointer_types = { workspace = true}
-cursor_hero_character = { workspace = true}
+cursor_hero_character_types = { workspace = true}
 cursor_hero_camera = { workspace = true}
 cursor_hero_winutils = { workspace = true}
 bevy = { workspace = true }

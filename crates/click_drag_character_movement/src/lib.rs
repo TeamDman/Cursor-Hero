@@ -7,7 +7,7 @@ use bevy_xpbd_2d::components::Position;
 use cursor_hero_camera::camera_plugin::update_camera_zoom;
 use cursor_hero_camera::camera_plugin::FollowWithMainCamera;
 use cursor_hero_camera::camera_plugin::MainCamera;
-use cursor_hero_character::character_plugin::Character;
+use cursor_hero_character_types::prelude::*;
 
 pub struct ClickDragMovementPlugin;
 

@@ -44,10 +44,14 @@ use cursor_hero_version::version_plugin::Version;
 use cursor_hero_wallpaper::wallpaper_plugin::WallpaperPlugin;
 use cursor_hero_agent::agent_plugin::AgentPlugin;
 
+use cursor_hero_agent_types::agent_types_plugin::AgentTypesPlugin;
+use cursor_hero_character_types::character_types_plugin::CharacterTypesPlugin;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(CharacterTypesPlugin);
+        app.add_plugins(AgentTypesPlugin);
         app.add_plugins(AgentPlugin);
         //app.add_plugins(ClickDragMovementPlugin);
         //app.add_plugins(HoverShowerRelayPlugin);

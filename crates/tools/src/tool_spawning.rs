@@ -76,6 +76,11 @@ where
         self
     }
 
+    pub fn with_input_map(mut self, input_map: Option<InputMap<Action>>) -> Self {
+        self.input_map = input_map;
+        self
+    }
+
     fn format_tool_name_from_source(file_path: &str) -> String {
         // Extract the file name from the path
         let file_name = Path::new(file_path)

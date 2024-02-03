@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 use bevy_xpbd_2d::prelude::*;
-use cursor_hero_character::character_plugin::Character;
+use cursor_hero_character_types::prelude::*;
 use cursor_hero_pointer_types::prelude::*;
 use leafwing_input_manager::prelude::*;
 
