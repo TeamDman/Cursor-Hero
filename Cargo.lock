@@ -1735,6 +1735,7 @@ dependencies = [
  "cursor_hero_character_types",
  "cursor_hero_environment",
  "cursor_hero_input",
+ "cursor_hero_movement_tool_types",
  "cursor_hero_physics",
  "cursor_hero_toolbelt_types",
  "leafwing-input-manager",

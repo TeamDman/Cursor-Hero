@@ -9,6 +9,7 @@ edition = "2021"
 bevy = { workspace = true }
 cursor_hero_environment = { workspace = true }
 cursor_hero_character_types = { workspace = true }
+cursor_hero_movement_tool_types = { workspace = true }
 cursor_hero_agent_types = { workspace = true }
 cursor_hero_physics = { workspace = true }
 cursor_hero_input = { workspace = true }

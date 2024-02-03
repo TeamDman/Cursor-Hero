@@ -174,12 +174,11 @@ where
             if let StartingState::Active = self.starting_state {
                 tool.insert(ActiveTool);
             }
-            if let Some(input_map) = self.input_map {
-                tool.insert(InputManagerBundle {
-                    input_map,
-                    ..default()
-                });
-            }
+            let input_map = self.input_map.unwrap_or_default();
+            tool.insert(InputManagerBundle {
+                input_map,
+                ..default()
+            });
         });
         info!("{:?} => {:?}", self.event, self.name);
     }
