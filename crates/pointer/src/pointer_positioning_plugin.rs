@@ -44,7 +44,7 @@ impl Plugin for PointerPositioningPlugin {
             update_pointer_position
                 .in_set(PointerSystemSet::Position)
                 .after(PhysicsSet::Sync)
-                .before(TransformSystem::TransformPropagate),
+                .after(TransformSystem::TransformPropagate),
         );
 
         app.add_systems(
@@ -169,6 +169,7 @@ fn update_pointer_position(
     mut pointer_query: Query<
         (
             &mut Position,
+            &mut Transform,
             &ActionState<PointerAction>,
             &Pointer,
             &Parent,
@@ -179,7 +180,8 @@ fn update_pointer_position(
     mut debounce: Local<bool>,
 ) {
     for pointer in pointer_query.iter_mut() {
-        let (mut pointer_position, pointer_actions, pointer, pointer_parent) = pointer;
+        let (mut pointer_position, mut pointer_transform, pointer_actions, pointer, pointer_parent) =
+            pointer;
         let character_position = character_query.get_mut(pointer_parent.get()).unwrap();
         if pointer_actions.pressed(PointerAction::Move) {
             let look = pointer_actions.axis_pair(PointerAction::Move).unwrap().xy();
@@ -189,15 +191,21 @@ fn update_pointer_position(
 
             let offset = look * pointer.reach;
             let desired_position = character_position.xy() + offset;
+            let pointer_position = pointer_position.bypass_change_detection();
             pointer_position.x = desired_position.x;
             pointer_position.y = desired_position.y;
+            pointer_transform.translation.x = offset.x;
+            pointer_transform.translation.y = offset.y;
             *debounce = false;
             // debug!("pointer_position: {:?}", pointer_position.xy());
         } else if !*debounce || character_position.is_changed() {
             // debug!("character_position: {:?}", character_position.xy());
             let desired_position = character_position.xy();
+            let pointer_position = pointer_position.bypass_change_detection();
             pointer_position.x = desired_position.x;
             pointer_position.y = desired_position.y;
+            pointer_transform.translation.x = 0.0;
+            pointer_transform.translation.y = 0.0;
             *debounce = true;
         }
     }
