@@ -9,7 +9,6 @@ use crate::hello_tool::HelloToolPlugin;
 use crate::keyboard_tool::KeyboardToolPlugin;
 use crate::keyboard_wheel_tool::KeyboardWheelToolPlugin;
 use crate::level_bounds_visibility_tool::LevelBoundsVisibilityToolPlugin;
-use crate::movement_tool::MovementToolPlugin;
 use crate::observation_tool::ObservationToolPlugin;
 // use crate::placeholder_tool::PlaceholderToolPlugin;
 #[cfg(debug_assertions)]
@@ -30,7 +29,6 @@ impl Plugin for ToolPlugin {
         app.add_plugins(TalkToolPlugin);
         app.add_plugins(ZoomToolPlugin);
         app.add_plugins(FocusToolPlugin);
-        app.add_plugins(MovementToolPlugin);
         app.add_plugins(DefaultWheelToolPlugin);
         // app.add_plugins(WindowDragToolPlugin);
         app.add_plugins(KeyboardToolPlugin);

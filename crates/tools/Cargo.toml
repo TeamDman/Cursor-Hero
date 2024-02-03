@@ -19,6 +19,7 @@ cursor_hero_character_types = { workspace = true }
 cursor_hero_sprint_tool_types = { workspace = true }
 cursor_hero_data = { workspace = true }
 cursor_hero_math = { workspace = true }
+cursor_hero_movement_tool_types = { workspace = true }
 cursor_hero_click_drag_character_movement = { workspace = true }
 cursor_hero_physics = { workspace = true }
 bevy = { workspace = true }

@@ -46,10 +46,14 @@ use cursor_hero_agent::agent_plugin::AgentPlugin;
 
 use cursor_hero_agent_types::agent_types_plugin::AgentTypesPlugin;
 use cursor_hero_character_types::character_types_plugin::CharacterTypesPlugin;
+use cursor_hero_movement_tool::movement_tool_plugin::MovementToolPlugin;
+use cursor_hero_movement_tool_types::movement_tool_types_plugin::MovementToolTypesPlugin;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(MovementToolTypesPlugin);
+        app.add_plugins(MovementToolPlugin);
         app.add_plugins(CharacterTypesPlugin);
         app.add_plugins(AgentTypesPlugin);
         app.add_plugins(AgentPlugin);

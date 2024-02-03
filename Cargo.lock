@@ -1896,6 +1896,35 @@ dependencies = [
 ]
 
 [[package]]
+name = "cursor_hero_movement_tool"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy_xpbd_2d",
+ "cursor_hero_character_types",
+ "cursor_hero_input",
+ "cursor_hero_math",
+ "cursor_hero_movement_tool_types",
+ "cursor_hero_physics",
+ "cursor_hero_sprint_tool_types",
+ "cursor_hero_toolbelt_types",
+ "cursor_hero_tools",
+ "itertools 0.12.0",
+ "leafwing-input-manager",
+]
+
+[[package]]
+name = "cursor_hero_movement_tool_types"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy-inspector-egui",
+ "cursor_hero_input",
+ "cursor_hero_toolbelt_types",
+ "leafwing-input-manager",
+]
+
+[[package]]
 name = "cursor_hero_pause_tool"
 version = "0.1.0"
 dependencies = [
@@ -1945,6 +1974,8 @@ dependencies = [
  "cursor_hero_level_bounds",
  "cursor_hero_math",
  "cursor_hero_metrics",
+ "cursor_hero_movement_tool",
+ "cursor_hero_movement_tool_types",
  "cursor_hero_pause_tool",
  "cursor_hero_physics",
  "cursor_hero_physics_debug",
@@ -2115,6 +2146,7 @@ dependencies = [
  "cursor_hero_input",
  "cursor_hero_level_bounds",
  "cursor_hero_math",
+ "cursor_hero_movement_tool_types",
  "cursor_hero_physics",
  "cursor_hero_pointer_types",
  "cursor_hero_screen",

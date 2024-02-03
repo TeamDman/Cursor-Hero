@@ -117,7 +117,8 @@ where
             .file_stem() // Get the file stem (file name without extension)
             .and_then(|stem| stem.to_str()) // Convert OsStr to &str
             .unwrap_or("")
-            .trim_end_matches("_plugin");
+            .trim_end_matches("_plugin")
+            .trim_start_matches("spawn_");
         format!("textures/tools/{}.png", file_name)
     }
 
