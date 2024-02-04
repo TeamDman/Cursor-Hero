@@ -1,4 +1,3 @@
-use std::collections::vec_deque;
 use std::collections::VecDeque;
 
 use crate::ToBevyIRect;
@@ -12,6 +11,7 @@ use uiautomation::variants::Variant;
 use uiautomation::UIAutomation;
 use uiautomation::UIElement;
 
+#[derive(Debug, Reflect, Clone)]
 pub struct Taskbar {
     pub entries: Vec<TaskbarEntry>,
 }

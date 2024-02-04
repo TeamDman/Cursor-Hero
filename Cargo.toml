@@ -9,6 +9,10 @@ members = ["crates/*", "other/gamepad_hell", "other/uparrow-enter"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace.dependencies]
+cursor_hero_observation_types = { path = "./crates/observation_types" }
+cursor_hero_observation = { path = "./crates/observation" }
+cursor_hero_inference_types = { path = "./crates/inference_types" }
+cursor_hero_inference = { path = "./crates/inference" }
 cursor_hero_movement_tool_types = { path = "./crates/movement_tool_types" }
 cursor_hero_movement_tool = { path = "./crates/movement_tool" }
 cursor_hero_character_types = { path = "./crates/character_types" }
@@ -85,6 +89,7 @@ fxhash = "0.2.1"
 widestring = "1.0.2"
 winreg = "0.52.0"
 rand = "0.8.5"
+ollama-rs = "0.1.6"
 
 [dependencies]
 cursor_hero_plugins = { workspace = true }

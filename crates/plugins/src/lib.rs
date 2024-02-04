@@ -48,10 +48,18 @@ use cursor_hero_agent_types::agent_types_plugin::AgentTypesPlugin;
 use cursor_hero_character_types::character_types_plugin::CharacterTypesPlugin;
 use cursor_hero_movement_tool::movement_tool_plugin::MovementToolPlugin;
 use cursor_hero_movement_tool_types::movement_tool_types_plugin::MovementToolTypesPlugin;
+use cursor_hero_inference::inference_plugin::InferencePlugin;
+use cursor_hero_inference_types::inference_types_plugin::InferenceTypesPlugin;
+use cursor_hero_observation::observation_plugin::ObservationPlugin;
+use cursor_hero_observation_types::observation_types_plugin::ObservationTypesPlugin;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(ObservationTypesPlugin);
+        app.add_plugins(ObservationPlugin);
+        app.add_plugins(InferenceTypesPlugin);
+        app.add_plugins(InferencePlugin);
         app.add_plugins(MovementToolTypesPlugin);
         app.add_plugins(MovementToolPlugin);
         app.add_plugins(CharacterTypesPlugin);

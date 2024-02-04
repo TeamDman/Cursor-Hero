@@ -9,7 +9,6 @@ pub mod hello_tool;
 pub mod keyboard_tool;
 pub mod keyboard_wheel_tool;
 pub mod level_bounds_visibility_tool;
-pub mod observation_tool;
 pub mod placeholder_tool;
 pub mod restart_tool;
 pub mod scroll_tool;

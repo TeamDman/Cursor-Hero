@@ -1,6 +1,5 @@
 use crate::hover_ui_automation_plugin::get_element_info;
 use crate::hover_ui_automation_plugin::ElementInfo;
-use bevy::input::keyboard::KeyboardInput;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy_egui::EguiContext;
