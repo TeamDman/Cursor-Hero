@@ -1,0 +1,9 @@
+
+To start with, I want to interact with the taskbar located at -540.0 on the y-axis and 0.0 on the x-axis.
+λMovementToolAction::Move(-540.0, 0.0)
+
+Next, I want to move up to the start menu button which is at -1920.0 on the x-axis and -1880.0 on the y-axis.
+λMovementToolAction::Move(-1920.0, -1880.0)
+
+Now I want to interact with the start menu button by clicking it. So, I will press the left mouse button.
+λClickToolAction::LeftClick(Press)<dummy32000>

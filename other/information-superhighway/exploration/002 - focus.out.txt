@@ -1,0 +1,5 @@
+move_cursor(IVec2(212, 1040))
+
+## Expected Result
+
+VSCode window should become active and visible in the taskbar.<dummy32000>
