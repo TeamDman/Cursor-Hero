@@ -1,0 +1,7 @@
+ 1: Inform Admin
+
+Admin, I have observed that the character is walking around in circles. Is this part of their programming?
+
+## Response 2: Request Assistance
+
+Admin, can you please provide assistance to stop the character from walking in circles? This is not a part of their intended behavior.<dummy32000>

@@ -1,17 +1,17 @@
 use bevy::prelude::*;
-use std::thread;
-
 use crossbeam_channel::bounded;
 use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
-use cursor_hero_inference_types::prelude::*;
-pub struct OllamaPlugin;
+use cursor_hero_tts_types::prelude::*;
+use std::thread;
 
-impl Plugin for OllamaPlugin {
+pub struct TtsDispatchPlugin;
+
+impl Plugin for TtsDispatchPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, create_worker_thread);
-        app.add_systems(Update, bridge_generate_requests);
-        app.add_systems(Update, bridge_generate_responses);
+        app.add_systems(Update, bridge_requests);
+        app.add_systems(Update, bridge_responses);
     }
 }
 
@@ -20,7 +20,7 @@ enum GameboundMessage {
     Response {
         session_id: Entity,
         prompt: String,
-        response: String,
+        response: Vec<u8>,
     },
 }
 
@@ -45,7 +45,7 @@ fn create_worker_thread(mut commands: Commands) {
 
     let game_tx_clone = game_tx.clone();
     thread::Builder::new()
-        .name("Ollama thread".to_string())
+        .name("GLaDOSTTS thread".to_string())
         .spawn(move || {
             let rt = tokio::runtime::Runtime::new().unwrap();
             rt.block_on(async {
@@ -61,10 +61,10 @@ fn create_worker_thread(mut commands: Commands) {
                     match msg {
                         ThreadboundMessage::Generate { session_id, prompt } => {
                             debug!("Worker received generate request for session {:?}, generating response", session_id);
-                            let data = match crate::ollama::generate(&prompt).await {
+                            let data = match crate::glados_tts::generate(&prompt).await {
                                 Ok(data) => data,
                                 Err(e) => {
-                                    error!("Failed to generate: {}", e);
+                                    error!("Failed to generate TTS: {}", e);
                                     continue;
                                 }
                             };
@@ -85,10 +85,10 @@ fn create_worker_thread(mut commands: Commands) {
         .expect("Failed to spawn thread");
 }
 
-fn bridge_generate_requests(bridge: ResMut<Bridge>, mut events: EventReader<InferenceEvent>) {
+fn bridge_requests(bridge: ResMut<Bridge>, mut events: EventReader<TtsEvent>) {
     for event in events.read() {
         match event {
-            InferenceEvent::Request { session_id, prompt } => {
+            TtsEvent::Request { session_id, prompt } => {
                 debug!("Received generate request for session {:?}, sending over bridge to worker thread", session_id);
                 if let Err(e) = bridge.sender.send(ThreadboundMessage::Generate {
                     session_id: *session_id,
@@ -102,7 +102,7 @@ fn bridge_generate_requests(bridge: ResMut<Bridge>, mut events: EventReader<Infe
     }
 }
 
-fn bridge_generate_responses(bridge: ResMut<Bridge>, mut events: EventWriter<InferenceEvent>) {
+fn bridge_responses(bridge: ResMut<Bridge>, mut events: EventWriter<TtsEvent>) {
     for msg in bridge.receiver.try_iter() {
         match msg {
             GameboundMessage::Response {
@@ -110,16 +110,15 @@ fn bridge_generate_responses(bridge: ResMut<Bridge>, mut events: EventWriter<Inf
                 prompt,
                 response,
             } => {
-                let event = InferenceEvent::Response {
-                    session_id,
-                    response,
-                    prompt,
-                };
                 debug!(
-                    "Received bridge response, sending game event {:?}",
-                    event
+                    "Received bridge response for session {:?}, sending game event",
+                    session_id
                 );
-                events.send(event);
+                events.send(TtsEvent::Response {
+                    session_id,
+                    prompt,
+                    wav: response,
+                });
             }
         }
     }

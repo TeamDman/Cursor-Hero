@@ -5,12 +5,13 @@ pub struct InferenceSession;
 
 #[derive(Event, Reflect, Debug, Clone)]
 pub enum InferenceEvent {
-    GenerateRequest {
+    Request {
         session_id: Entity,
         prompt: String,
     },
-    GenerateResponse {
+    Response {
         session_id: Entity,
+        prompt: String,
         response: String,
     },
 }

@@ -7,6 +7,8 @@ edition = "2021"
 
 
 [dependencies]
+cursor_hero_tts = { workspace = true }
+cursor_hero_tts_types = { workspace = true }
 cursor_hero_observation_types = { workspace = true }
 cursor_hero_observation = { workspace = true }
 cursor_hero_inference_types = { workspace = true }

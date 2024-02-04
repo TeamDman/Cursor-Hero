@@ -19,14 +19,14 @@ fn observation_inference_pipeline(
     for event in observation_events.read() {
         let ObservationEvent::ObservationToolResponse {
             observation,
-            character_id,
+            character_id: _,
         } = event;
 
         let session_id = commands
             .spawn((InferenceSession, Name::new("ObservationInferenceSession")))
             .id();
         let prompt = observation.clone();
-        inference_events.send(InferenceEvent::GenerateRequest { session_id, prompt });
+        inference_events.send(InferenceEvent::Request { session_id, prompt });
         debug!(
             "ObservationInferencePlugin: Sent inference request for session {:?}",
             session_id

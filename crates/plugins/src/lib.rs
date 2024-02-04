@@ -52,10 +52,14 @@ use cursor_hero_inference::inference_plugin::InferencePlugin;
 use cursor_hero_inference_types::inference_types_plugin::InferenceTypesPlugin;
 use cursor_hero_observation::observation_plugin::ObservationPlugin;
 use cursor_hero_observation_types::observation_types_plugin::ObservationTypesPlugin;
+use cursor_hero_tts_types::tts_types_plugin::TtsTypesPlugin;
+use cursor_hero_tts::tts_plugin::TtsPlugin;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(TtsPlugin);
+        app.add_plugins(TtsTypesPlugin);
         app.add_plugins(ObservationTypesPlugin);
         app.add_plugins(ObservationPlugin);
         app.add_plugins(InferenceTypesPlugin);
