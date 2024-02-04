@@ -1,5 +1,6 @@
 use crate::hover_ui_automation_plugin::get_element_info;
 use crate::hover_ui_automation_plugin::ElementInfo;
+use bevy::input::keyboard::KeyboardInput;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy_egui::EguiContext;
@@ -8,6 +9,7 @@ use bevy_xpbd_2d::components::RigidBody;
 use crossbeam_channel::bounded;
 use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
+use cursor_hero_bevy::NegativeYVec2;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_physics::damping_plugin::MovementDamping;
 use cursor_hero_pointer_types::prelude::*;
@@ -17,8 +19,11 @@ use cursor_hero_screen::get_image::ScreensToImageParam;
 use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_tools::cube_tool::CubeToolInteractable;
 use cursor_hero_tools::prelude::*;
-use cursor_hero_winutils::win_mouse::find_element_at;
+use cursor_hero_winutils::ui_automation::find_element_at;
+use cursor_hero_winutils::ui_automation::gather_elements_at;
 use leafwing_input_manager::prelude::*;
+use rand::thread_rng;
+use rand::Rng;
 use std::thread;
 
 pub struct InspectToolPlugin;
@@ -59,6 +64,7 @@ fn toolbelt_events(
 enum InspectToolAction {
     DupeUnderMouse,
     PrintUnderMouse,
+    FractureUnderMouse,
 }
 
 impl InspectToolAction {
@@ -66,6 +72,7 @@ impl InspectToolAction {
         match self {
             Self::DupeUnderMouse => GamepadButtonType::RightTrigger.into(),
             Self::PrintUnderMouse => GamepadButtonType::North.into(),
+            Self::FractureUnderMouse => GamepadButtonType::Select.into(),
         }
     }
 
@@ -73,6 +80,7 @@ impl InspectToolAction {
         match self {
             Self::DupeUnderMouse => MouseButton::Left.into(),
             Self::PrintUnderMouse => MouseButton::Right.into(),
+            Self::FractureUnderMouse => KeyCode::G.into(),
         }
     }
 }
@@ -90,13 +98,18 @@ impl ToolAction for InspectToolAction {
 
 #[derive(Debug)]
 enum ThreadboundMessage {
-    DupeUnderMouse(i32, i32),
-    PrintUnderMouse(i32, i32),
+    DupeUnderMouse { world_position: Vec3 },
+    PrintUnderMouse { world_position: Vec3 },
+    FractureUnderMouse { world_position: Vec3 },
 }
 #[derive(Debug)]
 enum GameboundMessage {
     DupeElementDetails(ElementInfo),
     PrintElementDetails(ElementInfo),
+    FractureElementDetails {
+        data: Vec<(ElementInfo, usize)>,
+        world_position: Vec3,
+    },
 }
 
 #[derive(Resource)]
@@ -109,10 +122,11 @@ fn process_thread_message(
     reply_tx: &Sender<GameboundMessage>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match action {
-        ThreadboundMessage::DupeUnderMouse(x, y) => {
-            debug!("Worker received click: {:?} {} {}", action, x, y);
+        ThreadboundMessage::DupeUnderMouse { world_position } => {
+            let mouse_position = world_position.xy().neg_y().as_ivec2();
+            debug!("Worker received click: {:?} {:?}", action, mouse_position);
 
-            let elem = find_element_at(x, y)?;
+            let elem = find_element_at(mouse_position)?;
             info!("{} - {}", elem.get_classname()?, elem.get_name()?);
 
             let id = elem.get_automation_id()?;
@@ -120,10 +134,11 @@ fn process_thread_message(
             let info = get_element_info(elem)?;
             reply_tx.send(GameboundMessage::DupeElementDetails(info))?;
         }
-        ThreadboundMessage::PrintUnderMouse(x, y) => {
-            debug!("Worker received click: {:?} {} {}", action, x, y);
+        ThreadboundMessage::PrintUnderMouse { world_position } => {
+            let mouse_position = world_position.xy().neg_y().as_ivec2();
+            debug!("Worker received click: {:?} {:?}", action, mouse_position);
 
-            let elem = find_element_at(x, y)?;
+            let elem = find_element_at(mouse_position)?;
             info!("{} - {}", elem.get_classname()?, elem.get_name()?);
 
             // Can we click on elements with this?
@@ -134,6 +149,20 @@ fn process_thread_message(
             info!("Automation ID: {}", id);
             let info = get_element_info(elem)?;
             reply_tx.send(GameboundMessage::PrintElementDetails(info))?;
+        }
+        ThreadboundMessage::FractureUnderMouse { world_position } => {
+            let mouse_position = world_position.xy().neg_y().as_ivec2();
+            debug!("Worker received click: {:?} {:?}", action, mouse_position);
+
+            let found = gather_elements_at(mouse_position)?;
+            let data = found
+                .into_iter()
+                .filter_map(|(elem, depth)| get_element_info(elem).ok().map(|info| (info, depth)))
+                .collect();
+            reply_tx.send(GameboundMessage::FractureElementDetails {
+                data,
+                world_position,
+            })?;
         }
     }
 
@@ -197,44 +226,39 @@ fn handle_input(
         };
         let pointer_transform = pointer;
         let pointer_translation = pointer_transform.translation();
+        let hovering_over_egui = egui_context_query
+            .get_single()
+            .ok()
+            .map(|egui_context| egui_context.clone().get_mut().is_pointer_over_area())
+            .unwrap_or(false);
+        if hovering_over_egui {
+            continue;
+        }
         if tool_actions.just_pressed(InspectToolAction::DupeUnderMouse) {
-            let hovering_over_egui = egui_context_query
-                .get_single()
-                .ok()
-                .map(|egui_context| egui_context.clone().get_mut().is_pointer_over_area())
-                .unwrap_or(false);
-            if hovering_over_egui {
-                continue;
-            }
             info!("PrintUnderMouse button");
-            match bridge.sender.send(ThreadboundMessage::DupeUnderMouse(
-                pointer_translation.x as i32,
-                -pointer_translation.y as i32,
-            )) {
-                Ok(_) => {}
-                Err(e) => {
-                    error!("Failed to send click: {:?}", e);
-                }
+            let msg = ThreadboundMessage::DupeUnderMouse {
+                world_position: pointer_translation,
+            };
+            if let Err(e) = bridge.sender.send(msg) {
+                error!("Failed to send click: {:?}", e);
             }
         }
         if tool_actions.just_pressed(InspectToolAction::PrintUnderMouse) {
-            let hovering_over_egui = egui_context_query
-                .get_single()
-                .ok()
-                .map(|egui_context| egui_context.clone().get_mut().is_pointer_over_area())
-                .unwrap_or(false);
-            if hovering_over_egui {
-                continue;
-            }
             info!("PrintUnderMouse button");
-            match bridge.sender.send(ThreadboundMessage::PrintUnderMouse(
-                pointer_translation.x as i32,
-                -pointer_translation.y as i32,
-            )) {
-                Ok(_) => {}
-                Err(e) => {
-                    error!("Failed to send click: {:?}", e);
-                }
+            let msg = ThreadboundMessage::PrintUnderMouse {
+                world_position: pointer_translation,
+            };
+            if let Err(e) = bridge.sender.send(msg) {
+                error!("Failed to send click: {:?}", e);
+            }
+        }
+        if tool_actions.just_pressed(InspectToolAction::FractureUnderMouse) {
+            info!("FractureUnderMouse button");
+            let msg = ThreadboundMessage::FractureUnderMouse {
+                world_position: pointer_translation,
+            };
+            if let Err(e) = bridge.sender.send(msg) {
+                error!("Failed to send click: {:?}", e);
             }
         }
     }
@@ -288,6 +312,52 @@ fn handle_replies(
                     },
                     Name::new(format!("SFX Element - {}", info.name)),
                 ));
+            }
+            GameboundMessage::FractureElementDetails {
+                data,
+                world_position,
+            } => {
+                info!("Received info with {} elements", data.len());
+                if !data.is_empty() {
+                    commands.spawn((
+                        SpatialBundle {
+                            transform: Transform::from_translation(world_position),
+                            ..default()
+                        },
+                        AudioBundle {
+                            source: asset_server.load("sounds/spring strung light 4.ogg"),
+                            settings: PlaybackSettings::DESPAWN.with_spatial(true),
+                        },
+                        Name::new("Fracture Sound"),
+                    ));
+                }
+                for (info, depth) in data {
+                    // let Ok(image) = get_image(info.bounding_rect, &access) else {
+                    //     continue;
+                    // };
+                    // let texture_handle = asset_server.add(image);
+
+                    // spawn the element image
+                    let mut elem_center_pos = info.bounding_rect.center().extend(depth as f32);
+                    elem_center_pos.y *= -1.0;
+                    commands.spawn((
+                        SpriteBundle {
+                            transform: Transform::from_translation(elem_center_pos),
+                            sprite: Sprite {
+                                custom_size: Some(info.bounding_rect.size()),
+                                color: Color::hsl(thread_rng().gen_range(0.0..360.0), 0.5, 0.5),
+                                ..default()
+                            },
+                            // texture: texture_handle,
+                            ..default()
+                        },
+                        CubeToolInteractable,
+                        RigidBody::Dynamic,
+                        Collider::cuboid(info.bounding_rect.width(), info.bounding_rect.height()),
+                        MovementDamping::default(),
+                        Name::new(format!("Element - {}", info.name)),
+                    ));
+                }
             }
         }
     }
