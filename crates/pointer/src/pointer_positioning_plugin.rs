@@ -175,13 +175,20 @@ fn update_pointer_position(
         ),
         (Without<Character>, With<Pointer>, Without<FollowHostCursor>),
     >,
-    mut character_query: Query<Ref<Position>, (With<Character>, Without<Pointer>)>,
+    mut character_query: Query<
+        (Ref<Position>, Option<&MainCharacter>),
+        (With<Character>, Without<Pointer>),
+    >,
     mut debounce: Local<bool>,
 ) {
     for pointer in pointer_query.iter_mut() {
         let (mut pointer_position, mut pointer_transform, pointer_actions, pointer, pointer_parent) =
             pointer;
-        let character_position = character_query.get_mut(pointer_parent.get()).unwrap();
+        let Ok(character) = character_query.get_mut(pointer_parent.get()) else {
+            warn!("No character found");
+            continue;
+        };
+        let (character_position, is_main_character) = character;
         if pointer_actions.pressed(PointerAction::Move) {
             let look = pointer_actions.axis_pair(PointerAction::Move).unwrap().xy();
             if look.x.is_nan() || look.y.is_nan() {
@@ -193,8 +200,10 @@ fn update_pointer_position(
             let pointer_position = pointer_position.bypass_change_detection();
             pointer_position.x = desired_position.x;
             pointer_position.y = desired_position.y;
-            pointer_transform.translation.x = offset.x;
-            pointer_transform.translation.y = offset.y;
+            if is_main_character.is_some() {
+                pointer_transform.translation.x = offset.x;
+                pointer_transform.translation.y = offset.y;
+            }
             *debounce = false;
             // debug!("pointer_position: {:?}", pointer_position.xy());
         } else if !*debounce || character_position.is_changed() {
@@ -203,8 +212,10 @@ fn update_pointer_position(
             let pointer_position = pointer_position.bypass_change_detection();
             pointer_position.x = desired_position.x;
             pointer_position.y = desired_position.y;
-            pointer_transform.translation.x = 0.0;
-            pointer_transform.translation.y = 0.0;
+            if is_main_character.is_some() {
+                pointer_transform.translation.x = 0.0;
+                pointer_transform.translation.y = 0.0;
+            }
             *debounce = true;
         }
     }

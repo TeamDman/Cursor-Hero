@@ -25,7 +25,7 @@ cursor_hero_math = { workspace = true }
 cursor_hero_movement_tool_types = { workspace = true }
 cursor_hero_click_drag_character_movement = { workspace = true }
 cursor_hero_physics = { workspace = true }
-bevy = { workspace = true }
+bevy = { workspace = true, features=["webp"] }
 bevy-inspector-egui = { workspace = true }
 bevy_xpbd_2d = { workspace = true }
 crossbeam-channel = {workspace = true }

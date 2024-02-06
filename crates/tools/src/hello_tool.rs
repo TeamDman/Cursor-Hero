@@ -28,7 +28,7 @@ fn toolbelt_events(
         if let PopulateToolbeltEvent::Inspector { toolbelt_id } = event {
             ToolSpawnConfig::<HelloTool, NoInputs>::new(HelloTool, *toolbelt_id, event)
                 .guess_name(file!())
-                .guess_image(file!(), &asset_server)
+                .guess_image(file!(), &asset_server, "png")
                 .with_description("Prints hello.")
                 .with_starting_state(StartingState::Inactive)
                 .spawn(&mut commands);

@@ -39,7 +39,7 @@ fn toolbelt_events(
         {
             ToolSpawnConfig::<FocusTool, FocusToolAction>::new(FocusTool, *toolbelt_id, event)
                 .guess_name(file!())
-                .guess_image(file!(), &asset_server)
+                .guess_image(file!(), &asset_server, "png")
                 .with_description("Camera follows the character")
                 .spawn(&mut commands);
         }

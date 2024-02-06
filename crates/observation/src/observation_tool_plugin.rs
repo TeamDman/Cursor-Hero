@@ -23,7 +23,7 @@ fn toolbelt_events(
         {
             ToolSpawnConfig::<ObservationTool, NoInputs>::new(ObservationTool, *toolbelt_id, event)
                 .guess_name(file!())
-                .guess_image(file!(), &asset_server)
+                .guess_image(file!(), &asset_server, "png")
                 .with_description("Logs information about the environment to the console.")
                 .with_starting_state(StartingState::Inactive)
                 .spawn(&mut commands);

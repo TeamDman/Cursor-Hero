@@ -28,7 +28,7 @@ fn toolbelt_events(
                 event,
             )
             .guess_name(file!())
-            .guess_image(file!(), &asset_server)
+            .guess_image(file!(), &asset_server, "png")
             .with_description("Swaps to keyboard tools")
             .with_starting_state(StartingState::Inactive)
             .spawn(&mut commands);

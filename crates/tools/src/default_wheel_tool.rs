@@ -23,6 +23,7 @@ fn toolbelt_events(
     for event in reader.read() {
         if let PopulateToolbeltEvent::Inspector { toolbelt_id }
         | PopulateToolbeltEvent::Taskbar { toolbelt_id }
+        | PopulateToolbeltEvent::Chat { toolbelt_id }
         | PopulateToolbeltEvent::Keyboard { toolbelt_id } = event
         {
             ToolSpawnConfig::<DefaultWheelTool, NoInputs>::new(
@@ -31,7 +32,7 @@ fn toolbelt_events(
                 event,
             )
             .guess_name(file!())
-            .guess_image(file!(), &asset_server)
+            .guess_image(file!(), &asset_server, "png")
             .with_description("Swaps to default tools")
             .with_starting_state(StartingState::Inactive)
             .spawn(&mut commands);

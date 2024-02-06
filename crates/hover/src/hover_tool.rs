@@ -26,7 +26,7 @@ fn toolbelt_events(
         if let PopulateToolbeltEvent::Inspector { toolbelt_id } = event {
             ToolSpawnConfig::<HoverTool, NoInputs>::new(HoverTool, *toolbelt_id, event)
                 .guess_name(file!())
-                .guess_image(file!(), &asset_server)
+                .guess_image(file!(), &asset_server, "png")
                 .with_description("UI hover visuals")
                 .spawn(&mut commands);
         }

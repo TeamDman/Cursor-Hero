@@ -48,7 +48,7 @@ fn toolbelt_events(
         {
             ToolSpawnConfig::<CursorTool, NoInputs>::new(CursorTool, *toolbelt_id, event)
                 .guess_name(file!())
-                .guess_image(file!(), &asset_server)
+                .guess_image(file!(), &asset_server, "png")
                 .with_description("Positions the Windows cursor based on the game pointer")
                 .spawn(&mut commands);
         }

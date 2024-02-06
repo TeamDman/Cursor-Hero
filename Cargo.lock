@@ -1791,6 +1791,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "cursor_hero_chat"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "cursor_hero_character_types",
+ "cursor_hero_chat_types",
+ "cursor_hero_observation_types",
+ "cursor_hero_toolbelt_types",
+ "cursor_hero_tools",
+ "leafwing-input-manager",
+]
+
+[[package]]
+name = "cursor_hero_chat_types"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "cursor_hero_toolbelt_types",
+ "leafwing-input-manager",
+]
+
+[[package]]
 name = "cursor_hero_click_drag_character_movement"
 version = "0.1.0"
 dependencies = [
@@ -2006,6 +2028,8 @@ dependencies = [
  "cursor_hero_camera",
  "cursor_hero_character",
  "cursor_hero_character_types",
+ "cursor_hero_chat",
+ "cursor_hero_chat_types",
  "cursor_hero_click_drag_character_movement",
  "cursor_hero_cursor_mirror",
  "cursor_hero_data",

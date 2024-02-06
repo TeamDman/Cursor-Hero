@@ -25,7 +25,7 @@ fn toolbelt_events(
         if let PopulateToolbeltEvent::Inspector { toolbelt_id } = event {
             ToolSpawnConfig::<PauseTool, PauseToolAction>::new(PauseTool, *toolbelt_id, event)
                 .guess_name(file!())
-                .guess_image(file!(), &asset_server)
+                .guess_image(file!(), &asset_server, "png")
                 .with_description("Pauses the game (not yet implemented)")
                 .spawn(&mut commands);
         }

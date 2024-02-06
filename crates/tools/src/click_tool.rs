@@ -46,7 +46,7 @@ fn toolbelt_events(
         {
             ToolSpawnConfig::<ClickTool, ClickToolAction>::new(ClickTool, *toolbelt_id, event)
                 .guess_name(file!())
-                .guess_image(file!(), &asset_server)
+                .guess_image(file!(), &asset_server, "png")
                 .with_description("Send mouse clicks")
                 .spawn(&mut commands);
         }

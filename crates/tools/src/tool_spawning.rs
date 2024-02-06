@@ -106,12 +106,12 @@ where
             .join(" ")
     }
 
-    pub fn guess_image(mut self, file_path: &str, asset_server: &Res<AssetServer>) -> Self {
-        self.texture = asset_server.load(Self::format_tool_image_from_source(file_path));
+    pub fn guess_image(mut self, file_path: &str, asset_server: &Res<AssetServer>, extension: &str) -> Self {
+        self.texture = asset_server.load(Self::format_tool_image_from_source(file_path, extension));
         self
     }
 
-    fn format_tool_image_from_source(file_path: &str) -> String {
+    fn format_tool_image_from_source(file_path: &str, extension: &str) -> String {
         // Extract the file name from the path
         let file_name = Path::new(file_path)
             .file_stem() // Get the file stem (file name without extension)
@@ -119,7 +119,7 @@ where
             .unwrap_or("")
             .trim_end_matches("_plugin")
             .trim_start_matches("spawn_");
-        format!("textures/tools/{}.png", file_name)
+        format!("textures/tools/{}.{}", file_name, extension)
     }
 
     pub fn with_asset_image(

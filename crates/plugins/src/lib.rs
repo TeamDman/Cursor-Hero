@@ -54,10 +54,14 @@ use cursor_hero_observation::observation_plugin::ObservationPlugin;
 use cursor_hero_observation_types::observation_types_plugin::ObservationTypesPlugin;
 use cursor_hero_tts_types::tts_types_plugin::TtsTypesPlugin;
 use cursor_hero_tts::tts_plugin::TtsPlugin;
+use cursor_hero_chat::chat_plugin::ChatPlugin;
+use cursor_hero_chat_types::chat_types_plugin::ChatTypesPlugin;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(ChatTypesPlugin);
+        app.add_plugins(ChatPlugin);
         app.add_plugins(TtsPlugin);
         app.add_plugins(TtsTypesPlugin);
         app.add_plugins(ObservationTypesPlugin);

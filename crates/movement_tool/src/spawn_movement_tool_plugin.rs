@@ -28,7 +28,7 @@ fn handle_toolbelt_events(
                     event,
                 )
                 .guess_name(file!())
-                .guess_image(file!(), &asset_server)
+                .guess_image(file!(), &asset_server, "png")
                 .with_description("Go faster, reach further")
                 .spawn(&mut commands);
             }
@@ -40,10 +40,11 @@ fn handle_toolbelt_events(
                 )
                 .with_input_map(None)
                 .guess_name(file!())
-                .guess_image(file!(), &asset_server)
+                .guess_image(file!(), &asset_server, "png")
                 .with_description("Go faster, reach further")
                 .spawn(&mut commands);
             }
+            _ => {}
         }
     }
 }

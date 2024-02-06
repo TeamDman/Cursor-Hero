@@ -9,6 +9,7 @@ pub struct SprintToolPlugin;
 
 impl Plugin for SprintToolPlugin {
     fn build(&self, app: &mut App) {
+        // TODO: move to sprint_tool_types crate
         app.register_type::<SprintTool>();
         app.register_type::<SpawnedCube>();
         app.add_plugins(InputManagerPlugin::<SprintToolAction>::default());
@@ -60,7 +61,7 @@ fn toolbelt_events(
         {
             ToolSpawnConfig::<SprintTool, SprintToolAction>::new(SprintTool, *toolbelt_id, event)
                 .guess_name(file!())
-                .guess_image(file!(), &asset_server)
+                .guess_image(file!(), &asset_server, "png")
                 .with_description("Go faster, reach further")
                 .spawn(&mut commands);
         }

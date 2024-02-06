@@ -34,7 +34,7 @@ fn toolbelt_events(
                 event,
             )
             .guess_name(file!())
-            .guess_image(file!(), &asset_server)
+            .guess_image(file!(), &asset_server, "png")
             .with_description("Drag the window from its body")
             .spawn(&mut commands);
         }

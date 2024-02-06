@@ -52,7 +52,7 @@ fn toolbelt_events(
         {
             ToolSpawnConfig::<_, ZoomToolAction>::new(ZoomTool::default(), *toolbelt_id, event)
                 .guess_name(file!())
-                .guess_image(file!(), &asset_server)
+                .guess_image(file!(), &asset_server, "png")
                 .with_description("Send scroll events")
                 .spawn(&mut commands);
         }

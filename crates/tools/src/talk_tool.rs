@@ -35,7 +35,7 @@ fn toolbelt_events(
         if let PopulateToolbeltEvent::Keyboard { toolbelt_id } = event {
             ToolSpawnConfig::<TalkTool, TalkToolAction>::new(TalkTool, *toolbelt_id, event)
                 .guess_name(file!())
-                .guess_image(file!(), &asset_server)
+                .guess_image(file!(), &asset_server, "png")
                 .with_description("Presses F23")
                 .spawn(&mut commands);
         }

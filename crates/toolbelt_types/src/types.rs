@@ -70,6 +70,7 @@ pub enum PopulateToolbeltEvent {
     Taskbar { toolbelt_id: Entity },
     Keyboard { toolbelt_id: Entity },
     Agent { toolbelt_id: Entity },
+    Chat { toolbelt_id: Entity },
 }
 
 #[derive(Event, Debug, Reflect)]
