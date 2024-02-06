@@ -13,6 +13,8 @@ impl Plugin for AgentMovementPlugin {
         app.add_systems(Update, agent_tool_movement);
     }
 }
+
+#[allow(clippy::type_complexity)]
 fn agent_tool_movement(
     character_query: Query<(&Children, &Transform), (With<Character>, With<Agent>)>,
     toolbelt_query: Query<&Children, With<Toolbelt>>,

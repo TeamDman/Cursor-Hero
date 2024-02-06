@@ -61,25 +61,25 @@ fn toolbelt_events(
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
 enum InspectToolAction {
-    DupeUnderMouse,
-    PrintUnderMouse,
-    FractureUnderMouse,
+    Dupe,
+    Print,
+    Fracture,
 }
 
 impl InspectToolAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
-            Self::DupeUnderMouse => GamepadButtonType::RightTrigger.into(),
-            Self::PrintUnderMouse => GamepadButtonType::North.into(),
-            Self::FractureUnderMouse => GamepadButtonType::Select.into(),
+            Self::Dupe => GamepadButtonType::RightTrigger.into(),
+            Self::Print => GamepadButtonType::North.into(),
+            Self::Fracture => GamepadButtonType::Select.into(),
         }
     }
 
     fn default_mkb_binding(&self) -> UserInput {
         match self {
-            Self::DupeUnderMouse => MouseButton::Left.into(),
-            Self::PrintUnderMouse => MouseButton::Right.into(),
-            Self::FractureUnderMouse => KeyCode::G.into(),
+            Self::Dupe => MouseButton::Left.into(),
+            Self::Print => MouseButton::Right.into(),
+            Self::Fracture => KeyCode::G.into(),
         }
     }
 }
@@ -97,15 +97,15 @@ impl ToolAction for InspectToolAction {
 
 #[derive(Debug)]
 enum ThreadboundMessage {
-    DupeUnderMouse { world_position: Vec3 },
-    PrintUnderMouse { world_position: Vec3 },
-    FractureUnderMouse { world_position: Vec3 },
+    Dupe { world_position: Vec3 },
+    Print { world_position: Vec3 },
+    Fracture { world_position: Vec3 },
 }
 #[derive(Debug)]
 enum GameboundMessage {
-    DupeElementDetails(ElementInfo),
-    PrintElementDetails(ElementInfo),
-    FractureElementDetails {
+    Dupe(ElementInfo),
+    Print(ElementInfo),
+    Fracture {
         data: Vec<(ElementInfo, usize)>,
         world_position: Vec3,
     },
@@ -121,7 +121,7 @@ fn process_thread_message(
     reply_tx: &Sender<GameboundMessage>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match action {
-        ThreadboundMessage::DupeUnderMouse { world_position } => {
+        ThreadboundMessage::Dupe { world_position } => {
             let mouse_position = world_position.xy().neg_y().as_ivec2();
             debug!("Worker received click: {:?} {:?}", action, mouse_position);
 
@@ -131,9 +131,9 @@ fn process_thread_message(
             let id = elem.get_automation_id()?;
             info!("Automation ID: {}", id);
             let info = get_element_info(elem)?;
-            reply_tx.send(GameboundMessage::DupeElementDetails(info))?;
+            reply_tx.send(GameboundMessage::Dupe(info))?;
         }
-        ThreadboundMessage::PrintUnderMouse { world_position } => {
+        ThreadboundMessage::Print { world_position } => {
             let mouse_position = world_position.xy().neg_y().as_ivec2();
             debug!("Worker received click: {:?} {:?}", action, mouse_position);
 
@@ -147,9 +147,9 @@ fn process_thread_message(
             let id = elem.get_automation_id()?;
             info!("Automation ID: {}", id);
             let info = get_element_info(elem)?;
-            reply_tx.send(GameboundMessage::PrintElementDetails(info))?;
+            reply_tx.send(GameboundMessage::Print(info))?;
         }
-        ThreadboundMessage::FractureUnderMouse { world_position } => {
+        ThreadboundMessage::Fracture { world_position } => {
             let mouse_position = world_position.xy().neg_y().as_ivec2();
             debug!("Worker received click: {:?} {:?}", action, mouse_position);
 
@@ -158,7 +158,7 @@ fn process_thread_message(
                 .into_iter()
                 .filter_map(|(elem, depth)| get_element_info(elem).ok().map(|info| (info, depth)))
                 .collect();
-            reply_tx.send(GameboundMessage::FractureElementDetails {
+            reply_tx.send(GameboundMessage::Fracture {
                 data,
                 world_position,
             })?;
@@ -233,27 +233,27 @@ fn handle_input(
         if hovering_over_egui {
             continue;
         }
-        if tool_actions.just_pressed(InspectToolAction::DupeUnderMouse) {
+        if tool_actions.just_pressed(InspectToolAction::Dupe) {
             info!("PrintUnderMouse button");
-            let msg = ThreadboundMessage::DupeUnderMouse {
+            let msg = ThreadboundMessage::Dupe {
                 world_position: pointer_translation,
             };
             if let Err(e) = bridge.sender.send(msg) {
                 error!("Failed to send click: {:?}", e);
             }
         }
-        if tool_actions.just_pressed(InspectToolAction::PrintUnderMouse) {
+        if tool_actions.just_pressed(InspectToolAction::Print) {
             info!("PrintUnderMouse button");
-            let msg = ThreadboundMessage::PrintUnderMouse {
+            let msg = ThreadboundMessage::Print {
                 world_position: pointer_translation,
             };
             if let Err(e) = bridge.sender.send(msg) {
                 error!("Failed to send click: {:?}", e);
             }
         }
-        if tool_actions.just_pressed(InspectToolAction::FractureUnderMouse) {
+        if tool_actions.just_pressed(InspectToolAction::Fracture) {
             info!("FractureUnderMouse button");
-            let msg = ThreadboundMessage::FractureUnderMouse {
+            let msg = ThreadboundMessage::Fracture {
                 world_position: pointer_translation,
             };
             if let Err(e) = bridge.sender.send(msg) {
@@ -271,7 +271,7 @@ fn handle_replies(
 ) {
     while let Ok(msg) = bridge.receiver.try_recv() {
         match msg {
-            GameboundMessage::DupeElementDetails(info) => {
+            GameboundMessage::Dupe(info) => {
                 let Ok(image) = get_image(info.bounding_rect, &access) else {
                     continue;
                 };
@@ -302,7 +302,7 @@ fn handle_replies(
                     Name::new(format!("Element - {}", info.name)),
                 ));
             }
-            GameboundMessage::PrintElementDetails(info) => {
+            GameboundMessage::Print(info) => {
                 info!("Received info for element {:?}", info);
                 commands.spawn((
                     AudioBundle {
@@ -312,7 +312,7 @@ fn handle_replies(
                     Name::new(format!("SFX Element - {}", info.name)),
                 ));
             }
-            GameboundMessage::FractureElementDetails {
+            GameboundMessage::Fracture {
                 data,
                 world_position,
             } => {

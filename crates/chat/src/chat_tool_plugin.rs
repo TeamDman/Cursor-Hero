@@ -72,27 +72,25 @@ fn handle_input(
                 character_id,
                 tool_id,
             });
-        } else if tool_actions.just_pressed(ChatToolAction::Submit) {
-            if tool.focused {
-                let message = tool.buffer.clone();
-                tool.buffer.clear();
-                tool.focused = false;
+        } else if tool_actions.just_pressed(ChatToolAction::Submit) && tool.focused {
+            let message = tool.buffer.clone();
+            tool.buffer.clear();
+            tool.focused = false;
 
-                info!(
-                    "Chat message submitted by character {:?}: {}",
-                    character_id, message
-                );
-                chat_events.send(ChatEvent::Chat {
-                    character_id,
-                    message,
-                });
+            info!(
+                "Chat message submitted by character {:?}: {}",
+                character_id, message
+            );
+            chat_events.send(ChatEvent::Chat {
+                character_id,
+                message,
+            });
 
-                info!("Chat tool unfocused");
-                chat_input_events.send(ChatInputEvent::Unfocus {
-                    character_id,
-                    tool_id,
-                });
-            }
+            info!("Chat tool unfocused");
+            chat_input_events.send(ChatInputEvent::Unfocus {
+                character_id,
+                tool_id,
+            });
         }
     }
 }

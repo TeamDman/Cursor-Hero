@@ -87,17 +87,17 @@ fn create_worker_thread(mut commands: Commands) {
 
 fn bridge_generate_requests(bridge: ResMut<Bridge>, mut events: EventReader<InferenceEvent>) {
     for event in events.read() {
-        match event {
-            InferenceEvent::Request { session_id, prompt } => {
-                debug!("Received generate request for session {:?}, sending over bridge to worker thread", session_id);
-                if let Err(e) = bridge.sender.send(ThreadboundMessage::Generate {
-                    session_id: *session_id,
-                    prompt: prompt.clone(),
-                }) {
-                    error!("Threadbound channel failure: {}", e);
-                }
+        if let InferenceEvent::Request { session_id, prompt } = event {
+            debug!(
+                "Received generate request for session {:?}, sending over bridge to worker thread",
+                session_id
+            );
+            if let Err(e) = bridge.sender.send(ThreadboundMessage::Generate {
+                session_id: *session_id,
+                prompt: prompt.clone(),
+            }) {
+                error!("Threadbound channel failure: {}", e);
             }
-            _ => {}
         }
     }
 }

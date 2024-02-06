@@ -31,6 +31,7 @@ fn toolbelt_events(
     }
 }
 
+#[allow(clippy::type_complexity)]
 fn tick(
     mut commands: Commands,
     tool_query: Query<(Entity, &Parent), (Added<ActiveTool>, With<ObservationTool>)>,
