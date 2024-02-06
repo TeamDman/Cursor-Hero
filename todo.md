@@ -1,21 +1,18 @@
-- set clippy rule to flag unwrap calls
+- fullscreen tool binding f11 to fullscreen toggle
+- set clippy rule to flag `unwrap` and `expect` usage
 - post to openai discord use-cases channel https://discord.com/channels/974519864045756446/1155775326253756456
   - tag @abdubs (Alex)
-- give the character eyes
-- 
 - window switcher tool; window wheel -> focus, teleport
-
 - Github releases in world
-
 - File browser in world
-
 - Voice input tool
   - Push to talk
   - Push to toggle talk
   - Insert period
   - Insert space
   - Hit enter
-  - 
+
+- interpreter agent that acts as "middleware" that will process user speech transcription to clean it up typos and other errors that can decrease model performance before it gets included in main agent observations
 
 - sprint tool scales scroll speed
 
