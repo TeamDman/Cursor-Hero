@@ -10,4 +10,3 @@ pub enum ObservationEvent {
         observation: String,
     },
 }
-

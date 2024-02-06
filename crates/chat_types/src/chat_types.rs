@@ -55,7 +55,6 @@ pub enum ChatEvent {
     },
 }
 
-
 #[derive(Event, PartialEq, Eq, Clone, Hash, Debug, Reflect)]
 pub enum ChatInputEvent {
     Focus {
@@ -71,8 +70,6 @@ pub enum ChatInputEvent {
         tool_id: Entity,
     },
 }
-
-
 
 #[derive(Component, Reflect, Debug, Default)]
 pub struct ChatInput;

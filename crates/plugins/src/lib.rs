@@ -46,16 +46,16 @@ use cursor_hero_wallpaper::wallpaper_plugin::WallpaperPlugin;
 
 use cursor_hero_agent_types::agent_types_plugin::AgentTypesPlugin;
 use cursor_hero_character_types::character_types_plugin::CharacterTypesPlugin;
-use cursor_hero_movement_tool::movement_tool_plugin::MovementToolPlugin;
-use cursor_hero_movement_tool_types::movement_tool_types_plugin::MovementToolTypesPlugin;
-use cursor_hero_inference::inference_plugin::InferencePlugin;
-use cursor_hero_inference_types::inference_types_plugin::InferenceTypesPlugin;
-use cursor_hero_observation::observation_plugin::ObservationPlugin;
-use cursor_hero_observation_types::observation_types_plugin::ObservationTypesPlugin;
-use cursor_hero_tts_types::tts_types_plugin::TtsTypesPlugin;
-use cursor_hero_tts::tts_plugin::TtsPlugin;
 use cursor_hero_chat::chat_plugin::ChatPlugin;
 use cursor_hero_chat_types::chat_types_plugin::ChatTypesPlugin;
+use cursor_hero_inference::inference_plugin::InferencePlugin;
+use cursor_hero_inference_types::inference_types_plugin::InferenceTypesPlugin;
+use cursor_hero_movement_tool::movement_tool_plugin::MovementToolPlugin;
+use cursor_hero_movement_tool_types::movement_tool_types_plugin::MovementToolTypesPlugin;
+use cursor_hero_observation::observation_plugin::ObservationPlugin;
+use cursor_hero_observation_types::observation_types_plugin::ObservationTypesPlugin;
+use cursor_hero_tts::tts_plugin::TtsPlugin;
+use cursor_hero_tts_types::tts_types_plugin::TtsTypesPlugin;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {

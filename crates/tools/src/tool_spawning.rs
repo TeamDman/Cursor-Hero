@@ -106,7 +106,12 @@ where
             .join(" ")
     }
 
-    pub fn guess_image(mut self, file_path: &str, asset_server: &Res<AssetServer>, extension: &str) -> Self {
+    pub fn guess_image(
+        mut self,
+        file_path: &str,
+        asset_server: &Res<AssetServer>,
+        extension: &str,
+    ) -> Self {
         self.texture = asset_server.load(Self::format_tool_image_from_source(file_path, extension));
         self
     }

@@ -115,10 +115,7 @@ fn bridge_generate_responses(bridge: ResMut<Bridge>, mut events: EventWriter<Inf
                     response,
                     prompt,
                 };
-                debug!(
-                    "Received bridge response, sending game event {:?}",
-                    event
-                );
+                debug!("Received bridge response, sending game event {:?}", event);
                 events.send(event);
             }
         }

@@ -81,9 +81,7 @@ fn tts_response(
 ) {
     for event in tts_events.read() {
         if let TtsEvent::Response {
-            session_id,
-            wav,
-            ..
+            session_id, wav, ..
         } = event
         {
             if tool_query.get(*session_id).is_ok() {
