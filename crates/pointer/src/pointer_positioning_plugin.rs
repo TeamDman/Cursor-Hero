@@ -29,6 +29,11 @@ impl Plugin for PointerPositioningPlugin {
     }
 }
 
+/// What a chonker.
+/// I'm pretty proud of how clean this is compared to how it used to be.
+/// https://github.com/TeamDman/Cursor-Hero/commit/28c7e40ba9d8f77175d43ddd786ac4cf690de3b6#diff-8186c0229ca354003aa4c771e5c89c82d85fd38c4530f3726ae39220a99eb1e3
+/// It used to be a bunch of tags where the pointer and cursor were manipulated in many different systems.
+/// Now, with the behaviour enum, all situations are explicit, obvious, and will warn when unanticipated situations arise.
 #[allow(clippy::type_complexity)]
 #[allow(clippy::too_many_arguments)]
 fn update_pointer(
@@ -124,6 +129,8 @@ fn update_pointer(
             (current, true, false, false, _) => current,
             // main character, not in host environment, stick in use
             (_, true, false, true, _) => PointerMovementBehaviour::HostOverWindow,
+            // none stays none
+            (PointerMovementBehaviour::None, _, _, _, _) => PointerMovementBehaviour::None,
             (current, a, b, c, d) => {
                 warn!("Unhandled case: current={} main_character={} in_host_environment={} stick={} input_method={:?}", current, a, b, c, d);
                 current
@@ -140,6 +147,9 @@ fn update_pointer(
                 *input_method
             );
             pointer.movement_behaviour = next_behaviour;
+        }
+        if pointer.movement_behaviour == PointerMovementBehaviour::None {
+            continue;
         }
 
         let (local_target, global_target, host_target) = match pointer.movement_behaviour {
