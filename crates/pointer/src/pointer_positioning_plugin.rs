@@ -167,9 +167,9 @@ fn update_pointer(
                         (Some(local_target), Some(global_target), None)
                     }
                     None => {
-                        // if pointer.log_behaviour == PointerLogBehaviour::ErrorsAndPositionUpdates {
-                        warn!("No cursor position found");
-                        // }
+                        if pointer.log_behaviour == PointerLogBehaviour::ErrorsAndPositionUpdates {
+                            warn!("No cursor position found");
+                        }
                         (None, None, None)
                     }
                 }

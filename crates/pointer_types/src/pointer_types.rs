@@ -36,8 +36,8 @@ impl Default for Pointer {
             default_reach: 50.0,
             sprint_reach: 2000.0,
             movement_behaviour: PointerMovementBehaviour::None,
-            // log_behaviour: PointerLogBehaviour::Errors,
-            log_behaviour: PointerLogBehaviour::ErrorsAndPositionUpdates,
+            log_behaviour: PointerLogBehaviour::Errors,
+            // log_behaviour: PointerLogBehaviour::ErrorsAndPositionUpdates,
         }
     }
 }
