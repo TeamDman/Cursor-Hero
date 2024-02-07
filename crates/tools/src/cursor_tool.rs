@@ -3,6 +3,7 @@ use bevy::transform::TransformSystem;
 use bevy_xpbd_2d::prelude::*;
 use cursor_hero_bevy::NegativeYIVec2;
 use cursor_hero_environment::environment_plugin::GameEnvironment;
+use cursor_hero_pointer_types::pointer_behaviour_types::PointerMovementBehaviour;
 use cursor_hero_pointer_types::prelude::*;
 
 use itertools::Itertools;
@@ -42,16 +43,16 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Default { toolbelt_id }
-        | PopulateToolbeltEvent::Inspector { toolbelt_id }
-        | PopulateToolbeltEvent::Keyboard { toolbelt_id } = event
-        {
-            ToolSpawnConfig::<CursorTool, NoInputs>::new(CursorTool, *toolbelt_id, event)
-                .guess_name(file!())
-                .guess_image(file!(), &asset_server, "png")
-                .with_description("Positions the Windows cursor based on the game pointer")
-                .spawn(&mut commands);
-        }
+        // if let PopulateToolbeltEvent::Default { toolbelt_id }
+        // | PopulateToolbeltEvent::Inspector { toolbelt_id }
+        // | PopulateToolbeltEvent::Keyboard { toolbelt_id } = event
+        // {
+        //     ToolSpawnConfig::<CursorTool, NoInputs>::new(CursorTool, *toolbelt_id, event)
+        //         .guess_name(file!())
+        //         .guess_image(file!(), &asset_server, "png")
+        //         .with_description("Positions the Windows cursor based on the game pointer")
+        //         .spawn(&mut commands);
+        // }
     }
 }
 
@@ -59,10 +60,7 @@ fn toolbelt_events(
 fn snap_mouse_to_pointer(
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<(Ref<GlobalTransform>, &Children), With<Character>>,
-    pointers: Query<
-        (Ref<GlobalTransform>, Option<&PointerEnvironment>),
-        (With<Pointer>, With<HostCursorFollows>),
-    >,
+    pointers: Query<(Ref<GlobalTransform>, Option<&PointerEnvironment>, &Pointer)>,
     tools: Query<&Parent, (With<CursorTool>, With<ActiveTool>)>,
     camera_query: Query<(&GlobalTransform, &Camera)>,
     window_query: Query<&RawHandleWrapper, With<PrimaryWindow>>,
@@ -97,12 +95,15 @@ fn snap_mouse_to_pointer(
     let Some(pointer) = character_children
         .iter()
         .filter_map(|x| pointers.get(*x).ok())
+        .filter(|(_, _, pointer)| {
+            pointer.movement_behaviour == PointerMovementBehaviour::HostFollowsPointer
+        })
         .next()
     else {
         // may not be any pointers matching With<HostCursorFollows>
         return;
     };
-    let (pointer_position, pointer_environment) = pointer;
+    let (pointer_position, pointer_environment, pointer) = pointer;
 
     // ensure a change has occurred
     if !pointer_position.is_changed() && !character_position.is_changed() {
@@ -162,7 +163,11 @@ fn snap_mouse_to_pointer(
 
     // debug!("Setting cursor position to {:?}", destination_position);
     match set_cursor_position(destination_position.neg_y()) {
-        Ok(_) => {}
+        Ok(_) => {
+            if pointer.log_behaviour == PointerLogBehaviour::ErrorsAndPositionUpdates {
+                debug!("Set cursor position to {:?}", destination_position);
+            }
+        }
         Err(e) => warn!("Failed to set cursor position: {}", e),
     }
 }

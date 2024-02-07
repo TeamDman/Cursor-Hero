@@ -6,8 +6,6 @@ pub struct PointerTypesPlugin;
 impl Plugin for PointerTypesPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<Pointer>();
-        app.register_type::<FollowHostCursor>();
-        app.register_type::<HostCursorFollows>();
         app.configure_sets(Update, PointerSystemSet::Position);
 
         app.add_event::<PointerReachEvent>();

@@ -2077,6 +2077,7 @@ dependencies = [
  "bevy",
  "bevy-inspector-egui",
  "bevy_xpbd_2d",
+ "cursor_hero_bevy",
  "cursor_hero_camera",
  "cursor_hero_character_types",
  "cursor_hero_environment",
@@ -2088,6 +2089,7 @@ dependencies = [
  "cursor_hero_toolbelt_types",
  "cursor_hero_winutils",
  "leafwing-input-manager",
+ "raw-window-handle",
 ]
 
 [[package]]

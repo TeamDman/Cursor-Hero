@@ -21,7 +21,7 @@ pub struct MovementTool {
 impl Default for MovementTool {
     fn default() -> Self {
         match ActiveInput::default() {
-            ActiveInput::MouseKeyboard => Self::default_mnk(),
+            ActiveInput::MouseAndKeyboard => Self::default_mnk(),
             ActiveInput::Gamepad => Self::default_gamepad(),
         }
     }

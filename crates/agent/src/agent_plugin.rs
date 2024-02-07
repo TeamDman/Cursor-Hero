@@ -7,8 +7,8 @@ pub struct AgentPlugin;
 
 impl Plugin for AgentPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(InsertAgentToolbeltPlugin);
-        app.add_plugins(SpawnAgentPlugin);
-        app.add_plugins(AgentMovementPlugin);
+        // app.add_plugins(InsertAgentToolbeltPlugin);
+        // app.add_plugins(SpawnAgentPlugin);
+        // app.add_plugins(AgentMovementPlugin);
     }
 }

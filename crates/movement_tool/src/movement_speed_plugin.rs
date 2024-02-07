@@ -8,7 +8,7 @@ pub struct MovementSpeedPlugin;
 
 impl Plugin for MovementSpeedPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(ActiveInput::MouseKeyboard), set_mnk_speed);
+        app.add_systems(OnEnter(ActiveInput::MouseAndKeyboard), set_mnk_speed);
         app.add_systems(OnEnter(ActiveInput::Gamepad), set_gamepad_speed);
     }
 }

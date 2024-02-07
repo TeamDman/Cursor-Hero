@@ -1,3 +1,6 @@
+- switcher wheel to collect all switcher tools for predictable navigation
+  - gamepad rumble on hover
+  - sound effect on hover tool
 - fullscreen tool binding f11 to fullscreen toggle
 - set clippy rule to flag `unwrap` and `expect` usage
 - post to openai discord use-cases channel https://discord.com/channels/974519864045756446/1155775326253756456
