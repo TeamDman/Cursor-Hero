@@ -2,7 +2,6 @@ use bevy::prelude::*;
 
 use crate::click_tool::ClickToolPlugin;
 use crate::cube_tool::CubeToolPlugin;
-use crate::cursor_tool::CursorToolPlugin;
 use crate::default_wheel_tool::DefaultWheelToolPlugin;
 use crate::focus_tool::FocusToolPlugin;
 use crate::hello_tool::HelloToolPlugin;
@@ -23,7 +22,6 @@ impl Plugin for ToolPlugin {
         app.add_plugins(CubeToolPlugin);
         // app.add_plugins(PlaceholderToolPlugin);
         app.add_plugins(ClickToolPlugin);
-        app.add_plugins(CursorToolPlugin);
         app.add_plugins(ScrollToolPlugin);
         app.add_plugins(TalkToolPlugin);
         app.add_plugins(ZoomToolPlugin);

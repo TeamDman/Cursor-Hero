@@ -2,7 +2,6 @@
 
 pub mod click_tool;
 pub mod cube_tool;
-pub mod cursor_tool;
 pub mod default_wheel_tool;
 pub mod focus_tool;
 pub mod hello_tool;

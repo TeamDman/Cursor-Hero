@@ -2,12 +2,9 @@ use bevy::prelude::*;
 use bevy::transform::TransformSystem;
 use bevy::window::PrimaryWindow;
 use bevy_xpbd_2d::prelude::*;
-use cursor_hero_bevy::NegativeYIVec2;
 use cursor_hero_bevy::NegativeYVec2;
-use cursor_hero_camera::camera_plugin::CameraSystemSet;
 use cursor_hero_camera::camera_plugin::MainCamera;
 use cursor_hero_character_types::prelude::*;
-use cursor_hero_environment::environment_plugin::GameEnvironment;
 use cursor_hero_environment::environment_plugin::HostEnvironment;
 use cursor_hero_input::active_input_state_plugin::ActiveInput;
 use cursor_hero_pointer_types::pointer_behaviour_types::PointerMovementBehaviour;
@@ -33,6 +30,7 @@ impl Plugin for PointerPositioningPlugin {
 }
 
 #[allow(clippy::type_complexity)]
+#[allow(clippy::too_many_arguments)]
 fn update_pointer(
     mut pointer_query: Query<
         (
@@ -112,14 +110,12 @@ fn update_pointer(
             stick,
             *input_method,
         ) {
-            // main character, in any environment, stick in use, mouse and keyboard
-            // (_, true, _, true, ActiveInput::MouseAndKeyboard) => {
-            //     PointerMovementBehaviour::HostFollowsPointer
-            // }
             // main character, in host environment, stick in use
             (_, true, true, true, _) => PointerMovementBehaviour::HostFollowsPointer,
             // main character, in host environment, stick not in use, gamepad
-            (_, true, true, false, ActiveInput::Gamepad) => PointerMovementBehaviour::HostFollowsPointer,
+            (_, true, true, false, ActiveInput::Gamepad) => {
+                PointerMovementBehaviour::HostFollowsPointer
+            }
             // main character, in any environment, stick not in use
             (_, true, _, false, ActiveInput::MouseAndKeyboard) => {
                 PointerMovementBehaviour::PointerFollowsHost
@@ -136,7 +132,7 @@ fn update_pointer(
         if next_behaviour != pointer.movement_behaviour {
             info!(
                 "Switching to {:?} | current={} main_character={} in_host_environment={} stick={} input_method={:?}",
-                next_behaviour, 
+                next_behaviour,
                 pointer.movement_behaviour,
                 is_main_character.is_some(),
                 in_host_environment,
@@ -301,7 +297,7 @@ fn update_pointer(
         };
 
         // Update positions
-        if (local_target != (*last_sent).0 || global_target != (*last_sent).1)
+        if (local_target != (*last_sent).0 || global_target != last_sent.1)
             && let Some(local_target) = local_target
             && let Some(global_target) = global_target
         {
@@ -336,7 +332,10 @@ fn update_pointer(
             match set_cursor_position(host_target) {
                 Ok(_) => {
                     if pointer.log_behaviour == PointerLogBehaviour::ErrorsAndPositionUpdates {
-                        debug!("{} | set host cursor to {:?}", pointer.movement_behaviour, host_target);
+                        debug!(
+                            "{} | set host cursor to {:?}",
+                            pointer.movement_behaviour, host_target
+                        );
                     }
                 }
                 Err(e) => {
