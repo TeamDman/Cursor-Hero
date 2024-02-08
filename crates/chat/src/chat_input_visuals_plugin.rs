@@ -22,6 +22,7 @@ fn handle_chat_input_events(
             ChatInputEvent::Focus {
                 character_id,
                 tool_id,
+                ..
             } => {
                 if let Ok(character_children) = character_query.get(*character_id) {
                     for child in character_children.iter() {
@@ -69,6 +70,7 @@ fn handle_chat_input_events(
             ChatInputEvent::TextChanged {
                 character_id,
                 tool_id,
+                ..
             } => {
                 let new_text = match tool_query.get(*tool_id) {
                     Ok(tool) => tool.buffer.clone(),

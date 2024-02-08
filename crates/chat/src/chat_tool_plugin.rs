@@ -20,7 +20,9 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Chat { toolbelt_id } = event {
+        if let PopulateToolbeltEvent::Chat { toolbelt_id }
+        | PopulateToolbeltEvent::Default { toolbelt_id } = event
+        {
             ToolSpawnConfig::<ChatTool, ChatToolAction>::new(
                 ChatTool::default(),
                 *toolbelt_id,
@@ -39,7 +41,7 @@ fn handle_input(
         (Entity, &ActionState<ChatToolAction>, &Parent, &mut ChatTool),
         With<ActiveTool>,
     >,
-    toolbelt_query: Query<&Parent, With<Toolbelt>>,
+    toolbelt_query: Query<(&Parent, &Children), With<Toolbelt>>,
     mut character_query: Query<Entity, With<Character>>,
     mut chat_events: EventWriter<ChatEvent>,
     mut chat_input_events: EventWriter<ChatInputEvent>,
@@ -51,7 +53,7 @@ fn handle_input(
             warn!("Tool not inside a toolbelt?");
             continue;
         };
-        let toolbelt_parent = toolbelt;
+        let (toolbelt_parent, toolbelt_children) = toolbelt;
         let Ok(character) = character_query.get_mut(toolbelt_parent.get()) else {
             warn!("Toolbelt parent not a character?");
             continue;
@@ -59,38 +61,39 @@ fn handle_input(
         let character_id = character;
 
         if tool_actions.just_pressed(ChatToolAction::Focus) && !tool.focused {
-            tool.focused = true;
-            info!("Chat tool focused");
-            chat_input_events.send(ChatInputEvent::Focus {
-                character_id,
+            let event = ChatInputEvent::Focus {
                 tool_id,
-            });
+                toolbelt_id: tool_parent.get(),
+                character_id,
+            };
+            info!("Sending focus event {:?}", event);
+            chat_input_events.send(event);
         } else if tool_actions.just_pressed(ChatToolAction::Unfocus) && tool.focused {
-            tool.focused = false;
-            info!("Chat tool unfocused");
-            chat_input_events.send(ChatInputEvent::Unfocus {
-                character_id,
+            let event = ChatInputEvent::Unfocus {
                 tool_id,
-            });
+                toolbelt_id: tool_parent.get(),
+                character_id,
+            };
+            info!("Sending unfocus event {:?}", event);
+            chat_input_events.send(event);
         } else if tool_actions.just_pressed(ChatToolAction::Submit) && tool.focused {
             let message = tool.buffer.clone();
             tool.buffer.clear();
-            tool.focused = false;
 
-            info!(
-                "Chat message submitted by character {:?}: {}",
-                character_id, message
-            );
-            chat_events.send(ChatEvent::Chat {
+            let event = ChatEvent::Chat {
                 character_id,
                 message,
-            });
+            };
+            info!("Sending chat event {:?}", event);
+            chat_events.send(event);
 
-            info!("Chat tool unfocused");
-            chat_input_events.send(ChatInputEvent::Unfocus {
-                character_id,
+            let event = ChatInputEvent::Unfocus {
                 tool_id,
-            });
+                toolbelt_id: tool_parent.get(),
+                character_id,
+            };
+            info!("Sending unfocus event {:?}", event);
+            chat_input_events.send(event);
         }
     }
 }

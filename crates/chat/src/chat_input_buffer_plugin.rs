@@ -37,6 +37,7 @@ fn handle_input(
             tool.buffer.push(character_event.char);
             chat_input_events.send(ChatInputEvent::TextChanged {
                 tool_id,
+                toolbelt_id: tool_parent.get(),
                 character_id,
             });
             debug!("Chat buffer: {}", tool.buffer);

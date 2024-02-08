@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::utils::HashSet;
 use cursor_hero_toolbelt_types::prelude::*;
 use leafwing_input_manager::prelude::*;
 
@@ -6,6 +7,7 @@ use leafwing_input_manager::prelude::*;
 pub struct ChatTool {
     pub focused: bool,
     pub buffer: String,
+    pub tools_disabled_during_focus: HashSet<Entity>,
 }
 
 #[derive(Component, Reflect, Default)]
@@ -58,15 +60,18 @@ pub enum ChatEvent {
 #[derive(Event, PartialEq, Eq, Clone, Hash, Debug, Reflect)]
 pub enum ChatInputEvent {
     Focus {
-        character_id: Entity,
         tool_id: Entity,
+        toolbelt_id: Entity,
+        character_id: Entity,
     },
     Unfocus {
-        character_id: Entity,
         tool_id: Entity,
+        toolbelt_id: Entity,
+        character_id: Entity,
     },
     TextChanged {
         character_id: Entity,
+        toolbelt_id: Entity,
         tool_id: Entity,
     },
 }
