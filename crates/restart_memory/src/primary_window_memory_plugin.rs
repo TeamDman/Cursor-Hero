@@ -18,6 +18,8 @@ use crate::Usage;
 
 pub struct PrimaryWindowMemoryPlugin;
 
+// TODO: remember maximized status
+
 impl Plugin for PrimaryWindowMemoryPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(PrimaryWindowMemoryConfig::default());
