@@ -42,6 +42,7 @@ fn spawn_nametags_in_new_environments(
     mut environment_reader: EventReader<PopulateEnvironmentEvent>,
     mut commands: Commands,
     environment_query: Query<&Name, With<Environment>>,
+    asset_server: Res<AssetServer>,
 ) {
     for environment_event in environment_reader.read() {
         match environment_event {
@@ -64,13 +65,14 @@ fn spawn_nametags_in_new_environments(
                             text: Text::from_section(
                                 environment_name.to_string(),
                                 TextStyle {
-                                    font_size: 172.0,
+                                    font_size: 72.0,
+                                    font: asset_server.load("fonts/kenney_kenney-fonts/Fonts/Kenney Future Narrow.ttf"),
                                     color: Color::WHITE,
                                     ..default()
                                 },
                             )
                             .with_alignment(TextAlignment::Center),
-                            transform: Transform::from_xyz(0.0, 200.0, 1.0),
+                            transform: Transform::from_xyz(0.0, 200.0, 1.0).with_scale(Vec3::splat(4.0)),
                             ..default()
                         },
                         Nametag,
