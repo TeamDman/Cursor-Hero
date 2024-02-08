@@ -59,7 +59,7 @@ impl RestartToolAction {
 
     fn default_mkb_binding(&self) -> UserInput {
         match self {
-            Self::CancelAndRunPreviousTerminalCommand => KeyCode::Return.into(),
+            Self::CancelAndRunPreviousTerminalCommand => KeyCode::Plus.into(),
         }
     }
 }
