@@ -4,3 +4,4 @@ pub mod chat_plugin;
 pub mod chat_tool_plugin;
 pub mod chat_wheel_tool_plugin;
 pub mod chat_focus_exclusivity_plugin;
+pub mod chat_sfx_plugin;

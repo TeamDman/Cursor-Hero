@@ -1,6 +1,7 @@
 use crate::chat_focus_exclusivity_plugin::ChatFocusExclusivityPlugin;
 use crate::chat_input_buffer_plugin::ChatInputBufferPlugin;
 use crate::chat_input_visuals_plugin::ChatInputVisualsPlugin;
+use crate::chat_sfx_plugin::ChatSfxPlugin;
 use crate::chat_tool_plugin::ChatToolPlugin;
 use crate::chat_wheel_tool_plugin::ChatWheelToolPlugin;
 use bevy::prelude::*;
@@ -13,5 +14,6 @@ impl Plugin for ChatPlugin {
         app.add_plugins(ChatWheelToolPlugin);
         app.add_plugins(ChatInputVisualsPlugin);
         app.add_plugins(ChatInputBufferPlugin);
+        app.add_plugins(ChatSfxPlugin);
     }
 }
