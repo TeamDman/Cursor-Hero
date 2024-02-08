@@ -40,6 +40,7 @@ fn update_pointer(
     mut pointer_query: Query<
         (
             &mut Transform,
+            &GlobalTransform,
             &mut Position,
             &ActionState<PointerAction>,
             &mut Pointer,
@@ -66,6 +67,7 @@ fn update_pointer(
         // get pointer
         let (
             mut pointer_transform,
+            pointer_global_transform,
             mut pointer_position,
             pointer_actions,
             mut pointer,
@@ -148,11 +150,16 @@ fn update_pointer(
             );
             pointer.movement_behaviour = next_behaviour;
         }
-        if pointer.movement_behaviour == PointerMovementBehaviour::None {
-            continue;
-        }
 
         let (local_target, global_target, host_target) = match pointer.movement_behaviour {
+            PointerMovementBehaviour::None => {
+                // sync physics to render
+                (
+                    None,
+                    Some(pointer_global_transform.translation().xy()),
+                    None,
+                )
+            }
             PointerMovementBehaviour::PointerFollowsHost => {
                 // usual mode for mouse and keyboard input
                 match window.cursor_position().or(*last_known_cursor_position) {
@@ -300,30 +307,15 @@ fn update_pointer(
                     (Some(local_target), Some(global_target), host_target)
                 }
             }
-            PointerMovementBehaviour::None => {
-                // no movement behaviour, no render or physics
-                continue;
-            }
         };
 
-        // Update positions
-        if (local_target != (*last_sent).0 || global_target != last_sent.1)
+        // Update render body
+        let mut render_updated = false;
+        if local_target != (*last_sent).0
             && let Some(local_target) = local_target
-            && let Some(global_target) = global_target
         {
             let target_distance = local_target - pointer_transform.translation.xy();
-            if target_distance == Vec2::ZERO {
-                // Already at destination, keep physics in sync with unchanged render body
-                if pointer.log_behaviour == PointerLogBehaviour::ErrorsAndPositionUpdates {
-                    debug!(
-                        "{} stick={:?} | keeping physics in sync, global_target={:?}",
-                        pointer.movement_behaviour, stick, global_target
-                    );
-                }
-                let pointer_position = pointer_position.bypass_change_detection();
-                pointer_position.x = global_target.x;
-                pointer_position.y = global_target.y;
-            } else {
+            if target_distance != Vec2::ZERO {
                 // Not at destination, update render body (which physics will follow)
                 if pointer.log_behaviour == PointerLogBehaviour::ErrorsAndPositionUpdates {
                     debug!(
@@ -333,8 +325,62 @@ fn update_pointer(
                 }
                 pointer_transform.translation.x = local_target.x;
                 pointer_transform.translation.y = local_target.y;
+                render_updated = true;
             }
         }
+
+        // Update physics body
+        if !render_updated
+            && global_target != last_sent.1
+            && let Some(global_target) = global_target
+        {
+            let target_distance = global_target - pointer_position.xy();
+            if target_distance != Vec2::ZERO {
+                // Not at destination, update physics body
+                if pointer.log_behaviour == PointerLogBehaviour::ErrorsAndPositionUpdates {
+                    debug!(
+                        "{} stick={:?} | target_distance={:?}, updating physics body to global_target={:?}",
+                        pointer.movement_behaviour, stick, target_distance, global_target
+                    );
+                }
+                // prevent feedback loop
+                let pointer_position = pointer_position.bypass_change_detection();
+
+                // update physics body
+                pointer_position.x = global_target.x;
+                pointer_position.y = global_target.y;
+            }
+        }
+
+        // // Update positions
+        // if (local_target != (*last_sent).0 || global_target != last_sent.1)
+        //     && let Some(local_target) = local_target
+        //     && let Some(global_target) = global_target
+        // {
+        //     let target_distance = local_target - pointer_transform.translation.xy();
+        //     if target_distance == Vec2::ZERO {
+        //         // Already at destination, keep physics in sync with unchanged render body
+        //         if pointer.log_behaviour == PointerLogBehaviour::ErrorsAndPositionUpdates {
+        //             debug!(
+        //                 "{} stick={:?} | keeping physics in sync, global_target={:?}",
+        //                 pointer.movement_behaviour, stick, global_target
+        //             );
+        //         }
+        //         let pointer_position = pointer_position.bypass_change_detection();
+        //         pointer_position.x = global_target.x;
+        //         pointer_position.y = global_target.y;
+        //     } else {
+        //         // Not at destination, update render body (which physics will follow)
+        //         if pointer.log_behaviour == PointerLogBehaviour::ErrorsAndPositionUpdates {
+        //             debug!(
+        //                 "{} stick={:?} | target_distance={:?}, updating render body to local_target={:?}",
+        //                 pointer.movement_behaviour, stick, target_distance, local_target
+        //             );
+        //         }
+        //         pointer_transform.translation.x = local_target.x;
+        //         pointer_transform.translation.y = local_target.y;
+        //     }
+        // }
 
         if host_target != last_sent.2
             && let Some(host_target) = host_target
