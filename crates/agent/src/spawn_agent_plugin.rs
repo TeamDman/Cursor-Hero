@@ -39,6 +39,7 @@ fn spawn_agent(
                     ..default()
                 },
                 Character,
+                AgentCharacter,
                 Name::new("Agent"),
                 Agent,
                 RigidBody::Dynamic,

@@ -15,13 +15,39 @@ impl Plugin for PointerSpawningPlugin {
 fn insert_pointer(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    character: Query<Entity, Added<Character>>,
+    character: Query<(Entity, Option<&MainCharacter>, Option<&AgentCharacter>), Added<Character>>,
 ) {
-    for character_id in character.iter() {
+    for character in character.iter() {
+        let (character_id, is_main_character, is_agent_character) = character;
         info!("Creating pointer for character '{:?}'", character_id);
         commands.entity(character_id).with_children(|parent| {
             parent.spawn((
-                Pointer::default(),
+                match (is_main_character.is_some(), is_agent_character.is_some()) {
+                    (true, false) => (
+                        Pointer::new_host_pointer(),
+                        InputManagerBundle::<PointerAction> {
+                            input_map: PointerAction::default_input_map(),
+                            action_state: ActionState::default(),
+                        }
+                    ),
+                    (false, true) => (
+                        Pointer::new_agent_pointer(),
+                        InputManagerBundle::<PointerAction> {
+                            input_map: InputMap::default(),
+                            action_state: ActionState::default(),
+                        }
+                    ),
+                    (is_main,is_agent) => {
+                        error!("Character '{:?}' isn't exclusively main or agent: main: {:?}, agent: {:?}", character_id, is_main, is_agent);
+                        (
+                            Pointer::new_unknown_pointer(),
+                            InputManagerBundle::<PointerAction> {
+                                input_map: InputMap::default(),
+                                action_state: ActionState::default(),
+                            }
+                        )
+                    }
+                },
                 Name::new("Pointer"),
                 SpriteBundle {
                     texture: asset_server.load("textures/cursor.png"),
@@ -32,10 +58,6 @@ fn insert_pointer(
                         ..default()
                     },
                     ..Default::default()
-                },
-                InputManagerBundle::<PointerAction> {
-                    input_map: PointerAction::default_input_map(),
-                    action_state: ActionState::default(),
                 },
                 RigidBody::Dynamic,
                 Collider::cuboid(10.0, 10.0),

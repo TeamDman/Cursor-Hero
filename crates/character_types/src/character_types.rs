@@ -9,6 +9,8 @@ pub struct Character;
 
 #[derive(Component, Reflect, Default)]
 pub struct MainCharacter;
+#[derive(Component, Reflect, Default)]
+pub struct AgentCharacter;
 
 #[derive(Component, Reflect, Eq, PartialEq, Debug)]
 pub enum CharacterAppearance {
