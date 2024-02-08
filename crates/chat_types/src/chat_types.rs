@@ -79,67 +79,6 @@ pub enum ChatInputEvent {
 #[derive(Component, Reflect, Debug, Default)]
 pub struct ChatInput;
 
-#[derive(Bundle, Debug, Default)]
-pub struct ChatInputBundle {
-    pub text: Text2dBundle,
-    pub background: Sprite,
-    pub chat: ChatInput,
-}
-impl ChatInputBundle {
-    pub fn new(position: Vec3, starting_text: String) -> Self {
-        Self {
-            text: Text2dBundle {
-                text: Text::from_section(
-                    starting_text,
-                    TextStyle {
-                        font_size: 20.0,
-                        color: Color::WHITE,
-                        ..default()
-                    },
-                ),
-                transform: Transform::from_translation(position),
-                ..default()
-            },
-            chat: ChatInput,
-            background: Sprite {
-                custom_size: Some(Vec2::new(300.0, 100.0)),
-                color: Color::ALICE_BLUE,
-                ..default()
-            },
-        }
-    }
-}
-
 #[derive(Component, Reflect, Debug, Default)]
 pub struct ChatBubble;
 
-#[derive(Bundle, Debug, Default)]
-pub struct ChatBubbleBundle {
-    pub text: Text2dBundle,
-    pub background: Sprite,
-    pub chat: ChatBubble,
-}
-impl ChatBubbleBundle {
-    pub fn new(position: Vec3, message: String) -> Self {
-        Self {
-            text: Text2dBundle {
-                text: Text::from_section(
-                    message,
-                    TextStyle {
-                        font_size: 20.0,
-                        color: Color::WHITE,
-                        ..default()
-                    },
-                ),
-                transform: Transform::from_translation(position),
-                ..default()
-            },
-            background: Sprite {
-                custom_size: Some(Vec2::new(300.0, 100.0)),
-                color: Color::BLACK,
-                ..default()
-            },
-            chat: ChatBubble,
-        }
-    }
-}

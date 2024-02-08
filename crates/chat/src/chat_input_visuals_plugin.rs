@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, text::Text2dBounds};
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_chat_types::prelude::*;
 
@@ -14,7 +14,8 @@ fn handle_chat_input_events(
     mut commands: Commands,
     tool_query: Query<&mut ChatTool>,
     character_query: Query<&Children, With<Character>>,
-    mut chat_input_query: Query<&mut Text, With<ChatInput>>,
+    chat_input_query: Query<&Children, With<ChatInput>>,
+    mut text_query: Query<&mut Text>,
     mut chat_input_events: EventReader<ChatInputEvent>,
 ) {
     for event in chat_input_events.read() {
@@ -47,10 +48,41 @@ fn handle_chat_input_events(
                     character_id
                 );
                 commands.entity(*character_id).with_children(|parent| {
-                    parent.spawn(ChatInputBundle::new(
-                        Vec3::new(0.0, 100.0, 5.0),
-                        starting_text,
-                    ));
+                    let size = Vec2::new(300.0, 100.0);
+                    let resolution = 3.0;
+                    let padding = Vec2::new(10.0,10.0);
+                    parent
+                        .spawn((
+                            SpriteBundle {
+                                sprite: Sprite {
+                                    color: Color::ALICE_BLUE,
+                                    custom_size: Some(size),
+                                    ..default()
+                                },
+                                transform: Transform::from_translation(Vec3::new(0.0, 100.0, -1.0)),
+                                ..default()
+                            },
+                            ChatInput,
+                            Name::new("Chat Input Bubble"),
+                        ))
+                        .with_children(|parent| {
+                            parent.spawn((Text2dBundle {
+                                text: Text::from_section(
+                                    starting_text,
+                                    TextStyle {
+                                        font_size: 20.0 * resolution,
+                                        color: Color::MIDNIGHT_BLUE,
+                                        ..default()
+                                    },
+                                ),
+                                text_2d_bounds: Text2dBounds {
+                                    size: size * resolution - padding,
+                                },
+                                transform: Transform::from_translation(Vec3::new(0.0, 0.0, 1.0))
+                                    .with_scale(Vec3::new(1.0/resolution, 1.0/resolution, 1.0)),
+                                ..default()
+                            },));
+                        });
                 });
             }
             ChatInputEvent::Unfocus { character_id, .. } => {
@@ -88,8 +120,13 @@ fn handle_chat_input_events(
                 );
                 if let Ok(character_children) = character_query.get(*character_id) {
                     for child in character_children.iter() {
-                        if let Ok(mut text) = chat_input_query.get_mut(*child) {
-                            text.sections[0].value = new_text.clone();
+                        if let Ok(chat_input) = chat_input_query.get(*child) {
+                            let chat_input_children = chat_input;
+                            for child in chat_input_children.iter() {
+                                if let Ok(mut text) = text_query.get_mut(*child) {
+                                    text.sections[0].value = new_text.clone();
+                                }
+                            }
                         }
                     }
                 } else {
@@ -120,10 +157,43 @@ fn handle_chat_events(
                         "Creating chat bubble for character {:?} at position {:?}",
                         character_id, character_transform.translation
                     );
-                    commands.spawn(ChatBubbleBundle::new(
-                        character_transform.translation,
-                        message.clone(),
-                    ));
+                    let size = Vec2::new(300.0, 100.0);
+                    let resolution = 3.0;
+                    let padding = Vec2::new(10.0,10.0);
+                    let mut transform = character_transform.clone();
+                    transform.translation -= Vec3::new(0.0,100.0,10.0);
+                    commands
+                        .spawn((
+                            SpriteBundle {
+                                sprite: Sprite {
+                                    color: Color::BLACK,
+                                    custom_size: Some(size),
+                                    ..default()
+                                },
+                                transform,
+                                ..default()
+                            },
+                            ChatBubble,
+                            Name::new("Chat Bubble"),
+                        ))
+                        .with_children(|parent| {
+                            parent.spawn((Text2dBundle {
+                                text: Text::from_section(
+                                    message.clone(),
+                                    TextStyle {
+                                        font_size: 20.0 * resolution,
+                                        color: Color::WHITE,
+                                        ..default()
+                                    },
+                                ),
+                                text_2d_bounds: Text2dBounds {
+                                    size: size * resolution - padding,
+                                },
+                                transform: Transform::from_translation(Vec3::new(0.0, 0.0, 1.0))
+                                    .with_scale(Vec3::new(1.0/resolution, 1.0/resolution, 1.0)),
+                                ..default()
+                            },));
+                        });
                 } else {
                     warn!(
                         "Character {:?} not found? Skipping chat bubble creation.",
