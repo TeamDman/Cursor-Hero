@@ -7,9 +7,9 @@
 from typing import Tuple
 
 def chunk(text: str) -> Tuple[str, str, str]:
-    # TODO: Implement logic for use_statements
-    # TODO: Implement logic for plugin_start
     # TODO: Implement logic for plugin_remaining
+    # TODO: Implement logic for plugin_start
+    # TODO: Implement logic for use_statements
     return ()
 
 ##### WORKSPACE CONTENT
