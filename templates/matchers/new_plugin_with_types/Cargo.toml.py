@@ -6,11 +6,9 @@
 from typing import Tuple
 
 def chunk(text: str) -> Tuple[str, str]:
-    # split on `[workspace.dependencies]`, keep it in the first chunk
-    index= text.find("[workspace.dependencies]")
-    if index == -1:
-        return text, "# !!!SPLIT FAILED!!!"
-    return text[:index], text[index:]
+    # TODO: Implement logic for before_first_workspace_dependency
+    # TODO: Implement logic for first_workspace_dependency_onwards
+    return ()
 
 ##### WORKSPACE CONTENT
 #[package]
