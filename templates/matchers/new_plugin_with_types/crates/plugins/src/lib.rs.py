@@ -9,10 +9,13 @@
 from typing import Tuple
 
 def chunk(text: str) -> Tuple[str, str, str]:
-    # TODO: Implement logic for plugin_start
-    # TODO: Implement logic for use_statements
-    # TODO: Implement logic for plugin_remaining
-    return ()
+    find = "pub struct MyPlugin;\n"
+    first, remaining = text[:text.find(find)], text[text.find(find):]
+
+    find = "fn build(&self, app: &mut App) {\n"
+    second, remaining = remaining[:remaining.find(find)], remaining[remaining.find(find):]
+
+    return first, second, remaining
 
 ##### WORKSPACE CONTENT
 #use bevy::input::common_conditions::input_toggle_active;
