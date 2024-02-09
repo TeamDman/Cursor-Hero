@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::observation_inference_plugin::ObservationInferencePlugin;
 use crate::observation_log_plugin::ObservationLogPlugin;
 use crate::observation_tool_plugin::ObservationToolPlugin;
+use crate::observe_chat_plugin::ObserveChatPlugin;
 
 pub struct ObservationPlugin;
 
@@ -11,5 +12,6 @@ impl Plugin for ObservationPlugin {
         app.add_plugins(ObservationLogPlugin);
         app.add_plugins(ObservationInferencePlugin);
         app.add_plugins(ObservationToolPlugin);
+        app.add_plugins(ObserveChatPlugin);
     }
 }

@@ -9,4 +9,5 @@ edition = "2021"
 cursor_hero_environment = { workspace = true}
 cursor_hero_bevy = { workspace = true}
 cursor_hero_screen = { workspace = true}
+cursor_hero_environment_types = { workspace = true}
 bevy = { workspace = true }

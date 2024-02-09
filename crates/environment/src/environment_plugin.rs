@@ -1,37 +1,16 @@
 use bevy::prelude::*;
+use cursor_hero_environment_types::prelude::*;
 
 pub struct EnvironmentPlugin;
 
 impl Plugin for EnvironmentPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<Environment>();
-        app.register_type::<HostEnvironment>();
-        app.add_event::<CreateEnvironmentEvent>();
-        app.add_event::<PopulateEnvironmentEvent>();
         app.add_systems(Startup, send_create_host_event);
         app.add_systems(Startup, send_create_game_event);
         app.add_systems(Update, handle_create_events);
     }
 }
 
-#[derive(Component, Debug, Reflect)]
-pub struct Environment;
-#[derive(Component, Debug, Reflect)]
-pub struct HostEnvironment;
-#[derive(Component, Debug, Reflect)]
-pub struct GameEnvironment;
-
-#[derive(Event, Debug, Reflect)]
-pub enum CreateEnvironmentEvent {
-    Host { origin: Vec2, name: String },
-    Game { origin: Vec2, name: String },
-}
-
-#[derive(Event, Debug, Reflect)]
-pub enum PopulateEnvironmentEvent {
-    Host { environment_id: Entity },
-    Game { environment_id: Entity },
-}
 
 fn send_create_host_event(mut events: EventWriter<CreateEnvironmentEvent>) {
     events.send(CreateEnvironmentEvent::Host {

@@ -5,6 +5,7 @@ use cursor_hero_environment::environment_plugin::Environment;
 use cursor_hero_environment::environment_plugin::PopulateEnvironmentEvent;
 use cursor_hero_screen::screen_plugin::Screen;
 use cursor_hero_screen::screen_plugin::ScreenParent;
+use cursor_hero_environment_types::prelude::*;
 
 pub struct EnvironmentNametagPlugin;
 
@@ -23,20 +24,6 @@ impl Plugin for EnvironmentNametagPlugin {
             .register_type::<Nametag>();
     }
 }
-
-#[derive(Event, Debug, Reflect)]
-pub enum NametagEvent {
-    Update {
-        environment_id: Entity,
-        name: String,
-    },
-    RecalculatePosition {
-        environment_id: Entity,
-    },
-}
-
-#[derive(Component, Default, Reflect)]
-pub struct Nametag;
 
 fn spawn_nametags_in_new_environments(
     mut environment_reader: EventReader<PopulateEnvironmentEvent>,

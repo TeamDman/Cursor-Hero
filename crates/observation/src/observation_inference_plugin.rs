@@ -19,8 +19,10 @@ fn observation_inference_pipeline(
     for event in observation_events.read() {
         let ObservationEvent::ObservationToolResponse {
             observation,
-            character_id: _,
-        } = event;
+            ..
+        } = event else {
+            continue;
+        };
 
         let session_id = commands
             .spawn((InferenceSession, Name::new("ObservationInferenceSession")))

@@ -1,0 +1,3 @@
+{{before_first_plugins_dependency}}
+cursor_hero_{{crate_name}} = { workspace = true }
+{{first_plugins_dependency_onwards}}

@@ -1,0 +1,3 @@
+{{before_first_workspace_dependency}}
+cursor_hero_{{crate_name}}_tool = { path = "./crates/{{crate_name}}_tool" }
+{{first_workspace_dependency_onwards}}

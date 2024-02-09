@@ -41,7 +41,7 @@ fn handle_input(
         (Entity, &ActionState<ChatToolAction>, &Parent, &mut ChatTool),
         With<ActiveTool>,
     >,
-    toolbelt_query: Query<(&Parent, &Children), With<Toolbelt>>,
+    toolbelt_query: Query<&Parent, With<Toolbelt>>,
     mut character_query: Query<Entity, With<Character>>,
     mut chat_events: EventWriter<ChatEvent>,
     mut chat_input_events: EventWriter<ChatInputEvent>,
@@ -53,7 +53,7 @@ fn handle_input(
             warn!("Tool not inside a toolbelt?");
             continue;
         };
-        let (toolbelt_parent, toolbelt_children) = toolbelt;
+        let toolbelt_parent = toolbelt;
         let Ok(character) = character_query.get_mut(toolbelt_parent.get()) else {
             warn!("Toolbelt parent not a character?");
             continue;

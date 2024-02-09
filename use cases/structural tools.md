@@ -1,0 +1,19 @@
+specify method signature of a system before having copilot build the body
+- verbal description of the intent of the system and any method signature suggestions
+- recommender system provide a list of parameters that sound relevant
+  - mut Commands
+  - event readers
+  - event writers
+  - tool query
+  - toolbelt query
+  - character query
+  - pointer query
+  - camera query
+  - local parameters
+  - resources
+  - properties
+    - Components
+      - Tool
+      - Transform
+    - Filters
+      - With, Without

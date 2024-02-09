@@ -11,3 +11,6 @@ cursor_hero_observation_types = { workspace = true }
 cursor_hero_inference_types = { workspace = true }
 cursor_hero_toolbelt_types = { workspace = true }
 cursor_hero_tools = { workspace = true }
+cursor_hero_chat_types = { workspace = true }
+cursor_hero_character_types = { workspace = true }
+cursor_hero_environment_types = { workspace = true }
