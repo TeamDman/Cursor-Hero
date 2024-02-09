@@ -8,6 +8,15 @@ pub struct ChatTool {
     pub focused: bool,
     pub buffer: String,
     pub tools_disabled_during_focus: HashSet<Entity>,
+    pub state: ChatToolState,
+}
+
+#[derive(PartialEq, Reflect, Debug, Default, Clone)]
+pub enum ChatToolState {
+    #[default]
+    Idle,
+    InitialRepeatDelay(Timer),
+    RepeatDelay(Timer),
 }
 
 #[derive(Component, Reflect, Default)]
@@ -18,6 +27,8 @@ pub enum ChatToolAction {
     Focus,
     Unfocus,
     Submit,
+    WordModifier,
+    Backspace,
 }
 
 impl ChatToolAction {
@@ -26,6 +37,8 @@ impl ChatToolAction {
             Self::Focus => GamepadButtonType::North.into(),
             Self::Unfocus => GamepadButtonType::East.into(),
             Self::Submit => GamepadButtonType::South.into(),
+            Self::WordModifier => GamepadButtonType::LeftTrigger.into(),
+            Self::Backspace => GamepadButtonType::West.into(),
         }
     }
 
@@ -34,6 +47,8 @@ impl ChatToolAction {
             Self::Focus => KeyCode::Return.into(),
             Self::Unfocus => KeyCode::Escape.into(),
             Self::Submit => KeyCode::Return.into(),
+            Self::WordModifier => KeyCode::ControlLeft.into(),
+            Self::Backspace => KeyCode::Back.into(),
         }
     }
 }

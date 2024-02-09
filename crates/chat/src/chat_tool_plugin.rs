@@ -78,15 +78,16 @@ fn handle_input(
             chat_input_events.send(event);
         } else if tool_actions.just_pressed(ChatToolAction::Submit) && tool.focused {
             let message = tool.buffer.clone();
-            tool.buffer.clear();
+            if !message.is_empty() {
+                tool.buffer.clear();
 
-            let event = ChatEvent::Chat {
-                character_id,
-                message,
-            };
-            info!("Sending chat event {:?}", event);
-            chat_events.send(event);
-
+                let event = ChatEvent::Chat {
+                    character_id,
+                    message,
+                };
+                info!("Sending chat event {:?}", event);
+                chat_events.send(event);
+            }
             let event = ChatInputEvent::Unfocus {
                 tool_id,
                 toolbelt_id: tool_parent.get(),
