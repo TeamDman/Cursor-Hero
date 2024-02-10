@@ -6,8 +6,7 @@ use bevy_xpbd_2d::components::LinearVelocity;
 use bevy_xpbd_2d::components::RigidBody;
 use bevy_xpbd_2d::components::Sensor;
 use cursor_hero_character_types::prelude::*;
-use cursor_hero_environment::environment_plugin::Environment;
-use cursor_hero_environment::environment_plugin::PopulateEnvironmentEvent;
+use cursor_hero_environment_types::prelude::*;
 
 pub struct LevelBoundsPlugin;
 

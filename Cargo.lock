@@ -1733,7 +1733,7 @@ dependencies = [
  "cursor_hero_bevy",
  "cursor_hero_camera",
  "cursor_hero_character_types",
- "cursor_hero_environment",
+ "cursor_hero_environment_types",
  "cursor_hero_input",
  "cursor_hero_movement_tool_types",
  "cursor_hero_physics",
@@ -1840,7 +1840,10 @@ name = "cursor_hero_environment"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "bevy_xpbd_2d",
  "cursor_hero_environment_types",
+ "cursor_hero_level_bounds",
+ "cursor_hero_pointer_types",
 ]
 
 [[package]]
@@ -1935,7 +1938,7 @@ dependencies = [
  "bevy",
  "bevy_xpbd_2d",
  "cursor_hero_character_types",
- "cursor_hero_environment",
+ "cursor_hero_environment_types",
 ]
 
 [[package]]
@@ -2094,7 +2097,7 @@ dependencies = [
  "cursor_hero_bevy",
  "cursor_hero_camera",
  "cursor_hero_character_types",
- "cursor_hero_environment",
+ "cursor_hero_environment_types",
  "cursor_hero_input",
  "cursor_hero_level_bounds",
  "cursor_hero_math",
@@ -2145,7 +2148,7 @@ dependencies = [
  "bevy-inspector-egui",
  "bevy_xpbd_2d",
  "cursor_hero_bevy",
- "cursor_hero_environment",
+ "cursor_hero_environment_types",
  "cursor_hero_level_bounds",
  "cursor_hero_metrics",
  "cursor_hero_winutils",
@@ -2183,7 +2186,7 @@ dependencies = [
  "bevy",
  "bevy_xpbd_2d",
  "cursor_hero_bevy",
- "cursor_hero_environment",
+ "cursor_hero_environment_types",
  "cursor_hero_pointer_types",
  "cursor_hero_screen",
  "cursor_hero_toolbelt_types",
@@ -2232,7 +2235,7 @@ dependencies = [
  "cursor_hero_character_types",
  "cursor_hero_click_drag_character_movement",
  "cursor_hero_data",
- "cursor_hero_environment",
+ "cursor_hero_environment_types",
  "cursor_hero_inference_types",
  "cursor_hero_input",
  "cursor_hero_level_bounds",
@@ -2293,7 +2296,7 @@ name = "cursor_hero_wallpaper"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "cursor_hero_environment",
+ "cursor_hero_environment_types",
  "cursor_hero_winutils",
  "image",
  "windows 0.51.1",

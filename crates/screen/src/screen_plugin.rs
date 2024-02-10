@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use cursor_hero_bevy::IExpandable;
 use cursor_hero_bevy::NegativeYIRect;
-use cursor_hero_environment::environment_plugin::PopulateEnvironmentEvent;
+use cursor_hero_environment_types::prelude::*;
 use cursor_hero_level_bounds::level_bounds_plugin::LevelBoundsEvent;
 use cursor_hero_winutils::win_screen_capture::get_all_monitors;
 use image::DynamicImage;

@@ -5,7 +5,7 @@ use bevy_xpbd_2d::components::RigidBody;
 use cursor_hero_agent_types::prelude::*;
 use cursor_hero_bevy::NegativeYVec2;
 use cursor_hero_character_types::prelude::*;
-use cursor_hero_environment::environment_plugin::PopulateEnvironmentEvent;
+use cursor_hero_environment_types::prelude::*;
 use cursor_hero_physics::damping_plugin::MovementDamping;
 
 pub struct SpawnAgentPlugin;

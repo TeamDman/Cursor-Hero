@@ -8,3 +8,6 @@ edition = "2021"
 [dependencies]
 bevy = { workspace = true }
 cursor_hero_environment_types = { workspace = true}
+cursor_hero_level_bounds = { workspace = true }
+cursor_hero_pointer_types = { workspace = true }
+bevy_xpbd_2d = { workspace = true }

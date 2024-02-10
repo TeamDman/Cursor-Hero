@@ -4,6 +4,7 @@ use bevy_xpbd_2d::components::CollidingEntities;
 use cursor_hero_level_bounds::level_bounds_plugin::LevelBounds;
 use cursor_hero_level_bounds::level_bounds_plugin::LevelBoundsHolder;
 use cursor_hero_pointer_types::prelude::*;
+use cursor_hero_environment_types::prelude::*;
 
 pub struct PointerEnvironmentPlugin;
 

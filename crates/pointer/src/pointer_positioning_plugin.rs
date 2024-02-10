@@ -5,7 +5,7 @@ use bevy_xpbd_2d::prelude::*;
 use cursor_hero_bevy::NegativeYVec2;
 use cursor_hero_camera::camera_plugin::MainCamera;
 use cursor_hero_character_types::prelude::*;
-use cursor_hero_environment::environment_plugin::HostEnvironment;
+use cursor_hero_environment_types::prelude::*;
 use cursor_hero_input::active_input_state_plugin::ActiveInput;
 use cursor_hero_pointer_types::pointer_behaviour_types::PointerMovementBehaviour;
 use cursor_hero_pointer_types::prelude::*;

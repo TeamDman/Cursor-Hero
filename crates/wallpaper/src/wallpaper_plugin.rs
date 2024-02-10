@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use cursor_hero_environment::environment_plugin::PopulateEnvironmentEvent;
+use cursor_hero_environment_types::prelude::*;
 
 pub struct WallpaperPlugin;
 

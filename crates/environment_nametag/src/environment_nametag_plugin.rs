@@ -1,11 +1,9 @@
 use bevy::prelude::*;
 use bevy::utils::HashSet;
 use cursor_hero_bevy::Vec2ToRect;
-use cursor_hero_environment::environment_plugin::Environment;
-use cursor_hero_environment::environment_plugin::PopulateEnvironmentEvent;
+use cursor_hero_environment_types::prelude::*;
 use cursor_hero_screen::screen_plugin::Screen;
 use cursor_hero_screen::screen_plugin::ScreenParent;
-use cursor_hero_environment_types::prelude::*;
 
 pub struct EnvironmentNametagPlugin;
 

@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 bevy = { workspace = true }
-cursor_hero_environment = { workspace = true }
+cursor_hero_environment_types = { workspace = true }
 cursor_hero_character_types = { workspace = true }
 cursor_hero_movement_tool_types = { workspace = true }
 cursor_hero_agent_types = { workspace = true }

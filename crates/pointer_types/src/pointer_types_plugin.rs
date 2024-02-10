@@ -9,7 +9,6 @@ impl Plugin for PointerTypesPlugin {
         app.configure_sets(Update, PointerSystemSet::Position);
 
         app.add_event::<PointerReachEvent>();
-        app.register_type::<PointerEnvironment>();
 
         app.register_type::<Hovered>();
         app.register_type::<Hoverable>();

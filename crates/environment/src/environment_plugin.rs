@@ -1,16 +1,18 @@
 use bevy::prelude::*;
 use cursor_hero_environment_types::prelude::*;
 
+use crate::pointer_environment_plugin::PointerEnvironmentPlugin;
+
 pub struct EnvironmentPlugin;
 
 impl Plugin for EnvironmentPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(PointerEnvironmentPlugin);
         app.add_systems(Startup, send_create_host_event);
         app.add_systems(Startup, send_create_game_event);
         app.add_systems(Update, handle_create_events);
     }
 }
-
 
 fn send_create_host_event(mut events: EventWriter<CreateEnvironmentEvent>) {
     events.send(CreateEnvironmentEvent::Host {

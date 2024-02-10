@@ -14,6 +14,7 @@ fn observe_chat(
     mut chat_events: EventReader<ChatEvent>,
     mut observation_events: EventWriter<ObservationEvent>,
     character_query: Query<Option<&Name>, With<Character>>,
+    
 ) {
     for event in chat_events.read() {
         let ChatEvent::Chat {
@@ -31,6 +32,7 @@ fn observe_chat(
         
         let event = ObservationEvent::SomethingHappened {
             observation: Observation::Chat {
+                environment_id: None, // TODO: this should be queried and included here
                 character_id: *character_id,
                 character_name: character_name.to_string(),
                 message: message.clone(),
