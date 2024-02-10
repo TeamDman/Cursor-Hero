@@ -6,18 +6,33 @@
 #         app.add_plugins({{crate_name_pascal}}Plugin);
 # {{plugin_remaining}}
 
-from typing import Tuple
-
-def chunk(text: str) -> Tuple[str, str, str]:
+def gather_variables(text: str) -> dict[str,str]:
+    # use_statements
     find = "pub struct MyPlugin;\n"
-    first, remaining = text[:text.find(find)], text[text.find(find):]
+    include = False
+    index = text.find(find)
+    assert index != -1, f"Coult not find `{find}`"
+    index = index + len(find) if include else index
+    use_statements, remaining = text[:index],text[index:]
 
+    # plugin_start
     find = "fn build(&self, app: &mut App) {\n"
-    second, remaining = remaining[:remaining.find(find)], remaining[remaining.find(find):]
+    include = True
+    index = remaining.find(find)
+    assert index != -1, f"Coult not find `{find}`"
+    index = index + len(find) if include else index
+    plugin_start, remaining = remaining[:index],remaining[index:]
 
-    return first, second, remaining
+    # plugin_remaining
+    plugin_remaining = remaining
 
-##### WORKSPACE CONTENT
+    return {
+        "use_statements": use_statements,
+        "plugin_start": plugin_start,
+        "plugin_remaining": plugin_remaining,
+    }
+
+#region WORKSPACE CONTENT
 #use bevy::input::common_conditions::input_toggle_active;
 #use bevy::prelude::*;
 #
@@ -185,3 +200,4 @@ def chunk(text: str) -> Tuple[str, str, str]:
 #    }
 #}
 #
+#endregion

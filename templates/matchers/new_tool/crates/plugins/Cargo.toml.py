@@ -2,23 +2,40 @@
 # cursor_hero_{{crate_name}} = { workspace = true }
 # {{first_plugins_dependency_onwards}}
 
-
-
 def gather_variables(text: str) -> dict[str,str]:
-    find = "some part of the file"
+    # before_first_plugins_dependency
+    find = "[dependencies]"
+    include = True
     index = text.find(find)
     assert index != -1, f"Coult not find `{find}`"
+    index = index + len(find) if include else index
     before_first_plugins_dependency, remaining = text[:index],text[index:]
-    find = "some part of the file"
-    index = remaining.find(find)
-    assert index != -1, f"Coult not find `{find}`"
-    first_plugins_dependency_onwards, remaining = remaining[:index],remaining[index:]
+
+    # first_plugins_dependency_onwards
+    first_plugins_dependency_onwards = remaining
+
     return {
-        "before_first_plugins_dependency": "TODO",
-        "first_plugins_dependency_onwards": "TODO",
+        "before_first_plugins_dependency": before_first_plugins_dependency,
+        "first_plugins_dependency_onwards": first_plugins_dependency_onwards,
     }
 
-##### WORKSPACE CONTENT
+#region OLD CONTENT OF THIS FILE
+
+# # {{before_first_plugins_dependency}}
+# # cursor_hero_{{crate_name}} = { workspace = true }
+# # {{first_plugins_dependency_onwards}
+# 
+# from typing import Tuple
+# 
+# def chunk(text: str) -> Tuple[str, str]:
+#     index = text.find("[dependencies]")
+#     if index == -1:
+#         return text, "# !!!SPLIT FAILED!!!"
+#     return text[:index], text[index:]
+# 
+#endregion
+
+#region WORKSPACE CONTENT
 #[package]
 #name = "cursor_hero_plugins"
 #version = "0.1.0"
@@ -81,3 +98,4 @@ def gather_variables(text: str) -> dict[str,str]:
 #[dev-dependencies]
 #cursor_hero_restart_memory = {workspace = true}
 #
+#endregion
