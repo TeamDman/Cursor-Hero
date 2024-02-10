@@ -2,13 +2,21 @@
 # cursor_hero_{{crate_name}} = { workspace = true }
 # {{first_plugins_dependency_onwards}}
 
-from typing import Tuple
 
-def chunk(text: str) -> Tuple[str, str]:
-    index = text.find("[dependencies]")
-    if index == -1:
-        return text, "# !!!SPLIT FAILED!!!"
-    return text[:index], text[index:]
+
+def gather_variables(text: str) -> dict[str,str]:
+    find = "some part of the file"
+    index = text.find(find)
+    assert index != -1, f"Coult not find `{find}`"
+    before_first_plugins_dependency, remaining = text[:index],text[index:]
+    find = "some part of the file"
+    index = remaining.find(find)
+    assert index != -1, f"Coult not find `{find}`"
+    first_plugins_dependency_onwards, remaining = remaining[:index],remaining[index:]
+    return {
+        "before_first_plugins_dependency": "TODO",
+        "first_plugins_dependency_onwards": "TODO",
+    }
 
 ##### WORKSPACE CONTENT
 #[package]

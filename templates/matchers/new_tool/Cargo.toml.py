@@ -2,14 +2,264 @@
 # cursor_hero_{{crate_name}}_tool = { path = "./crates/{{crate_name}}_tool" }
 # {{first_workspace_dependency_onwards}}
 
-from typing import Tuple
 
-def chunk(text: str) -> Tuple[str, str]:
-    # split on `[workspace.dependencies]`, keep it in the first chunk
-    index= text.find("[workspace.dependencies]")
-    if index == -1:
-        return text, "# !!!SPLIT FAILED!!!"
-    return text[:index], text[index:]
+
+def gather_variables(text: str) -> dict[str,str]:
+    # before_first_workspace_dependency
+    find = "[workspace.dependencies]"
+    include = True
+    index = text.find(find)
+    assert index != -1, f"Coult not find `{find}`"
+    index = index + len(find) if include else index
+    before_first_workspace_dependency, remaining = text[:index],text[index:]
+
+    # first_workspace_dependency_onwards
+    first_workspace_dependency_onwards = remaining
+
+    return {
+        "before_first_workspace_dependency": before_first_workspace_dependency,
+        "first_workspace_dependency_onwards": first_workspace_dependency_onwards,
+    }
+
+##### OLD CONTENT OF THIS FILE
+
+# # {{before_first_workspace_dependency}}
+# # cursor_hero_{{crate_name}}_tool = { path = "./crates/{{crate_name}}_tool" }
+# # {{first_workspace_dependency_onwards}
+# 
+# 
+# 
+# def gather_variables(text: str) -> dict[str,str]:
+#     find = "some part of the file"
+#     include = True
+#     index = text.find(find)
+#     assert index != -1, f"Coult not find `{find}`"
+#     index = index + len(find) if include else index
+#     before_first_workspace_dependency, remaining = text[:index],text[index:]
+# 
+#     first_workspace_dependency_onwards = remaining
+# 
+#     return {
+#         "before_first_workspace_dependency": before_first_workspace_dependency,
+#         "first_workspace_dependency_onwards": first_workspace_dependency_onwards,
+#     }
+# 
+# ##### OLD CONTENT OF THIS FILE
+# 
+# # # {{before_first_workspace_dependency}}
+# # # cursor_hero_{{crate_name}}_tool = { path = "./crates/{{crate_name}}_tool" }
+# # # {{first_workspace_dependency_onwards}
+# # 
+# # 
+# # 
+# # def gather_variables(text: str) -> dict[str,str]:
+# #     find = "some part of the file"
+# #     include = True
+# #     index = text.find(find)
+# #     assert index != -1, f"Coult not find `{find}`"
+# #     index = index + len(find) if include else index
+# #     before_first_workspace_dependency, remaining = text[:index],text[index:]
+# # 
+# #     first_workspace_dependency_onwards = remaining
+# #     return {
+# #         "before_first_workspace_dependency": before_first_workspace_dependency,
+# #         "first_workspace_dependency_onwards": first_workspace_dependency_onwards,
+# #     }
+# # 
+# # ##### OLD CONTENT OF THIS FILE
+# # 
+# # # # {{before_first_workspace_dependency}}
+# # # # cursor_hero_{{crate_name}}_tool = { path = "./crates/{{crate_name}}_tool" }
+# # # # {{first_workspace_dependency_onwards}
+# # # 
+# # # 
+# # # 
+# # # def gather_variables(text: str) -> dict[str,str]:
+# # #     find = "some part of the file"
+# # #     include = True
+# # #     index = text.find(find)
+# # #     assert index != -1, f"Coult not find `{find}`"
+# # #     index = index + len(find) if include else index
+# # #     before_first_workspace_dependency, remaining = text[:index],text[index:]
+# # # 
+# # #     find = "some part of the file"
+# # #     include = True
+# # #     index = remaining.find(find)
+# # #     assert index != -1, f"Coult not find `{find}`"
+# # #     index = index + len(find) if include else index
+# # #     first_workspace_dependency_onwards, remaining = remaining[:index],remaining[index:]
+# # # 
+# # #     return {
+# # #         "before_first_workspace_dependency": before_first_workspace_dependency,
+# # #         "first_workspace_dependency_onwards": first_workspace_dependency_onwards,
+# # #     }
+# # # 
+# # # ##### OLD CONTENT OF THIS FILE
+# # # 
+# # # # # {{before_first_workspace_dependency}}
+# # # # # cursor_hero_{{crate_name}}_tool = { path = "./crates/{{crate_name}}_tool" }
+# # # # # {{first_workspace_dependency_onwards}
+# # # # 
+# # # # 
+# # # # 
+# # # # def gather_variables(text: str) -> dict[str,str]:
+# # # #     find = "some part of the file"
+# # # #     include = True
+# # # #     index = text.find(find)
+# # # #     assert index != -1, f"Coult not find `{find}`"
+# # # #     index = index + len(find) if include else index
+# # # #     before_first_workspace_dependency, remaining = text[:index],text[index:]
+# # # # 
+# # # #     find = "some part of the file"
+# # # #     include = True
+# # # #     index = remaining.find(find)
+# # # #     assert index != -1, f"Coult not find `{find}`"
+# # # #     index = index + len(find) if include else index
+# # # #     first_workspace_dependency_onwards, remaining = remaining[:index],remaining[index:]
+# # # # 
+# # # #     return {
+# # # #         "before_first_workspace_dependency": before_first_workspace_dependency,
+# # # #         "first_workspace_dependency_onwards": first_workspace_dependency_onwards,
+# # # #     }
+# # # # 
+# # # # ##### OLD CONTENT OF THIS FILE
+# # # # 
+# # # # # # {{before_first_workspace_dependency}}
+# # # # # # cursor_hero_{{crate_name}}_tool = { path = "./crates/{{crate_name}}_tool" }
+# # # # # # {{first_workspace_dependency_onwards}
+# # # # # 
+# # # # # 
+# # # # # 
+# # # # # def gather_variables(text: str) -> dict[str,str]:
+# # # # #     find = "some part of the file"
+# # # # #     include = True
+# # # # #     index = text.find(find)
+# # # # #     assert index != -1, f"Coult not find `{find}`"
+# # # # #     before_first_workspace_dependency, remaining = text[:index],text[index:]
+# # # # # 
+# # # # #     find = "some part of the file"
+# # # # #     include = True
+# # # # #     index = remaining.find(find)
+# # # # #     assert index != -1, f"Coult not find `{find}`"
+# # # # #     first_workspace_dependency_onwards, remaining = remaining[:index],remaining[index:]
+# # # # # 
+# # # # #     return {
+# # # # #         "before_first_workspace_dependency": before_first_workspace_dependency,
+# # # # #         "first_workspace_dependency_onwards": first_workspace_dependency_onwards,
+# # # # #     }
+# # # # # 
+# # # # # ##### OLD CONTENT OF THIS FILE
+# # # # # 
+# # # # # # # {{before_first_workspace_dependency}}
+# # # # # # # cursor_hero_{{crate_name}}_tool = { path = "./crates/{{crate_name}}_tool" }
+# # # # # # # {{first_workspace_depndency_onwards}}
+# # # # # # 
+# # # # # # 
+# # # # # # 
+# # # # # # def gather_variables(text: str) -> dict[str,str]:
+# # # # # #     find = "some part of the file"
+# # # # # #     include = true
+# # # # # #     index = text.find(find)
+# # # # # #     assert index != -1, f"Coult not find `{find}`"
+# # # # # #     before_first_workspace_dependency, remaining = text[:index],text[index:]
+# # # # # # 
+# # # # # #     find = "some part of the file"
+# # # # # #     include = true
+# # # # # #     index = remaining.find(find)
+# # # # # #     assert index != -1, f"Coult not find `{find}`"
+# # # # # #     first_workspace_dependency_onwards, remaining = remaining[:index],remaining[index:]
+# # # # # # 
+# # # # # #     return {
+# # # # # #         "before_first_workspace_dependency": before_first_workspace_dependency,
+# # # # # #         "first_workspace_dependency_onwards": first_workspace_dependency_onwards,
+# # # # # #     }
+# # # # # # 
+# # # # # # ##### OLD CONTENT OF THIS FILE
+# # # # # # 
+# # # # # # # # {{before_first_workspace_dependency}}
+# # # # # # # # cursor_hero_{{crate_name}}_tool = { path = "./crates/{{crate_name}}_tool" }
+# # # # # # # # {{first_workspace_dependency_onwards}
+# # # # # # # 
+# # # # # # # 
+# # # # # # # 
+# # # # # # # def gather_variables(text: str) -> dict[str,str]:
+# # # # # # #     find = "some part of the file"
+# # # # # # #     include = true    index = text.find(find)
+# # # # # # #     assert index != -1, f"Coult not find `{find}`"
+# # # # # # #     before_first_workspace_dependency, remaining = text[:index],text[index:]
+# # # # # # # 
+# # # # # # #     find = "some part of the file"
+# # # # # # #     include = true    index = remaining.find(find)
+# # # # # # #     assert index != -1, f"Coult not find `{find}`"
+# # # # # # #     first_workspace_dependency_onwards, remaining = remaining[:index],remaining[index:]
+# # # # # # # 
+# # # # # # #     return {
+# # # # # # #         "before_first_workspace_dependency": before_first_workspace_dependency,
+# # # # # # #         "first_workspace_dependency_onwards": first_workspace_dependency_onwards,
+# # # # # # #     }
+# # # # # # # 
+# # # # # # # ##### OLD CONTENT OF THIS FILE
+# # # # # # # 
+# # # # # # # # # {{before_first_workspace_dependency}}
+# # # # # # # # # cursor_hero_{{crate_name}}_tool = { path = "./crates/{{crate_name}}_tool" }
+# # # # # # # # # {{first_workspace_dependency_onw
+# # # # # # # # 
+# # # # # # # # 
+# # # # # # # # 
+# # # # # # # # def gather_variables(text: str) -> dict[str,str]:
+# # # # # # # #     find = "some part of the file"
+# # # # # # # #     include = true    index = text.find(find)
+# # # # # # # #     assert index != -1, f"Coult not find `{find}`"
+# # # # # # # #     before_first_workspace_dependency, remaining = text[:index],text[index:]
+# # # # # # # # 
+# # # # # # # #     find = "some part of the file"
+# # # # # # # #     include = true    index = remaining.find(find)
+# # # # # # # #     assert index != -1, f"Coult not find `{find}`"
+# # # # # # # #     first_workspace_dependency_onwards, remaining = remaining[:index],remaining[index:]
+# # # # # # # # 
+# # # # # # # #     return {
+# # # # # # # #         "before_first_workspace_dependency": before_first_workspace_dependency,
+# # # # # # # #         "first_workspace_dependency_onwards": first_workspace_dependency_onwards,
+# # # # # # # #     }
+# # # # # # # # 
+# # # # # # # # ##### OLD CONTENT OF THIS FILE# # {{before_first_workspace_dependency}}
+# # # # # # # # # # cursor_hero_{{crate_name}}_tool = { path = "./crates/{{crate_name}}_tool" }
+# # # # # # # # # 
+# # # # # # # # # 
+# # # # # # # # # 
+# # # # # # # # # 
+# # # # # # # # # def gather_variables(text: str) -> dict[str,str]:
+# # # # # # # # #     find = "some part of the file"
+# # # # # # # # #     include = true    index = text.find(find)
+# # # # # # # # #     assert index != -1, f"Coult not find `{find}`"
+# # # # # # # # #     before_first_workspace_dependency, remaining = text[:index],text[index:]
+# # # # # # # # # 
+# # # # # # # # #     find = "some part of the file"
+# # # # # # # # #     include = true    index = remaining.find(find)
+# # # # # # # # #     assert index != -1, f"Coult not find `{find}`"
+# # # # # # # # #     first_workspace_dependency_onwards, remaining = remaining[:index],remaining[index:]
+# # # # # # # # # 
+# # # # # # # # #     return {
+# # # # # # # # #         "before_first_workspace_dependency": before_first_workspace_dependency,
+# # # # # # # # #         "first_workspace_dependency_onwards": first_workspace_dependency_onwards,
+# # # # # # # # #     }
+# # # # # # # # 
+# # # # # # # # 
+# # # # # # # 
+# # # # # # # 
+# # # # # # 
+# # # # # # 
+# # # # # 
+# # # # # 
+# # # # 
+# # # # 
+# # # 
+# # # 
+# # 
+# # 
+# 
+# 
+
 
 ##### WORKSPACE CONTENT
 #[package]
@@ -111,11 +361,13 @@ def chunk(text: str) -> Tuple[str, str]:
 #ollama-rs = "0.1.6"
 #reqwest = "0.11.24"
 #urlencoding = "2.1.3"
+#chrono = "0.4.33"
 #
 #[dependencies]
 #cursor_hero_plugins = { workspace = true }
 #cursor_hero_version = { workspace = true }
 #bevy = { workspace = true }
+#
 #
 #[dev-dependencies]
 #bevy = { workspace = true, features = ["dynamic_linking"] }

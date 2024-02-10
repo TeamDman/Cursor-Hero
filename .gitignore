@@ -1,2 +1,3 @@
 /target/
 crates/restart_memory/src/*.json
+__pycache__
