@@ -6,11 +6,12 @@ use cursor_hero_agent_types::prelude::*;
 use cursor_hero_bevy::NegativeYVec2;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_environment_types::prelude::*;
+use cursor_hero_observation_types::prelude::*;
 use cursor_hero_physics::damping_plugin::MovementDamping;
 
-pub struct SpawnAgentPlugin;
+pub struct AgentSpawningPlugin;
 
-impl Plugin for SpawnAgentPlugin {
+impl Plugin for AgentSpawningPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, spawn_agent);
     }
@@ -43,6 +44,10 @@ fn spawn_agent(
                 Name::new("Agent"),
                 Agent,
                 RigidBody::Dynamic,
+                ObservationBuffer {
+                    log_level: ObservationLogLevel::All,
+                    ..default()
+                },
                 Collider::capsule(25.0, 12.5),
                 MovementDamping { factor: 0.90 },
             ));

@@ -5,7 +5,8 @@ pub struct EnvironmentTypesPlugin;
 
 impl Plugin for EnvironmentTypesPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<PointerEnvironment>();
+        app.register_type::<TrackEnvironmentTag>();
+        app.register_type::<EnvironmentTag>();
         app.register_type::<Environment>();
         app.register_type::<HostEnvironment>();
         app.register_type::<GameEnvironment>();

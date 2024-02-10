@@ -9,10 +9,10 @@ use cursor_hero_physics::damping_plugin::MovementDamping;
 use cursor_hero_toolbelt_types::types::PopulateToolbeltEvent;
 use cursor_hero_toolbelt_types::types::ToolbeltBundle;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
+use cursor_hero_environment_types::prelude::*;
+pub struct CharacterSpawningPlugin;
 
-pub struct SpawnCharacterPlugin;
-
-impl Plugin for SpawnCharacterPlugin {
+impl Plugin for CharacterSpawningPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_character);
     }
@@ -47,10 +47,11 @@ fn spawn_character(
         Character,
         MainCharacter,
         MovementDamping { factor: 0.90 },
-        Name::new("Character"),
+        Name::new("John Doe"),
         RigidBody::Kinematic,
         Collider::capsule(15.0, 12.5),
         SpatialListener::new(-7.0),
+        TrackEnvironmentTag,
     ));
     camera_events.send(CameraEvent::BeginFollowing {
         target_id: character.id(),

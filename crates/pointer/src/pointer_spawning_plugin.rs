@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy::sprite::Anchor;
 use bevy_xpbd_2d::prelude::*;
 use cursor_hero_character_types::prelude::*;
+use cursor_hero_environment_types::environment_types::TrackEnvironmentTag;
 use cursor_hero_pointer_types::prelude::*;
 use leafwing_input_manager::prelude::*;
 
@@ -59,6 +60,7 @@ fn insert_pointer(
                     },
                     ..Default::default()
                 },
+                TrackEnvironmentTag,
                 RigidBody::Dynamic,
                 Collider::cuboid(10.0, 10.0),
                 Sensor,

@@ -1,7 +1,8 @@
 use bevy::prelude::*;
-use cursor_hero_chat_types::prelude::*;
-use cursor_hero_observation_types::prelude::*;
 use cursor_hero_character_types::prelude::*;
+use cursor_hero_chat_types::prelude::*;
+use cursor_hero_environment_types::environment_types::EnvironmentTag;
+use cursor_hero_observation_types::prelude::*;
 pub struct ObserveChatPlugin;
 
 impl Plugin for ObserveChatPlugin {
@@ -13,8 +14,7 @@ impl Plugin for ObserveChatPlugin {
 fn observe_chat(
     mut chat_events: EventReader<ChatEvent>,
     mut observation_events: EventWriter<ObservationEvent>,
-    character_query: Query<Option<&Name>, With<Character>>,
-    
+    character_query: Query<(Option<&Name>, Option<&EnvironmentTag>), With<Character>>,
 ) {
     for event in chat_events.read() {
         let ChatEvent::Chat {
@@ -22,21 +22,29 @@ fn observe_chat(
             message,
         } = event;
         let Ok(character) = character_query.get(*character_id) else {
-            warn!("Chat event for unknown character? character_id {:?}", character_id);
+            warn!(
+                "Chat event for unknown character? character_id {:?}",
+                character_id
+            );
             continue;
         };
-        let Some(character_name) = character else {
-            warn!("Chat event for character with no name? character_id {:?}", character_id);
+        let (character_name, character_environment_tag) = character;
+
+        let Some(character_name) = character_name else {
+            warn!(
+                "Chat event for character with no name? character_id {:?}",
+                character_id
+            );
             continue;
         };
-        
-        let event = ObservationEvent::SomethingHappened {
-            observation: Observation::Chat {
-                environment_id: None, // TODO: this should be queried and included here
-                character_id: *character_id,
-                character_name: character_name.to_string(),
-                message: message.clone(),
-            },
+
+        let environment_id = character_environment_tag.map(|tag| tag.environment_id);
+
+        let event = ObservationEvent::Chat {
+            environment_id,
+            character_id: *character_id,
+            character_name: character_name.to_string(),
+            message: message.clone(),
         };
         debug!("Sending event: {:?}", event);
         observation_events.send(event);

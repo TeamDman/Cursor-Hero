@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use cursor_hero_inference_types::inference_types::InferenceEvent;
 use cursor_hero_observation_types::prelude::*;
 use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_tools::prelude::*;
@@ -8,7 +9,8 @@ pub struct ObservationToolPlugin;
 impl Plugin for ObservationToolPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, toolbelt_events);
-        app.add_systems(Update, tick);
+        app.add_systems(Update, tool_tick);
+        app.add_systems(Update, reply_tick);
     }
 }
 
@@ -31,12 +33,14 @@ fn toolbelt_events(
     }
 }
 
+// TODO: rework this into the "inference wand" which will read the observation buffer in the target and send it over
+
 #[allow(clippy::type_complexity)]
-fn tick(
+fn tool_tick(
     mut commands: Commands,
     tool_query: Query<(Entity, &Parent), (Added<ActiveTool>, With<ObservationTool>)>,
     toolbelt_query: Query<&Parent, With<Toolbelt>>,
-    mut events: EventWriter<ObservationEvent>,
+    mut events: EventWriter<InferenceEvent>,
 ) {
     for tool in tool_query.iter() {
         let (tool_id, tool_parent) = tool;
@@ -50,10 +54,19 @@ fn tick(
         let character_id = toolbelt_parent.get();
 
         let observation = "Hello, world!".to_string();
-        events.send(ObservationEvent::ObservationToolResponse {
-            observation,
-            character_id,
+        events.send(InferenceEvent::Request {
+            session_id: character_id,
+            prompt: observation,
         });
         debug!("ObservationToolPlugin: Sent observation event");
+    }
+}
+
+fn reply_tick(mut commands: Commands, mut inference_events: EventReader<InferenceEvent>) {
+    for event in inference_events.read() {
+        let InferenceEvent::Response { response, .. } = event else {
+            continue;
+        };
+        warn!("todo! {:?}", event);
     }
 }

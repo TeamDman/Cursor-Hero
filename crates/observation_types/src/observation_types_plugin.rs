@@ -5,6 +5,9 @@ pub struct ObservationTypesPlugin;
 impl Plugin for ObservationTypesPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<ObservationTool>();
+        app.register_type::<ObservationBuffer>();
+        app.register_type::<ObservationBufferEntry>();
         app.add_event::<ObservationEvent>();
+        app.add_event::<ObservationBufferEvent>();
     }
 }

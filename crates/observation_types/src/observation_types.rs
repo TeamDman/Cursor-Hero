@@ -1,19 +1,40 @@
-use bevy::{prelude::*, utils::Instant};
+use std::fmt;
+use std::fmt::Display;
+use std::fmt::Formatter;
+
+use bevy::prelude::*;
+use bevy::utils::Instant;
 
 #[derive(Component, Reflect, Default)]
 pub struct ObservationTool;
 
 #[derive(Component, Reflect, Default)]
-pub struct ObservationTimeline {
-    pub observations: Vec<(Instant, Observation)>,
+pub struct ObservationBuffer {
+    pub observations: Vec<ObservationBufferEntry>,
+    pub log_level: ObservationLogLevel,
 }
 
-/// An observation must contain enough information for the transformation step 
-/// where it is turned into a prompt for an LLM to generate a response.
-/// 
-/// Additional information is fine.
-#[derive(Reflect, Clone, PartialEq, Debug)]
-pub enum Observation {
+#[derive(Debug, Reflect, Default, PartialEq, Eq)]
+pub enum ObservationLogLevel {
+    #[default]
+    Default,
+    All,
+}
+
+#[derive(Component, Reflect, Debug)]
+pub struct ObservationBufferEntry {
+    pub timestamp: Instant,
+    pub observation: String,
+    pub origin: ObservationEvent,
+}
+
+#[derive(Event, Debug, Clone, Reflect)]
+pub enum ObservationBufferEvent {
+    Updated { buffer_id: Entity },
+}
+
+#[derive(Event, Debug, Clone, Reflect)]
+pub enum ObservationEvent {
     Chat {
         environment_id: Option<Entity>,
         character_id: Entity,
@@ -21,14 +42,16 @@ pub enum Observation {
         message: String,
     },
 }
-
-#[derive(Event, Debug, Clone)]
-pub enum ObservationEvent {
-    ObservationToolResponse {
-        character_id: Entity,
-        observation: String,
-    },
-    SomethingHappened {
-        observation: Observation,
+impl Display for ObservationEvent {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            ObservationEvent::Chat {
+                character_name,
+                message,
+                ..
+            } => {
+                write!(f, "<{:?}> {:?}", character_name, message)
+            }
+        }
     }
 }

@@ -1,33 +1,29 @@
 use bevy::prelude::*;
 use bevy::utils::HashSet;
 use bevy_xpbd_2d::components::CollidingEntities;
+use cursor_hero_environment_types::prelude::*;
 use cursor_hero_level_bounds::level_bounds_plugin::LevelBounds;
 use cursor_hero_level_bounds::level_bounds_plugin::LevelBoundsHolder;
-use cursor_hero_pointer_types::prelude::*;
-use cursor_hero_environment_types::prelude::*;
 
-pub struct PointerEnvironmentPlugin;
+pub struct EnvironmentTrackerPlugin;
 
-impl Plugin for PointerEnvironmentPlugin {
+impl Plugin for EnvironmentTrackerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, track_pointer_environment);
+        app.add_systems(Update, track);
     }
 }
 
-fn track_pointer_environment(
+fn track(
     mut commands: Commands,
-    mut pointer_query: Query<
-        (Entity, Option<&mut PointerEnvironment>, &CollidingEntities),
-        With<Pointer>,
-    >,
+    mut thing_query: Query<(Entity, Option<&mut EnvironmentTag>, &CollidingEntities)>,
     level_bounds_query: Query<&Parent, With<LevelBounds>>,
     level_bounds_holder_query: Query<&Parent, With<LevelBoundsHolder>>,
 ) {
-    for (pointer_id, pointer_environment, pointer_colliding_entities) in pointer_query.iter_mut() {
+    for (thing_id, thing_environment_tag, thing_colliding_entities) in thing_query.iter_mut() {
         // find out what level bounds the pointer is touching
         // find those bounds' parent
         // find the parent of the parent to get the environment ID
-        let environment_ids = pointer_colliding_entities
+        let environment_ids = thing_colliding_entities
             .0
             .iter()
             .filter_map(|entity| {
@@ -43,20 +39,20 @@ fn track_pointer_environment(
             .collect::<HashSet<Entity>>();
         if environment_ids.len() > 1 {
             warn!(
-                "Pointer {:?} is touching multiple environments: {:?}",
-                pointer_id, environment_ids
+                "Thing {:?} is touching multiple environments: {:?}",
+                thing_id, environment_ids
             );
         }
         if let Some(environment_id) = environment_ids.iter().next() {
-            if let Some(mut pointer_environment) = pointer_environment {
-                pointer_environment.environment_id = *environment_id;
+            if let Some(mut tag) = thing_environment_tag {
+                tag.environment_id = *environment_id;
             } else {
-                commands.entity(pointer_id).insert(PointerEnvironment {
+                commands.entity(thing_id).insert(EnvironmentTag {
                     environment_id: *environment_id,
                 });
             }
-        } else if pointer_environment.is_some() {
-            commands.entity(pointer_id).remove::<PointerEnvironment>();
+        } else if thing_environment_tag.is_some() {
+            commands.entity(thing_id).remove::<EnvironmentTag>();
         }
     }
 }

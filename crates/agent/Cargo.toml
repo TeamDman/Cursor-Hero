@@ -15,6 +15,7 @@ cursor_hero_physics = { workspace = true }
 cursor_hero_input = { workspace = true }
 cursor_hero_bevy = { workspace = true }
 cursor_hero_toolbelt_types = { workspace = true }
+cursor_hero_observation_types = { workspace = true }
 cursor_hero_camera = { workspace = true }
 bevy_xpbd_2d = { workspace = true }
 bevy-inspector-egui = { workspace = true}

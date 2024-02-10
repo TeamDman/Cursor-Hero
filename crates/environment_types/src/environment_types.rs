@@ -33,7 +33,10 @@ pub enum NametagEvent {
 #[derive(Component, Default, Reflect)]
 pub struct Nametag;
 
-#[derive(Component, Debug, Reflect)]
-pub struct PointerEnvironment {
+#[derive(Component, Debug, Reflect, Eq, PartialEq)]
+pub struct EnvironmentTag {
     pub environment_id: Entity,
 }
+
+#[derive(Component, Debug, Reflect)]
+pub struct TrackEnvironmentTag;
