@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use cursor_hero_inference_types::inference_types::InferenceEvent;
+use cursor_hero_inference_types::prelude::*;
 use cursor_hero_observation_types::prelude::*;
 use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_tools::prelude::*;
@@ -40,6 +40,7 @@ fn tool_tick(
     mut commands: Commands,
     tool_query: Query<(Entity, &Parent), (Added<ActiveTool>, With<ObservationTool>)>,
     toolbelt_query: Query<&Parent, With<Toolbelt>>,
+    mut character_query: Query<&mut ObservationBuffer>,
     mut events: EventWriter<InferenceEvent>,
 ) {
     for tool in tool_query.iter() {
@@ -51,12 +52,24 @@ fn tool_tick(
             continue;
         };
         let toolbelt_parent = toolbelt;
-        let character_id = toolbelt_parent.get();
 
-        let observation = "Hello, world!".to_string();
+        let character_id = toolbelt_parent.get();
+        let Ok(character) = character_query.get_mut(character_id) else {
+            warn!("Failed to get character");
+            continue;
+        };
+        let mut character_observation_buffer = character;
+
+        let mut content = String::new();
+        for entry in character_observation_buffer.observations.iter() {
+            let timestamp = entry.datetime.format("%Y-%m-%d %H:%M:%S").to_string();
+            content.push_str(&format!("{}: {}\n", timestamp, entry.observation));
+        }
+        character_observation_buffer.observations.clear();
+
         events.send(InferenceEvent::Request {
             session_id: character_id,
-            prompt: observation,
+            prompt: Prompt::Chat(content),
         });
         debug!("ObservationToolPlugin: Sent observation event");
     }
@@ -67,6 +80,6 @@ fn reply_tick(mut commands: Commands, mut inference_events: EventReader<Inferenc
         let InferenceEvent::Response { response, .. } = event else {
             continue;
         };
-        warn!("todo! {:?}", event);
+        info!("ObservationToolPlugin: Received response: {}", response);
     }
 }

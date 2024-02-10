@@ -47,7 +47,8 @@ fn update_buffers(
             }
 
             let entry = ObservationBufferEntry {
-                timestamp: Instant::now(),
+                instant: Instant::now(),
+                datetime: chrono::Local::now(),
                 observation: event.to_string(),
                 origin: event.clone(),
             };

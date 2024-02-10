@@ -85,9 +85,9 @@ fn create_worker_thread(mut commands: Commands) {
         .expect("Failed to spawn thread");
 }
 
-fn bridge_generate_requests(bridge: ResMut<Bridge>, mut events: EventReader<InferenceEvent>) {
+fn bridge_generate_requests(bridge: ResMut<Bridge>, mut events: EventReader<InferenceEvent>, text_assets: Res<Assets<Text>>) {
     for event in events.read() {
-        if let InferenceEvent::Request { session_id, prompt } = event {
+        if let InferenceEvent::Request { session_id, prompt_parameter: prompt } = event {
             debug!(
                 "Received generate request for session {:?}, sending over bridge to worker thread",
                 session_id

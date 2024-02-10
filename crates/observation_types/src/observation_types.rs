@@ -4,6 +4,8 @@ use std::fmt::Formatter;
 
 use bevy::prelude::*;
 use bevy::utils::Instant;
+use chrono::DateTime;
+use chrono::Local;
 
 #[derive(Component, Reflect, Default)]
 pub struct ObservationTool;
@@ -14,6 +16,7 @@ pub struct ObservationBuffer {
     pub log_level: ObservationLogLevel,
 }
 
+
 #[derive(Debug, Reflect, Default, PartialEq, Eq)]
 pub enum ObservationLogLevel {
     #[default]
@@ -23,7 +26,9 @@ pub enum ObservationLogLevel {
 
 #[derive(Component, Reflect, Debug)]
 pub struct ObservationBufferEntry {
-    pub timestamp: Instant,
+    pub instant: Instant,
+    #[reflect(ignore)]
+    pub datetime: DateTime<Local>,
     pub observation: String,
     pub origin: ObservationEvent,
 }

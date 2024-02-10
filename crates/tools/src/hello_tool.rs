@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use bevy::prelude::*;
-use cursor_hero_inference_types::inference_types::InferenceEvent;
+use cursor_hero_inference_types::{inference_types::InferenceEvent, prompt_types::Prompt};
 use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_tts_types::tts_types::TtsEvent;
 
@@ -46,7 +46,9 @@ fn activation(
         info!("Hello, world!");
         inference_events.send(InferenceEvent::Request {
             session_id: tool_id,
-            prompt: "Hello, ".to_string(),
+            prompt: Prompt::Raw { 
+                content: "Hello, ".to_string(),
+            },
         });
     }
 }
@@ -60,13 +62,13 @@ fn inference_response(
         if let InferenceEvent::Response {
             session_id,
             response,
-            prompt,
+            prompt: Prompt::Raw { content },
         } = event
         {
             if tool_query.get(*session_id).is_ok() {
                 tts_events.send(TtsEvent::Request {
                     session_id: *session_id,
-                    prompt: format!("{}{}", prompt, response),
+                    prompt: format!("{}{}", content, response),
                 });
             }
         }

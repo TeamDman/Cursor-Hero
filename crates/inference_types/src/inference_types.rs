@@ -1,3 +1,4 @@
+use crate::prelude::*;
 use bevy::prelude::*;
 
 #[derive(Component, Reflect, Debug)]
@@ -7,11 +8,11 @@ pub struct InferenceSession;
 pub enum InferenceEvent {
     Request {
         session_id: Entity,
-        prompt: String,
+        prompt: Prompt,
     },
     Response {
         session_id: Entity,
-        prompt: String,
+        prompt: Prompt,
         response: String,
     },
 }

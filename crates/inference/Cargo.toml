@@ -10,6 +10,7 @@ bevy = { workspace = true }
 ollama-rs = { workspace = true }
 crossbeam-channel = { workspace = true }
 cursor_hero_inference_types = {workspace = true}
+cursor_hero_bevy = {workspace = true}
 tokio = {workspace = true}
 reqwest = {workspace = true, features=["json"]}
 serde = { version = "1.0", features = ["derive"] }
