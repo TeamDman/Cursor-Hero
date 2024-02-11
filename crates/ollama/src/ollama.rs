@@ -1,6 +1,5 @@
 use cursor_hero_ollama_types::ollama_types::OllamaStatus;
 use reqwest::Client;
-use reqwest::Request;
 use std::error::Error;
 
 use serde::Deserialize;
@@ -43,8 +42,32 @@ pub async fn get_status() -> Result<OllamaStatus, Box<dyn Error>> {
             true => Ok(OllamaStatus::Alive),
             false => Ok(OllamaStatus::Dead),
         },
-        Err(_) => {
-            Ok(OllamaStatus::Dead)
-        }
+        Err(_) => Ok(OllamaStatus::Dead),
+    }
+}
+
+pub async fn start() -> Result<(), Box<dyn Error>> {
+    // wt --window 0 --profile "Ubuntu-22.04" --colorScheme "Ubuntu-22.04-ColorScheme" --title "Ollama Serve" wsl -d Ubuntu-22.04 -- ollama serve
+    match std::process::Command::new("wt")
+        .args(&[
+            "--window",
+            "0",
+            "--profile",
+            "Ubuntu-22.04",
+            "--colorScheme",
+            "Ubuntu-22.04-ColorScheme",
+            "--title",
+            "Ollama Serve",
+            "wsl",
+            "-d",
+            "Ubuntu-22.04",
+            "--",
+            "ollama",
+            "serve",
+        ])
+        .spawn()
+    {
+        Ok(_) => Ok(()),
+        Err(e) => Err(Box::new(e)),
     }
 }

@@ -172,7 +172,7 @@ fn update_control_visuals(
 
 fn click_listener(
     mut click_events: EventReader<ClickEvent>,
-    button_query: Query<Entity, With<OllamaStatusButton>>,
+    button_query: Query<OllamaStatusButton>,
     mut status_events: EventWriter<OllamaStatusEvent>,
 ) {
     for event in click_events.read() {
@@ -187,8 +187,18 @@ fn click_listener(
         if way != &Way::Left {
             continue;
         }
-        if let Ok(_) = button_query.get(*target_id) {
+        if let Ok(button) = button_query.get(*target_id) {
             info!("Ollama Server Control clicked");
+            // if the button visual status is alive, do nothing
+            match button.visual_state {
+                OllamaStatusButtonVisualState::Default { status: OllamaStatus::Alive }
+                | OllamaStatusButtonVisualState::Hovered { status: OllamaStatus::Alive }
+                | OllamaStatusButtonVisualState::Pressed { status: OllamaStatus::Alive } => {
+                    warn!("Ollama Server Control is already alive");
+                    continue;
+                }
+                _ => {}
+            }
             let event = OllamaStatusEvent::Startup;
             debug!("Sending event {:?}", event);
             status_events.send(event);

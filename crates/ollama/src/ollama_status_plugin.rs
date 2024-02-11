@@ -26,29 +26,28 @@ fn handle_startup_event(
         .p0()
         .read()
         .any(|event| matches!(event, OllamaStatusEvent::Startup));
-    if starting {
-        *ollama_status = OllamaStatus::Starting {
-            instant: Instant::now(),
-            timeout: Duration::from_secs(5),
-        };
-        let event = OllamaStatusEvent::Changed {
-            new_value: *ollama_status,
-        };
-        debug!("Sending event {:?}", event);
-        status_events.p1().send(event);
+    if !starting {
+        return;
     }
+    status_events.p0().clear();
+
+    *ollama_status = OllamaStatus::Starting {
+        instant: Instant::now(),
+        timeout: Duration::from_secs(5),
+    };
+    let event = OllamaStatusEvent::Changed {
+        new_value: *ollama_status,
+    };
+    debug!("Sending event {:?}", event);
+    status_events.p1().send(event);
 }
 
 fn periodic_ping(
-    ollama_status: Res<OllamaStatus>,
     mut ping_events: EventWriter<OllamaPingEvent>,
     mut last_ping: Local<Option<Instant>>,
 ) {
-    let (OllamaStatus::Starting { .. } | OllamaStatus::Unknown) = *ollama_status else {
-        return;
-    };
     if let Some(instant) = *last_ping {
-        if instant.elapsed().as_secs() > 2 {
+        if instant.elapsed().as_secs() > 5 {
             ping_events.send(OllamaPingEvent::Ping);
             *last_ping = Some(Instant::now());
         }
@@ -93,21 +92,3 @@ fn handle_pong(
         }
     }
 }
-
-// fn startup_timeout(
-//     mut ollama_status: ResMut<OllamaStatus>,
-//     mut status_events: EventWriter<OllamaStatusEvent>,
-// ) {
-//     let OllamaStatus::Starting { instant, timeout } = *ollama_status else {
-//         return;
-//     };
-//     if instant.elapsed() > timeout {
-//         *ollama_status = OllamaStatus::Dead;
-//         let event = OllamaStatusEvent::Changed {
-//             new_value: OllamaStatus::Dead,
-//         };
-//         debug!("Startup timeout exceeded, sending event {:?}", event);
-//         status_events.send(event);
-//         return;
-//     }
-// }

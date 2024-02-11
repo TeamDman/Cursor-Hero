@@ -2,9 +2,7 @@ use bevy::prelude::*;
 use crossbeam_channel::bounded;
 use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
-use cursor_hero_inference_types::prelude::*;
 use cursor_hero_ollama_types::prelude::*;
-use cursor_hero_text_asset_types::prelude::*;
 use std::thread;
 
 pub struct OllamaStatusWorkerPlugin;
@@ -25,6 +23,7 @@ enum GameboundMessage {
 #[derive(Debug)]
 enum ThreadboundMessage {
     Ping,
+    Startup,
 }
 
 #[derive(Resource)]
@@ -71,6 +70,12 @@ fn create_worker_thread(mut commands: Commands) {
                                 break;
                             }
                         }
+                        ThreadboundMessage::Startup => {
+                            debug!("Worker received startup request, starting Ollama API");
+                            if let Err(e) = crate::ollama::start().await {
+                                error!("Failed to start: {:?}", e);
+                            };
+                        }
                     }
                     std::thread::sleep(std::time::Duration::from_millis(50));
                 }
@@ -79,12 +84,30 @@ fn create_worker_thread(mut commands: Commands) {
         .expect("Failed to spawn thread");
 }
 
-fn events_to_bridge(bridge: ResMut<Bridge>, mut events: EventReader<OllamaPingEvent>) {
-    for event in events.read() {
+fn events_to_bridge(
+    bridge: ResMut<Bridge>,
+    mut ping_events: EventReader<OllamaPingEvent>,
+    mut status_events: EventReader<OllamaStatusEvent>,
+) {
+    // Detect ping requests
+    for event in ping_events.read() {
         let OllamaPingEvent::Ping = event else {
             continue;
         };
         let msg = ThreadboundMessage::Ping;
+        debug!("Sending bridge message: {:?}", msg);
+        if let Err(e) = bridge.sender.send(msg) {
+            error!("Threadbound channel failure: {}", e);
+        }
+    }
+
+    // Detect startup requests
+    let starting = status_events
+        .read()
+        .any(|event| matches!(event, OllamaStatusEvent::Startup));
+    if starting {
+        status_events.clear();
+        let msg = ThreadboundMessage::Startup;
         debug!("Sending bridge message: {:?}", msg);
         if let Err(e) = bridge.sender.send(msg) {
             error!("Threadbound channel failure: {}", e);
