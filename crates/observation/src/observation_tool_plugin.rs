@@ -60,16 +60,18 @@ fn tool_tick(
         };
         let mut character_observation_buffer = character;
 
-        let mut content = String::new();
+        let mut chat_history = String::new();
         for entry in character_observation_buffer.observations.iter() {
             let timestamp = entry.datetime.format("%Y-%m-%d %H:%M:%S").to_string();
-            content.push_str(&format!("{}: {}\n", timestamp, entry.observation));
+            chat_history.push_str(&format!("{}: {}\n", timestamp, entry.observation));
         }
         character_observation_buffer.observations.clear();
 
         events.send(InferenceEvent::Request {
             session_id: character_id,
-            prompt: Prompt::Chat(content),
+            prompt: Prompt::Chat {
+                chat_history,
+            }
         });
         debug!("ObservationToolPlugin: Sent observation event");
     }

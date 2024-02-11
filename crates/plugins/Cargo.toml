@@ -8,6 +8,7 @@ edition = "2021"
 
 [dependencies]
 cursor_hero_text_asset = { workspace = true }
+cursor_hero_text_asset_types = { workspace = true }
 cursor_hero_environment_types = { workspace = true }
 cursor_hero_chat_types = { workspace = true }
 cursor_hero_chat = { workspace = true }

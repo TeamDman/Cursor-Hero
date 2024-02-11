@@ -6,6 +6,7 @@ impl Plugin for InferenceTypesPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<InferenceSession>();
         app.register_type::<Prompt>();
+        app.register_type::<MaterializedPrompt>();
         app.add_event::<InferenceEvent>();
     }
 }

@@ -4,21 +4,12 @@ use bevy::asset::io::Reader;
 use bevy::asset::AssetLoader;
 use bevy::asset::AsyncReadExt;
 use bevy::asset::LoadContext;
-use bevy::reflect::TypePath;
 use bevy::utils::thiserror;
 use bevy::utils::BoxedFuture;
 use serde::Deserialize;
 use thiserror::Error;
 
-pub struct TextAssetLoaderPlugin;
-
-impl Plugin for TextAssetLoaderPlugin {
-    fn build(&self, app: &mut App) {
-        app.init_asset_loader::<TextAssetLoader>()
-    }
-}
-
-#[derive(Asset, TypePath, Debug, Deserialize)]
+#[derive(Asset, Reflect, Debug, Deserialize)]
 pub struct TextAsset {
     pub value: String,
 }

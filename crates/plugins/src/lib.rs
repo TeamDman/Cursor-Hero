@@ -63,8 +63,6 @@ pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(TextAssetTypesPlugin);
-        app.add_plugins(TextAssetPlugin);
         app.add_plugins(EnvironmentTypesPlugin);
         app.add_plugins(ChatTypesPlugin);
         app.add_plugins(ChatPlugin);
@@ -160,6 +158,10 @@ impl Plugin for MyPlugin {
                 .set(log_plugin)
                 .build(),
         );
+
+        // must be after the default plugins (relies on assetserver existing)
+        app.add_plugins(TextAssetTypesPlugin);
+        app.add_plugins(TextAssetPlugin);
 
         // must be after the default plugins
         app.add_plugins(

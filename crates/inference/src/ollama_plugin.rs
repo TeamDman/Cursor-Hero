@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use cursor_hero_text_asset_types::prelude::*;
 use std::thread;
 
 use crossbeam_channel::bounded;
@@ -19,14 +20,17 @@ impl Plugin for OllamaPlugin {
 enum GameboundMessage {
     Response {
         session_id: Entity,
-        prompt: String,
+        prompt: MaterializedPrompt,
         response: String,
     },
 }
 
 #[derive(Debug)]
 enum ThreadboundMessage {
-    Generate { session_id: Entity, prompt: String },
+    Generate {
+        session_id: Entity,
+        prompt: MaterializedPrompt,
+    },
 }
 
 #[derive(Resource)]
@@ -61,7 +65,7 @@ fn create_worker_thread(mut commands: Commands) {
                     match msg {
                         ThreadboundMessage::Generate { session_id, prompt } => {
                             debug!("Worker received generate request for session {:?}, generating response", session_id);
-                            let data = match crate::ollama::generate(&prompt).await {
+                            let data = match crate::ollama::generate(&prompt.materialized).await {
                                 Ok(data) => data,
                                 Err(e) => {
                                     error!("Failed to generate: {}", e);
@@ -85,16 +89,48 @@ fn create_worker_thread(mut commands: Commands) {
         .expect("Failed to spawn thread");
 }
 
-fn bridge_generate_requests(bridge: ResMut<Bridge>, mut events: EventReader<InferenceEvent>, text_assets: Res<Assets<Text>>) {
+fn bridge_generate_requests(
+    bridge: ResMut<Bridge>,
+    mut events: EventReader<InferenceEvent>,
+    prompts: Res<PromptHandles>,
+    text_assets: Res<Assets<TextAsset>>,
+) {
     for event in events.read() {
-        if let InferenceEvent::Request { session_id, prompt_parameter: prompt } = event {
+        if let InferenceEvent::Request { session_id, prompt } = event {
             debug!(
                 "Received generate request for session {:?}, sending over bridge to worker thread",
                 session_id
             );
+
+            // we gotta load the prompt from the asset server to materialize it before we can send it
+            let handle = match prompt {
+                Prompt::Raw { .. } => &prompts.raw,
+                Prompt::Chat { .. } => &prompts.chat,
+            };
+            let prompt_asset = match text_assets.get(handle) {
+                Some(asset) => asset,
+                None => {
+                    error!(
+                        "Failed to load prompt asset {:?} for prompt type {:?}",
+                        handle,
+                        std::any::type_name_of_val(&prompt)
+                    );
+                    continue;
+                }
+            };
+            let materialized_prompt = MaterializedPrompt {
+                prompt: prompt.clone(),
+                materialized: match prompt {
+                    Prompt::Raw { content } => prompt_asset.value.replace("{{content}}", content),
+                    Prompt::Chat { chat_history } => {
+                        prompt_asset.value.replace("{{chat_history}}", chat_history)
+                    }
+                },
+            };
+
             if let Err(e) = bridge.sender.send(ThreadboundMessage::Generate {
                 session_id: *session_id,
-                prompt: prompt.clone(),
+                prompt: materialized_prompt,
             }) {
                 error!("Threadbound channel failure: {}", e);
             }

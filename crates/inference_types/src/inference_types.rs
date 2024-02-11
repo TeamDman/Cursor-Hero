@@ -12,7 +12,7 @@ pub enum InferenceEvent {
     },
     Response {
         session_id: Entity,
-        prompt: Prompt,
+        prompt: MaterializedPrompt,
         response: String,
     },
 }

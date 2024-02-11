@@ -1,4 +1,4 @@
 This is a conversation between a scientist and a nacent autonomous agent.
 
-{{content}}
+{{chat_history}}
 Agent: 

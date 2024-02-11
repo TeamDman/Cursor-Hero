@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 bevy = { workspace = true }
 ollama-rs = { workspace = true }
+cursor_hero_text_asset_types = {workspace = true}
