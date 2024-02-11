@@ -95,4 +95,6 @@ pub enum ChatInputEvent {
 pub struct ChatInput;
 
 #[derive(Component, Reflect, Debug, Default)]
-pub struct ChatBubble;
+pub struct ChatBubble {
+    pub lifetime: Timer,
+}

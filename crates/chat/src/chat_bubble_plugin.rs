@@ -2,13 +2,14 @@ use bevy::prelude::*;
 use bevy::text::Text2dBounds;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_chat_types::prelude::*;
-
+use bevy_xpbd_2d::prelude::*;
 pub struct ChatBubblePlugin;
 
 impl Plugin for ChatBubblePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, handle_chat_input_events);
         app.add_systems(Update, handle_chat_events);
+        app.add_systems(Update, chat_bubble_lifetime);
     }
 }
 fn handle_chat_input_events(
@@ -156,7 +157,8 @@ fn handle_chat_events(
                     let character_transform = character;
                     info!(
                         "Creating chat bubble for character {:?} at position {:?}",
-                        character_id, character_transform.translation()
+                        character_id,
+                        character_transform.translation()
                     );
                     let size = Vec2::new(300.0, 100.0);
                     let resolution = 3.0;
@@ -174,7 +176,12 @@ fn handle_chat_events(
                                 transform,
                                 ..default()
                             },
-                            ChatBubble,
+                            ChatBubble {
+                                lifetime: Timer::from_seconds(25.0, TimerMode::Once),
+                            },
+                            RigidBody::Dynamic,
+                            LinearVelocity(Vec2::new(0.0, -30.0)),
+                            Collider::cuboid(size.x, size.y),
                             Name::new("Chat Bubble"),
                         ))
                         .with_children(|parent| {
@@ -202,6 +209,19 @@ fn handle_chat_events(
                     );
                 }
             }
+        }
+    }
+}
+
+fn chat_bubble_lifetime(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut query: Query<(Entity, &mut ChatBubble)>,
+) {
+    for (entity, mut chat_bubble) in query.iter_mut() {
+        chat_bubble.lifetime.tick(time.delta());
+        if chat_bubble.lifetime.finished() {
+            commands.entity(entity).despawn_recursive();
         }
     }
 }

@@ -14,3 +14,4 @@ cursor_hero_tools = { workspace = true }
 leafwing-input-manager = { workspace = true }
 cursor_hero_observation_types = { workspace = true }
 rand = { workspace = true }
+bevy_xpbd_2d = { workspace = true }

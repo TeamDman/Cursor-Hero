@@ -1,4 +1,9 @@
-- GLaDOS TTS startup button
+- agent restart memory
+- better prompt history
+- hot mic support for back and forth talking while coding
+- vscode buffer observations
+- environment restart observations 
+
 - Onboarder startup button
 - voice2text startup button
 - Screen pause toggle button
