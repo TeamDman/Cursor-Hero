@@ -2,6 +2,7 @@
 - Onboarder startup button
 - voice2text startup button
 - Screen pause toggle button
+- add "thinking" bubble above agent head when request in flight
 
 - customizable launch params for the wt invocation to launch ollama and stuff in case people have different WSL distros than ubuntu
   - restart memory, edit in game

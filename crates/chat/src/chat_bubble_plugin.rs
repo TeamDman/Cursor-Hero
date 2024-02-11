@@ -3,9 +3,9 @@ use bevy::text::Text2dBounds;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_chat_types::prelude::*;
 
-pub struct ChatInputVisualsPlugin;
+pub struct ChatBubblePlugin;
 
-impl Plugin for ChatInputVisualsPlugin {
+impl Plugin for ChatBubblePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, handle_chat_input_events);
         app.add_systems(Update, handle_chat_events);
@@ -144,7 +144,7 @@ fn handle_chat_input_events(
 fn handle_chat_events(
     mut events: EventReader<ChatEvent>,
     mut commands: Commands,
-    character_query: Query<&Transform, With<Character>>,
+    character_query: Query<&GlobalTransform, With<Character>>,
 ) {
     for event in events.read() {
         match event {
@@ -156,12 +156,12 @@ fn handle_chat_events(
                     let character_transform = character;
                     info!(
                         "Creating chat bubble for character {:?} at position {:?}",
-                        character_id, character_transform.translation
+                        character_id, character_transform.translation()
                     );
                     let size = Vec2::new(300.0, 100.0);
                     let resolution = 3.0;
                     let padding = Vec2::new(10.0, 10.0);
-                    let mut transform = *character_transform;
+                    let mut transform = character_transform.compute_transform();
                     transform.translation -= Vec3::new(0.0, 100.0, 10.0);
                     commands
                         .spawn((

@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::utils::Instant;
 use cursor_hero_character_types::character_types::AgentCharacter;
 use cursor_hero_chat_types::chat_types::ChatEvent;
 use cursor_hero_inference_types::prelude::*;
@@ -23,31 +24,29 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Agent { toolbelt_id } = event
-        {
-            ToolSpawnConfig::<ObservationTool, NoInputs>::new(ObservationTool, *toolbelt_id, event)
-                .guess_name(file!())
-                .guess_image(file!(), &asset_server, "png")
-                .with_description("Logs information about the environment to the console.")
-                .with_starting_state(StartingState::Inactive)
-                .spawn(&mut commands);
+        if let PopulateToolbeltEvent::Agent { toolbelt_id } = event {
+            ToolSpawnConfig::<ObservationTool, NoInputs>::new(
+                ObservationTool::default(),
+                *toolbelt_id,
+                event,
+            )
+            .guess_name(file!())
+            .guess_image(file!(), &asset_server, "png")
+            .with_description("Logs information about the environment to the console.")
+            .spawn(&mut commands);
         }
     }
 }
 
-// TODO: rework this into the "inference wand" which will read the observation buffer in the target and send it over
-
 #[allow(clippy::type_complexity)]
 fn tool_tick(
-    mut commands: Commands,
-    tool_query: Query<(Entity, &Parent), (Added<ActiveTool>, With<ObservationTool>)>,
+    mut tool_query: Query<(&Parent, &mut ObservationTool), With<ActiveTool>>,
     toolbelt_query: Query<&Parent, With<Toolbelt>>,
     mut character_query: Query<&mut ObservationBuffer>,
     mut events: EventWriter<TextInferenceEvent>,
 ) {
-    for tool in tool_query.iter() {
-        let (tool_id, tool_parent) = tool;
-        commands.entity(tool_id).remove::<ActiveTool>();
+    for tool in tool_query.iter_mut() {
+        let (tool_parent, mut tool) = tool;
 
         let Ok(toolbelt) = toolbelt_query.get(tool_parent.get()) else {
             warn!("Failed to get toolbelt");
@@ -60,14 +59,47 @@ fn tool_tick(
             warn!("Failed to get character");
             continue;
         };
-        let mut character_observation_buffer = character;
+
+        let character_observation_buffer = character;
+        let mut whats_new = WhatsNew::Nothing;
+        if let Some(last_inference) = tool.last_inference {
+            for entry in character_observation_buffer
+                .observations
+                .iter()
+                .filter(|entry| entry.instant > last_inference)
+            {
+                let is_self_chat = matches!(entry.origin, ObservationEvent::Chat { character_id: event_character_id, .. } if event_character_id == character_id);
+                if is_self_chat {
+                    whats_new = WhatsNew::SelfChat;
+                } else {
+                    whats_new = WhatsNew::Something;
+                    break;
+                }
+            }
+        } else if !character_observation_buffer.observations.is_empty() {
+            whats_new = WhatsNew::Something;
+        }
+
+        // Update the field for debug viewing in the inspector
+        tool._whats_new = Some(whats_new);
+
+        // the agent will observe its own chats
+        // so this check doesn't prevent all forms of loops
+        if let WhatsNew::Nothing = whats_new {
+            continue;
+        }
+
+        if let Some(last_inference) = tool.last_inference {
+            if last_inference + whats_new.cooldown() > Instant::now() {
+                continue;
+            }
+        }
 
         let mut chat_history = String::new();
         for entry in character_observation_buffer.observations.iter() {
             // let timestamp = entry.datetime.format("%Y-%m-%d %H:%M:%S").to_string();
             chat_history.push_str(entry.observation.as_str());
         }
-        character_observation_buffer.observations.clear();
 
         events.send(TextInferenceEvent::Request {
             session_id: character_id,
@@ -85,6 +117,8 @@ fn tool_tick(
             },
         });
         debug!("ObservationToolPlugin: Sent observation event");
+
+        tool.last_inference = Some(Instant::now());
     }
 }
 
@@ -108,6 +142,11 @@ fn handle_text_inference_response(
             continue;
         }
 
+        if response.is_empty() {
+            debug!("Received empty response, skipping");
+            continue;
+        }
+
         let event = ChatEvent::Chat {
             character_id: *session_id,
             message: response.clone(),
@@ -117,7 +156,9 @@ fn handle_text_inference_response(
 
         let event = SpeechInferenceEvent::Request {
             session_id: *session_id,
-            prompt: SpeechPrompt::Raw { content: response.clone() },
+            prompt: SpeechPrompt::Raw {
+                content: response.clone(),
+            },
         };
         debug!("Sending event: {:?}", event);
         tts_events.send(event);
