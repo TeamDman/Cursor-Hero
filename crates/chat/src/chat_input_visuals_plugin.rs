@@ -43,7 +43,7 @@ fn handle_chat_input_events(
                         continue;
                     }
                 };
-                info!(
+                debug!(
                     "Creating chat input entity for character {:?}",
                     character_id
                 );
@@ -86,7 +86,7 @@ fn handle_chat_input_events(
                 });
             }
             ChatInputEvent::Unfocus { character_id, .. } => {
-                info!(
+                debug!(
                     "Removing chat input entity for character {:?}",
                     character_id
                 );
