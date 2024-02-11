@@ -51,13 +51,16 @@ fn spawn_nametags_in_new_environments(
                                 environment_name.to_string(),
                                 TextStyle {
                                     font_size: 72.0,
-                                    font: asset_server.load("fonts/kenney_kenney-fonts/Fonts/Kenney Future Narrow.ttf"),
+                                    font: asset_server.load(
+                                        "fonts/kenney_kenney-fonts/Fonts/Kenney Future Narrow.ttf",
+                                    ),
                                     color: Color::WHITE,
                                     ..default()
                                 },
                             )
                             .with_alignment(TextAlignment::Center),
-                            transform: Transform::from_xyz(0.0, 200.0, 1.0).with_scale(Vec3::splat(4.0)),
+                            transform: Transform::from_xyz(0.0, 200.0, 1.0)
+                                .with_scale(Vec3::splat(4.0)),
                             ..default()
                         },
                         Nametag,

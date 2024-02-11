@@ -47,19 +47,19 @@ use cursor_hero_agent_types::agent_types_plugin::AgentTypesPlugin;
 use cursor_hero_character_types::character_types_plugin::CharacterTypesPlugin;
 use cursor_hero_chat::chat_plugin::ChatPlugin;
 use cursor_hero_chat_types::chat_types_plugin::ChatTypesPlugin;
+use cursor_hero_environment_types::environment_types_plugin::EnvironmentTypesPlugin;
+use cursor_hero_glados_tts::prelude::*;
+use cursor_hero_glados_tts_types::prelude::*;
 use cursor_hero_inference::inference_plugin::InferencePlugin;
 use cursor_hero_inference_types::inference_types_plugin::InferenceTypesPlugin;
 use cursor_hero_movement_tool::movement_tool_plugin::MovementToolPlugin;
 use cursor_hero_movement_tool_types::movement_tool_types_plugin::MovementToolTypesPlugin;
 use cursor_hero_observation::observation_plugin::ObservationPlugin;
 use cursor_hero_observation_types::observation_types_plugin::ObservationTypesPlugin;
-use cursor_hero_environment_types::environment_types_plugin::EnvironmentTypesPlugin;
-use cursor_hero_text_asset::prelude::*;
-use cursor_hero_text_asset_types::prelude::*;
 use cursor_hero_ollama::prelude::*;
 use cursor_hero_ollama_types::prelude::*;
-use cursor_hero_glados_tts::prelude::*;
-use cursor_hero_glados_tts_types::prelude::*;
+use cursor_hero_text_asset::prelude::*;
+use cursor_hero_text_asset_types::prelude::*;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
@@ -128,7 +128,6 @@ impl Plugin for MyPlugin {
             level: bevy::log::Level::DEBUG,
             filter: "info,wgpu_core=warn,wgpu_hal=warn,bevy_ecs=info,cursor_hero=debug,cursor_hero_ollama::ollama_status_worker_plugin=warn,cursor_hero_glados_tts::glados_tts_status_worker_plugin=warn".into(),
             // TODO: add world representation of all our cursor_hero crates where clicking them will toggle their log level to warn
-            
             // TODO: fix warnings when minimized
         };
         #[cfg(not(debug_assertions))]

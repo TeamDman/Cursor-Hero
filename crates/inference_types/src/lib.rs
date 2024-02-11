@@ -4,6 +4,6 @@ pub mod prompt_types;
 
 pub mod prelude {
     pub use crate::inference_types::*;
-    pub use crate::prompt_types::*;
     pub use crate::inference_types_plugin::InferenceTypesPlugin;
+    pub use crate::prompt_types::*;
 }

@@ -16,7 +16,6 @@ pub struct ObservationBuffer {
     pub log_level: ObservationLogLevel,
 }
 
-
 #[derive(Debug, Reflect, Default, PartialEq, Eq)]
 pub enum ObservationLogLevel {
     #[default]

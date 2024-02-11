@@ -53,10 +53,7 @@ fn play_sound_for_keystrokes(
         let character_transform = character;
 
         // optimization opportunity: avoid unnecessary allocations
-        let choices = vec![
-            "sounds/kenny_click_002.ogg",
-            "sounds/kenny_click_003.ogg",
-        ];
+        let choices = vec!["sounds/kenny_click_002.ogg", "sounds/kenny_click_003.ogg"];
         let Some(choice) = choices.choose(&mut rand::thread_rng()) else {
             continue;
         };

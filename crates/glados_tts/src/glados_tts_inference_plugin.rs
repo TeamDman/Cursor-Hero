@@ -26,7 +26,10 @@ enum GameboundMessage {
 
 #[derive(Debug)]
 enum ThreadboundMessage {
-    Generate { session_id: Entity, prompt: SpeechPrompt },
+    Generate {
+        session_id: Entity,
+        prompt: SpeechPrompt,
+    },
 }
 
 #[derive(Resource)]

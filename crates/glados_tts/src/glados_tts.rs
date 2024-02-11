@@ -19,7 +19,7 @@ pub async fn generate(prompt: &str) -> Result<Vec<u8>, Box<dyn Error>> {
 
     // Ensure the audio decoder won't crash the freaking game
     rodio::Decoder::new(std::io::Cursor::new(wav.clone()))?;
-    
+
     Ok(wav)
 }
 

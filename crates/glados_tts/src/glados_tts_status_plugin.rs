@@ -83,7 +83,9 @@ fn handle_pong(
 
                 if *gladosTts_status != new_status {
                     *gladosTts_status = new_status;
-                    let event = GladosTtsStatusEvent::Changed { new_value: new_status };
+                    let event = GladosTtsStatusEvent::Changed {
+                        new_value: new_status,
+                    };
                     debug!("Sending event {:?}", event);
                     status_events.send(event);
                 }

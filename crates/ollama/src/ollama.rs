@@ -10,7 +10,10 @@ struct ApiResponse {
     response: String,
 }
 
-pub async fn generate(prompt: &str, options: Option<TextInferenceOptions>) -> Result<String, Box<dyn Error>> {
+pub async fn generate(
+    prompt: &str,
+    options: Option<TextInferenceOptions>,
+) -> Result<String, Box<dyn Error>> {
     let mut payload = serde_json::json!({
         "model": "whatevs",
         "prompt": prompt,

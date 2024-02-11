@@ -83,7 +83,9 @@ fn handle_pong(
 
                 if *ollama_status != new_status {
                     *ollama_status = new_status;
-                    let event = OllamaStatusEvent::Changed { new_value: new_status };
+                    let event = OllamaStatusEvent::Changed {
+                        new_value: new_status,
+                    };
                     debug!("Sending event {:?}", event);
                     status_events.send(event);
                 }

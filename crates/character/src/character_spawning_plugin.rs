@@ -5,11 +5,11 @@ use bevy_xpbd_2d::prelude::*;
 use cursor_hero_bevy::NegativeYVec2;
 use cursor_hero_camera::camera_plugin::CameraEvent;
 use cursor_hero_character_types::prelude::*;
+use cursor_hero_environment_types::prelude::*;
 use cursor_hero_physics::damping_plugin::MovementDamping;
 use cursor_hero_toolbelt_types::types::PopulateToolbeltEvent;
 use cursor_hero_toolbelt_types::types::ToolbeltBundle;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
-use cursor_hero_environment_types::prelude::*;
 pub struct CharacterSpawningPlugin;
 
 impl Plugin for CharacterSpawningPlugin {

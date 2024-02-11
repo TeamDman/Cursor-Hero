@@ -75,10 +75,7 @@ fn inference_response(
                 tts_events.send(SpeechInferenceEvent::Request {
                     session_id: *session_id,
                     prompt: SpeechPrompt::Raw {
-                        content: format!(
-                            "{}",
-                            response.clone()
-                        ),
+                        content: format!("{}", response.clone()),
                     },
                 });
             }

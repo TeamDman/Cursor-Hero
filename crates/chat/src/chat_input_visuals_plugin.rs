@@ -1,4 +1,5 @@
-use bevy::{prelude::*, text::Text2dBounds};
+use bevy::prelude::*;
+use bevy::text::Text2dBounds;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_chat_types::prelude::*;
 
@@ -50,7 +51,7 @@ fn handle_chat_input_events(
                 commands.entity(*character_id).with_children(|parent| {
                     let size = Vec2::new(300.0, 100.0);
                     let resolution = 3.0;
-                    let padding = Vec2::new(10.0,10.0);
+                    let padding = Vec2::new(10.0, 10.0);
                     parent
                         .spawn((
                             SpriteBundle {
@@ -79,7 +80,7 @@ fn handle_chat_input_events(
                                     size: size * resolution - padding,
                                 },
                                 transform: Transform::from_translation(Vec3::new(0.0, 0.0, 1.0))
-                                    .with_scale(Vec3::new(1.0/resolution, 1.0/resolution, 1.0)),
+                                    .with_scale(Vec3::new(1.0 / resolution, 1.0 / resolution, 1.0)),
                                 ..default()
                             },));
                         });
@@ -159,9 +160,9 @@ fn handle_chat_events(
                     );
                     let size = Vec2::new(300.0, 100.0);
                     let resolution = 3.0;
-                    let padding = Vec2::new(10.0,10.0);
+                    let padding = Vec2::new(10.0, 10.0);
                     let mut transform = character_transform.clone();
-                    transform.translation -= Vec3::new(0.0,100.0,10.0);
+                    transform.translation -= Vec3::new(0.0, 100.0, 10.0);
                     commands
                         .spawn((
                             SpriteBundle {
@@ -190,7 +191,7 @@ fn handle_chat_events(
                                     size: size * resolution - padding,
                                 },
                                 transform: Transform::from_translation(Vec3::new(0.0, 0.0, 1.0))
-                                    .with_scale(Vec3::new(1.0/resolution, 1.0/resolution, 1.0)),
+                                    .with_scale(Vec3::new(1.0 / resolution, 1.0 / resolution, 1.0)),
                                 ..default()
                             },));
                         });

@@ -96,4 +96,3 @@ pub struct ChatInput;
 
 #[derive(Component, Reflect, Debug, Default)]
 pub struct ChatBubble;
-

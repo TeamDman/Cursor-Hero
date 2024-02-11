@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 use bevy_xpbd_2d::prelude::*;
 use cursor_hero_environment_types::prelude::*;
-use cursor_hero_math::Lerp;
 use cursor_hero_glados_tts_types::prelude::*;
+use cursor_hero_math::Lerp;
 use cursor_hero_pointer_types::prelude::*;
 pub struct GladosTtsButtonPlugin;
 
@@ -23,10 +23,7 @@ fn populate_new_host_environments(
         let PopulateEnvironmentEvent::Host { environment_id } = event else {
             continue;
         };
-        info!(
-            "Adding button to new host environment {:?}",
-            environment_id
-        );
+        info!("Adding button to new host environment {:?}", environment_id);
         commands.entity(*environment_id).with_children(|parent| {
             parent
                 .spawn((
@@ -52,22 +49,20 @@ fn populate_new_host_environments(
                     Collider::cuboid(200.0, 100.0),
                 ))
                 .with_children(|parent| {
-                    parent.spawn((
-                        Text2dBundle {
-                            text: Text::from_section(
-                                "GLaDOS TTS Server Control".to_string(),
-                                TextStyle {
-                                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                    font_size: 32.0,
-                                    color: Color::WHITE,
-                                    ..default()
-                                },
-                            )
-                            .with_alignment(TextAlignment::Center),
-                            transform: Transform::from_xyz(0.0, 70.0, 1.0),
-                            ..default()
-                        },
-                    ));
+                    parent.spawn((Text2dBundle {
+                        text: Text::from_section(
+                            "GLaDOS TTS Server Control".to_string(),
+                            TextStyle {
+                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                font_size: 32.0,
+                                color: Color::WHITE,
+                                ..default()
+                            },
+                        )
+                        .with_alignment(TextAlignment::Center),
+                        transform: Transform::from_xyz(0.0, 70.0, 1.0),
+                        ..default()
+                    },));
                 });
         });
     }
@@ -190,9 +185,15 @@ fn click_listener(
             info!("GladosTts Server Control clicked");
             // if the button visual status is alive, do nothing
             match button.visual_state {
-                GladosTtsStatusButtonVisualState::Default { status: GladosTtsStatus::Alive }
-                | GladosTtsStatusButtonVisualState::Hovered { status: GladosTtsStatus::Alive }
-                | GladosTtsStatusButtonVisualState::Pressed { status: GladosTtsStatus::Alive } => {
+                GladosTtsStatusButtonVisualState::Default {
+                    status: GladosTtsStatus::Alive,
+                }
+                | GladosTtsStatusButtonVisualState::Hovered {
+                    status: GladosTtsStatus::Alive,
+                }
+                | GladosTtsStatusButtonVisualState::Pressed {
+                    status: GladosTtsStatus::Alive,
+                } => {
                     warn!("GladosTts Server Control is already alive");
                     continue;
                 }

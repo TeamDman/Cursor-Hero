@@ -1,6 +1,6 @@
 use crate::agent_movement_plugin::AgentMovementPlugin;
-use crate::insert_agent_toolbelt::InsertAgentToolbeltPlugin;
 use crate::agent_spawning_plugin::AgentSpawningPlugin;
+use crate::insert_agent_toolbelt::InsertAgentToolbeltPlugin;
 use bevy::prelude::*;
 
 pub struct AgentPlugin;

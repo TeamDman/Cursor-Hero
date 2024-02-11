@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
-use crate::ollama_inference_plugin::OllamaInferencePlugin;
 use crate::ollama_button_plugin::OllamaButtonPlugin;
+use crate::ollama_inference_plugin::OllamaInferencePlugin;
 use crate::ollama_status_plugin::OllamaStatusPlugin;
 use crate::ollama_status_worker_plugin::OllamaStatusWorkerPlugin;
 

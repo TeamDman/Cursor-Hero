@@ -52,22 +52,20 @@ fn populate_new_host_environments(
                     Collider::cuboid(200.0, 100.0),
                 ))
                 .with_children(|parent| {
-                    parent.spawn((
-                        Text2dBundle {
-                            text: Text::from_section(
-                                "Ollama Server Control".to_string(),
-                                TextStyle {
-                                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                    font_size: 32.0,
-                                    color: Color::WHITE,
-                                    ..default()
-                                },
-                            )
-                            .with_alignment(TextAlignment::Center),
-                            transform: Transform::from_xyz(0.0, 70.0, 1.0),
-                            ..default()
-                        },
-                    ));
+                    parent.spawn((Text2dBundle {
+                        text: Text::from_section(
+                            "Ollama Server Control".to_string(),
+                            TextStyle {
+                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                font_size: 32.0,
+                                color: Color::WHITE,
+                                ..default()
+                            },
+                        )
+                        .with_alignment(TextAlignment::Center),
+                        transform: Transform::from_xyz(0.0, 70.0, 1.0),
+                        ..default()
+                    },));
                 });
         });
     }
@@ -190,9 +188,15 @@ fn click_listener(
             info!("Ollama Server Control clicked");
             // if the button visual status is alive, do nothing
             match button.visual_state {
-                OllamaStatusButtonVisualState::Default { status: OllamaStatus::Alive }
-                | OllamaStatusButtonVisualState::Hovered { status: OllamaStatus::Alive }
-                | OllamaStatusButtonVisualState::Pressed { status: OllamaStatus::Alive } => {
+                OllamaStatusButtonVisualState::Default {
+                    status: OllamaStatus::Alive,
+                }
+                | OllamaStatusButtonVisualState::Hovered {
+                    status: OllamaStatus::Alive,
+                }
+                | OllamaStatusButtonVisualState::Pressed {
+                    status: OllamaStatus::Alive,
+                } => {
                     warn!("Ollama Server Control is already alive");
                     continue;
                 }
