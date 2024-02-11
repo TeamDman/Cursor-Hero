@@ -110,7 +110,11 @@ cursor_hero_version = { workspace = true }
 bevy = { workspace = true }
 windows = { workspace = true}
 bevy_xpbd_2d = { workspace = true }
-
+uiautomation = { workspace = true }
+bevy-inspector-egui = { workspace = true }
+syn = { workspace = true }
+quote = { workspace = true }
+itertools = { workspace = true }
 
 [dev-dependencies]
 bevy = { workspace = true, features = ["dynamic_linking"] }
