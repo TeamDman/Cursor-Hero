@@ -153,7 +153,7 @@ fn keyboard_input(
 }
 
 fn has_movement(mut reader: EventReader<MovementAction>) -> bool {
-    !reader.read().next().is_none()
+    reader.read().next().is_some()
 }
 fn movement(
     time: Res<Time>,

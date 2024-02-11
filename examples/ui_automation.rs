@@ -41,7 +41,7 @@ fn print_element(
     }
     println!("{} - {}", element.get_classname()?, element.get_name()?);
 
-    if let Ok(child) = walker.get_first_child(&element) {
+    if let Ok(child) = walker.get_first_child(element) {
         print_element(walker, &child, level + 1)?;
 
         let mut next = child;

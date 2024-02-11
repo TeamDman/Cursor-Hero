@@ -108,13 +108,17 @@ rodio = { version = "0.17", default-features = false }
 cursor_hero_plugins = { workspace = true }
 cursor_hero_version = { workspace = true }
 bevy = { workspace = true }
-windows = { workspace = true}
+
+# dependencies for examples
 bevy_xpbd_2d = { workspace = true }
 uiautomation = { workspace = true }
 bevy-inspector-egui = { workspace = true }
 syn = { workspace = true }
 quote = { workspace = true }
 itertools = { workspace = true }
+windows = { workspace = true, features = [
+    "Gaming_Input",
+]}
 
 [dev-dependencies]
 bevy = { workspace = true, features = ["dynamic_linking"] }
