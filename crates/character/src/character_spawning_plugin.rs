@@ -47,7 +47,7 @@ fn spawn_character(
         Character,
         MainCharacter,
         MovementDamping { factor: 0.90 },
-        Name::new("John Doe"),
+        Name::new("(Human) Tume Eena"),
         RigidBody::Kinematic,
         Collider::capsule(15.0, 12.5),
         SpatialListener::new(-7.0),
