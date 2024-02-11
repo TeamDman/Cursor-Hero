@@ -1,5 +1,5 @@
 [package]
-name = "cursor_hero_{{crate_name}}_types"
+name = "cursor_hero_{{crate_name}}"
 version = "0.1.0"
 edition = "2021"
 
