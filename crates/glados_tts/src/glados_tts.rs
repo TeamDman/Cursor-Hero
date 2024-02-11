@@ -1,6 +1,6 @@
 use cursor_hero_glados_tts_types::glados_tts_types::GladosTtsStatus;
 use reqwest::Client;
-use std::error::Error;
+use std::{env, error::Error, process::Command};
 
 pub async fn generate(prompt: &str) -> Result<Vec<u8>, Box<dyn Error>> {
     // Construct the URL for the TTS endpoint
@@ -34,7 +34,7 @@ pub async fn get_status() -> Result<GladosTtsStatus, Box<dyn Error>> {
     }
 }
 
-pub async fn start() -> Result<(), Box<dyn Error>> {
+pub fn start() -> Result<(), Box<dyn Error>> {
     // wt --window 0 --profile PowerShell -- pwsh -Command "cd G:\ml\glados-tts-upstream && conda activate gladostts && python .\engine.py"
     match std::process::Command::new("wt")
         .args([
@@ -57,6 +57,16 @@ pub async fn start() -> Result<(), Box<dyn Error>> {
             "python",
             ".\\engine.py\"",
         ])
+        .spawn()
+    {
+        Ok(_) => Ok(()),
+        Err(e) => Err(Box::new(e)),
+    }
+}
+
+pub fn start_vscode() -> Result<(), Box<dyn Error>> {
+    match Command::new(r"C:\Program Files\Microsoft VS Code\Code.exe")
+        .args(["G:\\ml\\glados-tts-upstream"])
         .spawn()
     {
         Ok(_) => Ok(()),

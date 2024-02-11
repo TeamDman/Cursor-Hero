@@ -72,7 +72,7 @@ fn create_worker_thread(mut commands: Commands) {
                         }
                         ThreadboundMessage::Startup => {
                             debug!("Worker received startup request, starting GladosTts API");
-                            if let Err(e) = crate::glados_tts::start().await {
+                            if let Err(e) = crate::glados_tts::start() {
                                 error!("Failed to start: {:?}", e);
                             };
                         }

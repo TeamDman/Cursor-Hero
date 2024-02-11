@@ -4,13 +4,17 @@ use cursor_hero_environment_types::prelude::*;
 use cursor_hero_glados_tts_types::prelude::*;
 use cursor_hero_math::Lerp;
 use cursor_hero_pointer_types::prelude::*;
+
+use crate::glados_tts;
 pub struct GladosTtsButtonPlugin;
 
 impl Plugin for GladosTtsButtonPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, populate_new_host_environments);
         app.add_systems(Update, update_visuals);
-        app.add_systems(Update, click_listener);
+        app.add_systems(Update, status_button_click);
+        app.add_systems(Update, vscode_button_click);
+        app.add_systems(Update, handle_vscode_events);
     }
 }
 
@@ -60,6 +64,44 @@ fn populate_new_host_environments(
                         )
                         .with_alignment(TextAlignment::Center),
                         transform: Transform::from_xyz(0.0, 70.0, 1.0),
+                        ..default()
+                    },));
+                });
+            parent
+                .spawn((
+                    GladosTtsVscodeButton::default(),
+                    Name::new("GLaDOS TTS VSCode Button"),
+                    SpriteBundle {
+                        sprite: Sprite {
+                            custom_size: Some(Vec2::new(200.0, 100.0)),
+                            color: Color::rgb(0.0, 0.6, 0.8),
+                            ..default()
+                        },
+                        transform: Transform::from_translation(Vec3::new(
+                            1920.0 / 2.0 - 600.0,
+                            -1080.0 - 350.0,
+                            0.0,
+                        )),
+                        ..default()
+                    },
+                    Clickable,
+                    Hoverable,
+                    RigidBody::Static,
+                    Sensor,
+                    Collider::cuboid(200.0, 100.0),
+                ))
+                .with_children(|parent| {
+                    parent.spawn((Text2dBundle {
+                        text: Text::from_section(
+                            "open in vscode".to_string(),
+                            TextStyle {
+                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                font_size: 32.0,
+                                color: Color::WHITE,
+                            },
+                        )
+                        .with_alignment(TextAlignment::Center),
+                        transform: Transform::from_xyz(0.0, 0.0, 1.0),
                         ..default()
                     },));
                 });
@@ -161,7 +203,7 @@ fn update_visuals(
     }
 }
 
-fn click_listener(
+fn status_button_click(
     mut click_events: EventReader<ClickEvent>,
     button_query: Query<&GladosTtsStatusButton>,
     mut status_events: EventWriter<GladosTtsStatusEvent>,
@@ -201,4 +243,45 @@ fn click_listener(
             status_events.send(event);
         }
     }
+}
+
+fn vscode_button_click(
+    mut click_events: EventReader<ClickEvent>,
+    button_query: Query<&GladosTtsVscodeButton>,
+    mut vscode_events: EventWriter<GladosTtsVscodeEvent>,
+) {
+    for event in click_events.read() {
+        let ClickEvent::Clicked {
+            target_id,
+            pointer_id: _,
+            way,
+        } = event
+        else {
+            continue;
+        };
+        if way != &Way::Left {
+            continue;
+        }
+        if button_query.get(*target_id).is_ok() {
+            info!("GladosTts vscode clicked");
+            let event = GladosTtsVscodeEvent::Startup;
+            debug!("Sending event {:?}", event);
+            vscode_events.send(event);
+        }
+    }
+}
+
+fn handle_vscode_events(
+    mut vscode_events: EventReader<GladosTtsVscodeEvent>,
+) {
+    let should_start = vscode_events.read().any(|event| {
+        matches!(event, GladosTtsVscodeEvent::Startup)
+    });
+    if should_start {
+        info!("Opening vscode");
+        if let Err(e) = glados_tts::start_vscode() {
+            error!("Failed to start vscode: {:?}", e);
+        }
+    }
+    vscode_events.clear();
 }

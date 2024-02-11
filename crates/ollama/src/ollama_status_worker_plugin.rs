@@ -72,7 +72,7 @@ fn create_worker_thread(mut commands: Commands) {
                         }
                         ThreadboundMessage::Startup => {
                             debug!("Worker received startup request, starting Ollama API");
-                            if let Err(e) = crate::ollama::start().await {
+                            if let Err(e) = crate::ollama::start() {
                                 error!("Failed to start: {:?}", e);
                             };
                         }

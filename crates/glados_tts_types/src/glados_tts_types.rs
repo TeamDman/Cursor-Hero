@@ -15,6 +15,8 @@ pub enum GladosTtsStatus {
     },
 }
 
+
+
 #[derive(Component, Debug, Reflect, Default)]
 pub struct GladosTtsStatusButton {
     pub visual_state: GladosTtsStatusButtonVisualState,
@@ -33,6 +35,23 @@ impl Default for GladosTtsStatusButtonVisualState {
         }
     }
 }
+
+
+
+#[derive(Component, Debug, Reflect, Default)]
+pub struct GladosTtsVscodeButton {
+    pub visual_state: GladosTtsVscodeButtonVisualState,
+}
+#[derive(Debug, Reflect, Eq, PartialEq, Default)]
+pub enum GladosTtsVscodeButtonVisualState {
+    #[default]
+    Default,
+}
+#[derive(Event, Debug, Reflect)]
+pub enum GladosTtsVscodeEvent {
+    Startup,
+}
+
 
 #[derive(Event, Debug, Reflect)]
 pub enum GladosTtsPingEvent {

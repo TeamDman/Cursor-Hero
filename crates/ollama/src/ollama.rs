@@ -69,7 +69,7 @@ pub async fn get_status() -> Result<OllamaStatus, Box<dyn Error>> {
     }
 }
 
-pub async fn start() -> Result<(), Box<dyn Error>> {
+pub fn start() -> Result<(), Box<dyn Error>> {
     // wt --window 0 --profile "Ubuntu-22.04" --colorScheme "Ubuntu-22.04-ColorScheme" --title "Ollama Serve" wsl -d Ubuntu-22.04 -- ollama serve
     match std::process::Command::new("wt")
         .args([
