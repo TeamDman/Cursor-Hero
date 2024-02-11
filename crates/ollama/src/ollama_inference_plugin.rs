@@ -1,14 +1,14 @@
-use bevy::prelude::*;
 use cursor_hero_text_asset_types::prelude::*;
 use std::thread;
-
+use bevy::prelude::*;
 use crossbeam_channel::bounded;
 use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
 use cursor_hero_inference_types::prelude::*;
-pub struct OllamaPlugin;
 
-impl Plugin for OllamaPlugin {
+pub struct OllamaInferencePlugin;
+
+impl Plugin for OllamaInferencePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, create_worker_thread);
         app.add_systems(Update, bridge_generate_requests);

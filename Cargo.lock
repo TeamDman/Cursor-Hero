@@ -1909,14 +1909,7 @@ name = "cursor_hero_inference"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "crossbeam-channel",
  "cursor_hero_inference_types",
- "cursor_hero_text_asset_types",
- "ollama-rs",
- "reqwest",
- "serde",
- "serde_json",
- "tokio 1.35.1",
 ]
 
 [[package]]
@@ -2012,6 +2005,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "cursor_hero_ollama"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy_xpbd_2d",
+ "crossbeam-channel",
+ "cursor_hero_environment_types",
+ "cursor_hero_inference_types",
+ "cursor_hero_math",
+ "cursor_hero_ollama_types",
+ "cursor_hero_pointer_types",
+ "cursor_hero_text_asset_types",
+ "ollama-rs",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tokio 1.35.1",
+]
+
+[[package]]
+name = "cursor_hero_ollama_types"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+]
+
+[[package]]
 name = "cursor_hero_pause_tool"
 version = "0.1.0"
 dependencies = [
@@ -2070,6 +2090,8 @@ dependencies = [
  "cursor_hero_movement_tool_types",
  "cursor_hero_observation",
  "cursor_hero_observation_types",
+ "cursor_hero_ollama",
+ "cursor_hero_ollama_types",
  "cursor_hero_pause_tool",
  "cursor_hero_physics",
  "cursor_hero_physics_debug",

@@ -1,4 +1,6 @@
+use cursor_hero_ollama_types::ollama_types::OllamaStatus;
 use reqwest::Client;
+use reqwest::Request;
 use std::error::Error;
 
 use serde::Deserialize;
@@ -31,5 +33,18 @@ pub async fn generate(prompt: &str) -> Result<String, Box<dyn Error>> {
             std::io::ErrorKind::Other,
             format!("Failed to call API. Status: {}", res.status()),
         )))
+    }
+}
+
+pub async fn get_status() -> Result<OllamaStatus, Box<dyn Error>> {
+    let client = Client::new();
+    match client.get("http://localhost:11434/").send().await {
+        Ok(res) => match res.status().is_success() {
+            true => Ok(OllamaStatus::Alive),
+            false => Ok(OllamaStatus::Dead),
+        },
+        Err(_) => {
+            Ok(OllamaStatus::Dead)
+        }
     }
 }

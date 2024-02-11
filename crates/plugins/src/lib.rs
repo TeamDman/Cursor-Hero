@@ -59,10 +59,14 @@ use cursor_hero_tts_types::tts_types_plugin::TtsTypesPlugin;
 use cursor_hero_environment_types::environment_types_plugin::EnvironmentTypesPlugin;
 use cursor_hero_text_asset::prelude::*;
 use cursor_hero_text_asset_types::prelude::*;
+use cursor_hero_ollama::prelude::*;
+use cursor_hero_ollama_types::prelude::*;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(OllamaTypesPlugin);
+        app.add_plugins(OllamaPlugin);
         app.add_plugins(EnvironmentTypesPlugin);
         app.add_plugins(ChatTypesPlugin);
         app.add_plugins(ChatPlugin);

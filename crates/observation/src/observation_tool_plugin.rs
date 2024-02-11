@@ -69,15 +69,13 @@ fn tool_tick(
 
         events.send(InferenceEvent::Request {
             session_id: character_id,
-            prompt: Prompt::Chat {
-                chat_history,
-            }
+            prompt: Prompt::Chat { chat_history },
         });
         debug!("ObservationToolPlugin: Sent observation event");
     }
 }
 
-fn reply_tick(mut commands: Commands, mut inference_events: EventReader<InferenceEvent>) {
+fn reply_tick(mut inference_events: EventReader<InferenceEvent>) {
     for event in inference_events.read() {
         let InferenceEvent::Response { response, .. } = event else {
             continue;
