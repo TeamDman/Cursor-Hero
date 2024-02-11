@@ -2123,6 +2123,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy-inspector-egui",
+ "bevy_egui",
  "bevy_xpbd_2d",
  "cursor_hero_bevy",
  "cursor_hero_camera",

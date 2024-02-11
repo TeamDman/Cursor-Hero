@@ -172,7 +172,7 @@ fn update_control_visuals(
 
 fn click_listener(
     mut click_events: EventReader<ClickEvent>,
-    button_query: Query<OllamaStatusButton>,
+    button_query: Query<&OllamaStatusButton>,
     mut status_events: EventWriter<OllamaStatusEvent>,
 ) {
     for event in click_events.read() {

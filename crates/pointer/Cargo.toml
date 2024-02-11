@@ -20,5 +20,6 @@ cursor_hero_winutils = { workspace = true }
 bevy = { workspace = true }
 leafwing-input-manager = { workspace = true }
 bevy_xpbd_2d = { workspace = true }
+bevy_egui = {workspace = true}
 bevy-inspector-egui = { workspace = true}
 raw-window-handle = {workspace = true }
