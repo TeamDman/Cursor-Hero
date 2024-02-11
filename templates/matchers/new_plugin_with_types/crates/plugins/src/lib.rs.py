@@ -8,7 +8,7 @@
 
 def gather_variables(text: str) -> dict[str,str]:
     # use_statements
-    find = "pub struct MyPlugin;\n"
+    find = "pub struct MyPlugin;"
     include = False
     index = text.find(find)
     assert index != -1, f"Coult not find `{find}`"
@@ -16,7 +16,7 @@ def gather_variables(text: str) -> dict[str,str]:
     use_statements, remaining = text[:index],text[index:]
 
     # plugin_start
-    find = "fn build(&self, app: &mut App) {\n"
+    find = "fn build(&self, app: &mut App) {"
     include = True
     index = remaining.find(find)
     assert index != -1, f"Coult not find `{find}`"

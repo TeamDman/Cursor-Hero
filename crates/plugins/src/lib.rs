@@ -57,10 +57,14 @@ use cursor_hero_observation_types::observation_types_plugin::ObservationTypesPlu
 use cursor_hero_tts::tts_plugin::TtsPlugin;
 use cursor_hero_tts_types::tts_types_plugin::TtsTypesPlugin;
 use cursor_hero_environment_types::environment_types_plugin::EnvironmentTypesPlugin;
+use cursor_hero_text_asset::prelude::*;
+use cursor_hero_text_asset_types::prelude::*;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(TextAssetTypesPlugin);
+        app.add_plugins(TextAssetPlugin);
         app.add_plugins(EnvironmentTypesPlugin);
         app.add_plugins(ChatTypesPlugin);
         app.add_plugins(ChatPlugin);
