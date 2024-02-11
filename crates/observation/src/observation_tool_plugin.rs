@@ -99,6 +99,7 @@ fn tool_tick(
         for entry in character_observation_buffer.observations.iter() {
             // let timestamp = entry.datetime.format("%Y-%m-%d %H:%M:%S").to_string();
             chat_history.push_str(entry.observation.as_str());
+            chat_history.push_str("\n");
         }
 
         events.send(TextInferenceEvent::Request {
