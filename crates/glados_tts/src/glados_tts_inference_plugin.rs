@@ -67,7 +67,7 @@ fn create_worker_thread(mut commands: Commands) {
                             let prompt_str = match &prompt {
                                 SpeechPrompt::Raw { content } => content,
                             };
-                            let data = match crate::glados_tts::generate(&prompt_str).await {
+                            let data = match crate::glados_tts::generate(prompt_str).await {
                                 Ok(data) => data,
                                 Err(e) => {
                                     error!("Failed to generate TTS: {}", e);

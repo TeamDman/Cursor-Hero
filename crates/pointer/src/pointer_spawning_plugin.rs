@@ -13,6 +13,8 @@ impl Plugin for PointerSpawningPlugin {
         app.add_systems(Update, insert_pointer);
     }
 }
+
+#[allow(clippy::type_complexity)]
 fn insert_pointer(
     mut commands: Commands,
     asset_server: Res<AssetServer>,

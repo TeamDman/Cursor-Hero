@@ -63,34 +63,32 @@ fn handle_pong(
     mut glados_tts_status: ResMut<GladosTtsStatus>,
 ) {
     for event in ping_events.read() {
-        match event {
-            GladosTtsPingEvent::Pong { status } => {
-                // identify the new state based on the pong
-                let new_status = match (*glados_tts_status, *status) {
-                    // if starting, only change to dead if the timeout has been exceeded
-                    (GladosTtsStatus::Starting { instant, timeout }, status) => {
-                        if status == GladosTtsStatus::Alive {
-                            GladosTtsStatus::Alive
-                        } else if instant.elapsed() > timeout {
-                            GladosTtsStatus::Dead
-                        } else {
-                            GladosTtsStatus::Starting { instant, timeout }
-                        }
-                    }
-                    // respect the new status if it's not starting
-                    _ => *status,
-                };
-
-                if *glados_tts_status != new_status {
-                    *glados_tts_status = new_status;
-                    let event = GladosTtsStatusEvent::Changed {
-                        new_value: new_status,
-                    };
-                    debug!("Sending event {:?}", event);
-                    status_events.send(event);
+        let GladosTtsPingEvent::Pong { status } = event else {
+            continue;
+        };
+        // identify the new state based on the pong
+        let new_status = match (*glados_tts_status, *status) {
+            // if starting, only change to dead if the timeout has been exceeded
+            (GladosTtsStatus::Starting { instant, timeout }, status) => {
+                if status == GladosTtsStatus::Alive {
+                    GladosTtsStatus::Alive
+                } else if instant.elapsed() > timeout {
+                    GladosTtsStatus::Dead
+                } else {
+                    GladosTtsStatus::Starting { instant, timeout }
                 }
             }
-            _ => {}
+            // respect the new status if it's not starting
+            _ => *status,
+        };
+
+        if *glados_tts_status != new_status {
+            *glados_tts_status = new_status;
+            let event = GladosTtsStatusEvent::Changed {
+                new_value: new_status,
+            };
+            debug!("Sending event {:?}", event);
+            status_events.send(event);
         }
     }
 }

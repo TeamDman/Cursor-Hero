@@ -56,7 +56,6 @@ fn populate_new_host_environments(
                                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                 font_size: 32.0,
                                 color: Color::WHITE,
-                                ..default()
                             },
                         )
                         .with_alignment(TextAlignment::Center),
@@ -74,65 +73,63 @@ fn update_visuals(
     mut button_text_query: Query<&mut Text>,
 ) {
     for event in events.read() {
-        match event {
-            GladosTtsStatusEvent::Changed { new_value: status } => {
-                debug!("Updating GladosTts Server Control visuals to {:?}", status);
-                for button in button_query.iter_mut() {
-                    let (mut button_sprite, button_children, mut button) = button;
-                    button.visual_state = match button.visual_state {
-                        GladosTtsStatusButtonVisualState::Default { .. } => {
-                            GladosTtsStatusButtonVisualState::Default { status: *status }
-                        }
-                        GladosTtsStatusButtonVisualState::Hovered { .. } => {
-                            GladosTtsStatusButtonVisualState::Hovered { status: *status }
-                        }
-                        GladosTtsStatusButtonVisualState::Pressed { .. } => {
-                            GladosTtsStatusButtonVisualState::Pressed { status: *status }
-                        }
-                    };
+        let GladosTtsStatusEvent::Changed { new_value: status } = event else {
+            continue;
+        };
+        debug!("Updating GladosTts Server Control visuals to {:?}", status);
+        for button in button_query.iter_mut() {
+            let (mut button_sprite, button_children, mut button) = button;
+            button.visual_state = match button.visual_state {
+                GladosTtsStatusButtonVisualState::Default { .. } => {
+                    GladosTtsStatusButtonVisualState::Default { status: *status }
+                }
+                GladosTtsStatusButtonVisualState::Hovered { .. } => {
+                    GladosTtsStatusButtonVisualState::Hovered { status: *status }
+                }
+                GladosTtsStatusButtonVisualState::Pressed { .. } => {
+                    GladosTtsStatusButtonVisualState::Pressed { status: *status }
+                }
+            };
+            match status {
+                GladosTtsStatus::Alive => {
+                    button_sprite.color = Color::GREEN;
+                }
+                GladosTtsStatus::Dead => {
+                    button_sprite.color = Color::RED;
+                }
+                GladosTtsStatus::Unknown => {
+                    button_sprite.color = Color::PURPLE;
+                }
+                GladosTtsStatus::Starting { instant, timeout } => {
+                    button_sprite.color = Color::YELLOW
+                        * (1.0, 0.1)
+                            .lerp(instant.elapsed().as_secs_f32() / timeout.as_secs_f32());
+                }
+            }
+            for child in button_children.iter() {
+                if let Ok(mut text) = button_text_query.get_mut(*child) {
                     match status {
                         GladosTtsStatus::Alive => {
-                            button_sprite.color = Color::GREEN;
+                            text.sections[0].value =
+                                "GladosTts Server Control (Alive)".to_string();
                         }
                         GladosTtsStatus::Dead => {
-                            button_sprite.color = Color::RED;
+                            text.sections[0].value =
+                                "GladosTts Server Control (Dead)".to_string();
                         }
                         GladosTtsStatus::Unknown => {
-                            button_sprite.color = Color::PURPLE;
+                            text.sections[0].value =
+                                "GladosTts Server Control (Unknown)".to_string();
                         }
-                        GladosTtsStatus::Starting { instant, timeout } => {
-                            button_sprite.color = Color::YELLOW
-                                * (1.0, 0.1)
-                                    .lerp(instant.elapsed().as_secs_f32() / timeout.as_secs_f32());
-                        }
-                    }
-                    for child in button_children.iter() {
-                        if let Ok(mut text) = button_text_query.get_mut(*child) {
-                            match status {
-                                GladosTtsStatus::Alive => {
-                                    text.sections[0].value =
-                                        "GladosTts Server Control (Alive)".to_string();
-                                }
-                                GladosTtsStatus::Dead => {
-                                    text.sections[0].value =
-                                        "GladosTts Server Control (Dead)".to_string();
-                                }
-                                GladosTtsStatus::Unknown => {
-                                    text.sections[0].value =
-                                        "GladosTts Server Control (Unknown)".to_string();
-                                }
-                                GladosTtsStatus::Starting { instant, .. } => {
-                                    text.sections[0].value = format!(
-                                        "GladosTts Server Control (Starting {}s ago)",
-                                        instant.elapsed().as_secs()
-                                    );
-                                }
-                            }
+                        GladosTtsStatus::Starting { instant, .. } => {
+                            text.sections[0].value = format!(
+                                "GladosTts Server Control (Starting {}s ago)",
+                                instant.elapsed().as_secs()
+                            );
                         }
                     }
                 }
             }
-            _ => {}
         }
     }
 

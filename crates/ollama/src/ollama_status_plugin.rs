@@ -63,34 +63,32 @@ fn handle_pong(
     mut ollama_status: ResMut<OllamaStatus>,
 ) {
     for event in ping_events.read() {
-        match event {
-            OllamaPingEvent::Pong { status } => {
-                // identify the new state based on the pong
-                let new_status = match (*ollama_status, *status) {
-                    // if starting, only change to dead if the timeout has been exceeded
-                    (OllamaStatus::Starting { instant, timeout }, status) => {
-                        if status == OllamaStatus::Alive {
-                            OllamaStatus::Alive
-                        } else if instant.elapsed() > timeout {
-                            OllamaStatus::Dead
-                        } else {
-                            OllamaStatus::Starting { instant, timeout }
-                        }
-                    }
-                    // respect the new status if it's not starting
-                    _ => *status,
-                };
-
-                if *ollama_status != new_status {
-                    *ollama_status = new_status;
-                    let event = OllamaStatusEvent::Changed {
-                        new_value: new_status,
-                    };
-                    debug!("Sending event {:?}", event);
-                    status_events.send(event);
+        let OllamaPingEvent::Pong { status } = event else {
+            continue;
+        };
+        // identify the new state based on the pong
+        let new_status = match (*ollama_status, *status) {
+            // if starting, only change to dead if the timeout has been exceeded
+            (OllamaStatus::Starting { instant, timeout }, status) => {
+                if status == OllamaStatus::Alive {
+                    OllamaStatus::Alive
+                } else if instant.elapsed() > timeout {
+                    OllamaStatus::Dead
+                } else {
+                    OllamaStatus::Starting { instant, timeout }
                 }
             }
-            _ => {}
+            // respect the new status if it's not starting
+            _ => *status,
+        };
+
+        if *ollama_status != new_status {
+            *ollama_status = new_status;
+            let event = OllamaStatusEvent::Changed {
+                new_value: new_status,
+            };
+            debug!("Sending event {:?}", event);
+            status_events.send(event);
         }
     }
 }

@@ -37,7 +37,7 @@ pub async fn get_status() -> Result<GladosTtsStatus, Box<dyn Error>> {
 pub async fn start() -> Result<(), Box<dyn Error>> {
     // wt --window 0 --profile PowerShell -- pwsh -Command "cd G:\ml\glados-tts-upstream && conda activate gladostts && python .\engine.py"
     match std::process::Command::new("wt")
-        .args(&[
+        .args([
             "--window",
             "0",
             "--profile",

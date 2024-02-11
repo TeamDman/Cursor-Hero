@@ -161,7 +161,7 @@ fn handle_chat_events(
                     let size = Vec2::new(300.0, 100.0);
                     let resolution = 3.0;
                     let padding = Vec2::new(10.0, 10.0);
-                    let mut transform = character_transform.clone();
+                    let mut transform = *character_transform;
                     transform.translation -= Vec3::new(0.0, 100.0, 10.0);
                     commands
                         .spawn((

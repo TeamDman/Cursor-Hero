@@ -59,7 +59,6 @@ fn populate_new_host_environments(
                                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                 font_size: 32.0,
                                 color: Color::WHITE,
-                                ..default()
                             },
                         )
                         .with_alignment(TextAlignment::Center),
@@ -77,65 +76,59 @@ fn update_visuals(
     mut button_text_query: Query<&mut Text>,
 ) {
     for event in events.read() {
-        match event {
-            OllamaStatusEvent::Changed { new_value: status } => {
-                debug!("Updating Ollama Server Control visuals to {:?}", status);
-                for button in button_query.iter_mut() {
-                    let (mut button_sprite, button_children, mut button) = button;
-                    button.visual_state = match button.visual_state {
-                        OllamaStatusButtonVisualState::Default { .. } => {
-                            OllamaStatusButtonVisualState::Default { status: *status }
-                        }
-                        OllamaStatusButtonVisualState::Hovered { .. } => {
-                            OllamaStatusButtonVisualState::Hovered { status: *status }
-                        }
-                        OllamaStatusButtonVisualState::Pressed { .. } => {
-                            OllamaStatusButtonVisualState::Pressed { status: *status }
-                        }
-                    };
+        let OllamaStatusEvent::Changed { new_value: status } = event else {
+            continue;
+        };
+        debug!("Updating Ollama Server Control visuals to {:?}", status);
+        for button in button_query.iter_mut() {
+            let (mut button_sprite, button_children, mut button) = button;
+            button.visual_state = match button.visual_state {
+                OllamaStatusButtonVisualState::Default { .. } => {
+                    OllamaStatusButtonVisualState::Default { status: *status }
+                }
+                OllamaStatusButtonVisualState::Hovered { .. } => {
+                    OllamaStatusButtonVisualState::Hovered { status: *status }
+                }
+                OllamaStatusButtonVisualState::Pressed { .. } => {
+                    OllamaStatusButtonVisualState::Pressed { status: *status }
+                }
+            };
+            match status {
+                OllamaStatus::Alive => {
+                    button_sprite.color = Color::GREEN;
+                }
+                OllamaStatus::Dead => {
+                    button_sprite.color = Color::RED;
+                }
+                OllamaStatus::Unknown => {
+                    button_sprite.color = Color::PURPLE;
+                }
+                OllamaStatus::Starting { instant, timeout } => {
+                    button_sprite.color = Color::YELLOW
+                        * (1.0, 0.1).lerp(instant.elapsed().as_secs_f32() / timeout.as_secs_f32());
+                }
+            }
+            for child in button_children.iter() {
+                if let Ok(mut text) = button_text_query.get_mut(*child) {
                     match status {
                         OllamaStatus::Alive => {
-                            button_sprite.color = Color::GREEN;
+                            text.sections[0].value = "Ollama Server Control (Alive)".to_string();
                         }
                         OllamaStatus::Dead => {
-                            button_sprite.color = Color::RED;
+                            text.sections[0].value = "Ollama Server Control (Dead)".to_string();
                         }
                         OllamaStatus::Unknown => {
-                            button_sprite.color = Color::PURPLE;
+                            text.sections[0].value = "Ollama Server Control (Unknown)".to_string();
                         }
-                        OllamaStatus::Starting { instant, timeout } => {
-                            button_sprite.color = Color::YELLOW
-                                * (1.0, 0.1)
-                                    .lerp(instant.elapsed().as_secs_f32() / timeout.as_secs_f32());
-                        }
-                    }
-                    for child in button_children.iter() {
-                        if let Ok(mut text) = button_text_query.get_mut(*child) {
-                            match status {
-                                OllamaStatus::Alive => {
-                                    text.sections[0].value =
-                                        "Ollama Server Control (Alive)".to_string();
-                                }
-                                OllamaStatus::Dead => {
-                                    text.sections[0].value =
-                                        "Ollama Server Control (Dead)".to_string();
-                                }
-                                OllamaStatus::Unknown => {
-                                    text.sections[0].value =
-                                        "Ollama Server Control (Unknown)".to_string();
-                                }
-                                OllamaStatus::Starting { instant, .. } => {
-                                    text.sections[0].value = format!(
-                                        "Ollama Server Control (Starting {}s ago)",
-                                        instant.elapsed().as_secs()
-                                    );
-                                }
-                            }
+                        OllamaStatus::Starting { instant, .. } => {
+                            text.sections[0].value = format!(
+                                "Ollama Server Control (Starting {}s ago)",
+                                instant.elapsed().as_secs()
+                            );
                         }
                     }
                 }
             }
-            _ => {}
         }
     }
 

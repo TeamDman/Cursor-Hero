@@ -119,7 +119,7 @@ fn bridge_to_events(bridge: ResMut<Bridge>, mut events: EventWriter<OllamaPingEv
     for msg in bridge.receiver.try_iter() {
         match msg {
             GameboundMessage::Pong { status } => {
-                let event = OllamaPingEvent::Pong { status: status };
+                let event = OllamaPingEvent::Pong { status };
                 debug!("Received bridge response, sending game event {:?}", event);
                 events.send(event);
             }

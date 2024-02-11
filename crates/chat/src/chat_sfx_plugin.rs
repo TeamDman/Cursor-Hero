@@ -29,7 +29,7 @@ fn play_sound_for_new_chat_messages(
                 settings: PlaybackSettings::DESPAWN.with_spatial(true),
             },
             SpatialBundle {
-                transform: character_transform.clone(),
+                transform: *character_transform,
                 ..default()
             },
         ));
@@ -53,7 +53,7 @@ fn play_sound_for_keystrokes(
         let character_transform = character;
 
         // optimization opportunity: avoid unnecessary allocations
-        let choices = vec!["sounds/kenny_click_002.ogg", "sounds/kenny_click_003.ogg"];
+        let choices = ["sounds/kenny_click_002.ogg", "sounds/kenny_click_003.ogg"];
         let Some(choice) = choices.choose(&mut rand::thread_rng()) else {
             continue;
         };
@@ -64,7 +64,7 @@ fn play_sound_for_keystrokes(
                 settings: PlaybackSettings::DESPAWN.with_spatial(true),
             },
             SpatialBundle {
-                transform: character_transform.clone(),
+                transform: *character_transform,
                 ..default()
             },
         ));

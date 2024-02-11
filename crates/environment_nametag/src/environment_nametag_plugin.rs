@@ -55,7 +55,6 @@ fn spawn_nametags_in_new_environments(
                                         "fonts/kenney_kenney-fonts/Fonts/Kenney Future Narrow.ttf",
                                     ),
                                     color: Color::WHITE,
-                                    ..default()
                                 },
                             )
                             .with_alignment(TextAlignment::Center),
