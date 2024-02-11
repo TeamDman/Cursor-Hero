@@ -234,7 +234,7 @@ fn handle_input(
             // debug!("Performing virtual click");
             for action in ClickToolAction::variants() {
                 if tool_actions.just_pressed(action) {
-                    info!("{:?} pressed", action);
+                    debug!("{:?} pressed", action);
                     if !disable_sfx {
                         commands.spawn((
                             SpatialBundle {
@@ -256,7 +256,7 @@ fn handle_input(
                     });
                 }
                 if tool_actions.just_released(action) {
-                    info!("{:?} released", action);
+                    debug!("{:?} released", action);
                     if !disable_sfx {
                         commands.spawn((
                             SpatialBundle {
@@ -284,7 +284,7 @@ fn handle_input(
             // debug!("Performing host click");
             for action in ClickToolAction::variants() {
                 if tool_actions.just_pressed(action) {
-                    info!("{:?} pressed", action);
+                    debug!("{:?} pressed", action);
                     match bridge.sender.send((
                         action.get_thread_message(Motion::Down),
                         pointer_pos.x as i32,
@@ -311,7 +311,7 @@ fn handle_input(
                     }
                 }
                 if tool_actions.just_released(action) {
-                    info!("{:?} released", action);
+                    debug!("{:?} released", action);
                     match bridge.sender.send((
                         action.get_thread_message(Motion::Up),
                         pointer_pos.x as i32,
