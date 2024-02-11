@@ -20,7 +20,7 @@ fn handle_startup_event(
         EventReader<GladosTtsStatusEvent>,
         EventWriter<GladosTtsStatusEvent>,
     )>,
-    mut gladosTts_status: ResMut<GladosTtsStatus>,
+    mut glados_tts_status: ResMut<GladosTtsStatus>,
 ) {
     let starting = status_events
         .p0()
@@ -31,12 +31,12 @@ fn handle_startup_event(
     }
     status_events.p0().clear();
 
-    *gladosTts_status = GladosTtsStatus::Starting {
+    *glados_tts_status = GladosTtsStatus::Starting {
         instant: Instant::now(),
         timeout: Duration::from_secs(5),
     };
     let event = GladosTtsStatusEvent::Changed {
-        new_value: *gladosTts_status,
+        new_value: *glados_tts_status,
     };
     debug!("Sending event {:?}", event);
     status_events.p1().send(event);

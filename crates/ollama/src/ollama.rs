@@ -35,8 +35,11 @@ pub async fn generate(prompt: &str, options: Option<TextInferenceOptions>) -> Re
         .await?;
 
     if res.status().is_success() {
-        let response_body = res.json::<ApiResponse>().await?;
-        Ok(response_body.response)
+        let api_response = res.json::<ApiResponse>().await?;
+        let mut text = api_response.response.as_str();
+        text = text.trim_end_matches("<dummy32000>");
+        text = text.trim();
+        Ok(text.to_string())
     } else {
         Err(Box::new(std::io::Error::new(
             std::io::ErrorKind::Other,

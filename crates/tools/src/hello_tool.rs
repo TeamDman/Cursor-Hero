@@ -68,7 +68,7 @@ fn inference_response(
         if let TextInferenceEvent::Response {
             session_id,
             response,
-            prompt,
+            prompt: _,
         } = event
         {
             if tool_query.get(*session_id).is_ok() {
@@ -76,8 +76,7 @@ fn inference_response(
                     session_id: *session_id,
                     prompt: SpeechPrompt::Raw {
                         content: format!(
-                            "Hello, world! {} {}",
-                            prompt.materialized,
+                            "{}",
                             response.clone()
                         ),
                     },

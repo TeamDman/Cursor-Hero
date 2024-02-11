@@ -39,7 +39,7 @@ fn populate_new_host_environments(
                             ..default()
                         },
                         transform: Transform::from_translation(Vec3::new(
-                            1920.0 / 2.0 - 400.0,
+                            1920.0 / 2.0 - 600.0,
                             -1080.0 - 200.0,
                             0.0,
                         )),
