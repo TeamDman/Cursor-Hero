@@ -3,8 +3,14 @@
 - voice2text startup button
 - Screen pause toggle button
 
+- customizable launch params for the wt invocation to launch ollama and stuff in case people have different WSL distros than ubuntu
+  - restart memory, edit in game
+- ollama server documentation button to open the github
+- character selection room, displaying all the variants of the character using a closet that you scroll through the hangers that describe the situation in which each sprite is used, exploded view to show all variants / the sprite sheet
+- run animation
+
 - performance profiling (so I can close the browser tab I have open for the rust metrics lib)
-- reduce background CPU usage from 22% 😱
+- reduce background CPU usage from 22% 😱 https://learn.microsoft.com/en-us/windows-hardware/test/wpt/introduction-to-wpr
 
 - switcher wheel to collect all switcher tools for predictable navigation
   - gamepad rumble on hover

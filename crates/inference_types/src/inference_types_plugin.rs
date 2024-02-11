@@ -4,9 +4,13 @@ pub struct InferenceTypesPlugin;
 
 impl Plugin for InferenceTypesPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<InferenceSession>();
-        app.register_type::<Prompt>();
-        app.register_type::<MaterializedPrompt>();
-        app.add_event::<InferenceEvent>();
+        app.register_type::<TextPrompt>();
+        app.register_type::<MaterializedTextPrompt>();
+        app.register_type::<TextInferenceEvent>();
+        app.add_event::<TextInferenceEvent>();
+
+        app.register_type::<SpeechPrompt>();
+        app.register_type::<SpeechInferenceEvent>();
+        app.add_event::<SpeechInferenceEvent>();
     }
 }

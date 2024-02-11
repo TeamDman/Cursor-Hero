@@ -41,7 +41,7 @@ fn spawn_agent(
                 },
                 Character,
                 AgentCharacter,
-                Name::new("Agent"),
+                Name::new("(Agent) Ithia Tig"),
                 Agent,
                 RigidBody::Dynamic,
                 ObservationBuffer {

@@ -1,9 +1,11 @@
 use crate::prelude::*;
 use bevy::prelude::*;
-use cursor_hero_inference_types::inference_types::InferenceEvent;
-use cursor_hero_inference_types::prompt_types::Prompt;
+use cursor_hero_inference_types::inference_types::SpeechInferenceEvent;
+use cursor_hero_inference_types::inference_types::TextInferenceEvent;
+use cursor_hero_inference_types::inference_types::TextInferenceOptions;
+use cursor_hero_inference_types::prompt_types::SpeechPrompt;
+use cursor_hero_inference_types::prompt_types::TextPrompt;
 use cursor_hero_toolbelt_types::prelude::*;
-use cursor_hero_tts_types::tts_types::TtsEvent;
 
 pub struct HelloToolPlugin;
 
@@ -40,36 +42,45 @@ fn toolbelt_events(
 fn activation(
     mut commands: Commands,
     tool_query: Query<Entity, (Added<ActiveTool>, With<HelloTool>)>,
-    mut inference_events: EventWriter<InferenceEvent>,
+    mut inference_events: EventWriter<TextInferenceEvent>,
 ) {
     for tool_id in tool_query.iter() {
         commands.entity(tool_id).remove::<ActiveTool>();
         info!("Hello, world!");
-        inference_events.send(InferenceEvent::Request {
+        inference_events.send(TextInferenceEvent::Request {
             session_id: tool_id,
-            prompt: Prompt::Raw {
-                content: "Here is a random word: ".to_string(),
+            prompt: TextPrompt::Raw {
+                content: "Here is a random word:".to_string(),
+                options: Some(TextInferenceOptions {
+                    num_predict: Some(7),
+                }),
             },
         });
     }
 }
 
 fn inference_response(
-    mut inference_events: EventReader<InferenceEvent>,
-    mut tts_events: EventWriter<TtsEvent>,
+    mut llm_events: EventReader<TextInferenceEvent>,
+    mut tts_events: EventWriter<SpeechInferenceEvent>,
     tool_query: Query<Entity, With<HelloTool>>,
 ) {
-    for event in inference_events.read() {
-        if let InferenceEvent::Response {
+    for event in llm_events.read() {
+        if let TextInferenceEvent::Response {
             session_id,
             response,
-            ..
+            prompt,
         } = event
         {
             if tool_query.get(*session_id).is_ok() {
-                tts_events.send(TtsEvent::Request {
+                tts_events.send(SpeechInferenceEvent::Request {
                     session_id: *session_id,
-                    prompt: response.clone(),
+                    prompt: SpeechPrompt::Raw {
+                        content: format!(
+                            "Hello, world! {} {}",
+                            prompt.materialized,
+                            response.clone()
+                        ),
+                    },
                 });
             }
         }
@@ -78,12 +89,12 @@ fn inference_response(
 
 fn tts_response(
     mut commands: Commands,
-    mut tts_events: EventReader<TtsEvent>,
+    mut tts_events: EventReader<SpeechInferenceEvent>,
     tool_query: Query<Entity, With<HelloTool>>,
     mut audio_assets: ResMut<Assets<AudioSource>>,
 ) {
     for event in tts_events.read() {
-        if let TtsEvent::Response {
+        if let SpeechInferenceEvent::Response {
             session_id, wav, ..
         } = event
         {

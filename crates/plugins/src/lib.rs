@@ -30,7 +30,6 @@ use cursor_hero_pointer::pointer_plugin::PointerPlugin;
 use cursor_hero_pointer_types::pointer_types_plugin::PointerTypesPlugin;
 use cursor_hero_pressure_plate::pressure_plate_plugin::PressurePlatePlugin;
 use cursor_hero_restart_memory::MemoryPlugin;
-#[cfg(debug_assertions)]
 use cursor_hero_screen::screen_plugin::ScreenPlugin;
 use cursor_hero_screen::screen_update_plugin::ScreenUpdatePlugin;
 use cursor_hero_sprint_tool::sprint_tool_plugin::SprintToolPlugin;
@@ -54,24 +53,24 @@ use cursor_hero_movement_tool::movement_tool_plugin::MovementToolPlugin;
 use cursor_hero_movement_tool_types::movement_tool_types_plugin::MovementToolTypesPlugin;
 use cursor_hero_observation::observation_plugin::ObservationPlugin;
 use cursor_hero_observation_types::observation_types_plugin::ObservationTypesPlugin;
-use cursor_hero_tts::tts_plugin::TtsPlugin;
-use cursor_hero_tts_types::tts_types_plugin::TtsTypesPlugin;
 use cursor_hero_environment_types::environment_types_plugin::EnvironmentTypesPlugin;
 use cursor_hero_text_asset::prelude::*;
 use cursor_hero_text_asset_types::prelude::*;
 use cursor_hero_ollama::prelude::*;
 use cursor_hero_ollama_types::prelude::*;
+use cursor_hero_glados_tts::prelude::*;
+use cursor_hero_glados_tts_types::prelude::*;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(GladosTtsTypesPlugin);
+        app.add_plugins(GladosTtsPlugin);
         app.add_plugins(OllamaTypesPlugin);
         app.add_plugins(OllamaPlugin);
         app.add_plugins(EnvironmentTypesPlugin);
         app.add_plugins(ChatTypesPlugin);
         app.add_plugins(ChatPlugin);
-        app.add_plugins(TtsPlugin);
-        app.add_plugins(TtsTypesPlugin);
         app.add_plugins(ObservationTypesPlugin);
         app.add_plugins(ObservationPlugin);
         app.add_plugins(InferenceTypesPlugin);

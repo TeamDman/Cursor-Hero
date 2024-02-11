@@ -55,7 +55,7 @@ impl Display for ObservationEvent {
                 message,
                 ..
             } => {
-                write!(f, "<{:?}> {:?}", character_name, message)
+                write!(f, "{}: {}", character_name, message)
             }
         }
     }

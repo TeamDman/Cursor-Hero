@@ -1,3 +1,4 @@
+use cursor_hero_inference_types::inference_types::TextInferenceOptions;
 use cursor_hero_ollama_types::ollama_types::OllamaStatus;
 use reqwest::Client;
 use std::error::Error;
@@ -9,12 +10,21 @@ struct ApiResponse {
     response: String,
 }
 
-pub async fn generate(prompt: &str) -> Result<String, Box<dyn Error>> {
-    let payload = serde_json::json!({
+pub async fn generate(prompt: &str, options: Option<TextInferenceOptions>) -> Result<String, Box<dyn Error>> {
+    let mut payload = serde_json::json!({
         "model": "whatevs",
         "prompt": prompt,
         "stream": false
     });
+    if let Some(options) = options {
+        // create empty object
+        // if options.num_predict is Some, add it to the object
+        let mut options_json = serde_json::json!({});
+        if let Some(num_predict) = options.num_predict {
+            options_json["num_predict"] = serde_json::json!(num_predict);
+        }
+        payload["options"] = options_json;
+    }
 
     let client = Client::new();
 

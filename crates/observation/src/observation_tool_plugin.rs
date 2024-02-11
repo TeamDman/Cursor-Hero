@@ -41,7 +41,7 @@ fn tool_tick(
     tool_query: Query<(Entity, &Parent), (Added<ActiveTool>, With<ObservationTool>)>,
     toolbelt_query: Query<&Parent, With<Toolbelt>>,
     mut character_query: Query<&mut ObservationBuffer>,
-    mut events: EventWriter<InferenceEvent>,
+    mut events: EventWriter<TextInferenceEvent>,
 ) {
     for tool in tool_query.iter() {
         let (tool_id, tool_parent) = tool;
@@ -67,17 +67,20 @@ fn tool_tick(
         }
         character_observation_buffer.observations.clear();
 
-        events.send(InferenceEvent::Request {
+        events.send(TextInferenceEvent::Request {
             session_id: character_id,
-            prompt: Prompt::Chat { chat_history },
+            prompt: TextPrompt::Chat {
+                chat_history,
+                options: None,
+            },
         });
         debug!("ObservationToolPlugin: Sent observation event");
     }
 }
 
-fn reply_tick(mut inference_events: EventReader<InferenceEvent>) {
+fn reply_tick(mut inference_events: EventReader<TextInferenceEvent>) {
     for event in inference_events.read() {
-        let InferenceEvent::Response { response, .. } = event else {
+        let TextInferenceEvent::Response { response, .. } = event else {
             continue;
         };
         info!("ObservationToolPlugin: Received response: {}", response);

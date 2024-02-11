@@ -1,10 +1,10 @@
-use cursor_hero_text_asset_types::prelude::*;
-use std::thread;
 use bevy::prelude::*;
 use crossbeam_channel::bounded;
 use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
 use cursor_hero_inference_types::prelude::*;
+use cursor_hero_text_asset_types::prelude::*;
+use std::thread;
 
 pub struct OllamaInferencePlugin;
 
@@ -20,7 +20,7 @@ impl Plugin for OllamaInferencePlugin {
 enum GameboundMessage {
     Response {
         session_id: Entity,
-        prompt: MaterializedPrompt,
+        prompt: MaterializedTextPrompt,
         response: String,
     },
 }
@@ -29,7 +29,7 @@ enum GameboundMessage {
 enum ThreadboundMessage {
     Generate {
         session_id: Entity,
-        prompt: MaterializedPrompt,
+        prompt: MaterializedTextPrompt,
     },
 }
 
@@ -65,7 +65,7 @@ fn create_worker_thread(mut commands: Commands) {
                     match msg {
                         ThreadboundMessage::Generate { session_id, prompt } => {
                             debug!("Worker received generate request for session {:?}, generating response", session_id);
-                            let data = match crate::ollama::generate(&prompt.materialized).await {
+                            let data = match crate::ollama::generate(&prompt.materialized, prompt.prompt.options()).await {
                                 Ok(data) => data,
                                 Err(e) => {
                                     error!("Failed to generate: {}", e);
@@ -91,12 +91,12 @@ fn create_worker_thread(mut commands: Commands) {
 
 fn bridge_generate_requests(
     bridge: ResMut<Bridge>,
-    mut events: EventReader<InferenceEvent>,
-    prompts: Res<PromptHandles>,
+    mut events: EventReader<TextInferenceEvent>,
+    prompts: Res<TextPromptHandles>,
     text_assets: Res<Assets<TextAsset>>,
 ) {
     for event in events.read() {
-        if let InferenceEvent::Request { session_id, prompt } = event {
+        if let TextInferenceEvent::Request { session_id, prompt } = event {
             debug!(
                 "Received generate request for session {:?}, sending over bridge to worker thread",
                 session_id
@@ -104,8 +104,8 @@ fn bridge_generate_requests(
 
             // we gotta load the prompt from the asset server to materialize it before we can send it
             let handle = match prompt {
-                Prompt::Raw { .. } => &prompts.raw,
-                Prompt::Chat { .. } => &prompts.chat,
+                TextPrompt::Raw { .. } => &prompts.raw,
+                TextPrompt::Chat { .. } => &prompts.chat,
             };
             let prompt_asset = match text_assets.get(handle) {
                 Some(asset) => asset,
@@ -118,11 +118,13 @@ fn bridge_generate_requests(
                     continue;
                 }
             };
-            let materialized_prompt = MaterializedPrompt {
+            let materialized_prompt = MaterializedTextPrompt {
                 prompt: prompt.clone(),
                 materialized: match prompt {
-                    Prompt::Raw { content } => prompt_asset.value.replace("{{content}}", content),
-                    Prompt::Chat { chat_history } => {
+                    TextPrompt::Raw { content, .. } => {
+                        prompt_asset.value.replace("{{content}}", content)
+                    }
+                    TextPrompt::Chat { chat_history, .. } => {
                         prompt_asset.value.replace("{{chat_history}}", chat_history)
                     }
                 },
@@ -138,7 +140,7 @@ fn bridge_generate_requests(
     }
 }
 
-fn bridge_generate_responses(bridge: ResMut<Bridge>, mut events: EventWriter<InferenceEvent>) {
+fn bridge_generate_responses(bridge: ResMut<Bridge>, mut events: EventWriter<TextInferenceEvent>) {
     for msg in bridge.receiver.try_iter() {
         match msg {
             GameboundMessage::Response {
@@ -146,7 +148,7 @@ fn bridge_generate_responses(bridge: ResMut<Bridge>, mut events: EventWriter<Inf
                 prompt,
                 response,
             } => {
-                let event = InferenceEvent::Response {
+                let event = TextInferenceEvent::Response {
                     session_id,
                     response,
                     prompt,

@@ -2,19 +2,19 @@ use bevy::prelude::*;
 use bevy_xpbd_2d::prelude::*;
 use cursor_hero_environment_types::prelude::*;
 use cursor_hero_math::Lerp;
-use cursor_hero_ollama_types::prelude::*;
+use cursor_hero_glados_tts_types::prelude::*;
 use cursor_hero_pointer_types::prelude::*;
-pub struct OllamaControlPlugin;
+pub struct GladosTtsButtonPlugin;
 
-impl Plugin for OllamaControlPlugin {
+impl Plugin for GladosTtsButtonPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, add_control_to_new_host_environments);
-        app.add_systems(Update, update_control_visuals);
+        app.add_systems(Update, populate_new_host_environments);
+        app.add_systems(Update, update_visuals);
         app.add_systems(Update, click_listener);
     }
 }
 
-fn add_control_to_new_host_environments(
+fn populate_new_host_environments(
     mut commands: Commands,
     mut environment_events: EventReader<PopulateEnvironmentEvent>,
     asset_server: Res<AssetServer>,
@@ -24,14 +24,14 @@ fn add_control_to_new_host_environments(
             continue;
         };
         info!(
-            "Adding Ollama Server Control to new host environment {:?}",
+            "Adding button to new host environment {:?}",
             environment_id
         );
         commands.entity(*environment_id).with_children(|parent| {
             parent
                 .spawn((
-                    OllamaStatusButton::default(),
-                    Name::new("Ollama Server Control"),
+                    GladosTtsStatusButton::default(),
+                    Name::new("GLaDOS TTS Button"),
                     SpriteBundle {
                         sprite: Sprite {
                             custom_size: Some(Vec2::new(200.0, 100.0)),
@@ -39,7 +39,7 @@ fn add_control_to_new_host_environments(
                             ..default()
                         },
                         transform: Transform::from_translation(Vec3::new(
-                            1920.0 / 2.0,
+                            1920.0 / 2.0 - 400.0,
                             -1080.0 - 200.0,
                             0.0,
                         )),
@@ -55,7 +55,7 @@ fn add_control_to_new_host_environments(
                     parent.spawn((
                         Text2dBundle {
                             text: Text::from_section(
-                                "Ollama Server Control".to_string(),
+                                "GLaDOS TTS Server Control".to_string(),
                                 TextStyle {
                                     font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                     font_size: 32.0,
@@ -67,46 +67,45 @@ fn add_control_to_new_host_environments(
                             transform: Transform::from_xyz(0.0, 70.0, 1.0),
                             ..default()
                         },
-                        Name::new("Ollama Server Control Text"),
                     ));
                 });
         });
     }
 }
 
-fn update_control_visuals(
-    mut events: EventReader<OllamaStatusEvent>,
-    mut button_query: Query<(&mut Sprite, &Children, &mut OllamaStatusButton)>,
+fn update_visuals(
+    mut events: EventReader<GladosTtsStatusEvent>,
+    mut button_query: Query<(&mut Sprite, &Children, &mut GladosTtsStatusButton)>,
     mut button_text_query: Query<&mut Text>,
 ) {
     for event in events.read() {
         match event {
-            OllamaStatusEvent::Changed { new_value: status } => {
-                debug!("Updating Ollama Server Control visuals to {:?}", status);
+            GladosTtsStatusEvent::Changed { new_value: status } => {
+                debug!("Updating GladosTts Server Control visuals to {:?}", status);
                 for button in button_query.iter_mut() {
                     let (mut button_sprite, button_children, mut button) = button;
                     button.visual_state = match button.visual_state {
-                        OllamaStatusButtonVisualState::Default { .. } => {
-                            OllamaStatusButtonVisualState::Default { status: *status }
+                        GladosTtsStatusButtonVisualState::Default { .. } => {
+                            GladosTtsStatusButtonVisualState::Default { status: *status }
                         }
-                        OllamaStatusButtonVisualState::Hovered { .. } => {
-                            OllamaStatusButtonVisualState::Hovered { status: *status }
+                        GladosTtsStatusButtonVisualState::Hovered { .. } => {
+                            GladosTtsStatusButtonVisualState::Hovered { status: *status }
                         }
-                        OllamaStatusButtonVisualState::Pressed { .. } => {
-                            OllamaStatusButtonVisualState::Pressed { status: *status }
+                        GladosTtsStatusButtonVisualState::Pressed { .. } => {
+                            GladosTtsStatusButtonVisualState::Pressed { status: *status }
                         }
                     };
                     match status {
-                        OllamaStatus::Alive => {
+                        GladosTtsStatus::Alive => {
                             button_sprite.color = Color::GREEN;
                         }
-                        OllamaStatus::Dead => {
+                        GladosTtsStatus::Dead => {
                             button_sprite.color = Color::RED;
                         }
-                        OllamaStatus::Unknown => {
+                        GladosTtsStatus::Unknown => {
                             button_sprite.color = Color::PURPLE;
                         }
-                        OllamaStatus::Starting { instant, timeout } => {
+                        GladosTtsStatus::Starting { instant, timeout } => {
                             button_sprite.color = Color::YELLOW
                                 * (1.0, 0.1)
                                     .lerp(instant.elapsed().as_secs_f32() / timeout.as_secs_f32());
@@ -115,21 +114,21 @@ fn update_control_visuals(
                     for child in button_children.iter() {
                         if let Ok(mut text) = button_text_query.get_mut(*child) {
                             match status {
-                                OllamaStatus::Alive => {
+                                GladosTtsStatus::Alive => {
                                     text.sections[0].value =
-                                        "Ollama Server Control (Alive)".to_string();
+                                        "GladosTts Server Control (Alive)".to_string();
                                 }
-                                OllamaStatus::Dead => {
+                                GladosTtsStatus::Dead => {
                                     text.sections[0].value =
-                                        "Ollama Server Control (Dead)".to_string();
+                                        "GladosTts Server Control (Dead)".to_string();
                                 }
-                                OllamaStatus::Unknown => {
+                                GladosTtsStatus::Unknown => {
                                     text.sections[0].value =
-                                        "Ollama Server Control (Unknown)".to_string();
+                                        "GladosTts Server Control (Unknown)".to_string();
                                 }
-                                OllamaStatus::Starting { instant, .. } => {
+                                GladosTtsStatus::Starting { instant, .. } => {
                                     text.sections[0].value = format!(
-                                        "Ollama Server Control (Starting {}s ago)",
+                                        "GladosTts Server Control (Starting {}s ago)",
                                         instant.elapsed().as_secs()
                                     );
                                 }
@@ -145,14 +144,14 @@ fn update_control_visuals(
     for button in button_query.iter_mut() {
         let (mut sprite, children, button) = button;
         // if the visual state status is starting, update the text to show the time elapsed
-        let (OllamaStatusButtonVisualState::Default {
-            status: OllamaStatus::Starting { instant, timeout },
+        let (GladosTtsStatusButtonVisualState::Default {
+            status: GladosTtsStatus::Starting { instant, timeout },
         }
-        | OllamaStatusButtonVisualState::Hovered {
-            status: OllamaStatus::Starting { instant, timeout },
+        | GladosTtsStatusButtonVisualState::Hovered {
+            status: GladosTtsStatus::Starting { instant, timeout },
         }
-        | OllamaStatusButtonVisualState::Pressed {
-            status: OllamaStatus::Starting { instant, timeout },
+        | GladosTtsStatusButtonVisualState::Pressed {
+            status: GladosTtsStatus::Starting { instant, timeout },
         }) = button.visual_state
         else {
             continue;
@@ -162,7 +161,7 @@ fn update_control_visuals(
         for child in children.iter() {
             if let Ok(mut text) = button_text_query.get_mut(*child) {
                 text.sections[0].value = format!(
-                    "Ollama Server Control (Starting {}s ago)",
+                    "GladosTts Server Control (Starting {}s ago)",
                     instant.elapsed().as_secs()
                 );
             }
@@ -172,8 +171,8 @@ fn update_control_visuals(
 
 fn click_listener(
     mut click_events: EventReader<ClickEvent>,
-    button_query: Query<&OllamaStatusButton>,
-    mut status_events: EventWriter<OllamaStatusEvent>,
+    button_query: Query<&GladosTtsStatusButton>,
+    mut status_events: EventWriter<GladosTtsStatusEvent>,
 ) {
     for event in click_events.read() {
         let ClickEvent::Clicked {
@@ -188,18 +187,18 @@ fn click_listener(
             continue;
         }
         if let Ok(button) = button_query.get(*target_id) {
-            info!("Ollama Server Control clicked");
+            info!("GladosTts Server Control clicked");
             // if the button visual status is alive, do nothing
             match button.visual_state {
-                OllamaStatusButtonVisualState::Default { status: OllamaStatus::Alive }
-                | OllamaStatusButtonVisualState::Hovered { status: OllamaStatus::Alive }
-                | OllamaStatusButtonVisualState::Pressed { status: OllamaStatus::Alive } => {
-                    warn!("Ollama Server Control is already alive");
+                GladosTtsStatusButtonVisualState::Default { status: GladosTtsStatus::Alive }
+                | GladosTtsStatusButtonVisualState::Hovered { status: GladosTtsStatus::Alive }
+                | GladosTtsStatusButtonVisualState::Pressed { status: GladosTtsStatus::Alive } => {
+                    warn!("GladosTts Server Control is already alive");
                     continue;
                 }
                 _ => {}
             }
-            let event = OllamaStatusEvent::Startup;
+            let event = GladosTtsStatusEvent::Startup;
             debug!("Sending event {:?}", event);
             status_events.send(event);
         }

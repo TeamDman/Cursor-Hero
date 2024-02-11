@@ -1,10 +1,8 @@
 use bevy::prelude::*;
 
-pub struct EnvironmentTypesPlugin;
+pub struct {{crate_name_pascal}}Plugin;
 
-impl Plugin for EnvironmentTypesPlugin {
+impl Plugin for {{crate_name_pascal}}Plugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<MyComponent>();
-        app.add_event::<MyEvent>();
     }
 }

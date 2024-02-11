@@ -2,12 +2,12 @@ use bevy::prelude::*;
 use crossbeam_channel::bounded;
 use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
-use cursor_hero_tts_types::prelude::*;
+use cursor_hero_inference_types::prelude::*;
 use std::thread;
 
-pub struct TtsDispatchPlugin;
+pub struct GladosTtsInferencePlugin;
 
-impl Plugin for TtsDispatchPlugin {
+impl Plugin for GladosTtsInferencePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, create_worker_thread);
         app.add_systems(Update, bridge_requests);
@@ -19,14 +19,14 @@ impl Plugin for TtsDispatchPlugin {
 enum GameboundMessage {
     Response {
         session_id: Entity,
-        prompt: String,
+        prompt: SpeechPrompt,
         response: Vec<u8>,
     },
 }
 
 #[derive(Debug)]
 enum ThreadboundMessage {
-    Generate { session_id: Entity, prompt: String },
+    Generate { session_id: Entity, prompt: SpeechPrompt },
 }
 
 #[derive(Resource)]
@@ -61,7 +61,10 @@ fn create_worker_thread(mut commands: Commands) {
                     match msg {
                         ThreadboundMessage::Generate { session_id, prompt } => {
                             debug!("Worker received generate request for session {:?}, generating response", session_id);
-                            let data = match crate::glados_tts::generate(&prompt).await {
+                            let prompt_str = match &prompt {
+                                SpeechPrompt::Raw { content } => content,
+                            };
+                            let data = match crate::glados_tts::generate(&prompt_str).await {
                                 Ok(data) => data,
                                 Err(e) => {
                                     error!("Failed to generate TTS: {}", e);
@@ -85,9 +88,9 @@ fn create_worker_thread(mut commands: Commands) {
         .expect("Failed to spawn thread");
 }
 
-fn bridge_requests(bridge: ResMut<Bridge>, mut events: EventReader<TtsEvent>) {
+fn bridge_requests(bridge: ResMut<Bridge>, mut events: EventReader<SpeechInferenceEvent>) {
     for event in events.read() {
-        if let TtsEvent::Request { session_id, prompt } = event {
+        if let SpeechInferenceEvent::Request { session_id, prompt } = event {
             debug!(
                 "Received generate request for session {:?}, sending over bridge to worker thread",
                 session_id
@@ -102,7 +105,7 @@ fn bridge_requests(bridge: ResMut<Bridge>, mut events: EventReader<TtsEvent>) {
     }
 }
 
-fn bridge_responses(bridge: ResMut<Bridge>, mut events: EventWriter<TtsEvent>) {
+fn bridge_responses(bridge: ResMut<Bridge>, mut events: EventWriter<SpeechInferenceEvent>) {
     for msg in bridge.receiver.try_iter() {
         match msg {
             GameboundMessage::Response {
@@ -114,7 +117,7 @@ fn bridge_responses(bridge: ResMut<Bridge>, mut events: EventWriter<TtsEvent>) {
                     "Received bridge response for session {:?}, sending game event",
                     session_id
                 );
-                events.send(TtsEvent::Response {
+                events.send(SpeechInferenceEvent::Response {
                     session_id,
                     prompt,
                     wav: response,
