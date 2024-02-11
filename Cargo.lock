@@ -1717,9 +1717,11 @@ name = "cursor_hero"
 version = "0.3.0"
 dependencies = [
  "bevy",
+ "bevy_xpbd_2d",
  "cursor_hero_plugins",
  "cursor_hero_version",
  "embed-resource",
+ "windows 0.51.1",
 ]
 
 [[package]]

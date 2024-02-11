@@ -60,13 +60,13 @@ fn periodic_ping(
 fn handle_pong(
     mut ping_events: EventReader<GladosTtsPingEvent>,
     mut status_events: EventWriter<GladosTtsStatusEvent>,
-    mut gladosTts_status: ResMut<GladosTtsStatus>,
+    mut glados_tts_status: ResMut<GladosTtsStatus>,
 ) {
     for event in ping_events.read() {
         match event {
             GladosTtsPingEvent::Pong { status } => {
                 // identify the new state based on the pong
-                let new_status = match (*gladosTts_status, *status) {
+                let new_status = match (*glados_tts_status, *status) {
                     // if starting, only change to dead if the timeout has been exceeded
                     (GladosTtsStatus::Starting { instant, timeout }, status) => {
                         if status == GladosTtsStatus::Alive {
@@ -81,8 +81,8 @@ fn handle_pong(
                     _ => *status,
                 };
 
-                if *gladosTts_status != new_status {
-                    *gladosTts_status = new_status;
+                if *glados_tts_status != new_status {
+                    *glados_tts_status = new_status;
                     let event = GladosTtsStatusEvent::Changed {
                         new_value: new_status,
                     };
