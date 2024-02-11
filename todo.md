@@ -1,3 +1,11 @@
+- GLaDOS TTS startup button
+- Onboarder startup button
+- voice2text startup button
+- Screen pause toggle button
+
+- performance profiling (so I can close the browser tab I have open for the rust metrics lib)
+- reduce background CPU usage from 22% 😱
+
 - switcher wheel to collect all switcher tools for predictable navigation
   - gamepad rumble on hover
   - sound effect on hover tool
@@ -16,7 +24,7 @@
   - Hit enter
 
 - interpreter agent that acts as "middleware" that will process user speech transcription to clean it up typos and other errors that can decrease model performance before it gets included in main agent observations
-
+- track recently played sounds and empower the user to adjust the volume of individual sounds and future sounds of the same class
 - sprint tool scales scroll speed
 
 - couple click tool with window/screen mouse position tool
