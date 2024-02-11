@@ -70,7 +70,7 @@ fn create_worker_thread(mut commands: Commands) {
                             let data = match crate::glados_tts::generate(prompt_str).await {
                                 Ok(data) => data,
                                 Err(e) => {
-                                    error!("Failed to generate TTS: {}", e);
+                                    error!("Failed to generate TTS: {:?}", e);
                                     continue;
                                 }
                             };
@@ -79,7 +79,7 @@ fn create_worker_thread(mut commands: Commands) {
                                 prompt: prompt.clone(),
                                 response: data,
                             }) {
-                                error!("Gamebound channel failure, exiting: {}", e);
+                                error!("Gamebound channel failure, exiting: {:?}", e);
                                 break;
                             }
                         }
@@ -102,7 +102,7 @@ fn bridge_requests(bridge: ResMut<Bridge>, mut events: EventReader<SpeechInferen
                 session_id: *session_id,
                 prompt: prompt.clone(),
             }) {
-                error!("Threadbound channel failure: {}", e);
+                error!("Threadbound channel failure: {:?}", e);
             }
         }
     }

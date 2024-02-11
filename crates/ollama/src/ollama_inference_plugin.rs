@@ -68,7 +68,7 @@ fn create_worker_thread(mut commands: Commands) {
                             let data = match crate::ollama::generate(&prompt.materialized, prompt.prompt.options()).await {
                                 Ok(data) => data,
                                 Err(e) => {
-                                    error!("Failed to generate: {}", e);
+                                    error!("Failed to generate: {:?}", e);
                                     continue;
                                 }
                             };
@@ -77,7 +77,7 @@ fn create_worker_thread(mut commands: Commands) {
                                 prompt: prompt.clone(),
                                 response: data,
                             }) {
-                                error!("Gamebound channel failure, exiting: {}", e);
+                                error!("Gamebound channel failure, exiting: {:?}", e);
                                 break;
                             }
                         }
@@ -129,6 +129,8 @@ fn bridge_generate_requests(
                     }
                 },
             };
+
+            info!("Sending prompt to text generation worker:\n{}", materialized_prompt.materialized);
 
             if let Err(e) = bridge.sender.send(ThreadboundMessage::Generate {
                 session_id: *session_id,

@@ -1,4 +1,6 @@
 use bevy::prelude::*;
+use cursor_hero_character_types::character_types::AgentCharacter;
+use cursor_hero_chat_types::chat_types::ChatEvent;
 use cursor_hero_inference_types::prelude::*;
 use cursor_hero_observation_types::prelude::*;
 use cursor_hero_toolbelt_types::prelude::*;
@@ -10,7 +12,8 @@ impl Plugin for ObservationToolPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, toolbelt_events);
         app.add_systems(Update, tool_tick);
-        app.add_systems(Update, reply_tick);
+        app.add_systems(Update, handle_text_inference_response);
+        app.add_systems(Update, handle_tts_inference_response);
     }
 }
 
@@ -20,8 +23,7 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Inspector { toolbelt_id }
-        | PopulateToolbeltEvent::Agent { toolbelt_id } = event
+        if let PopulateToolbeltEvent::Agent { toolbelt_id } = event
         {
             ToolSpawnConfig::<ObservationTool, NoInputs>::new(ObservationTool, *toolbelt_id, event)
                 .guess_name(file!())
@@ -62,8 +64,8 @@ fn tool_tick(
 
         let mut chat_history = String::new();
         for entry in character_observation_buffer.observations.iter() {
-            let timestamp = entry.datetime.format("%Y-%m-%d %H:%M:%S").to_string();
-            chat_history.push_str(&format!("{}: {}\n", timestamp, entry.observation));
+            // let timestamp = entry.datetime.format("%Y-%m-%d %H:%M:%S").to_string();
+            chat_history.push_str(entry.observation.as_str());
         }
         character_observation_buffer.observations.clear();
 
@@ -71,18 +73,83 @@ fn tool_tick(
             session_id: character_id,
             prompt: TextPrompt::Chat {
                 chat_history,
-                options: None,
+                options: Some(TextInferenceOptions {
+                    stop: Some(vec![
+                        "\n".to_string(),
+                        "(Human)".to_string(),
+                        "(Tume Eena)".to_string(),
+                        "(Ithia Tig)".to_string(),
+                    ]),
+                    ..default()
+                }),
             },
         });
         debug!("ObservationToolPlugin: Sent observation event");
     }
 }
 
-fn reply_tick(mut inference_events: EventReader<TextInferenceEvent>) {
+fn handle_text_inference_response(
+    mut inference_events: EventReader<TextInferenceEvent>,
+    mut chat_events: EventWriter<ChatEvent>,
+    mut tts_events: EventWriter<SpeechInferenceEvent>,
+    agent_query: Query<(), With<AgentCharacter>>,
+) {
     for event in inference_events.read() {
-        let TextInferenceEvent::Response { response, .. } = event else {
+        let TextInferenceEvent::Response {
+            response,
+            session_id,
+            ..
+        } = event
+        else {
             continue;
         };
-        info!("ObservationToolPlugin: Received response: {}", response);
+        if !agent_query.get(*session_id).is_ok() {
+            // Only inference responses for agent sessions are to be converted to chat messages and spoken
+            continue;
+        }
+
+        let event = ChatEvent::Chat {
+            character_id: *session_id,
+            message: response.clone(),
+        };
+        debug!("Sending event: {:?}", event);
+        chat_events.send(event);
+
+        let event = SpeechInferenceEvent::Request {
+            session_id: *session_id,
+            prompt: SpeechPrompt::Raw { content: response.clone() },
+        };
+        debug!("Sending event: {:?}", event);
+        tts_events.send(event);
+    }
+}
+
+fn handle_tts_inference_response(
+    mut commands: Commands,
+    mut tts_events: EventReader<SpeechInferenceEvent>,
+    agent_query: Query<(), With<AgentCharacter>>,
+    mut audio_assets: ResMut<Assets<AudioSource>>,
+) {
+    for event in tts_events.read() {
+        if let SpeechInferenceEvent::Response {
+            session_id, wav, ..
+        } = event
+        {
+            if agent_query.get(*session_id).is_ok() {
+                info!(
+                    "Received TTS response for session {:?}, playing",
+                    session_id
+                );
+                let audio = audio_assets.add(AudioSource {
+                    bytes: wav.clone().into(),
+                });
+                commands.entity(*session_id).insert({
+                    AudioBundle {
+                        source: audio,
+                        settings: PlaybackSettings::REMOVE.with_spatial(true),
+                    }
+                });
+            }
+        }
     }
 }

@@ -53,6 +53,7 @@ fn activation(
                 content: "Here is a random word:".to_string(),
                 options: Some(TextInferenceOptions {
                     num_predict: Some(7),
+                    ..default()
                 }),
             },
         });

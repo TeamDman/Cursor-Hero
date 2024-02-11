@@ -366,7 +366,6 @@ name = "bevy"
 version = "0.12.1"
 source = "git+https://github.com/TeamDman/bevy.git?branch=cursor_hero#f21819b5e8a858f24fcece6fafcc38f3d489c941"
 dependencies = [
- "bevy_dylib",
  "bevy_internal",
 ]
 
@@ -569,14 +568,6 @@ dependencies = [
  "bevy_time",
  "bevy_utils",
  "sysinfo",
-]
-
-[[package]]
-name = "bevy_dylib"
-version = "0.12.1"
-source = "git+https://github.com/TeamDman/bevy.git?branch=cursor_hero#f21819b5e8a858f24fcece6fafcc38f3d489c941"
-dependencies = [
- "bevy_internal",
 ]
 
 [[package]]

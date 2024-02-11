@@ -4,6 +4,7 @@ use bevy::prelude::*;
 #[derive(Reflect, Debug, Clone, Default, Eq, PartialEq)]
 pub struct TextInferenceOptions {
     pub num_predict: Option<usize>,
+    pub stop: Option<Vec<String>>,
 }
 
 #[derive(Event, Reflect, Debug, Clone)]
