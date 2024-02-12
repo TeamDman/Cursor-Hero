@@ -32,3 +32,16 @@ pub enum SpeechInferenceEvent {
         wav: Vec<u8>,
     },
 }
+
+#[derive(Event, Reflect, Debug, Clone)]
+pub enum TranscriptionInferenceEvent {
+    Request {
+        session_id: Entity,
+        prompt: TranscriptionPrompt,
+    },
+    Response {
+        session_id: Entity,
+        prompt: TranscriptionPrompt,
+        transcription: String,
+    },
+}

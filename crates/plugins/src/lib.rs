@@ -60,10 +60,14 @@ use cursor_hero_ollama::prelude::*;
 use cursor_hero_ollama_types::prelude::*;
 use cursor_hero_text_asset::prelude::*;
 use cursor_hero_text_asset_types::prelude::*;
+use cursor_hero_voice_to_text::prelude::*;
+use cursor_hero_voice_to_text_types::prelude::*;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(VoiceToTextTypesPlugin);
+        app.add_plugins(VoiceToTextPlugin);
         app.add_plugins(GladosTtsTypesPlugin);
         app.add_plugins(GladosTtsPlugin);
         app.add_plugins(OllamaTypesPlugin);

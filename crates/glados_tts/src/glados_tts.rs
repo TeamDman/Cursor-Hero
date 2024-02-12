@@ -1,6 +1,7 @@
 use cursor_hero_glados_tts_types::glados_tts_types::GladosTtsStatus;
 use reqwest::Client;
-use std::{env, error::Error, process::Command};
+use std::error::Error;
+use std::process::Command;
 
 pub async fn generate(prompt: &str) -> Result<Vec<u8>, Box<dyn Error>> {
     // Construct the URL for the TTS endpoint

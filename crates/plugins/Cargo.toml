@@ -7,6 +7,8 @@ edition = "2021"
 
 
 [dependencies]
+cursor_hero_voice_to_text = { workspace = true }
+cursor_hero_voice_to_text_types = { workspace = true }
 cursor_hero_glados_tts = { workspace = true }
 cursor_hero_glados_tts_types = { workspace = true }
 cursor_hero_ollama = { workspace = true }

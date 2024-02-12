@@ -1,14 +1,13 @@
 use bevy::prelude::*;
 use bevy_xpbd_2d::prelude::*;
 use cursor_hero_environment_types::prelude::*;
-use cursor_hero_glados_tts_types::prelude::*;
 use cursor_hero_math::Lerp;
 use cursor_hero_pointer_types::prelude::*;
+use cursor_hero_voice_to_text_types::prelude::*;
 
-use crate::glados_tts;
-pub struct GladosTtsButtonPlugin;
+pub struct VoiceToTextButtonPlugin;
 
-impl Plugin for GladosTtsButtonPlugin {
+impl Plugin for VoiceToTextButtonPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, populate_new_host_environments);
         app.add_systems(Update, update_visuals);
@@ -31,8 +30,8 @@ fn populate_new_host_environments(
         commands.entity(*environment_id).with_children(|parent| {
             parent
                 .spawn((
-                    GladosTtsStatusButton::default(),
-                    Name::new("GLaDOS TTS Button"),
+                    VoiceToTextStatusButton::default(),
+                    Name::new("Voice2Text Button"),
                     SpriteBundle {
                         sprite: Sprite {
                             custom_size: Some(Vec2::new(200.0, 100.0)),
@@ -40,8 +39,8 @@ fn populate_new_host_environments(
                             ..default()
                         },
                         transform: Transform::from_translation(Vec3::new(
-                            1920.0 / 2.0 - 600.0,
-                            -1080.0 - 200.0,
+                            1920.0 / 2.0 + 600.0,
+                            -1080.0 -200.0,
                             0.0,
                         )),
                         ..default()
@@ -55,7 +54,7 @@ fn populate_new_host_environments(
                 .with_children(|parent| {
                     parent.spawn((Text2dBundle {
                         text: Text::from_section(
-                            "GLaDOS TTS Server Control".to_string(),
+                            "Voice2Text Server Control".to_string(),
                             TextStyle {
                                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                 font_size: 32.0,
@@ -69,8 +68,8 @@ fn populate_new_host_environments(
                 });
             parent
                 .spawn((
-                    GladosTtsVscodeButton::default(),
-                    Name::new("GLaDOS TTS VSCode Button"),
+                    VoiceToTextVscodeButton::default(),
+                    Name::new("Voice2Text VSCode Button"),
                     SpriteBundle {
                         sprite: Sprite {
                             custom_size: Some(Vec2::new(200.0, 100.0)),
@@ -78,7 +77,7 @@ fn populate_new_host_environments(
                             ..default()
                         },
                         transform: Transform::from_translation(Vec3::new(
-                            1920.0 / 2.0 - 600.0,
+                            1920.0 / 2.0 + 600.0,
                             -1080.0 - 350.0,
                             0.0,
                         )),
@@ -110,39 +109,39 @@ fn populate_new_host_environments(
 }
 
 fn update_visuals(
-    mut events: EventReader<GladosTtsStatusEvent>,
-    mut button_query: Query<(&mut Sprite, &Children, &mut GladosTtsStatusButton)>,
+    mut events: EventReader<VoiceToTextStatusEvent>,
+    mut button_query: Query<(&mut Sprite, &Children, &mut VoiceToTextStatusButton)>,
     mut button_text_query: Query<&mut Text>,
 ) {
     for event in events.read() {
-        let GladosTtsStatusEvent::Changed { new_value: status } = event else {
+        let VoiceToTextStatusEvent::Changed { new_value: status } = event else {
             continue;
         };
-        debug!("Updating GladosTts Server Control visuals to {:?}", status);
+        debug!("Updating VoiceToText Server Control visuals to {:?}", status);
         for button in button_query.iter_mut() {
             let (mut button_sprite, button_children, mut button) = button;
             button.visual_state = match button.visual_state {
-                GladosTtsStatusButtonVisualState::Default { .. } => {
-                    GladosTtsStatusButtonVisualState::Default { status: *status }
+                VoiceToTextStatusButtonVisualState::Default { .. } => {
+                    VoiceToTextStatusButtonVisualState::Default { status: *status }
                 }
-                GladosTtsStatusButtonVisualState::Hovered { .. } => {
-                    GladosTtsStatusButtonVisualState::Hovered { status: *status }
+                VoiceToTextStatusButtonVisualState::Hovered { .. } => {
+                    VoiceToTextStatusButtonVisualState::Hovered { status: *status }
                 }
-                GladosTtsStatusButtonVisualState::Pressed { .. } => {
-                    GladosTtsStatusButtonVisualState::Pressed { status: *status }
+                VoiceToTextStatusButtonVisualState::Pressed { .. } => {
+                    VoiceToTextStatusButtonVisualState::Pressed { status: *status }
                 }
             };
             match status {
-                GladosTtsStatus::Alive => {
+                VoiceToTextStatus::Alive => {
                     button_sprite.color = Color::GREEN;
                 }
-                GladosTtsStatus::Dead => {
+                VoiceToTextStatus::Dead => {
                     button_sprite.color = Color::RED;
                 }
-                GladosTtsStatus::Unknown => {
+                VoiceToTextStatus::Unknown => {
                     button_sprite.color = Color::PURPLE;
                 }
-                GladosTtsStatus::Starting { instant, timeout } => {
+                VoiceToTextStatus::Starting { instant, timeout } => {
                     button_sprite.color = Color::YELLOW
                         * (1.0, 0.1)
                             .lerp(instant.elapsed().as_secs_f32() / timeout.as_secs_f32());
@@ -151,21 +150,21 @@ fn update_visuals(
             for child in button_children.iter() {
                 if let Ok(mut text) = button_text_query.get_mut(*child) {
                     match status {
-                        GladosTtsStatus::Alive => {
+                        VoiceToTextStatus::Alive => {
                             text.sections[0].value =
-                                "GLaDOS TTS Server Control (Alive)".to_string();
+                                "VoiceToText Server Control (Alive)".to_string();
                         }
-                        GladosTtsStatus::Dead => {
+                        VoiceToTextStatus::Dead => {
                             text.sections[0].value =
-                                "GLaDOS TTS Server Control (Dead)".to_string();
+                                "VoiceToText Server Control (Dead)".to_string();
                         }
-                        GladosTtsStatus::Unknown => {
+                        VoiceToTextStatus::Unknown => {
                             text.sections[0].value =
-                                "GLaDOS TTS Server Control (Unknown)".to_string();
+                                "VoiceToText Server Control (Unknown)".to_string();
                         }
-                        GladosTtsStatus::Starting { instant, .. } => {
+                        VoiceToTextStatus::Starting { instant, .. } => {
                             text.sections[0].value = format!(
-                                "GLaDOS TTS Server Control (Starting {}s ago)",
+                                "VoiceToText Server Control (Starting {}s ago)",
                                 instant.elapsed().as_secs()
                             );
                         }
@@ -178,14 +177,14 @@ fn update_visuals(
     for button in button_query.iter_mut() {
         let (mut sprite, children, button) = button;
         // if the visual state status is starting, update the text to show the time elapsed
-        let (GladosTtsStatusButtonVisualState::Default {
-            status: GladosTtsStatus::Starting { instant, timeout },
+        let (VoiceToTextStatusButtonVisualState::Default {
+            status: VoiceToTextStatus::Starting { instant, timeout },
         }
-        | GladosTtsStatusButtonVisualState::Hovered {
-            status: GladosTtsStatus::Starting { instant, timeout },
+        | VoiceToTextStatusButtonVisualState::Hovered {
+            status: VoiceToTextStatus::Starting { instant, timeout },
         }
-        | GladosTtsStatusButtonVisualState::Pressed {
-            status: GladosTtsStatus::Starting { instant, timeout },
+        | VoiceToTextStatusButtonVisualState::Pressed {
+            status: VoiceToTextStatus::Starting { instant, timeout },
         }) = button.visual_state
         else {
             continue;
@@ -195,7 +194,7 @@ fn update_visuals(
         for child in children.iter() {
             if let Ok(mut text) = button_text_query.get_mut(*child) {
                 text.sections[0].value = format!(
-                    "GladosTts Server Control (Starting {}s ago)",
+                    "VoiceToText Server Control (Starting {}s ago)",
                     instant.elapsed().as_secs()
                 );
             }
@@ -205,8 +204,8 @@ fn update_visuals(
 
 fn status_button_click(
     mut click_events: EventReader<ClickEvent>,
-    button_query: Query<&GladosTtsStatusButton>,
-    mut status_events: EventWriter<GladosTtsStatusEvent>,
+    button_query: Query<&VoiceToTextStatusButton>,
+    mut status_events: EventWriter<VoiceToTextStatusEvent>,
 ) {
     for event in click_events.read() {
         let ClickEvent::Clicked {
@@ -221,24 +220,24 @@ fn status_button_click(
             continue;
         }
         if let Ok(button) = button_query.get(*target_id) {
-            info!("GladosTts Server Control clicked");
+            info!("VoiceToText Server Control clicked");
             // if the button visual status is alive, do nothing
             match button.visual_state {
-                GladosTtsStatusButtonVisualState::Default {
-                    status: GladosTtsStatus::Alive,
+                VoiceToTextStatusButtonVisualState::Default {
+                    status: VoiceToTextStatus::Alive,
                 }
-                | GladosTtsStatusButtonVisualState::Hovered {
-                    status: GladosTtsStatus::Alive,
+                | VoiceToTextStatusButtonVisualState::Hovered {
+                    status: VoiceToTextStatus::Alive,
                 }
-                | GladosTtsStatusButtonVisualState::Pressed {
-                    status: GladosTtsStatus::Alive,
+                | VoiceToTextStatusButtonVisualState::Pressed {
+                    status: VoiceToTextStatus::Alive,
                 } => {
-                    warn!("GladosTts Server Control is already alive");
+                    warn!("VoiceToText Server Control is already alive");
                     continue;
                 }
                 _ => {}
             }
-            let event = GladosTtsStatusEvent::Startup;
+            let event = VoiceToTextStatusEvent::Startup;
             debug!("Sending event {:?}", event);
             status_events.send(event);
         }
@@ -247,8 +246,8 @@ fn status_button_click(
 
 fn vscode_button_click(
     mut click_events: EventReader<ClickEvent>,
-    button_query: Query<&GladosTtsVscodeButton>,
-    mut vscode_events: EventWriter<GladosTtsVscodeEvent>,
+    button_query: Query<&VoiceToTextVscodeButton>,
+    mut vscode_events: EventWriter<VoiceToTextVscodeEvent>,
 ) {
     for event in click_events.read() {
         let ClickEvent::Clicked {
@@ -263,8 +262,8 @@ fn vscode_button_click(
             continue;
         }
         if button_query.get(*target_id).is_ok() {
-            info!("GladosTts vscode clicked");
-            let event = GladosTtsVscodeEvent::Startup;
+            info!("VoiceToText vscode clicked");
+            let event = VoiceToTextVscodeEvent::Startup;
             debug!("Sending event {:?}", event);
             vscode_events.send(event);
         }
@@ -272,14 +271,14 @@ fn vscode_button_click(
 }
 
 fn handle_vscode_events(
-    mut vscode_events: EventReader<GladosTtsVscodeEvent>,
+    mut vscode_events: EventReader<VoiceToTextVscodeEvent>,
 ) {
     let should_start = vscode_events.read().any(|event| {
-        matches!(event, GladosTtsVscodeEvent::Startup)
+        matches!(event, VoiceToTextVscodeEvent::Startup)
     });
     if should_start {
         info!("Opening vscode");
-        if let Err(e) = glados_tts::start_vscode() {
+        if let Err(e) = crate::voice_to_text::start_vscode() {
             error!("Failed to start vscode: {:?}", e);
         }
     }

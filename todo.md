@@ -1,6 +1,8 @@
+- hot mic support for back and forth talking while coding
+  - python server needs api with key set on launch
+    - key not present -> "who are you, how did you get into my house?"
 - agent restart memory
 - better prompt history
-- hot mic support for back and forth talking while coding
 - vscode buffer observations
 - environment restart observations 
 

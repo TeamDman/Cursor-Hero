@@ -12,5 +12,9 @@ impl Plugin for InferenceTypesPlugin {
         app.register_type::<SpeechPrompt>();
         app.register_type::<SpeechInferenceEvent>();
         app.add_event::<SpeechInferenceEvent>();
+
+        app.register_type::<TranscriptionPrompt>();
+        app.register_type::<TranscriptionInferenceEvent>();
+        app.add_event::<TranscriptionInferenceEvent>();
     }
 }

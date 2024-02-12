@@ -40,3 +40,8 @@ pub struct TextPromptHandles {
 pub enum SpeechPrompt {
     Raw { content: String },
 }
+
+#[derive(Reflect, Debug, PartialEq, Eq, Clone)]
+pub enum TranscriptionPrompt {
+    Raw { content: Vec<u8> },
+}
