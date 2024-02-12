@@ -1,5 +1,7 @@
 # Cursor Hero
 
+[![Visitors](https://api.visitorbadge.io/api/visitors?path=github.com%2FTeamDman%2FCursor-Hero&countColor=%23263759)](https://visitorbadge.io/status?path=github.com%2FTeamDman%2FCursor-Hero)
+
 Something I'm making using Bevy. I'm not quite sure what it is yet, but the plan is a tool for robotic process automation.
 
 If you have a DualShock controller, you will need something like [DS4Windows](https://ds4windows.dev/).
