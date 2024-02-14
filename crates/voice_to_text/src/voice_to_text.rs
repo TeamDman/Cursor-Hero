@@ -1,4 +1,6 @@
 use cursor_hero_voice_to_text_types::prelude::*;
+use rand::distributions::Alphanumeric;
+use rand::Rng;
 use reqwest::Client;
 use std::error::Error;
 use std::process::Command;
@@ -18,14 +20,24 @@ pub async fn get_status() -> Result<VoiceToTextStatus, Box<dyn Error>> {
     let client = Client::new();
     match client.get(format!("{}/", URL)).send().await {
         Ok(res) => match res.status().is_success() {
-            true => Ok(VoiceToTextStatus::Alive),
+            true => Ok(VoiceToTextStatus::AliveButWeDontKnowTheApiKey),
             false => Ok(VoiceToTextStatus::Dead),
         },
         Err(_) => Ok(VoiceToTextStatus::Dead),
     }
 }
 
-pub fn start() -> Result<(), Box<dyn Error>> {
+fn generate_api_key(len: usize) -> String {
+    let rng = rand::thread_rng();
+    rng.sample_iter(&Alphanumeric)
+        .take(len)
+        .map(char::from)
+        .collect()
+}
+
+pub fn start() -> Result<String, Box<dyn Error>> {
+    let port = 9127;
+    let api_key = generate_api_key(32);
     match std::process::Command::new("wt")
         .args([
             "--window",
@@ -37,15 +49,11 @@ pub fn start() -> Result<(), Box<dyn Error>> {
             "--",
             "pwsh",
             "-Command",
-            "\"cd",
-            r"D:\Repos\ml\voice2text",
-            "&&",
-            "pwsh",
-            "start.ps1",
+            format!(r"cd D:\Repos\ml\voice2text && conda activate whisperx && python .\transcribe_hotkey_typer.py {} {}", port, api_key).as_str(),
         ])
         .spawn()
     {
-        Ok(_) => Ok(()),
+        Ok(_) => Ok(api_key),
         Err(e) => Err(Box::new(e)),
     }
 }

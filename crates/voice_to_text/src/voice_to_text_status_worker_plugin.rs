@@ -4,6 +4,8 @@ use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
 use cursor_hero_voice_to_text_types::prelude::*;
 use std::thread;
+use std::time::Duration;
+use std::time::Instant;
 
 pub struct VoiceToTextStatusWorkerPlugin;
 
@@ -18,6 +20,7 @@ impl Plugin for VoiceToTextStatusWorkerPlugin {
 #[derive(Debug)]
 enum GameboundMessage {
     Pong { status: VoiceToTextStatus },
+    Starting { api_key: String },
 }
 
 #[derive(Debug)]
@@ -72,8 +75,19 @@ fn create_worker_thread(mut commands: Commands) {
                         }
                         ThreadboundMessage::Startup => {
                             debug!("Worker received startup request, starting VoiceToText API");
-                            if let Err(e) = crate::voice_to_text::start() {
-                                error!("Failed to start: {:?}", e);
+                            match crate::voice_to_text::start() {
+                                Ok(api_key) => {
+                                    debug!("VoiceToText API started successfully");
+                                    if let Err(e) =
+                                        game_tx.send(GameboundMessage::Starting { api_key })
+                                    {
+                                        error!("Gamebound channel failure, exiting: {}", e);
+                                        break;
+                                    }
+                                }
+                                Err(e) => {
+                                    error!("Failed to start: {:?}", e);
+                                }
                             };
                         }
                     }
@@ -87,7 +101,7 @@ fn create_worker_thread(mut commands: Commands) {
 fn events_to_bridge(
     bridge: ResMut<Bridge>,
     mut ping_events: EventReader<VoiceToTextPingEvent>,
-    mut status_events: EventReader<VoiceToTextStatusEvent>,
+    mut command_events: EventReader<VoiceToTextCommandEvent>,
 ) {
     // Detect ping requests
     for event in ping_events.read() {
@@ -102,11 +116,11 @@ fn events_to_bridge(
     }
 
     // Detect startup requests
-    let starting = status_events
+    let starting = command_events
         .read()
-        .any(|event| matches!(event, VoiceToTextStatusEvent::Startup));
+        .any(|event| matches!(event, VoiceToTextCommandEvent::Startup));
     if starting {
-        status_events.clear();
+        command_events.clear();
         let msg = ThreadboundMessage::Startup;
         debug!("Sending bridge message: {:?}", msg);
         if let Err(e) = bridge.sender.send(msg) {
@@ -115,13 +129,30 @@ fn events_to_bridge(
     }
 }
 
-fn bridge_to_events(bridge: ResMut<Bridge>, mut events: EventWriter<VoiceToTextPingEvent>) {
+fn bridge_to_events(
+    bridge: ResMut<Bridge>,
+    mut ping_events: EventWriter<VoiceToTextPingEvent>,
+    mut status_events: EventWriter<VoiceToTextStatusEvent>,
+    mut current_status: ResMut<VoiceToTextStatus>,
+) {
     for msg in bridge.receiver.try_iter() {
         match msg {
             GameboundMessage::Pong { status } => {
                 let event = VoiceToTextPingEvent::Pong { status };
                 debug!("Received bridge response, sending game event {:?}", event);
-                events.send(event);
+                ping_events.send(event);
+            }
+            GameboundMessage::Starting { api_key } => {
+                *current_status = VoiceToTextStatus::Starting {
+                    instant: Instant::now(),
+                    timeout: Duration::from_secs(60),
+                    api_key: api_key.clone(),
+                };
+                let event = VoiceToTextStatusEvent::Changed {
+                    new_value: current_status.clone(),
+                };
+                debug!("Received bridge response, sending game event {:?}", event);
+                status_events.send(event);
             }
         }
     }

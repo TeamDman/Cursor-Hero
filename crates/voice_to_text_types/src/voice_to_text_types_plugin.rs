@@ -14,6 +14,9 @@ impl Plugin for VoiceToTextTypesPlugin {
         app.register_type::<VoiceToTextPingEvent>();
         app.add_event::<VoiceToTextPingEvent>();
 
+        app.register_type::<VoiceToTextCommandEvent>();
+        app.add_event::<VoiceToTextCommandEvent>();
+
         app.register_type::<VoiceToTextVscodeButton>();
         app.register_type::<VoiceToTextVscodeButtonVisualState>();
         app.register_type::<VoiceToTextVscodeEvent>();

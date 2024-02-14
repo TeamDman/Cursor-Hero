@@ -122,18 +122,21 @@ fn update_visuals(
             let (mut button_sprite, button_children, mut button) = button;
             button.visual_state = match button.visual_state {
                 VoiceToTextStatusButtonVisualState::Default { .. } => {
-                    VoiceToTextStatusButtonVisualState::Default { status: *status }
+                    VoiceToTextStatusButtonVisualState::Default { status: status.clone() }
                 }
                 VoiceToTextStatusButtonVisualState::Hovered { .. } => {
-                    VoiceToTextStatusButtonVisualState::Hovered { status: *status }
+                    VoiceToTextStatusButtonVisualState::Hovered { status: status.clone() }
                 }
                 VoiceToTextStatusButtonVisualState::Pressed { .. } => {
-                    VoiceToTextStatusButtonVisualState::Pressed { status: *status }
+                    VoiceToTextStatusButtonVisualState::Pressed { status: status.clone() }
                 }
             };
             match status {
-                VoiceToTextStatus::Alive => {
+                VoiceToTextStatus::Alive { .. } => {
                     button_sprite.color = Color::GREEN;
+                }
+                VoiceToTextStatus::AliveButWeDontKnowTheApiKey => {
+                    button_sprite.color = Color::ORANGE_RED;
                 }
                 VoiceToTextStatus::Dead => {
                     button_sprite.color = Color::RED;
@@ -141,7 +144,7 @@ fn update_visuals(
                 VoiceToTextStatus::Unknown => {
                     button_sprite.color = Color::PURPLE;
                 }
-                VoiceToTextStatus::Starting { instant, timeout } => {
+                VoiceToTextStatus::Starting { instant, timeout, .. } => {
                     button_sprite.color = Color::YELLOW
                         * (1.0, 0.1)
                             .lerp(instant.elapsed().as_secs_f32() / timeout.as_secs_f32());
@@ -150,9 +153,14 @@ fn update_visuals(
             for child in button_children.iter() {
                 if let Ok(mut text) = button_text_query.get_mut(*child) {
                     match status {
-                        VoiceToTextStatus::Alive => {
+                        VoiceToTextStatus::Alive { .. } => {
                             text.sections[0].value =
                                 "VoiceToText Server Control (Alive)".to_string();
+                        }
+                        VoiceToTextStatus::AliveButWeDontKnowTheApiKey => {
+                            text.sections[0].value =
+                                "VoiceToText Server Control (Alive, but we don't know the API key)"
+                                    .to_string();
                         }
                         VoiceToTextStatus::Dead => {
                             text.sections[0].value =
@@ -178,13 +186,13 @@ fn update_visuals(
         let (mut sprite, children, button) = button;
         // if the visual state status is starting, update the text to show the time elapsed
         let (VoiceToTextStatusButtonVisualState::Default {
-            status: VoiceToTextStatus::Starting { instant, timeout },
+            status: VoiceToTextStatus::Starting { instant, timeout, .. },
         }
         | VoiceToTextStatusButtonVisualState::Hovered {
-            status: VoiceToTextStatus::Starting { instant, timeout },
+            status: VoiceToTextStatus::Starting { instant, timeout, .. },
         }
         | VoiceToTextStatusButtonVisualState::Pressed {
-            status: VoiceToTextStatus::Starting { instant, timeout },
+            status: VoiceToTextStatus::Starting { instant, timeout, .. },
         }) = button.visual_state
         else {
             continue;
@@ -205,7 +213,7 @@ fn update_visuals(
 fn status_button_click(
     mut click_events: EventReader<ClickEvent>,
     button_query: Query<&VoiceToTextStatusButton>,
-    mut status_events: EventWriter<VoiceToTextStatusEvent>,
+    mut command_events: EventWriter<VoiceToTextCommandEvent>,
 ) {
     for event in click_events.read() {
         let ClickEvent::Clicked {
@@ -224,22 +232,22 @@ fn status_button_click(
             // if the button visual status is alive, do nothing
             match button.visual_state {
                 VoiceToTextStatusButtonVisualState::Default {
-                    status: VoiceToTextStatus::Alive,
+                    status: VoiceToTextStatus::Alive { .. },
                 }
                 | VoiceToTextStatusButtonVisualState::Hovered {
-                    status: VoiceToTextStatus::Alive,
+                    status: VoiceToTextStatus::Alive { .. },
                 }
                 | VoiceToTextStatusButtonVisualState::Pressed {
-                    status: VoiceToTextStatus::Alive,
+                    status: VoiceToTextStatus::Alive { .. },
                 } => {
                     warn!("VoiceToText Server Control is already alive");
                     continue;
                 }
                 _ => {}
             }
-            let event = VoiceToTextStatusEvent::Startup;
+            let event = VoiceToTextCommandEvent::Startup;
             debug!("Sending event {:?}", event);
-            status_events.send(event);
+            command_events.send(event);
         }
     }
 }

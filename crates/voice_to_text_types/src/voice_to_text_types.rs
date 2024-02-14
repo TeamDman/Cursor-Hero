@@ -3,15 +3,20 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy::utils::Instant;
 
-#[derive(Reflect, Resource, Default, Debug, Eq, PartialEq, Clone, Copy)]
+#[derive(Reflect, Resource, Default, Debug, Eq, PartialEq, Clone)]
+#[reflect(Resource)]
 pub enum VoiceToTextStatus {
     #[default]
     Unknown,
-    Alive,
+    Alive {
+        api_key: String,
+    },
+    AliveButWeDontKnowTheApiKey,
     Dead,
     Starting {
         instant: Instant,
         timeout: Duration,
+        api_key: String,
     },
 }
 
@@ -24,6 +29,10 @@ pub enum VoiceToTextPingEvent {
 #[derive(Event, Debug, Reflect)]
 pub enum VoiceToTextStatusEvent {
     Changed { new_value: VoiceToTextStatus },
+    Startup,
+}
+#[derive(Event, Debug, Reflect)]
+pub enum VoiceToTextCommandEvent {
     Startup,
 }
 
