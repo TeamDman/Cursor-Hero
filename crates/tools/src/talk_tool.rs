@@ -169,22 +169,26 @@ fn handle_input(
                 warn!("VoiceToTextStatus not Alive, ignoring event");
                 continue;
             };
-            let status = VoiceToTextStatus::Alive {
+            let new_status = VoiceToTextStatus::Alive {
                 api_key: api_key.clone(),
                 listening: !listening,
             };
-            *voice_status = status.clone();
 
             let event = VoiceToTextCommandEvent::SetListening {
                 listening: !listening,
-                api_key: api_key
+                api_key: api_key,
             };
             info!("Sending event: {:?}", event);
             voice_command_events.send(event);
 
-            let event = VoiceToTextStatusEvent::Changed { new_value: status };
+            let event = VoiceToTextStatusEvent::Changed {
+                old_value: voice_status.clone(),
+                new_value: new_status.clone(),
+            };
             info!("Sending event: {:?}", event);
             voice_status_events.send(event);
+
+            *voice_status = new_status;
         }
     }
 }

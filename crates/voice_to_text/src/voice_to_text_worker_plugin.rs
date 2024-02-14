@@ -8,9 +8,9 @@ use std::thread;
 use std::time::Duration;
 use std::time::Instant;
 
-pub struct VoiceToTextStatusWorkerPlugin;
+pub struct VoiceToTextWorkerPlugin;
 
-impl Plugin for VoiceToTextStatusWorkerPlugin {
+impl Plugin for VoiceToTextWorkerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, create_worker_thread);
         app.add_systems(Update, events_to_bridge);
@@ -165,16 +165,19 @@ fn bridge_to_events(
                 ping_events.send(event);
             }
             GameboundMessage::Starting { api_key } => {
-                *current_status = VoiceToTextStatus::Starting {
+                let new_status = VoiceToTextStatus::Starting {
                     instant: Instant::now(),
                     timeout: Duration::from_secs(60),
                     api_key: api_key.clone(),
                 };
                 let event = VoiceToTextStatusEvent::Changed {
-                    new_value: current_status.clone(),
+                    old_value: current_status.clone(),
+                    new_value: new_status.clone(),
                 };
                 debug!("Received bridge response, sending game event {:?}", event);
                 status_events.send(event);
+
+                *current_status = new_status;
             }
         }
     }

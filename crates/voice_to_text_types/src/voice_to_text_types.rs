@@ -31,7 +31,10 @@ pub enum VoiceToTextPingEvent {
 
 #[derive(Event, Debug, Reflect)]
 pub enum VoiceToTextStatusEvent {
-    Changed { new_value: VoiceToTextStatus },
+    Changed {
+        old_value: VoiceToTextStatus,
+        new_value: VoiceToTextStatus,
+    },
     Startup,
 }
 #[derive(Event, Debug, Reflect)]

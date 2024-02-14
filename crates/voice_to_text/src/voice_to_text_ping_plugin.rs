@@ -81,12 +81,14 @@ fn handle_pong(
         };
 
         if *current_status != new_status {
-            *current_status = new_status.clone();
             let event = VoiceToTextStatusEvent::Changed {
-                new_value: new_status,
+                old_value: current_status.clone(),
+                new_value: new_status.clone(),
             };
             debug!("Sending event {:?}", event);
             status_events.send(event);
+
+            *current_status = new_status;
         }
     }
 }
