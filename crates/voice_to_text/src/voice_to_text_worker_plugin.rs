@@ -19,9 +19,10 @@ impl Plugin for VoiceToTextWorkerPlugin {
 }
 
 #[derive(Debug)]
-enum GameboundMessage {
+pub(crate) enum GameboundMessage {
     Pong { status: VoiceToTextStatus },
     Starting { api_key: SecretString },
+    TranscriptionReceived { transcription: String },
 }
 
 #[derive(Debug)]
@@ -30,6 +31,9 @@ enum ThreadboundMessage {
     Startup,
     SetListening {
         listening: bool,
+        api_key: SecretString,
+    },
+    ConnectReceiver {
         api_key: SecretString,
     },
 }
@@ -95,14 +99,30 @@ fn create_worker_thread(mut commands: Commands) {
                                 }
                             };
                         }
-                        ThreadboundMessage::SetListening { listening, api_key }=> {
+                        ThreadboundMessage::SetListening { listening, api_key } => {
                             debug!("Worker received set listening request: {}", listening);
                             match crate::voice_to_text::set_listening(listening, api_key).await {
                                 Ok(()) => {
-                                    debug!("VoiceToText API set listening={} successfully", listening);
+                                    info!(
+                                        "VoiceToText API set listening={} successfully",
+                                        listening
+                                    );
                                 }
                                 Err(e) => {
                                     error!("Failed to set listening: {:?}", e);
+                                }
+                            }
+                        }
+                        ThreadboundMessage::ConnectReceiver { api_key } => {
+                            debug!("Worker received connect receiver request");
+                            match crate::voice_to_text::connect_receiver(game_tx.clone(), api_key)
+                                .await
+                            {
+                                Ok(()) => {
+                                    debug!("VoiceToText API connected receiver successfully");
+                                }
+                                Err(e) => {
+                                    error!("Failed to connect receiver: {:?}", e);
                                 }
                             }
                         }
@@ -132,21 +152,23 @@ fn events_to_bridge(
     }
 
     for event in command_events.read() {
-        match event {
-            VoiceToTextCommandEvent::Startup => {
-                let msg = ThreadboundMessage::Startup;
-                debug!("Sending bridge message: {:?}", msg);
-                if let Err(e) = bridge.sender.send(msg) {
-                    error!("Threadbound channel failure: {}", e);
-                }
-            }
+        let msg = match event {
+            VoiceToTextCommandEvent::Startup => ThreadboundMessage::Startup,
             VoiceToTextCommandEvent::SetListening { listening, api_key } => {
-                let msg = ThreadboundMessage::SetListening { listening: *listening, api_key: api_key.clone() };
-                debug!("Sending bridge message: {:?}", msg);
-                if let Err(e) = bridge.sender.send(msg) {
-                    error!("Threadbound channel failure: {}", e);
+                ThreadboundMessage::SetListening {
+                    listening: *listening,
+                    api_key: api_key.clone(),
                 }
             }
+            VoiceToTextCommandEvent::ConnectReceiver { api_key } => {
+                ThreadboundMessage::ConnectReceiver {
+                    api_key: api_key.clone(),
+                }
+            }
+        };
+        debug!("Sending bridge message: {:?}", msg);
+        if let Err(e) = bridge.sender.send(msg) {
+            error!("Threadbound channel failure: {}", e);
         }
     }
 }
@@ -155,6 +177,7 @@ fn bridge_to_events(
     bridge: ResMut<Bridge>,
     mut ping_events: EventWriter<VoiceToTextPingEvent>,
     mut status_events: EventWriter<VoiceToTextStatusEvent>,
+    mut transcription_events: EventWriter<VoiceToTextTranscriptionEvent>,
     mut current_status: ResMut<VoiceToTextStatus>,
 ) {
     for msg in bridge.receiver.try_iter() {
@@ -171,13 +194,18 @@ fn bridge_to_events(
                     api_key: api_key.clone(),
                 };
                 let event = VoiceToTextStatusEvent::Changed {
-                    old_value: current_status.clone(),
-                    new_value: new_status.clone(),
+                    old_status: current_status.clone(),
+                    new_status: new_status.clone(),
                 };
                 debug!("Received bridge response, sending game event {:?}", event);
                 status_events.send(event);
 
                 *current_status = new_status;
+            }
+            GameboundMessage::TranscriptionReceived { transcription } => {
+                let event = VoiceToTextTranscriptionEvent::Received { transcription };
+                debug!("Received bridge response, sending game event {:?}", event);
+                transcription_events.send(event);
             }
         }
     }

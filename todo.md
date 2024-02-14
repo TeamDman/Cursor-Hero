@@ -1,3 +1,7 @@
+- sfx when service comes online
+- restart memory for voice2text api key
+
+
 - hot mic support for back and forth talking while coding
   - python server needs api with key set on launch
     - key not present -> "who are you, how did you get into my house?"

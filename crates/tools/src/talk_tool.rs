@@ -182,8 +182,8 @@ fn handle_input(
             voice_command_events.send(event);
 
             let event = VoiceToTextStatusEvent::Changed {
-                old_value: voice_status.clone(),
-                new_value: new_status.clone(),
+                old_status: voice_status.clone(),
+                new_status: new_status.clone(),
             };
             info!("Sending event: {:?}", event);
             voice_status_events.send(event);

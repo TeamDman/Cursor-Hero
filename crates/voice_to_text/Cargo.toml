@@ -7,16 +7,20 @@ edition = "2021"
 
 [dependencies]
 bevy = { workspace = true }
-cursor_hero_inference_types = {workspace = true}
+cursor_hero_inference_types = { workspace = true }
 cursor_hero_voice_to_text_types = { workspace = true }
-tokio = {workspace = true}
-reqwest = {workspace = true}
-urlencoding = {workspace = true}
+tokio = { workspace = true }
+tokio-tungstenite = { workspace = true, features = ["native-tls"]}
+futures-util = { workspace = true }
+reqwest = { workspace = true }
+urlencoding = { workspace = true }
 crossbeam-channel = { workspace = true }
-cursor_hero_environment_types = {workspace = true}
-cursor_hero_pointer_types = {workspace = true}
-cursor_hero_math = {workspace = true}
+cursor_hero_environment_types = { workspace = true }
+cursor_hero_pointer_types = { workspace = true }
+cursor_hero_math = { workspace = true }
 bevy_xpbd_2d = { workspace = true }
 rand = { workspace = true }
-rodio = { workspace = true, features=["wav"]}
+rodio = { workspace = true, features = ["wav"] }
 cursor_hero_secret_types = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

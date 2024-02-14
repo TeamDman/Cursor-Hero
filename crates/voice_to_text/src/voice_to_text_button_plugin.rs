@@ -114,9 +114,7 @@ fn update_visuals(
     mut button_text_query: Query<&mut Text>,
 ) {
     for event in events.read() {
-        let VoiceToTextStatusEvent::Changed { new_value: status, .. } = event else {
-            continue;
-        };
+        let VoiceToTextStatusEvent::Changed { new_status: status, .. } = event;
         debug!("Updating VoiceToText Server Control visuals to {:?}", status);
         for button in button_query.iter_mut() {
             let (mut button_sprite, button_children, mut button) = button;

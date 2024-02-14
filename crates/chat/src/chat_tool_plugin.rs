@@ -3,6 +3,7 @@ use cursor_hero_character_types::prelude::*;
 use cursor_hero_chat_types::prelude::*;
 use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_tools::prelude::*;
+use cursor_hero_voice_to_text_types::voice_to_text_types::VoiceToTextTranscriptionEvent;
 use leafwing_input_manager::prelude::*;
 
 pub struct ChatToolPlugin;
@@ -10,7 +11,9 @@ pub struct ChatToolPlugin;
 impl Plugin for ChatToolPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(InputManagerPlugin::<ChatToolAction>::default());
-        app.add_systems(Update, (toolbelt_events, handle_input));
+        app.add_systems(Update, toolbelt_events);
+        app.add_systems(Update, handle_input);
+        app.add_systems(Update, handle_voice_events);
     }
 }
 
@@ -96,5 +99,32 @@ fn handle_input(
             info!("Sending unfocus event {:?}", event);
             chat_input_events.send(event);
         }
+    }
+}
+
+fn handle_voice_events(
+    mut voice_events: EventReader<VoiceToTextTranscriptionEvent>,
+    mut chat_events: EventWriter<ChatEvent>,
+    character_query: Query<Entity, With<MainCharacter>>,
+) {
+    let character_id = match character_query.get_single() {
+        Ok(character_id) => character_id,
+        Err(e) => {
+            warn!("Failed to get main character: {:?}", e);
+            return;
+        }
+    };
+
+    for event in voice_events.read() {
+        let VoiceToTextTranscriptionEvent::Received { transcription } = event;
+        if transcription.is_empty() {
+            continue;
+        }
+        let event = ChatEvent::Chat {
+            character_id,
+            message: transcription.clone(),
+        };
+        info!("Sending chat event {:?}", event);
+        chat_events.send(event);
     }
 }

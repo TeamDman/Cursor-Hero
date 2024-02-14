@@ -8,6 +8,7 @@ impl Plugin for VoiceToTextPingPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, periodic_ping);
         app.add_systems(Update, handle_pong);
+        app.add_systems(Update, init_receiver_once_alive);
     }
 }
 
@@ -61,7 +62,10 @@ fn handle_pong(
                     }
                 } else if status == VoiceToTextStatus::AliveButWeDontKnowTheApiKey {
                     // A server has responded to our ping, assume the API key is the one we tracked when we started the program
-                    VoiceToTextStatus::Alive { api_key, listening: false }
+                    VoiceToTextStatus::Alive {
+                        api_key,
+                        listening: false,
+                    }
                 } else if instant.elapsed() > timeout {
                     // Only accept the dead status if the timeout has been exceeded
                     VoiceToTextStatus::Dead
@@ -74,21 +78,44 @@ fn handle_pong(
                 // Ping is alive, retain the api key
                 current_status.clone()
             }
-            (a,b) => {
-                debug!("Received pong with status {:?} but the current status is {:?}", b, a);
+            (a, b) => {
+                debug!(
+                    "Received pong with status {:?} but the current status is {:?}",
+                    b, a
+                );
                 new_status.clone()
             }
         };
 
         if *current_status != new_status {
             let event = VoiceToTextStatusEvent::Changed {
-                old_value: current_status.clone(),
-                new_value: new_status.clone(),
+                old_status: current_status.clone(),
+                new_status: new_status.clone(),
             };
             debug!("Sending event {:?}", event);
             status_events.send(event);
 
             *current_status = new_status;
         }
+    }
+}
+
+fn init_receiver_once_alive(
+    mut command_events: EventWriter<VoiceToTextCommandEvent>,
+    mut status_events: EventReader<VoiceToTextStatusEvent>,
+) {
+    for event in status_events.read() {
+        let VoiceToTextStatusEvent::Changed { new_status, old_status } = event;
+        if !matches!(old_status, VoiceToTextStatus::Starting { .. }) {
+            continue;
+        }
+        let VoiceToTextStatus::Alive { api_key, .. } = new_status else {
+            continue;
+        };
+        let event = VoiceToTextCommandEvent::ConnectReceiver {
+            api_key: api_key.clone(),
+        };
+        debug!("Now alive, sending event: {:?}", event);
+        command_events.send(event);
     }
 }

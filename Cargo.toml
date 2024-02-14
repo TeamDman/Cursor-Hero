@@ -108,6 +108,8 @@ urlencoding = "2.1.3"
 chrono = "0.4.33"
 rodio = { version = "0.17", default-features = false }
 zeroize = "1.7.0"
+tokio-tungstenite = "0.21.0"
+futures-util = "0.3.30"
 
 [dependencies]
 cursor_hero_plugins = { workspace = true }

@@ -32,16 +32,24 @@ pub enum VoiceToTextPingEvent {
 #[derive(Event, Debug, Reflect)]
 pub enum VoiceToTextStatusEvent {
     Changed {
-        old_value: VoiceToTextStatus,
-        new_value: VoiceToTextStatus,
+        old_status: VoiceToTextStatus,
+        new_status: VoiceToTextStatus,
     },
-    Startup,
 }
+
+#[derive(Event, Debug, Reflect)]
+pub enum VoiceToTextTranscriptionEvent {
+    Received { transcription: String },
+}
+
 #[derive(Event, Debug, Reflect)]
 pub enum VoiceToTextCommandEvent {
     Startup,
     SetListening {
         listening: bool,
+        api_key: SecretString,
+    },
+    ConnectReceiver {
         api_key: SecretString,
     },
 }
