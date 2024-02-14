@@ -33,7 +33,7 @@ fn handle_startup_event(
 
     *glados_tts_status = GladosTtsStatus::Starting {
         instant: Instant::now(),
-        timeout: Duration::from_secs(5),
+        timeout: Duration::from_secs(60),
     };
     let event = GladosTtsStatusEvent::Changed {
         new_value: *glados_tts_status,

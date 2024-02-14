@@ -33,7 +33,7 @@ fn handle_startup_event(
 
     *ollama_status = OllamaStatus::Starting {
         instant: Instant::now(),
-        timeout: Duration::from_secs(5),
+        timeout: Duration::from_secs(60),
     };
     let event = OllamaStatusEvent::Changed {
         new_value: *ollama_status,
