@@ -3,8 +3,10 @@ use reqwest::Client;
 use std::error::Error;
 use std::process::Command;
 
+pub const URL: &str = "https://localhost:9127";
+
 pub async fn transcribe(prompt: Vec<u8>) -> Result<String, Box<dyn Error>> {
-    let url = "http://localhost:8756/todo";
+    let url = format!("{}/transcribe", URL);
     let client = Client::new();
     let response = client.post(url).body(prompt).send().await?;
     let bytes = response.bytes().await?;
@@ -14,7 +16,7 @@ pub async fn transcribe(prompt: Vec<u8>) -> Result<String, Box<dyn Error>> {
 
 pub async fn get_status() -> Result<VoiceToTextStatus, Box<dyn Error>> {
     let client = Client::new();
-    match client.get("http://localhost:8756/").send().await {
+    match client.get(format!("{}/", URL)).send().await {
         Ok(res) => match res.status().is_success() {
             true => Ok(VoiceToTextStatus::Alive),
             false => Ok(VoiceToTextStatus::Dead),
