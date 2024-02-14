@@ -30,7 +30,7 @@ pub async fn generate(
         if let Some(stop) = options.stop {
             options_json["stop"] = serde_json::json!(stop);
         }
-        
+
         payload["options"] = options_json;
     }
 
@@ -54,7 +54,7 @@ pub async fn generate(
         Err(Box::new(std::io::Error::new(
             std::io::ErrorKind::Other,
             format!("Failed to call API. Status: {} Body: {}", status, body),
-        )))    
+        )))
     }
 }
 
@@ -76,7 +76,7 @@ pub fn start() -> Result<(), Box<dyn Error>> {
             "--window",
             "0",
             "--profile",
-            "Ubuntu-22.04",
+            "Ubuntu 22.04.3 LTS",
             "--colorScheme",
             "Ubuntu-22.04-ColorScheme",
             "--title",
@@ -87,6 +87,33 @@ pub fn start() -> Result<(), Box<dyn Error>> {
             "--",
             "ollama",
             "serve",
+        ])
+        .spawn()
+    {
+        Ok(_) => Ok(()),
+        Err(e) => Err(Box::new(e)),
+    }
+}
+
+pub fn start_terminal() -> Result<(), Box<dyn Error>> {
+    match std::process::Command::new("wt")
+        .args([
+            "--window",
+            "0",
+            "--profile",
+            "Ubuntu 22.04.3 LTS",
+            "--colorScheme",
+            "Ubuntu-22.04-ColorScheme",
+            "--title",
+            "Ollama",
+            "wsl",
+            "-d",
+            "Ubuntu-22.04",
+            "--",
+            "bash",
+            "-l",
+            "-c",
+            "cd ~ && exec pwsh",
         ])
         .spawn()
     {

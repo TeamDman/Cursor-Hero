@@ -45,3 +45,21 @@ pub enum OllamaStatusEvent {
     Changed { new_value: OllamaStatus },
     Startup,
 }
+
+
+
+
+#[derive(Component, Debug, Reflect, Default)]
+pub struct OllamaTerminalButton {
+    pub visual_state: OllamaTerminalButtonVisualState,
+}
+#[derive(Debug, Reflect, Eq, PartialEq, Default)]
+pub enum OllamaTerminalButtonVisualState {
+    #[default]
+    Default,
+}
+#[derive(Event, Debug, Reflect)]
+pub enum OllamaTerminalEvent {
+    Startup,
+}
+

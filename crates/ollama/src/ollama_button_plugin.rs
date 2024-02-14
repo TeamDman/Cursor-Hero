@@ -10,7 +10,9 @@ impl Plugin for OllamaButtonPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, populate_new_host_environments);
         app.add_systems(Update, update_visuals);
-        app.add_systems(Update, click_listener);
+        app.add_systems(Update, status_click_listener);
+        app.add_systems(Update, terminal_click_listener);
+        app.add_systems(Update, handle_terminal_events);
     }
 }
 
@@ -63,6 +65,44 @@ fn populate_new_host_environments(
                         )
                         .with_alignment(TextAlignment::Center),
                         transform: Transform::from_xyz(0.0, 70.0, 1.0),
+                        ..default()
+                    },));
+                });
+            parent
+                .spawn((
+                    OllamaTerminalButton::default(),
+                    Name::new("Ollama Terminal Button"),
+                    SpriteBundle {
+                        sprite: Sprite {
+                            custom_size: Some(Vec2::new(200.0, 100.0)),
+                            color: Color::rgb(0.0, 0.6, 0.8),
+                            ..default()
+                        },
+                        transform: Transform::from_translation(Vec3::new(
+                            1920.0 / 2.0,
+                            -1080.0 - 350.0,
+                            0.0,
+                        )),
+                        ..default()
+                    },
+                    Clickable,
+                    Hoverable,
+                    RigidBody::Static,
+                    Sensor,
+                    Collider::cuboid(200.0, 100.0),
+                ))
+                .with_children(|parent| {
+                    parent.spawn((Text2dBundle {
+                        text: Text::from_section(
+                            "open terminal".to_string(),
+                            TextStyle {
+                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                font_size: 32.0,
+                                color: Color::WHITE,
+                            },
+                        )
+                        .with_alignment(TextAlignment::Center),
+                        transform: Transform::from_xyz(0.0, 0.0, 1.0),
                         ..default()
                     },));
                 });
@@ -160,7 +200,7 @@ fn update_visuals(
     }
 }
 
-fn click_listener(
+fn status_click_listener(
     mut click_events: EventReader<ClickEvent>,
     button_query: Query<&OllamaStatusButton>,
     mut status_events: EventWriter<OllamaStatusEvent>,
@@ -200,4 +240,45 @@ fn click_listener(
             status_events.send(event);
         }
     }
+}
+
+fn terminal_click_listener(
+    mut click_events: EventReader<ClickEvent>,
+    button_query: Query<&OllamaTerminalButton>,
+    mut terminal_events: EventWriter<OllamaTerminalEvent>,
+) {
+    for event in click_events.read() {
+        let ClickEvent::Clicked {
+            target_id,
+            pointer_id: _,
+            way,
+        } = event
+        else {
+            continue;
+        };
+        if way != &Way::Left {
+            continue;
+        }
+        if button_query.get(*target_id).is_ok() {
+            info!("Ollama terminal clicked");
+            let event = OllamaTerminalEvent::Startup;
+            debug!("Sending event {:?}", event);
+            terminal_events.send(event);
+        }
+    }
+}
+
+fn handle_terminal_events(
+    mut terminal_events: EventReader<OllamaTerminalEvent>,
+) {
+    let should_start = terminal_events.read().any(|event| {
+        matches!(event, OllamaTerminalEvent::Startup)
+    });
+    if should_start {
+        info!("Opening terminal");
+        if let Err(e) = crate::ollama::start_terminal() {
+            error!("Failed to start terminal: {:?}", e);
+        }
+    }
+    terminal_events.clear();
 }
