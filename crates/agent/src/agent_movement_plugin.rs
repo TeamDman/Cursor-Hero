@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_xpbd_2d::components::{AngularVelocity, Rotation};
 use cursor_hero_agent_types::prelude::*;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_movement_tool_types::prelude::*;
@@ -11,6 +12,7 @@ pub struct AgentMovementPlugin;
 impl Plugin for AgentMovementPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, agent_tool_movement);
+        app.add_systems(Update, keep_upright);
     }
 }
 
@@ -41,5 +43,13 @@ fn agent_tool_movement(
                 tool.press(MovementToolAction::Move);
             }
         }
+    }
+}
+
+fn keep_upright(
+    mut character_query: Query<(&Rotation, &mut AngularVelocity), (With<Character>, With<Agent>)>,
+) {
+    for (rotation, mut angular_velocity) in character_query.iter_mut() {
+        *angular_velocity = AngularVelocity(rotation.sin() * -1.0);
     }
 }
