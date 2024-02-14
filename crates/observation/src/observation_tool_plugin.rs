@@ -68,16 +68,30 @@ fn tool_tick(
                 .iter()
                 .filter(|entry| entry.instant > last_inference)
             {
-                let is_self_chat = matches!(entry.origin, ObservationEvent::Chat { character_id: event_character_id, .. } if event_character_id == character_id);
-                if is_self_chat {
-                    whats_new = WhatsNew::SelfChat;
-                } else {
-                    whats_new = WhatsNew::Something;
-                    break;
+                whats_new = match (whats_new, &entry.origin) {
+                    // The agent is talking to itself
+                    (
+                        WhatsNew::Nothing | WhatsNew::SelfChat,
+                        ObservationEvent::Chat {
+                            character_id: event_character_id,
+                            ..
+                        },
+                    ) if *event_character_id == character_id => WhatsNew::SelfChat,
+                    // A human has responded but they are probably still thinking
+                    (
+                        WhatsNew::Nothing
+                        | WhatsNew::SelfChat
+                        | WhatsNew::ChatReceivedButTheyProbablyStillThinking,
+                        ObservationEvent::Chat { message, .. },
+                    ) if message.ends_with("...") => {
+                        WhatsNew::ChatReceivedButTheyProbablyStillThinking
+                    }
+                    // A human has responded
+                    (_, ObservationEvent::Chat { .. }) => WhatsNew::ChatReceived,
                 }
             }
         } else if !character_observation_buffer.observations.is_empty() {
-            whats_new = WhatsNew::Something;
+            whats_new = WhatsNew::ChatReceived;
         }
 
         // Update the field for debug viewing in the inspector
@@ -90,7 +104,7 @@ fn tool_tick(
         }
 
         if let Some(last_inference) = tool.last_inference {
-            if last_inference + whats_new.cooldown() > Instant::now() {
+            if last_inference + whats_new.reply_delay() > Instant::now() {
                 continue;
             }
         }

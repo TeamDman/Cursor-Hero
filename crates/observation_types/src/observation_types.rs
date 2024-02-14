@@ -30,20 +30,24 @@ pub enum WhatsNew {
     // to if a chat was received from another entity.
     SelfChat,
     Nothing,
-    Something,
+    ChatReceived,
+    ChatReceivedButTheyProbablyStillThinking
 }
 
 impl WhatsNew {
-    pub fn cooldown(&self) -> Duration {
+    pub fn reply_delay(&self) -> Duration {
         match self {
             WhatsNew::SelfChat => {
                 Duration::from_secs(60)
             }
             WhatsNew::Nothing => {
-                Duration::from_secs(120)
+                Duration::MAX
             }
-            WhatsNew::Something => {
+            WhatsNew::ChatReceived => {
                 Duration::ZERO
+            }
+            WhatsNew::ChatReceivedButTheyProbablyStillThinking => {
+                Duration::from_secs(25)
             }
         }
     }

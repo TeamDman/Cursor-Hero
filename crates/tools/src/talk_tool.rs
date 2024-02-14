@@ -35,7 +35,7 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Keyboard { toolbelt_id } = event {
+        if let PopulateToolbeltEvent::Keyboard { toolbelt_id } | PopulateToolbeltEvent::Default { toolbelt_id } = event {
             ToolSpawnConfig::<TalkTool, TalkToolAction>::new(TalkTool, *toolbelt_id, event)
                 .guess_name(file!())
                 .guess_image(file!(), &asset_server, "png")
