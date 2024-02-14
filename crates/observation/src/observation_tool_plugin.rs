@@ -83,7 +83,11 @@ fn tool_tick(
                         | WhatsNew::SelfChat
                         | WhatsNew::ChatReceivedButTheyProbablyStillThinking,
                         ObservationEvent::Chat { message, .. },
-                    ) if message.ends_with("...") => {
+                    ) if message.ends_with("...")
+                        || !message.ends_with(".")
+                        || !message.ends_with("!")
+                        || !message.ends_with("?") =>
+                    {
                         WhatsNew::ChatReceivedButTheyProbablyStillThinking
                     }
                     // A human has responded
