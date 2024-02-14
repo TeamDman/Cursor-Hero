@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use crossbeam_channel::bounded;
 use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
+use cursor_hero_secret_types::secrets_types::SecretString;
 use cursor_hero_voice_to_text_types::prelude::*;
 use std::thread;
 use std::time::Duration;
@@ -20,7 +21,7 @@ impl Plugin for VoiceToTextStatusWorkerPlugin {
 #[derive(Debug)]
 enum GameboundMessage {
     Pong { status: VoiceToTextStatus },
-    Starting { api_key: String },
+    Starting { api_key: SecretString },
 }
 
 #[derive(Debug)]
@@ -29,7 +30,7 @@ enum ThreadboundMessage {
     Startup,
     SetListening {
         listening: bool,
-        api_key: String,
+        api_key: SecretString,
     },
 }
 

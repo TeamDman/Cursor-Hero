@@ -1,3 +1,4 @@
+#![feature(trivial_bounds)]
 pub mod voice_to_text_types_plugin;
 pub mod voice_to_text_types;
 

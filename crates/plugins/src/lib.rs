@@ -62,10 +62,14 @@ use cursor_hero_text_asset::prelude::*;
 use cursor_hero_text_asset_types::prelude::*;
 use cursor_hero_voice_to_text::prelude::*;
 use cursor_hero_voice_to_text_types::prelude::*;
+use cursor_hero_secret::prelude::*;
+use cursor_hero_secret_types::prelude::*;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(SecretsTypesPlugin);
+        app.add_plugins(SecretsPlugin);
         app.add_plugins(VoiceToTextTypesPlugin);
         app.add_plugins(VoiceToTextPlugin);
         app.add_plugins(GladosTtsTypesPlugin);

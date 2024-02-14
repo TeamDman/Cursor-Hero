@@ -1,3 +1,4 @@
+use cursor_hero_secret_types::secrets_types::SecretString;
 use cursor_hero_voice_to_text_types::prelude::*;
 use rand::distributions::Alphanumeric;
 use rand::Rng;
@@ -27,15 +28,16 @@ pub async fn get_status() -> Result<VoiceToTextStatus, Box<dyn Error>> {
     }
 }
 
-fn generate_api_key(len: usize) -> String {
+fn generate_api_key(len: usize) -> SecretString {
     let rng = rand::thread_rng();
-    rng.sample_iter(&Alphanumeric)
+    let inner = rng.sample_iter(&Alphanumeric)
         .take(len)
         .map(char::from)
-        .collect()
+        .collect();
+    SecretString::new(inner)
 }
 
-pub fn start() -> Result<String, Box<dyn Error>> {
+pub fn start() -> Result<SecretString, Box<dyn Error>> {
     let port = 9127;
     let api_key = generate_api_key(32);
     match std::process::Command::new("wt")
@@ -52,7 +54,7 @@ pub fn start() -> Result<String, Box<dyn Error>> {
             format!(r"cd D:\Repos\ml\voice2text && conda activate whisperx && python .\transcribe_hotkey_typer.py $env:port $env:api_key").as_str(),
         ])
         .env("port", port.to_string())
-        .env("api_key", api_key.clone())
+        .env("api_key", api_key.expose_secret())
         .spawn()
     {
         Ok(_) => Ok(api_key),
@@ -70,13 +72,13 @@ pub fn start_vscode() -> Result<(), Box<dyn Error>> {
     }
 }
 
-pub async fn set_listening(listening: bool, api_key: String) -> Result<(), Box<dyn Error>> {
+pub async fn set_listening(listening: bool, api_key: SecretString) -> Result<(), Box<dyn Error>> {
     let client = Client::new();
     let endpoint = match listening {
         true => format!("{}/start_listening", URL),
         false => format!("{}/stop_listening", URL),
     };
-    match client.post(endpoint).header(reqwest::header::AUTHORIZATION, api_key).send().await {
+    match client.post(endpoint).header(reqwest::header::AUTHORIZATION, api_key.expose_secret()).send().await {
         Ok(res) => match res.status().is_success() {
             true => Ok(()),
             false => Err(Box::new(std::io::Error::new(

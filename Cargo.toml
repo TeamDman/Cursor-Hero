@@ -9,6 +9,8 @@ members = ["crates/*", "other/gamepad_hell", "other/uparrow-enter"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace.dependencies]
+cursor_hero_secret_types = { path = "./crates/secret_types" }
+cursor_hero_secret = { path = "./crates/secret" }
 cursor_hero_voice_to_text_types = { path = "./crates/voice_to_text_types" }
 cursor_hero_voice_to_text = { path = "./crates/voice_to_text" }
 cursor_hero_glados_tts_types = { path = "./crates/glados_tts_types" }
@@ -105,6 +107,7 @@ reqwest = "0.11.24"
 urlencoding = "2.1.3"
 chrono = "0.4.33"
 rodio = { version = "0.17", default-features = false }
+zeroize = "1.7.0"
 
 [dependencies]
 cursor_hero_plugins = { workspace = true }

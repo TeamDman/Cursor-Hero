@@ -3,14 +3,15 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 use bevy::utils::Instant;
+use cursor_hero_secret_types::prelude::*;
 
-#[derive(Reflect, Resource, Default, Eq, PartialEq, Clone)]
+#[derive(Reflect, Resource, Default, Debug, Clone, Eq, PartialEq)]
 #[reflect(Resource)]
 pub enum VoiceToTextStatus {
     #[default]
     Unknown,
     Alive {
-        api_key: String,
+        api_key: SecretString,
         listening: bool,
     },
     AliveButWeDontKnowTheApiKey,
@@ -18,39 +19,8 @@ pub enum VoiceToTextStatus {
     Starting {
         instant: Instant,
         timeout: Duration,
-        api_key: String,
+        api_key: SecretString,
     },
-}
-impl Debug for VoiceToTextStatus {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            VoiceToTextStatus::Unknown => write!(f, "Unknown"),
-            VoiceToTextStatus::Alive { api_key, listening } => {
-                write!(
-                    f,
-                    "Alive {{ api_key: {}, listening: {} }}",
-                    match api_key.len() {
-                        0 => "<empty>".to_string(),
-                        _ => "<redacted>".to_string(),
-                    },
-                    listening
-                )
-            }
-            VoiceToTextStatus::AliveButWeDontKnowTheApiKey => {
-                write!(f, "AliveButWeDontKnowTheApiKey")
-            }
-            VoiceToTextStatus::Dead => write!(f, "Dead"),
-            VoiceToTextStatus::Starting {
-                instant,
-                timeout,
-                api_key,
-            } => write!(
-                f,
-                "Starting {{ instant: {:?}, timeout: {:?}, api_key: {} }}",
-                instant, timeout, api_key
-            ),
-        }
-    }
 }
 
 #[derive(Event, Debug, Reflect)]
@@ -67,7 +37,10 @@ pub enum VoiceToTextStatusEvent {
 #[derive(Event, Debug, Reflect)]
 pub enum VoiceToTextCommandEvent {
     Startup,
-    SetListening { listening: bool, api_key: String },
+    SetListening {
+        listening: bool,
+        api_key: SecretString,
+    },
 }
 
 #[derive(Component, Debug, Reflect, Default)]

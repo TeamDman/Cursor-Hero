@@ -19,3 +19,4 @@ cursor_hero_math = {workspace = true}
 bevy_xpbd_2d = { workspace = true }
 rand = { workspace = true }
 rodio = { workspace = true, features=["wav"]}
+cursor_hero_secret_types = { workspace = true }
