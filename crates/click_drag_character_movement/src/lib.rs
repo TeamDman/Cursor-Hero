@@ -33,6 +33,7 @@ struct Anchor {
 }
 
 #[derive(Resource, Reflect, Default)]
+#[reflect(Resource)]
 struct MouseDragState {
     anchor: Option<Anchor>,
     is_dragging: bool,

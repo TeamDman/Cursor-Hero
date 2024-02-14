@@ -11,8 +11,9 @@ impl Plugin for IconPlugin {
     }
 }
 
-#[derive(Resource)]
-struct WindowIconResource(Handle<Image>, SystemId);
+#[derive(Resource, Reflect, Default)]
+#[reflect(Resource)]
+struct WindowIconResource(Handle<Image>);
 
 fn load_window_icon(mut commands: Commands, asset_server: Res<AssetServer>) {
     let icon_handle = asset_server.load("textures/icon.png");
@@ -35,7 +36,7 @@ fn load_window_icon(mut commands: Commands, asset_server: Res<AssetServer>) {
         }
 
         // add handle holder with system id for later removal
-        world.insert_resource(WindowIconResource(icon_handle, system_id));
+        world.insert_resource(WindowIconResource(icon_handle));
     });
 }
 
@@ -43,7 +44,7 @@ fn update_window_icon(
     windows: NonSend<WinitWindows>,
     materials: Res<Assets<Image>>,
     icon_resource: Res<WindowIconResource>,
-    mut commands: Commands,
+    // mut commands: Commands,
     mut flag: Local<bool>,
 ) {
     if *flag {
@@ -58,29 +59,28 @@ fn update_window_icon(
         info!("Updated window icon");
 
         // remove this system
-        let system_id = icon_resource.1;
-        commands.add(move |world: &mut World| {
-            match world.remove_system(system_id) {
-                Ok(_) => info!("Removed update_window_icon system since it did its job"),
-                Err(e) => error!("Failed to remove update_window_icon system: {}", e),
-            }
-            let mut schedules = world.resource_mut::<Schedules>();
-            if let Some(_schedule) = schedules.get_mut(Update) {
-                /*
-                https://discord.com/channels/691052431525675048/749335865876021248/1138225592064561243
-                Alice 🌹 — 08/07/2023 5:42 PM
-                We're also missing a Schedule::remove_system API, with a solution for
-                a) dependency invalidation and
-                b) disambiguation of multiple copies of a system in the same schedule
-                                     */
+        // commands.add(move |world: &mut World| {
+        //     match world.remove_system(system_id) {
+        //         Ok(_) => info!("Removed update_window_icon system since it did its job"),
+        //         Err(e) => error!("Failed to remove update_window_icon system: {}", e),
+        //     }
+        //     let mut schedules = world.resource_mut::<Schedules>();
+        //     if let Some(_schedule) = schedules.get_mut(Update) {
+        //         /*
+        //         https://discord.com/channels/691052431525675048/749335865876021248/1138225592064561243
+        //         Alice 🌹 — 08/07/2023 5:42 PM
+        //         We're also missing a Schedule::remove_system API, with a solution for
+        //         a) dependency invalidation and
+        //         b) disambiguation of multiple copies of a system in the same schedule
+        //                              */
 
-                // this method does not exist yet.
-                // should probably make a PR for it
-                // and should also include a simplified way to remove a system from a schedule
-                // maybe a .remove_when similar to .run_if
-                // schedule.remove_system(system_id);
-            }
-        });
+        //         // this method does not exist yet.
+        //         // should probably make a PR for it
+        //         // and should also include a simplified way to remove a system from a schedule
+        //         // maybe a .remove_when similar to .run_if
+        //         // schedule.remove_system(system_id);
+        //     }
+        // });
         *flag = true;
     }
 }

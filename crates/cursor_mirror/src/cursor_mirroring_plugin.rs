@@ -16,7 +16,8 @@ impl Plugin for CursorMirroringPlugin {
 #[derive(Component, Reflect)]
 pub struct CursorMirror;
 
-#[derive(Resource, Deref, Default)]
+#[derive(Resource, Deref, Default, Reflect)]
+#[reflect(Resource)]
 pub struct CursorPosition(pub IVec2);
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {

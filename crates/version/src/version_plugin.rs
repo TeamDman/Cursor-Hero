@@ -8,5 +8,6 @@ impl Plugin for VersionPlugin {
     }
 }
 
-#[derive(Resource)]
+#[derive(Resource, Reflect, Default)]
+#[reflect(Resource)]
 pub struct Version(pub String);

@@ -18,7 +18,8 @@ impl Plugin for ActiveInputStatePlugin {
     }
 }
 
-#[derive(Resource, Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
+#[derive(Resource, Reflect, Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
+#[reflect(Resource)]
 pub enum ActiveInput {
     #[default]
     MouseAndKeyboard,

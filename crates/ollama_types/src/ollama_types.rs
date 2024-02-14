@@ -4,6 +4,7 @@ use bevy::prelude::*;
 use bevy::utils::Instant;
 
 #[derive(Reflect, Resource, Default, Debug, Eq, PartialEq, Clone, Copy)]
+#[reflect(Resource)]
 pub enum OllamaStatus {
     #[default]
     Unknown,

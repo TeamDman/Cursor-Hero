@@ -31,6 +31,7 @@ pub struct MaterializedTextPrompt {
 }
 
 #[derive(Resource, Debug, Default, Reflect, PartialEq, Eq, Clone)]
+#[reflect(Resource)]
 pub struct TextPromptHandles {
     pub raw: Handle<TextAsset>,
     pub chat: Handle<TextAsset>,

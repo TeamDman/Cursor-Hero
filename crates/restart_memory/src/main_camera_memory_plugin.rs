@@ -40,7 +40,8 @@ fn handle_restore_errors(In(result): In<Result<RestoreSuccess, RestoreError>>) {
     }
 }
 
-#[derive(Debug, Resource)]
+#[derive(Debug, Resource, Reflect)]
+#[reflect(Resource)]
 struct MainCameraMemoryConfig {
     pub debounce_timer: Timer,
 }
