@@ -1,6 +1,9 @@
 use std::thread;
 
 use bevy::prelude::*;
+use cursor_hero_voice_to_text_types::voice_to_text_types::VoiceToTextCommandEvent;
+use cursor_hero_voice_to_text_types::voice_to_text_types::VoiceToTextStatus;
+use cursor_hero_voice_to_text_types::voice_to_text_types::VoiceToTextStatusEvent;
 use leafwing_input_manager::prelude::*;
 
 use crossbeam_channel::bounded;
@@ -44,7 +47,8 @@ fn toolbelt_events(
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
 enum TalkToolAction {
-    Listen,
+    PushToTalk,
+    ToggleAlwaysOn,
 }
 
 #[derive(Debug)]
@@ -66,24 +70,28 @@ struct Bridge {
 impl TalkToolAction {
     fn default_wheel_gamepad_binding(&self) -> UserInput {
         match self {
-            Self::Listen => GamepadButtonType::Select.into(),
+            Self::PushToTalk => GamepadButtonType::Select.into(),
+            Self::ToggleAlwaysOn => GamepadButtonType::Start.into(),
         }
     }
 
     fn default_wheel_mkb_binding(&self) -> UserInput {
         match self {
-            Self::Listen => KeyCode::ShiftRight.into(),
+            Self::PushToTalk => KeyCode::ShiftRight.into(),
+            Self::ToggleAlwaysOn => KeyCode::Scroll.into(),
         }
     }
     fn talk_wheel_gamepad_binding(&self) -> UserInput {
         match self {
-            Self::Listen => GamepadButtonType::Select.into(),
+            Self::PushToTalk => GamepadButtonType::Select.into(),
+            Self::ToggleAlwaysOn => GamepadButtonType::Start.into(),
         }
     }
 
     fn talk_wheel_mkb_binding(&self) -> UserInput {
         match self {
-            Self::Listen => KeyCode::ShiftRight.into(),
+            Self::PushToTalk => KeyCode::ShiftRight.into(),
+            Self::ToggleAlwaysOn => KeyCode::Scroll.into(),
         }
     }
 }
@@ -130,9 +138,12 @@ fn spawn_worker_thread(mut commands: Commands) {
 fn handle_input(
     tools: Query<&ActionState<TalkToolAction>, With<ActiveTool>>,
     bridge: ResMut<Bridge>,
+    mut voice_command_events: EventWriter<VoiceToTextCommandEvent>,
+    mut voice_status_events: EventWriter<VoiceToTextStatusEvent>,
+    mut voice_status: ResMut<VoiceToTextStatus>,
 ) {
     for t_act in tools.iter() {
-        if t_act.just_pressed(TalkToolAction::Listen) {
+        if t_act.just_pressed(TalkToolAction::PushToTalk) {
             info!("Listen button pressed");
             match bridge
                 .sender
@@ -144,7 +155,7 @@ fn handle_input(
                 }
             }
         }
-        if t_act.just_released(TalkToolAction::Listen) {
+        if t_act.just_released(TalkToolAction::PushToTalk) {
             info!("Listen button released");
             match bridge.sender.send(ThreadMessage::ListenButton(Motion::Up)) {
                 Ok(_) => {}
@@ -152,6 +163,28 @@ fn handle_input(
                     error!("Failed to send thread message: {:?}", e);
                 }
             }
+        }
+        if t_act.just_pressed(TalkToolAction::ToggleAlwaysOn) {
+            let VoiceToTextStatus::Alive { api_key, listening } = voice_status.clone() else {
+                warn!("VoiceToTextStatus not Alive, ignoring event");
+                continue;
+            };
+            let status = VoiceToTextStatus::Alive {
+                api_key: api_key.clone(),
+                listening: !listening,
+            };
+            *voice_status = status.clone();
+
+            let event = VoiceToTextCommandEvent::SetListening {
+                listening: !listening,
+                api_key: api_key
+            };
+            info!("Sending event: {:?}", event);
+            voice_command_events.send(event);
+
+            let event = VoiceToTextStatusEvent::Changed { new_value: status };
+            info!("Sending event: {:?}", event);
+            voice_status_events.send(event);
         }
     }
 }

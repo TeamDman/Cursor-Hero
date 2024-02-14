@@ -48,6 +48,7 @@ fn handle_pong(
             ) => {
                 if let VoiceToTextStatus::Alive {
                     api_key: other_api_key,
+                    listening,
                 } = status
                 {
                     // Unlikely branch, but lets be safe
@@ -56,10 +57,11 @@ fn handle_pong(
                     }
                     VoiceToTextStatus::Alive {
                         api_key: other_api_key,
+                        listening,
                     }
                 } else if status == VoiceToTextStatus::AliveButWeDontKnowTheApiKey {
                     // A server has responded to our ping, assume the API key is the one we tracked when we started the program
-                    VoiceToTextStatus::Alive { api_key }
+                    VoiceToTextStatus::Alive { api_key, listening: false }
                 } else if instant.elapsed() > timeout {
                     // Only accept the dead status if the timeout has been exceeded
                     VoiceToTextStatus::Dead

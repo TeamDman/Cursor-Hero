@@ -49,8 +49,10 @@ pub fn start() -> Result<String, Box<dyn Error>> {
             "--",
             "pwsh",
             "-Command",
-            format!(r"cd D:\Repos\ml\voice2text && conda activate whisperx && python .\transcribe_hotkey_typer.py {} {}", port, api_key).as_str(),
+            format!(r"cd D:\Repos\ml\voice2text && conda activate whisperx && python .\transcribe_hotkey_typer.py $env:port $env:api_key").as_str(),
         ])
+        .env("port", port.to_string())
+        .env("api_key", api_key.clone())
         .spawn()
     {
         Ok(_) => Ok(api_key),
@@ -64,6 +66,27 @@ pub fn start_vscode() -> Result<(), Box<dyn Error>> {
         .spawn()
     {
         Ok(_) => Ok(()),
+        Err(e) => Err(Box::new(e)),
+    }
+}
+
+pub async fn set_listening(listening: bool, api_key: String) -> Result<(), Box<dyn Error>> {
+    let client = Client::new();
+    let endpoint = match listening {
+        true => format!("{}/start_listening", URL),
+        false => format!("{}/stop_listening", URL),
+    };
+    match client.post(endpoint).header(reqwest::header::AUTHORIZATION, api_key).send().await {
+        Ok(res) => match res.status().is_success() {
+            true => Ok(()),
+            false => Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("Failed to set listening: {:?}", match res.text().await {
+                    Ok(text) => text,
+                    Err(e) => format!("Failed to get response text during failure handler: {}", e),
+                }),
+            )))?,
+        },
         Err(e) => Err(Box::new(e)),
     }
 }

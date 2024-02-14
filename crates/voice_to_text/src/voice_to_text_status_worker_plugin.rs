@@ -27,6 +27,10 @@ enum GameboundMessage {
 enum ThreadboundMessage {
     Ping,
     Startup,
+    SetListening {
+        listening: bool,
+        api_key: String,
+    },
 }
 
 #[derive(Resource)]
@@ -90,6 +94,17 @@ fn create_worker_thread(mut commands: Commands) {
                                 }
                             };
                         }
+                        ThreadboundMessage::SetListening { listening, api_key }=> {
+                            debug!("Worker received set listening request: {}", listening);
+                            match crate::voice_to_text::set_listening(listening, api_key).await {
+                                Ok(()) => {
+                                    debug!("VoiceToText API set listening={} successfully", listening);
+                                }
+                                Err(e) => {
+                                    error!("Failed to set listening: {:?}", e);
+                                }
+                            }
+                        }
                     }
                     std::thread::sleep(std::time::Duration::from_millis(50));
                 }
@@ -115,16 +130,22 @@ fn events_to_bridge(
         }
     }
 
-    // Detect startup requests
-    let starting = command_events
-        .read()
-        .any(|event| matches!(event, VoiceToTextCommandEvent::Startup));
-    if starting {
-        command_events.clear();
-        let msg = ThreadboundMessage::Startup;
-        debug!("Sending bridge message: {:?}", msg);
-        if let Err(e) = bridge.sender.send(msg) {
-            error!("Threadbound channel failure: {}", e);
+    for event in command_events.read() {
+        match event {
+            VoiceToTextCommandEvent::Startup => {
+                let msg = ThreadboundMessage::Startup;
+                debug!("Sending bridge message: {:?}", msg);
+                if let Err(e) = bridge.sender.send(msg) {
+                    error!("Threadbound channel failure: {}", e);
+                }
+            }
+            VoiceToTextCommandEvent::SetListening { listening, api_key } => {
+                let msg = ThreadboundMessage::SetListening { listening: *listening, api_key: api_key.clone() };
+                debug!("Sending bridge message: {:?}", msg);
+                if let Err(e) = bridge.sender.send(msg) {
+                    error!("Threadbound channel failure: {}", e);
+                }
+            }
         }
     }
 }

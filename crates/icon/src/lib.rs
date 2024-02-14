@@ -1,4 +1,3 @@
-use bevy::ecs::system::SystemId;
 use bevy::prelude::*;
 use bevy::winit::WinitWindows;
 use winit::window::Icon;

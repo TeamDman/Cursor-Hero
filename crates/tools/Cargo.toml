@@ -16,6 +16,7 @@ cursor_hero_winutils = { workspace = true }
 cursor_hero_camera = { workspace = true }
 cursor_hero_inference_types = { workspace = true }
 cursor_hero_level_bounds = { workspace = true }
+cursor_hero_voice_to_text_types = { workspace = true }
 cursor_hero_environment_types = { workspace = true }
 cursor_hero_character_types = { workspace = true }
 cursor_hero_sprint_tool_types = { workspace = true }
