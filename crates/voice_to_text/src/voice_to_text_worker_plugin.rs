@@ -114,12 +114,12 @@ fn create_worker_thread(mut commands: Commands) {
                             }
                         }
                         ThreadboundMessage::ConnectReceiver { api_key } => {
-                            debug!("Worker received connect receiver request");
+                            info!("Worker received connect receiver request");
                             match crate::voice_to_text::connect_receiver(game_tx.clone(), api_key)
                                 .await
                             {
                                 Ok(()) => {
-                                    debug!("VoiceToText API connected receiver successfully");
+                                    info!("VoiceToText API connected receiver successfully");
                                 }
                                 Err(e) => {
                                     error!("Failed to connect receiver: {:?}", e);

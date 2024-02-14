@@ -38,7 +38,7 @@ fn handle_pong(
         };
         // identify the new state based on the pong
         // if the pong says dead and the current state is starting, only change to dead if the timeout has been exceeded
-        let new_status = match (current_status.clone(), new_status.clone()) {
+        let new_status = match (&*current_status, new_status) {
             (
                 VoiceToTextStatus::Starting {
                     instant,
@@ -57,16 +57,16 @@ fn handle_pong(
                         warn!("Received pong with Alive status with an api key different from the one we tracked when starting the program, overwriting api key")
                     }
                     VoiceToTextStatus::Alive {
-                        api_key: other_api_key,
-                        listening,
+                        api_key: other_api_key.clone(),
+                        listening: *listening,
                     }
-                } else if status == VoiceToTextStatus::AliveButWeDontKnowTheApiKey {
+                } else if *status == VoiceToTextStatus::AliveButWeDontKnowTheApiKey {
                     // A server has responded to our ping, assume the API key is the one we tracked when we started the program
                     VoiceToTextStatus::Alive {
-                        api_key,
+                        api_key: api_key.clone(),
                         listening: false,
                     }
-                } else if instant.elapsed() > timeout {
+                } else if instant.elapsed() > *timeout {
                     // Only accept the dead status if the timeout has been exceeded
                     VoiceToTextStatus::Dead
                 } else {
@@ -77,6 +77,16 @@ fn handle_pong(
             (VoiceToTextStatus::Alive { .. }, VoiceToTextStatus::AliveButWeDontKnowTheApiKey) => {
                 // Ping is alive, retain the api key
                 current_status.clone()
+            }
+            (
+                VoiceToTextStatus::UnknownWithCachedApiKey { api_key },
+                VoiceToTextStatus::AliveButWeDontKnowTheApiKey,
+            ) => {
+                // Ping is alive, use the cached api key
+                VoiceToTextStatus::Alive {
+                    api_key: api_key.clone(),
+                    listening: false,
+                }
             }
             (a, b) => {
                 debug!(
@@ -105,8 +115,14 @@ fn init_receiver_once_alive(
     mut status_events: EventReader<VoiceToTextStatusEvent>,
 ) {
     for event in status_events.read() {
-        let VoiceToTextStatusEvent::Changed { new_status, old_status } = event;
-        if !matches!(old_status, VoiceToTextStatus::Starting { .. }) {
+        let VoiceToTextStatusEvent::Changed {
+            new_status,
+            old_status,
+        } = event;
+        if !matches!(
+            old_status,
+            VoiceToTextStatus::Starting { .. } | VoiceToTextStatus::UnknownWithCachedApiKey { .. }
+        ) {
             continue;
         }
         let VoiceToTextStatus::Alive { api_key, .. } = new_status else {

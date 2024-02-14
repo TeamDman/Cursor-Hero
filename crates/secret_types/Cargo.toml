@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 bevy = { workspace = true }
 zeroize = { workspace = true }
+serde = { workspace = true }

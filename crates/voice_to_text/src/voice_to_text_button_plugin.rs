@@ -139,7 +139,7 @@ fn update_visuals(
                 VoiceToTextStatus::Dead => {
                     button_sprite.color = Color::RED;
                 }
-                VoiceToTextStatus::Unknown => {
+                VoiceToTextStatus::Unknown | VoiceToTextStatus::UnknownWithCachedApiKey { .. } => {
                     button_sprite.color = Color::PURPLE;
                 }
                 VoiceToTextStatus::Starting { instant, timeout, .. } => {
@@ -167,6 +167,10 @@ fn update_visuals(
                         VoiceToTextStatus::Unknown => {
                             text.sections[0].value =
                                 "VoiceToText Server Control (Unknown)".to_string();
+                        }
+                        VoiceToTextStatus::UnknownWithCachedApiKey { .. } => {
+                            text.sections[0].value =
+                                "VoiceToText Server Control (Unknown, api key present)".to_string();
                         }
                         VoiceToTextStatus::Starting { instant, .. } => {
                             text.sections[0].value = format!(

@@ -134,7 +134,7 @@ impl Plugin for MyPlugin {
         #[cfg(debug_assertions)]
         let log_plugin = LogPlugin {
             level: bevy::log::Level::DEBUG,
-            filter: "info,wgpu_core=warn,wgpu_hal=warn,bevy_ecs=info,cursor_hero=debug,cursor_hero_ollama::ollama_status_worker_plugin=warn,cursor_hero_glados_tts::glados_tts_status_worker_plugin=warn".into(),
+            filter: "info,wgpu_core=warn,wgpu_hal=warn,bevy_ecs=info,cursor_hero=debug,cursor_hero_ollama::ollama_status_worker_plugin=info,cursor_hero_glados_tts::glados_tts_status_worker_plugin=info,cursor_hero_voice_to_text::voice_to_text_worker_plugin=debug,cursor_hero_tools::click_tool=info,cursor_hero_restart_memory=info".into(),
             // TODO: add world representation of all our cursor_hero crates where clicking them will toggle their log level to warn
             // TODO: fix warnings when minimized
         };

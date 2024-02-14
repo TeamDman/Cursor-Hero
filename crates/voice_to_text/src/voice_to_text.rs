@@ -1,4 +1,4 @@
-use bevy::log::{debug, error};
+use bevy::log::{debug, error, info};
 use crossbeam_channel::Sender;
 use cursor_hero_secret_types::secrets_types::SecretString;
 use cursor_hero_voice_to_text_types::prelude::*;
@@ -108,14 +108,14 @@ use serde::Deserialize;
 #[derive(Debug, Deserialize)]
 struct TranscriptionResponse {
     segments: Vec<Segment>,
-    language: String,
+    // language: String,
 }
 
 #[derive(Debug, Deserialize)]
 struct Segment {
     text: String,
-    start: f64,
-    end: f64,
+    // start: f64,
+    // end: f64,
 }
 
 pub(crate) async fn connect_receiver(
@@ -133,7 +133,10 @@ pub(crate) async fn connect_receiver(
     // Start worker to listen to responses without blocking the main thread
     tokio::spawn(async move {
         let (ws_stream, _) = match connect_async(req).await {
-            Ok(conn) => conn,
+            Ok(conn) => {
+                info!("Connected to WebSocket");
+                conn
+            },
             Err(e) => {
                 error!("Failed to connect to WebSocket: {:?}", e);
                 return;
@@ -158,10 +161,12 @@ pub(crate) async fn connect_receiver(
                                     .map(|s| s.text.as_str())
                                     .collect::<Vec<&str>>()
                                     .join(" ");
+                                let msg = GameboundMessage::TranscriptionReceived {
+                                    transcription: concatenated_text,
+                                };
+                                debug!("Sending transcription to game: {:?}", msg);
                                 if let Err(e) =
-                                    game_tx.send(GameboundMessage::TranscriptionReceived {
-                                        transcription: concatenated_text,
-                                    })
+                                    game_tx.send(msg)
                                 {
                                     error!("Failed to send transcription to game: {:?}", e);
                                 }
@@ -171,7 +176,7 @@ pub(crate) async fn connect_receiver(
                     }
                 }
                 Err(e) => {
-                    eprintln!("WebSocket error: {:?}", e);
+                    error!("WebSocket error: {:?}", e);
                     break;
                 }
             }

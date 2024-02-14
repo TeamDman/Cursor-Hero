@@ -10,6 +10,9 @@ use cursor_hero_secret_types::prelude::*;
 pub enum VoiceToTextStatus {
     #[default]
     Unknown,
+    UnknownWithCachedApiKey {
+        api_key: SecretString,
+    },
     Alive {
         api_key: SecretString,
         listening: bool,

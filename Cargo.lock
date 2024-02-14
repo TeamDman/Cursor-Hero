@@ -2215,6 +2215,8 @@ dependencies = [
  "bevy",
  "cursor_hero_camera",
  "cursor_hero_character_types",
+ "cursor_hero_secret_types",
+ "cursor_hero_voice_to_text_types",
  "cursor_hero_winutils",
  "raw-window-handle",
  "serde",
@@ -2250,6 +2252,7 @@ name = "cursor_hero_secret_types"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "serde",
  "zeroize",
 ]
 

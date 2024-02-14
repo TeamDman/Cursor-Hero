@@ -3,6 +3,7 @@
 mod main_camera_memory_plugin;
 mod main_character_memory_plugin;
 mod primary_window_memory_plugin;
+pub mod voice_to_text_memory_plugin;
 
 use std::fs::File;
 use std::fs::OpenOptions;
@@ -21,6 +22,7 @@ impl Plugin for MemoryPlugin {
             main_character_memory_plugin::MainCharacterMemoryPlugin,
             primary_window_memory_plugin::PrimaryWindowMemoryPlugin,
             main_camera_memory_plugin::MainCameraMemoryPlugin,
+            voice_to_text_memory_plugin::VoiceToTextMemoryPlugin,
         ));
     }
 }
