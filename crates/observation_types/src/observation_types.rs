@@ -4,14 +4,15 @@ use std::fmt::Formatter;
 use std::time::Duration;
 
 use bevy::prelude::*;
-use bevy::utils::Instant;
 use chrono::DateTime;
 use chrono::Local;
-
+use serde::Deserialize;
+use serde::Serialize;
 #[derive(Component, Reflect)]
 pub struct ObservationTool {
-    pub last_inference: Option<Instant>,
-    pub _whats_new: Option<WhatsNew>,
+    #[reflect(ignore)]
+    pub last_inference: Option<DateTime<Local>>,
+    pub _whats_new: Option<WhatsNew>, // latest value for visual inspection
 }
 impl Default for ObservationTool {
     fn default() -> Self {
@@ -31,48 +32,63 @@ pub enum WhatsNew {
     SelfChat,
     Nothing,
     ChatReceived,
-    ChatReceivedButTheyProbablyStillThinking
+    ChatReceivedButTheyProbablyStillThinking,
+    MemoryRestored,
 }
 
 impl WhatsNew {
     pub fn reply_delay(&self) -> Duration {
         match self {
-            WhatsNew::SelfChat => {
-                Duration::from_secs(60)
-            }
-            WhatsNew::Nothing => {
-                Duration::MAX
-            }
-            WhatsNew::ChatReceived => {
-                Duration::ZERO
-            }
-            WhatsNew::ChatReceivedButTheyProbablyStillThinking => {
-                Duration::from_secs(25)
-            }
+            WhatsNew::SelfChat => Duration::from_secs(60),
+            WhatsNew::Nothing => Duration::MAX,
+            WhatsNew::ChatReceived => Duration::ZERO,
+            WhatsNew::ChatReceivedButTheyProbablyStillThinking => Duration::from_secs(25),
+            WhatsNew::MemoryRestored => Duration::from_secs(5),
         }
     }
 }
 
+impl Ord for WhatsNew {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        match match (self, other) {
+            (a, b) if a == b => std::cmp::Ordering::Equal,
+            (WhatsNew::ChatReceived, _) => std::cmp::Ordering::Greater,
+            (_, WhatsNew::ChatReceived) => std::cmp::Ordering::Less,
 
-#[derive(Component, Reflect, Default)]
-pub struct ObservationBuffer {
-    pub observations: Vec<ObservationBufferEntry>,
-    pub log_level: ObservationLogLevel,
+            (WhatsNew::Nothing, _) => std::cmp::Ordering::Less,
+            (_, WhatsNew::Nothing) => std::cmp::Ordering::Greater,
+
+            _ => std::cmp::Ordering::Equal,
+        } {
+            // If equal, lower delay takes priority
+            std::cmp::Ordering::Equal => self.reply_delay().cmp(&other.reply_delay()).reverse(),
+            x => x,
+        }
+    }
+}
+impl PartialOrd for WhatsNew {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
-#[derive(Debug, Reflect, Default, PartialEq, Eq)]
+#[derive(Component, Reflect, Default, Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+pub struct ObservationBuffer {
+    pub observations: Vec<ObservationBufferEntry>,
+    pub log_level: ObservationLogLevel, // TODO: investigate always logging but updating the log filter instead of not logging based on level
+}
+
+#[derive(Debug, Reflect, Default, PartialEq, Eq, Serialize, Deserialize, Clone)]
 pub enum ObservationLogLevel {
     #[default]
     Default,
     All,
 }
 
-#[derive(Component, Reflect, Debug)]
+#[derive(Component, Reflect, Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct ObservationBufferEntry {
-    pub instant: Instant,
     #[reflect(ignore)]
     pub datetime: DateTime<Local>,
-    pub observation: String,
     pub origin: ObservationEvent,
 }
 
@@ -81,13 +97,16 @@ pub enum ObservationBufferEvent {
     Updated { buffer_id: Entity },
 }
 
-#[derive(Event, Debug, Clone, Reflect)]
+#[derive(Event, Debug, Clone, Reflect, Serialize, Deserialize, PartialEq, Eq)]
 pub enum ObservationEvent {
     Chat {
         environment_id: Option<Entity>,
         character_id: Entity,
         character_name: String,
         message: String,
+    },
+    MemoryRestored {
+        observation_buffer_id: Entity,
     },
 }
 impl Display for ObservationEvent {
@@ -100,6 +119,32 @@ impl Display for ObservationEvent {
             } => {
                 write!(f, "{}: {}", character_name, message)
             }
+            ObservationEvent::MemoryRestored { .. } => {
+                write!(
+                    f,
+                    "The game has restarted and the agent memory has been restored."
+                )
+            }
+        }
+    }
+}
+impl ObservationEvent {
+    pub fn into_whats_new(&self, observation_buffer_id: Entity) -> WhatsNew {
+        match self {
+            ObservationEvent::Chat {
+                character_id: event_character_id,
+                ..
+            } if *event_character_id == observation_buffer_id => WhatsNew::SelfChat,
+            ObservationEvent::Chat { message, .. }
+                if message.ends_with("...")
+                    || !message.ends_with(".")
+                    || !message.ends_with("!")
+                    || !message.ends_with("?") =>
+            {
+                WhatsNew::ChatReceivedButTheyProbablyStillThinking
+            }
+            ObservationEvent::Chat { .. } => WhatsNew::ChatReceived,
+            ObservationEvent::MemoryRestored { .. } => WhatsNew::MemoryRestored,
         }
     }
 }

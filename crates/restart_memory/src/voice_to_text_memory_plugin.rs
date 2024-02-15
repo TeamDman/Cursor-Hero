@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 use bevy::utils::Instant;
 use cursor_hero_character_types::prelude::*;
@@ -21,7 +23,7 @@ pub struct VoiceToTextMemoryPlugin;
 
 impl Plugin for VoiceToTextMemoryPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(MainCharacterMemoryConfig::default());
+        app.insert_resource(VoiceToTextMemoryConfig::default());
         app.add_systems(Update, persist.pipe(handle_persist_errors));
         app.add_systems(Update, restore.pipe(handle_restore_errors));
     }
@@ -47,13 +49,15 @@ fn handle_restore_errors(In(result): In<Result<RestoreSuccess, RestoreError>>) {
 
 #[derive(Debug, Resource, Reflect)]
 #[reflect(Resource)]
-struct MainCharacterMemoryConfig {
-    pub debounce_timer: Timer,
+struct VoiceToTextMemoryConfig {
+    pub persist_cooldown: Timer,
+    pub restore_retry_cooldown: Duration,
 }
-impl Default for MainCharacterMemoryConfig {
+impl Default for VoiceToTextMemoryConfig {
     fn default() -> Self {
         Self {
-            debounce_timer: Timer::from_seconds(10.0, TimerMode::Repeating),
+            persist_cooldown: Timer::from_seconds(10.0, TimerMode::Repeating),
+            restore_retry_cooldown: Duration::from_secs(60),
         }
     }
 }
@@ -64,12 +68,12 @@ struct DiskData {
 }
 
 fn persist(
-    mut config: ResMut<MainCharacterMemoryConfig>,
+    mut config: ResMut<VoiceToTextMemoryConfig>,
     mut debounce: Local<Option<DiskData>>,
     time: Res<Time>,
     voice_status: Res<VoiceToTextStatus>,
 ) -> Result<PersistSuccess, PersistError> {
-    if !config.debounce_timer.tick(time.delta()).just_finished() {
+    if !config.persist_cooldown.tick(time.delta()).just_finished() {
         return Ok(PersistSuccess::Cooldown);
     }
     let api_key = match &*voice_status {
@@ -96,6 +100,7 @@ fn persist(
 }
 
 fn restore(
+    config: Res<VoiceToTextMemoryConfig>,
     mut current_status: ResMut<VoiceToTextStatus>,
     mut status_events: EventWriter<VoiceToTextStatusEvent>,
     mut attempted_at: Local<Option<Instant>>,
@@ -112,11 +117,12 @@ fn restore(
     let file = match get_persist_file(file!(), PERSIST_FILE_NAME, Usage::Restore) {
         Ok(file) => Ok(file),
         Err(e) => {
-            if let Some(instant) = *attempted_at {
-                if instant.elapsed().as_secs() > 60 {
+            if let Some(attempt) = *attempted_at {
+                if attempt.elapsed() > config.restore_retry_cooldown {
                     *attempted_at = Some(Instant::now());
                     return Err(RestoreError::Io(e));
                 } else {
+                    // Silently ignore the error and retry later
                     return Ok(RestoreSuccess::NoAction);
                 }
             } else {

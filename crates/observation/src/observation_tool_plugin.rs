@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy::utils::Instant;
+use chrono::DateTime;
 use cursor_hero_character_types::character_types::AgentCharacter;
 use cursor_hero_chat_types::chat_types::ChatEvent;
 use cursor_hero_inference_types::prelude::*;
@@ -61,42 +62,23 @@ fn tool_tick(
         };
 
         let character_observation_buffer = character;
-        let mut whats_new = WhatsNew::Nothing;
-        if let Some(last_inference) = tool.last_inference {
-            for entry in character_observation_buffer
-                .observations
-                .iter()
-                .filter(|entry| entry.instant > last_inference)
-            {
-                whats_new = match (whats_new, &entry.origin) {
-                    // The agent is talking to itself
-                    (
-                        WhatsNew::Nothing | WhatsNew::SelfChat,
-                        ObservationEvent::Chat {
-                            character_id: event_character_id,
-                            ..
-                        },
-                    ) if *event_character_id == character_id => WhatsNew::SelfChat,
-                    // A human has responded but they are probably still thinking
-                    (
-                        WhatsNew::Nothing
-                        | WhatsNew::SelfChat
-                        | WhatsNew::ChatReceivedButTheyProbablyStillThinking,
-                        ObservationEvent::Chat { message, .. },
-                    ) if message.ends_with("...")
-                        || !message.ends_with(".")
-                        || !message.ends_with("!")
-                        || !message.ends_with("?") =>
-                    {
-                        WhatsNew::ChatReceivedButTheyProbablyStillThinking
-                    }
-                    // A human has responded
-                    (_, ObservationEvent::Chat { .. }) => WhatsNew::ChatReceived,
-                }
-            }
-        } else if !character_observation_buffer.observations.is_empty() {
-            whats_new = WhatsNew::ChatReceived;
-        }
+        let whats_new = tool
+            .last_inference
+            .map(|last_inference| {
+                character_observation_buffer
+                    .observations
+                    .iter()
+                    .filter(|entry| entry.datetime > last_inference)
+                    .map(|entry| entry.origin.into_whats_new(character_id))
+                    .fold(WhatsNew::Nothing, |acc, new| acc.max(new))
+            })
+            .unwrap_or_else(|| {
+                character_observation_buffer
+                    .observations
+                    .iter()
+                    .map(|entry| entry.origin.into_whats_new(character_id))
+                    .fold(WhatsNew::Nothing, |acc, new| acc.max(new))
+            });
 
         // Update the field for debug viewing in the inspector
         tool._whats_new = Some(whats_new);
@@ -108,7 +90,7 @@ fn tool_tick(
         }
 
         if let Some(last_inference) = tool.last_inference {
-            if last_inference + whats_new.reply_delay() > Instant::now() {
+            if last_inference + whats_new.reply_delay() > chrono::Local::now() {
                 continue;
             }
         }
@@ -116,7 +98,7 @@ fn tool_tick(
         let mut chat_history = String::new();
         for entry in character_observation_buffer.observations.iter() {
             // let timestamp = entry.datetime.format("%Y-%m-%d %H:%M:%S").to_string();
-            chat_history.push_str(entry.observation.as_str());
+            chat_history.push_str(entry.origin.to_string().as_str());
             chat_history.push_str("\n");
         }
 
@@ -137,7 +119,7 @@ fn tool_tick(
         });
         debug!("ObservationToolPlugin: Sent observation event");
 
-        tool.last_inference = Some(Instant::now());
+        tool.last_inference = Some(chrono::Local::now());
     }
 }
 

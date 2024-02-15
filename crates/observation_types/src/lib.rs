@@ -1,3 +1,4 @@
+#![feature(trivial_bounds)]
 pub mod observation_types;
 pub mod observation_types_plugin;
 

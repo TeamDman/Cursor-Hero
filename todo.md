@@ -1,3 +1,6 @@
+- agent memory persist
+- agent memory reset (gun?)
+
 - sfx when service comes online
 - restart memory for voice2text api key
 

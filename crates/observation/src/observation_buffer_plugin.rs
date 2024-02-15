@@ -21,20 +21,18 @@ fn update_buffers(
         for buffer in buffer_query.iter_mut() {
             let (buffer_id, mut buffer, buffer_environment_tag) = buffer;
 
-            // Extract environment id from the event
-            let event_environment_id = match event {
-                ObservationEvent::Chat { environment_id, .. } => *environment_id,
-            };
-
-            // Assert the buffer can see the event
-            let can_see = match (buffer_environment_tag, event_environment_id) {
-                // A buffer in an environment can only see events from that environment
+            // Determine if the buffer can see the event
+            let can_see = match (buffer_environment_tag, event) {
                 (
                     Some(EnvironmentTag {
                         environment_id: buffer_environment_id,
                     }),
-                    Some(event_environment_id),
-                ) => *buffer_environment_id == event_environment_id,
+                    ObservationEvent::Chat {
+                        environment_id: Some(event_environment_id),
+                        ..
+                    },
+                ) => *buffer_environment_id == *event_environment_id,
+                (_, ObservationEvent::MemoryRestored { observation_buffer_id }) => buffer_id == *observation_buffer_id,
                 // A buffer outside all environments will observe all environments
                 (None, _) => true,
                 _ => false,
@@ -47,9 +45,7 @@ fn update_buffers(
             }
 
             let entry = ObservationBufferEntry {
-                instant: Instant::now(),
                 datetime: chrono::Local::now(),
-                observation: event.to_string(),
                 origin: event.clone(),
             };
             if buffer.log_level == ObservationLogLevel::All {

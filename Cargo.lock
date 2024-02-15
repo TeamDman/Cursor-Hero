@@ -1391,6 +1391,7 @@ dependencies = [
  "iana-time-zone",
  "js-sys",
  "num-traits",
+ "serde",
  "wasm-bindgen",
  "windows-targets 0.52.0",
 ]
@@ -2048,6 +2049,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "chrono",
+ "serde",
 ]
 
 [[package]]
@@ -2215,6 +2217,7 @@ dependencies = [
  "bevy",
  "cursor_hero_camera",
  "cursor_hero_character_types",
+ "cursor_hero_observation_types",
  "cursor_hero_secret_types",
  "cursor_hero_voice_to_text_types",
  "cursor_hero_winutils",
