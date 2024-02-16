@@ -1,4 +1,3 @@
-- agent memory persist
 - agent memory reset (gun?)
 
 - sfx when service comes online

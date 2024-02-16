@@ -3,6 +3,7 @@ use crossbeam_channel::Sender;
 use cursor_hero_secret_types::secrets_types::SecretString;
 use cursor_hero_voice_to_text_types::prelude::*;
 use futures_util::stream::StreamExt;
+use futures_util::SinkExt;
 use rand::distributions::Alphanumeric;
 use rand::Rng;
 use reqwest::Client;
@@ -143,7 +144,18 @@ pub(crate) async fn connect_receiver(
             }
         };
 
-        let (_write, mut read) = ws_stream.split();
+        let (mut write, mut read) = ws_stream.split();
+        debug!("Starting keepalive thread");
+        tokio::spawn(async move {
+            debug!("Keepalive thread started, entering main loop");
+            loop {
+                tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+                if let Err(e) = write.send(Message::text("keepalive")).await {
+                    error!("Failed to send keepalive: {:?}", e);
+                    break;
+                }
+            }
+        });
 
         // Listening for messages
         while let Some(message) = read.next().await {
