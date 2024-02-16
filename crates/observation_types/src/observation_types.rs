@@ -8,19 +8,11 @@ use chrono::DateTime;
 use chrono::Local;
 use serde::Deserialize;
 use serde::Serialize;
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Default)]
 pub struct ObservationTool {
     #[reflect(ignore)]
     pub last_inference: Option<DateTime<Local>>,
     pub _whats_new: Option<WhatsNew>, // latest value for visual inspection
-}
-impl Default for ObservationTool {
-    fn default() -> Self {
-        Self {
-            last_inference: None,
-            _whats_new: None,
-        }
-    }
 }
 
 #[derive(Debug, Reflect, PartialEq, Eq, Clone, Copy)]
@@ -137,9 +129,9 @@ impl ObservationEvent {
             } if *event_character_id == observation_buffer_id => WhatsNew::SelfChat,
             ObservationEvent::Chat { message, .. }
                 if message.ends_with("...")
-                    || !message.ends_with(".")
-                    || !message.ends_with("!")
-                    || !message.ends_with("?") =>
+                    || !message.ends_with('.')
+                    || !message.ends_with('!')
+                    || !message.ends_with('?') =>
             {
                 WhatsNew::ChatReceivedButTheyProbablyStillThinking
             }

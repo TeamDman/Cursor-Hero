@@ -56,7 +56,7 @@ pub(crate) fn start() -> Result<SecretString, Box<dyn Error>> {
             "--",
             "pwsh",
             "-Command",
-            format!(r"cd D:\Repos\ml\voice2text && conda activate whisperx && python .\transcribe_hotkey_typer.py $env:port $env:api_key").as_str(),
+            r"cd D:\Repos\ml\voice2text && conda activate whisperx && python .\transcribe_hotkey_typer.py $env:port $env:api_key",
         ])
         .env("port", port.to_string())
         .env("api_key", api_key.expose_secret())

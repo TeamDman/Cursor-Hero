@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy::utils::Instant;
 use cursor_hero_environment_types::prelude::*;
 use cursor_hero_observation_types::prelude::*;
 

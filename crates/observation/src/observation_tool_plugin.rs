@@ -1,6 +1,4 @@
 use bevy::prelude::*;
-use bevy::utils::Instant;
-use chrono::DateTime;
 use cursor_hero_character_types::character_types::AgentCharacter;
 use cursor_hero_chat_types::chat_types::ChatEvent;
 use cursor_hero_inference_types::prelude::*;
@@ -99,7 +97,7 @@ fn tool_tick(
         for entry in character_observation_buffer.observations.iter() {
             // let timestamp = entry.datetime.format("%Y-%m-%d %H:%M:%S").to_string();
             chat_history.push_str(entry.origin.to_string().as_str());
-            chat_history.push_str("\n");
+            chat_history.push('\n');
         }
 
         events.send(TextInferenceEvent::Request {
@@ -138,7 +136,7 @@ fn handle_text_inference_response(
         else {
             continue;
         };
-        if !agent_query.get(*session_id).is_ok() {
+        if agent_query.get(*session_id).is_err() {
             // Only inference responses for agent sessions are to be converted to chat messages and spoken
             continue;
         }

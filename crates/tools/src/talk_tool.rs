@@ -178,7 +178,7 @@ fn handle_input(
 
             let event = VoiceToTextCommandEvent::SetListening {
                 listening: !listening,
-                api_key: api_key,
+                api_key,
             };
             info!("Sending event: {:?}", event);
             voice_command_events.send(event);

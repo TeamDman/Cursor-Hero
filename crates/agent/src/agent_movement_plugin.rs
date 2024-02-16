@@ -47,6 +47,7 @@ fn agent_tool_movement(
     }
 }
 
+#[allow(clippy::type_complexity)]
 fn keep_upright(
     mut character_query: Query<(&Rotation, &mut AngularVelocity), (With<Character>, With<Agent>)>,
 ) {
