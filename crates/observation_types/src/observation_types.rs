@@ -130,8 +130,8 @@ impl ObservationEvent {
             ObservationEvent::Chat { message, .. }
                 if message.ends_with("...")
                     || !message.ends_with('.')
-                    || !message.ends_with('!')
-                    || !message.ends_with('?') =>
+                    && !message.ends_with('!')
+                    && !message.ends_with('?') =>
             {
                 WhatsNew::ChatReceivedButTheyProbablyStillThinking
             }
