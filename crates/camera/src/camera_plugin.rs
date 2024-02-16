@@ -39,6 +39,7 @@ fn spawn_camera(mut commands: Commands) {
         MovementDamping { factor: 0.90 },
         MassPropertiesBundle::new_computed(&Collider::ball(10.0), 1.0),
         RigidBody::Dynamic,
+        SpatialListener::new(-7.0),
     ));
 }
 

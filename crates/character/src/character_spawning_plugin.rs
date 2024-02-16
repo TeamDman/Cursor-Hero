@@ -50,7 +50,6 @@ fn spawn_character(
         Name::new("(Human) Tume Eena"),
         RigidBody::Kinematic,
         Collider::capsule(15.0, 12.5),
-        SpatialListener::new(-7.0),
         TrackEnvironmentTag,
     ));
     camera_events.send(CameraEvent::BeginFollowing {
