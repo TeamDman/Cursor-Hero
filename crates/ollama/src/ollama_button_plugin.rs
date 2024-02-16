@@ -268,12 +268,10 @@ fn terminal_click_listener(
     }
 }
 
-fn handle_terminal_events(
-    mut terminal_events: EventReader<OllamaTerminalEvent>,
-) {
-    let should_start = terminal_events.read().any(|event| {
-        matches!(event, OllamaTerminalEvent::Startup)
-    });
+fn handle_terminal_events(mut terminal_events: EventReader<OllamaTerminalEvent>) {
+    let should_start = terminal_events
+        .read()
+        .any(|event| matches!(event, OllamaTerminalEvent::Startup));
     if should_start {
         info!("Opening terminal");
         if let Err(e) = crate::ollama::start_terminal() {

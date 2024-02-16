@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use bevy_xpbd_2d::components::{AngularVelocity, Rotation};
+use bevy_xpbd_2d::components::AngularVelocity;
+use bevy_xpbd_2d::components::Rotation;
 use cursor_hero_agent_types::prelude::*;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_movement_tool_types::prelude::*;

@@ -47,9 +47,6 @@ pub enum OllamaStatusEvent {
     Startup,
 }
 
-
-
-
 #[derive(Component, Debug, Reflect, Default)]
 pub struct OllamaTerminalButton {
     pub visual_state: OllamaTerminalButtonVisualState,
@@ -63,4 +60,3 @@ pub enum OllamaTerminalButtonVisualState {
 pub enum OllamaTerminalEvent {
     Startup,
 }
-

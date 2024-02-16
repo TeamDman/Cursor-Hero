@@ -40,7 +40,7 @@ fn populate_new_host_environments(
                         },
                         transform: Transform::from_translation(Vec3::new(
                             1920.0 / 2.0 + 600.0,
-                            -1080.0 -200.0,
+                            -1080.0 - 200.0,
                             0.0,
                         )),
                         ..default()
@@ -114,19 +114,30 @@ fn update_visuals(
     mut button_text_query: Query<&mut Text>,
 ) {
     for event in events.read() {
-        let VoiceToTextStatusEvent::Changed { new_status: status, .. } = event;
-        debug!("Updating VoiceToText Server Control visuals to {:?}", status);
+        let VoiceToTextStatusEvent::Changed {
+            new_status: status, ..
+        } = event;
+        debug!(
+            "Updating VoiceToText Server Control visuals to {:?}",
+            status
+        );
         for button in button_query.iter_mut() {
             let (mut button_sprite, button_children, mut button) = button;
             button.visual_state = match button.visual_state {
                 VoiceToTextStatusButtonVisualState::Default { .. } => {
-                    VoiceToTextStatusButtonVisualState::Default { status: status.clone() }
+                    VoiceToTextStatusButtonVisualState::Default {
+                        status: status.clone(),
+                    }
                 }
                 VoiceToTextStatusButtonVisualState::Hovered { .. } => {
-                    VoiceToTextStatusButtonVisualState::Hovered { status: status.clone() }
+                    VoiceToTextStatusButtonVisualState::Hovered {
+                        status: status.clone(),
+                    }
                 }
                 VoiceToTextStatusButtonVisualState::Pressed { .. } => {
-                    VoiceToTextStatusButtonVisualState::Pressed { status: status.clone() }
+                    VoiceToTextStatusButtonVisualState::Pressed {
+                        status: status.clone(),
+                    }
                 }
             };
             match status {
@@ -142,10 +153,11 @@ fn update_visuals(
                 VoiceToTextStatus::Unknown | VoiceToTextStatus::UnknownWithCachedApiKey { .. } => {
                     button_sprite.color = Color::PURPLE;
                 }
-                VoiceToTextStatus::Starting { instant, timeout, .. } => {
+                VoiceToTextStatus::Starting {
+                    instant, timeout, ..
+                } => {
                     button_sprite.color = Color::YELLOW
-                        * (1.0, 0.1)
-                            .lerp(instant.elapsed().as_secs_f32() / timeout.as_secs_f32());
+                        * (1.0, 0.1).lerp(instant.elapsed().as_secs_f32() / timeout.as_secs_f32());
                 }
             }
             for child in button_children.iter() {
@@ -188,13 +200,19 @@ fn update_visuals(
         let (mut sprite, children, button) = button;
         // if the visual state status is starting, update the text to show the time elapsed
         let (VoiceToTextStatusButtonVisualState::Default {
-            status: VoiceToTextStatus::Starting { instant, timeout, .. },
+            status: VoiceToTextStatus::Starting {
+                instant, timeout, ..
+            },
         }
         | VoiceToTextStatusButtonVisualState::Hovered {
-            status: VoiceToTextStatus::Starting { instant, timeout, .. },
+            status: VoiceToTextStatus::Starting {
+                instant, timeout, ..
+            },
         }
         | VoiceToTextStatusButtonVisualState::Pressed {
-            status: VoiceToTextStatus::Starting { instant, timeout, .. },
+            status: VoiceToTextStatus::Starting {
+                instant, timeout, ..
+            },
         }) = button.visual_state
         else {
             continue;
@@ -280,12 +298,10 @@ fn vscode_button_click(
     }
 }
 
-fn handle_vscode_events(
-    mut vscode_events: EventReader<VoiceToTextVscodeEvent>,
-) {
-    let should_start = vscode_events.read().any(|event| {
-        matches!(event, VoiceToTextVscodeEvent::Startup)
-    });
+fn handle_vscode_events(mut vscode_events: EventReader<VoiceToTextVscodeEvent>) {
+    let should_start = vscode_events
+        .read()
+        .any(|event| matches!(event, VoiceToTextVscodeEvent::Startup));
     if should_start {
         info!("Opening vscode");
         if let Err(e) = crate::voice_to_text::start_vscode() {

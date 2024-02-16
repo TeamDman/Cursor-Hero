@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 use bevy::text::Text2dBounds;
+use bevy_xpbd_2d::prelude::*;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_chat_types::prelude::*;
-use bevy_xpbd_2d::prelude::*;
 pub struct ChatBubblePlugin;
 
 impl Plugin for ChatBubblePlugin {

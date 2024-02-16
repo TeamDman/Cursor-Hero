@@ -58,12 +58,12 @@ use cursor_hero_observation::observation_plugin::ObservationPlugin;
 use cursor_hero_observation_types::observation_types_plugin::ObservationTypesPlugin;
 use cursor_hero_ollama::prelude::*;
 use cursor_hero_ollama_types::prelude::*;
+use cursor_hero_secret::prelude::*;
+use cursor_hero_secret_types::prelude::*;
 use cursor_hero_text_asset::prelude::*;
 use cursor_hero_text_asset_types::prelude::*;
 use cursor_hero_voice_to_text::prelude::*;
 use cursor_hero_voice_to_text_types::prelude::*;
-use cursor_hero_secret::prelude::*;
-use cursor_hero_secret_types::prelude::*;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {

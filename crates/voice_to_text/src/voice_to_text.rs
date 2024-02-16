@@ -1,4 +1,6 @@
-use bevy::log::{debug, error, info};
+use bevy::log::debug;
+use bevy::log::error;
+use bevy::log::info;
 use crossbeam_channel::Sender;
 use cursor_hero_secret_types::secrets_types::SecretString;
 use cursor_hero_voice_to_text_types::prelude::*;
@@ -75,7 +77,10 @@ pub(crate) fn start_vscode() -> Result<(), Box<dyn Error>> {
     }
 }
 
-pub(crate) async fn set_listening(listening: bool, api_key: SecretString) -> Result<(), Box<dyn Error>> {
+pub(crate) async fn set_listening(
+    listening: bool,
+    api_key: SecretString,
+) -> Result<(), Box<dyn Error>> {
     let client = Client::new();
     let endpoint = match listening {
         true => format!("{}/start_listening", URL),
@@ -137,7 +142,7 @@ pub(crate) async fn connect_receiver(
             Ok(conn) => {
                 info!("Connected to WebSocket");
                 conn
-            },
+            }
             Err(e) => {
                 error!("Failed to connect to WebSocket: {:?}", e);
                 return;
@@ -177,9 +182,7 @@ pub(crate) async fn connect_receiver(
                                     transcription: concatenated_text,
                                 };
                                 debug!("Sending transcription to game: {:?}", msg);
-                                if let Err(e) =
-                                    game_tx.send(msg)
-                                {
+                                if let Err(e) = game_tx.send(msg) {
                                     error!("Failed to send transcription to game: {:?}", e);
                                 }
                             }

@@ -10,10 +10,10 @@ impl Plugin for OllamaTypesPlugin {
         app.register_type::<OllamaStatusButtonVisualState>();
         app.register_type::<OllamaStatusEvent>();
         app.add_event::<OllamaStatusEvent>();
-        
+
         app.register_type::<OllamaPingEvent>();
         app.add_event::<OllamaPingEvent>();
-        
+
         app.register_type::<OllamaTerminalButton>();
         app.register_type::<OllamaTerminalButtonVisualState>();
         app.register_type::<OllamaTerminalEvent>();

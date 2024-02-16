@@ -144,8 +144,7 @@ fn update_visuals(
                 }
                 GladosTtsStatus::Starting { instant, timeout } => {
                     button_sprite.color = Color::YELLOW
-                        * (1.0, 0.1)
-                            .lerp(instant.elapsed().as_secs_f32() / timeout.as_secs_f32());
+                        * (1.0, 0.1).lerp(instant.elapsed().as_secs_f32() / timeout.as_secs_f32());
                 }
             }
             for child in button_children.iter() {
@@ -156,8 +155,7 @@ fn update_visuals(
                                 "GLaDOS TTS Server Control (Alive)".to_string();
                         }
                         GladosTtsStatus::Dead => {
-                            text.sections[0].value =
-                                "GLaDOS TTS Server Control (Dead)".to_string();
+                            text.sections[0].value = "GLaDOS TTS Server Control (Dead)".to_string();
                         }
                         GladosTtsStatus::Unknown => {
                             text.sections[0].value =
@@ -271,12 +269,10 @@ fn vscode_button_click(
     }
 }
 
-fn handle_vscode_events(
-    mut vscode_events: EventReader<GladosTtsVscodeEvent>,
-) {
-    let should_start = vscode_events.read().any(|event| {
-        matches!(event, GladosTtsVscodeEvent::Startup)
-    });
+fn handle_vscode_events(mut vscode_events: EventReader<GladosTtsVscodeEvent>) {
+    let should_start = vscode_events
+        .read()
+        .any(|event| matches!(event, GladosTtsVscodeEvent::Startup));
     if should_start {
         info!("Opening vscode");
         if let Err(e) = glados_tts::start_vscode() {

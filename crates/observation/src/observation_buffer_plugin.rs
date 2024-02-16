@@ -32,7 +32,12 @@ fn update_buffers(
                         ..
                     },
                 ) => *buffer_environment_id == *event_environment_id,
-                (_, ObservationEvent::MemoryRestored { observation_buffer_id }) => buffer_id == *observation_buffer_id,
+                (
+                    _,
+                    ObservationEvent::MemoryRestored {
+                        observation_buffer_id,
+                    },
+                ) => buffer_id == *observation_buffer_id,
                 // A buffer outside all environments will observe all environments
                 (None, _) => true,
                 _ => false,

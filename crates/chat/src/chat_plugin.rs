@@ -1,5 +1,5 @@
-use crate::chat_focus_exclusivity_plugin::ChatFocusExclusivityPlugin;
 use crate::chat_bubble_plugin::ChatBubblePlugin;
+use crate::chat_focus_exclusivity_plugin::ChatFocusExclusivityPlugin;
 use crate::chat_input_buffer_plugin::ChatInputBufferPlugin;
 use crate::chat_sfx_plugin::ChatSfxPlugin;
 use crate::chat_tool_plugin::ChatToolPlugin;

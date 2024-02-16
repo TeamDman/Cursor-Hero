@@ -130,7 +130,10 @@ fn bridge_generate_requests(
                 },
             };
 
-            info!("Sending prompt to text generation worker:\n{}", materialized_prompt.materialized);
+            info!(
+                "Sending prompt to text generation worker:\n{}",
+                materialized_prompt.materialized
+            );
 
             if let Err(e) = bridge.sender.send(ThreadboundMessage::Generate {
                 session_id: *session_id,

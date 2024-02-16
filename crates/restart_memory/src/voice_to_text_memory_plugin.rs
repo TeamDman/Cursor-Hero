@@ -80,9 +80,7 @@ fn persist(
         VoiceToTextStatus::Alive { api_key, .. } | VoiceToTextStatus::Starting { api_key, .. } => {
             Some(api_key.clone())
         }
-        VoiceToTextStatus::Dead => {
-            None
-        }
+        VoiceToTextStatus::Dead => None,
         _ => {
             return Ok(PersistSuccess::NoAction);
         }
@@ -135,16 +133,14 @@ fn restore(
     let Some(api_key) = data.api_key else {
         return Ok(RestoreSuccess::NoAction);
     };
-    
+
     info!("Restoring api key");
 
     let new_status = match *current_status {
         VoiceToTextStatus::Unknown
         | VoiceToTextStatus::AliveButWeDontKnowTheApiKey
         | VoiceToTextStatus::UnknownWithCachedApiKey { .. } => {
-            VoiceToTextStatus::UnknownWithCachedApiKey {
-                api_key,
-            }
+            VoiceToTextStatus::UnknownWithCachedApiKey { api_key }
         }
         ref current => current.clone(),
     };

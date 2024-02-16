@@ -72,7 +72,6 @@ fn update_window_icon(
         //         a) dependency invalidation and
         //         b) disambiguation of multiple copies of a system in the same schedule
         //                              */
-
         //         // this method does not exist yet.
         //         // should probably make a PR for it
         //         // and should also include a simplified way to remove a system from a schedule
