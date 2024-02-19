@@ -1,19 +1,25 @@
+- start menu button
+- button creates a window with icon, title, decorations
+- taskbar lists windows
+
+- tree structure component that can render a tree structure following the flat-but-annotated style of the inspect.exe tree of the vscode file explorer
 - agent memory reset (gun?)
+  - points towards pointer
+  - projectile shoot
+  - sfx
+  - projectile hit
+  - sfx
+  - hitreg wipe memory
+- name labels above characters
+- character positions in observation
+  - snapshot at time for observation, or record ongoing activity?
+  - "X walked by, 25s ago"
+  - "Y stopped moving at [12.0, 255.0], 5s ago"
 
 - sfx when service comes online
-- restart memory for voice2text api key
-
-
-- hot mic support for back and forth talking while coding
-  - python server needs api with key set on launch
-    - key not present -> "who are you, how did you get into my house?"
-- agent restart memory
 - better prompt history
 - vscode buffer observations
-- environment restart observations 
-
 - Onboarder startup button
-- voice2text startup button
 - Screen pause toggle button
 - add "thinking" bubble above agent head when request in flight
 

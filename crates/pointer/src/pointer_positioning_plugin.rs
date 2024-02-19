@@ -299,7 +299,7 @@ fn update_pointer(
                             // accomodate window decorations
                             let mut offset = get_window_inner_offset();
                             offset.x *= 2;
-                            debug!("host_target={:?} offset={:?}", host_target, offset);
+                            // debug!("host_target={:?} offset={:?}", host_target, offset);
                             host_target += offset;
                             host_target
                         });

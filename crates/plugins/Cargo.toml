@@ -7,6 +7,10 @@ edition = "2021"
 
 
 [dependencies]
+cursor_hero_calculator_app = { workspace = true }
+cursor_hero_calculator_app_types = { workspace = true }
+cursor_hero_app = { workspace = true }
+cursor_hero_app_types = { workspace = true }
 cursor_hero_secret = { workspace = true }
 cursor_hero_secret_types = { workspace = true }
 cursor_hero_voice_to_text = { workspace = true }

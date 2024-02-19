@@ -1,4 +1,3 @@
-#![feature(type_name_of_val)]
 pub mod ollama;
 pub mod ollama_button_plugin;
 pub mod ollama_inference_plugin;

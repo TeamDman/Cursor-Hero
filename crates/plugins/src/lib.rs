@@ -64,10 +64,18 @@ use cursor_hero_text_asset::prelude::*;
 use cursor_hero_text_asset_types::prelude::*;
 use cursor_hero_voice_to_text::prelude::*;
 use cursor_hero_voice_to_text_types::prelude::*;
+use cursor_hero_app::prelude::*;
+use cursor_hero_app_types::prelude::*;
+use cursor_hero_calculator_app::prelude::*;
+use cursor_hero_calculator_app_types::prelude::*;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(CalculatorAppTypesPlugin);
+        app.add_plugins(CalculatorAppPlugin);
+        app.add_plugins(AppTypesPlugin);
+        app.add_plugins(AppPlugin);
         app.add_plugins(SecretsTypesPlugin);
         app.add_plugins(SecretsPlugin);
         app.add_plugins(VoiceToTextTypesPlugin);
