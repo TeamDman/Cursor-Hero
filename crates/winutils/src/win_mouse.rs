@@ -179,7 +179,7 @@ pub fn scroll_wheel(scale: f32) -> Result<(), windows::core::Error> {
     let mouse_input = MOUSEINPUT {
         dx: 0,
         dy: 0,
-        mouseData: (WHEEL_DELTA as f32 * scale) as i32,
+        mouseData: (WHEEL_DELTA as f32 * scale) as i32 as u32, // https://github.com/microsoft/windows-rs/issues/2708
         dwFlags: MOUSEEVENTF_WHEEL,
         time: 0,
         dwExtraInfo: 0,

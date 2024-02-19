@@ -7,6 +7,8 @@ edition = "2021"
 
 
 [dependencies]
+cursor_hero_host_watcher = { workspace = true }
+cursor_hero_host_watcher_types = { workspace = true }
 cursor_hero_start_menu = { workspace = true }
 cursor_hero_start_menu_types = { workspace = true }
 cursor_hero_calculator_app = { workspace = true }

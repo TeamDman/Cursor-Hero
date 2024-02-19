@@ -1944,6 +1944,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "cursor_hero_host_watcher"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "crossbeam-channel",
+ "cursor_hero_host_watcher_types",
+ "cursor_hero_winutils",
+]
+
+[[package]]
+name = "cursor_hero_host_watcher_types"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+]
+
+[[package]]
 name = "cursor_hero_hover"
 version = "0.1.0"
 dependencies = [
@@ -1969,7 +1986,7 @@ dependencies = [
  "tokio 1.35.1",
  "tokio-named-pipes",
  "uiautomation",
- "windows 0.51.1",
+ "windows 0.52.0",
 ]
 
 [[package]]
@@ -2162,6 +2179,8 @@ dependencies = [
  "cursor_hero_environment_types",
  "cursor_hero_glados_tts",
  "cursor_hero_glados_tts_types",
+ "cursor_hero_host_watcher",
+ "cursor_hero_host_watcher_types",
  "cursor_hero_hover",
  "cursor_hero_icon",
  "cursor_hero_inference",
@@ -2450,7 +2469,7 @@ dependencies = [
  "itertools 0.12.0",
  "leafwing-input-manager",
  "raw-window-handle",
- "windows 0.51.1",
+ "windows 0.52.0",
 ]
 
 [[package]]
@@ -2510,7 +2529,7 @@ dependencies = [
  "cursor_hero_environment_types",
  "cursor_hero_winutils",
  "image",
- "windows 0.51.1",
+ "windows 0.52.0",
 ]
 
 [[package]]
@@ -2525,7 +2544,7 @@ dependencies = [
  "image",
  "uiautomation",
  "widestring",
- "windows 0.51.1",
+ "windows 0.52.0",
  "winreg 0.52.0",
 ]
 
