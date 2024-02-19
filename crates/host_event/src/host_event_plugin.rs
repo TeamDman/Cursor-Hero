@@ -26,7 +26,7 @@ struct EventBridge {
 
 fn start_worker(mut commands: Commands) {
     info!("Starting worker thread");
-    let (sender, receiver) = bounded::<()>(100);
+    let (_sender, receiver) = bounded::<()>(100);
     if let Err(e) = std::thread::Builder::new()
         .name("HostWatcher thread".to_string())
         // .spawn(move || {
