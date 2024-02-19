@@ -118,19 +118,19 @@ fn update_pointer(
             *input_method,
         ) {
             // main character, in host environment, stick in use
-            (_, true, true, true, _) => PointerMovementBehaviour::HostFollowsPointer,
+            (_, true, true, true, _) => PointerMovementBehaviour::CursorFollowsPointerGameCoords,
             // main character, in host environment, stick not in use, gamepad
             (_, true, true, false, ActiveInput::Gamepad) => {
-                PointerMovementBehaviour::HostFollowsPointer
+                PointerMovementBehaviour::CursorFollowsPointerGameCoords
             }
             // main character, in any environment, stick not in use
             (_, true, _, false, ActiveInput::MouseAndKeyboard) => {
-                PointerMovementBehaviour::PointerFollowsHost
+                PointerMovementBehaviour::CursorOverWindowSetsPointer
             }
             // main character, not in host environment, stick not in use
             (current, true, false, false, _) => current,
             // main character, not in host environment, stick in use
-            (_, true, false, true, _) => PointerMovementBehaviour::HostOverWindow,
+            (_, true, false, true, _) => PointerMovementBehaviour::PointerSetsCursorOverWindow,
             // none stays none
             (PointerMovementBehaviour::None, _, _, _, _) => PointerMovementBehaviour::None,
             (current, a, b, c, d) => {
@@ -160,7 +160,7 @@ fn update_pointer(
                     None,
                 )
             }
-            PointerMovementBehaviour::PointerFollowsHost => {
+            PointerMovementBehaviour::CursorOverWindowSetsPointer => {
                 // usual mode for mouse and keyboard input
                 match window.cursor_position().or(*last_known_cursor_position) {
                     Some(host_cursor_xy) => {
@@ -187,7 +187,7 @@ fn update_pointer(
                     }
                 }
             }
-            PointerMovementBehaviour::HostFollowsPointer => {
+            PointerMovementBehaviour::CursorFollowsPointerGameCoords => {
                 // host follows pointer, render and physics are the same
                 if stick {
                     match pointer_actions.axis_pair(PointerAction::Move) {
@@ -219,7 +219,7 @@ fn update_pointer(
                     (Some(local_target), Some(global_target), Some(host_target))
                 }
             }
-            PointerMovementBehaviour::HostOverWindow => {
+            PointerMovementBehaviour::PointerSetsCursorOverWindow => {
                 if stick {
                     // stick in use
                     // the host cursor will go over the pointer's window position

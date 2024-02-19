@@ -5,9 +5,9 @@ use std::fmt::Formatter;
 #[derive(Eq, PartialEq, Debug, Reflect, Clone, Copy)]
 pub enum PointerMovementBehaviour {
     None,
-    HostFollowsPointer,
-    HostOverWindow,
-    PointerFollowsHost,
+    CursorFollowsPointerGameCoords,
+    PointerSetsCursorOverWindow,
+    CursorOverWindowSetsPointer,
 }
 
 impl Display for PointerMovementBehaviour {
@@ -17,9 +17,9 @@ impl Display for PointerMovementBehaviour {
             "{}",
             match self {
                 PointerMovementBehaviour::None => "None",
-                PointerMovementBehaviour::HostFollowsPointer => "HostFollowsPointer",
-                PointerMovementBehaviour::HostOverWindow => "HostOverWindow",
-                PointerMovementBehaviour::PointerFollowsHost => "PointerFollowsHost",
+                PointerMovementBehaviour::CursorFollowsPointerGameCoords => "HostFollowsPointer",
+                PointerMovementBehaviour::PointerSetsCursorOverWindow => "HostOverWindow",
+                PointerMovementBehaviour::CursorOverWindowSetsPointer => "PointerFollowsHost",
             }
         )
     }

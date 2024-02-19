@@ -11,6 +11,7 @@ impl Plugin for EnvironmentPlugin {
         app.add_systems(Startup, send_create_host_event);
         app.add_systems(Startup, send_create_game_event);
         app.add_systems(Update, handle_create_events);
+        app.add_systems(Update, send_populate_events);
     }
 }
 
@@ -28,6 +29,28 @@ fn send_create_game_event(mut events: EventWriter<CreateEnvironmentEvent>) {
     });
 }
 
+fn send_populate_events(
+    environment_query: Query<
+        (Entity, Option<&GameEnvironment>, Option<&HostEnvironment>),
+        Added<Environment>,
+    >,
+    mut populate_events: EventWriter<PopulateEnvironmentEvent>,
+) {
+    for environment in environment_query.iter() {
+        let (environment_id, is_game, is_host) = environment;
+        if is_game.is_some() {
+            let event = PopulateEnvironmentEvent::Game { environment_id };
+            debug!("Sending populate event: {:?}", event);
+            populate_events.send(event);
+        }
+        if is_host.is_some() {
+            let event = PopulateEnvironmentEvent::Host { environment_id };
+            debug!("Sending populate event: {:?}", event);
+            populate_events.send(event);
+        }
+    }
+}
+
 fn handle_create_events(
     mut commands: Commands,
     mut create_events: EventReader<CreateEnvironmentEvent>,
@@ -37,35 +60,27 @@ fn handle_create_events(
         match event {
             CreateEnvironmentEvent::Host { origin, name } => {
                 info!("Creating host environment at {:?}", origin);
-                let environment_id = commands
-                    .spawn((
-                        SpatialBundle {
-                            transform: Transform::from_translation(origin.extend(0.0)),
-                            ..default()
-                        },
-                        Environment,
-                        HostEnvironment,
-                        Name::new(name.clone()),
-                    ))
-                    .id();
-                info!("Broadcasting environment population event");
-                populate_events.send(PopulateEnvironmentEvent::Host { environment_id })
+                commands.spawn((
+                    SpatialBundle {
+                        transform: Transform::from_translation(origin.extend(0.0)),
+                        ..default()
+                    },
+                    Environment,
+                    HostEnvironment,
+                    Name::new(name.clone()),
+                ));
             }
             CreateEnvironmentEvent::Game { origin, name } => {
                 info!("Creating game environment at {:?}", origin);
-                let environment_id = commands
-                    .spawn((
-                        SpatialBundle {
-                            transform: Transform::from_translation(origin.extend(0.0)),
-                            ..default()
-                        },
-                        Environment,
-                        GameEnvironment,
-                        Name::new(name.clone()),
-                    ))
-                    .id();
-                info!("Broadcasting environment population event");
-                populate_events.send(PopulateEnvironmentEvent::Game { environment_id })
+                commands.spawn((
+                    SpatialBundle {
+                        transform: Transform::from_translation(origin.extend(0.0)),
+                        ..default()
+                    },
+                    Environment,
+                    GameEnvironment,
+                    Name::new(name.clone()),
+                ));
             }
         }
     }

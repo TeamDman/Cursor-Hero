@@ -77,7 +77,6 @@ pub struct MyPlugin;
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(TaskbarToolPlugin);
-        app.add_plugins(TaskbarTypesPlugin);
         app.add_plugins(StartMenuTypesPlugin);
         app.add_plugins(StartMenuPlugin);
         app.add_plugins(CalculatorAppTypesPlugin);
@@ -190,6 +189,8 @@ impl Plugin for MyPlugin {
         // must be after the default plugins (relies on assetserver existing)
         app.add_plugins(TextAssetTypesPlugin);
         app.add_plugins(TextAssetPlugin);
+        app.add_plugins(TaskbarTypesPlugin);
+
 
         // must be after the default plugins
         app.add_plugins(
