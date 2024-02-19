@@ -54,7 +54,6 @@ fn send_populate_events(
 fn handle_create_events(
     mut commands: Commands,
     mut create_events: EventReader<CreateEnvironmentEvent>,
-    mut populate_events: EventWriter<PopulateEnvironmentEvent>,
 ) {
     for event in create_events.read() {
         match event {

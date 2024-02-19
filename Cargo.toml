@@ -9,8 +9,8 @@ members = ["crates/*", "other/gamepad_hell", "other/uparrow-enter"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace.dependencies]
-cursor_hero_host_watcher_types = { path = "./crates/host_watcher_types" }
-cursor_hero_host_watcher = { path = "./crates/host_watcher" }
+cursor_hero_host_event_types = { path = "./crates/host_event_types" }
+cursor_hero_host_event = { path = "./crates/host_event" }
 cursor_hero_taskbar_tool = { path = "./crates/taskbar_tool" }
 cursor_hero_start_menu_types = { path = "./crates/start_menu_types" }
 cursor_hero_start_menu = { path = "./crates/start_menu" }

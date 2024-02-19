@@ -1944,17 +1944,17 @@ dependencies = [
 ]
 
 [[package]]
-name = "cursor_hero_host_watcher"
+name = "cursor_hero_host_event"
 version = "0.1.0"
 dependencies = [
  "bevy",
  "crossbeam-channel",
- "cursor_hero_host_watcher_types",
+ "cursor_hero_host_event_types",
  "cursor_hero_winutils",
 ]
 
 [[package]]
-name = "cursor_hero_host_watcher_types"
+name = "cursor_hero_host_event_types"
 version = "0.1.0"
 dependencies = [
  "bevy",
@@ -2179,8 +2179,8 @@ dependencies = [
  "cursor_hero_environment_types",
  "cursor_hero_glados_tts",
  "cursor_hero_glados_tts_types",
- "cursor_hero_host_watcher",
- "cursor_hero_host_watcher_types",
+ "cursor_hero_host_event",
+ "cursor_hero_host_event_types",
  "cursor_hero_hover",
  "cursor_hero_icon",
  "cursor_hero_inference",

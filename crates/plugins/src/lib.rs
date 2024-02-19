@@ -72,14 +72,14 @@ use cursor_hero_start_menu::prelude::*;
 use cursor_hero_start_menu_types::prelude::*;
 use cursor_hero_taskbar_tool::prelude::*;
 use cursor_hero_taskbar_types::prelude::TaskbarTypesPlugin;
-use cursor_hero_host_watcher::prelude::*;
-use cursor_hero_host_watcher_types::prelude::*;
+use cursor_hero_host_event::prelude::*;
+use cursor_hero_host_event_types::prelude::*;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(HostWatcherTypesPlugin);
-        app.add_plugins(HostWatcherPlugin);
+        app.add_plugins(HostEventPlugin);
         app.add_plugins(TaskbarToolPlugin);
         app.add_plugins(StartMenuTypesPlugin);
         app.add_plugins(StartMenuPlugin);

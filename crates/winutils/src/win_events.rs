@@ -1,10 +1,7 @@
+#![allow(dead_code)]
 use bevy::log::debug;
 use bevy::log::error;
 use bevy::log::info;
-use bevy::log::warn;
-use bevy::reflect::TypeData;
-use std::ptr::null_mut;
-use windows::core::BSTR;
 use windows::Win32::Foundation::*;
 use windows::Win32::System::Ole::VarBstrFromDec;
 use windows::Win32::System::Variant::VARIANT;
@@ -75,14 +72,14 @@ extern "system" fn win_event_proc(
                         return;
                     }
                 };
-                let mut role_var = match acc.get_accRole(elem.clone()) {
+                let role_var = match acc.get_accRole(elem.clone()) {
                     Ok(role) => role,
                     Err(e) => {
                         error!("Error getting role: {:?}", e);
                         return;
                     }
                 };
-                let mut state_var = match acc.get_accState(elem.clone()) {
+                let state_var = match acc.get_accState(elem.clone()) {
                     Ok(state) => state,
                     Err(e) => {
                         error!("Error getting state: {:?}", e);
@@ -97,13 +94,16 @@ extern "system" fn win_event_proc(
                 let mut pytop = 0;
                 let mut pcxwidth = 0;
                 let mut pcyheight = 0;
-                acc.accLocation(
+                if let Err(e) = acc.accLocation(
                     &mut pxleft,
                     &mut pytop,
                     &mut pcxwidth,
                     &mut pcyheight,
                     elem,
-                );
+                ) {
+                    error!("Error getting location: {:?}", e);
+                    return;
+                }
                 let bounds = bevy::math::IRect::from_corners(
                     bevy::math::IVec2::new(pxleft, pytop),
                     bevy::math::IVec2::new(pxleft + pcxwidth, pytop + pcyheight),

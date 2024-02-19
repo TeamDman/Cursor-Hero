@@ -1,16 +1,21 @@
+#![allow(dead_code)]
+
 use bevy::prelude::*;
 
 use crossbeam_channel::bounded;
 use crossbeam_channel::Receiver;
-use crossbeam_channel::Sender;
+// use crossbeam_channel::Sender;
 use cursor_hero_winutils::win_events::message_loop;
 
-pub struct HostWatcherPlugin;
+pub struct HostEventPlugin;
 
-impl Plugin for HostWatcherPlugin {
+impl Plugin for HostEventPlugin {
+    #![allow(unused_variables)]
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, start_worker);
-        app.add_systems(Update, process_events);
+        // not using this right now
+
+        // app.add_systems(Startup, start_worker);
+        // app.add_systems(Update, process_events);
     }
 }
 
@@ -42,7 +47,7 @@ fn start_worker(mut commands: Commands) {
     commands.insert_resource(EventBridge { receiver });
 }
 
-fn process_events(mut bridge: ResMut<EventBridge>) {
+fn process_events(bridge: ResMut<EventBridge>) {
     for event in bridge.receiver.try_iter() {
         println!("Event: {:?}", event);
     }
