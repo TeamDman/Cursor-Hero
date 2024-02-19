@@ -2188,7 +2188,11 @@ dependencies = [
  "cursor_hero_secret_types",
  "cursor_hero_sprint_tool",
  "cursor_hero_sprint_tool_types",
+ "cursor_hero_start_menu",
+ "cursor_hero_start_menu_types",
  "cursor_hero_taskbar",
+ "cursor_hero_taskbar_tool",
+ "cursor_hero_taskbar_types",
  "cursor_hero_text_asset",
  "cursor_hero_text_asset_types",
  "cursor_hero_toolbelt",
@@ -2317,6 +2321,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "cursor_hero_start_menu"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy_xpbd_2d",
+ "cursor_hero_pointer_types",
+ "cursor_hero_start_menu_types",
+ "cursor_hero_taskbar_types",
+ "cursor_hero_winutils",
+]
+
+[[package]]
+name = "cursor_hero_start_menu_types"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+]
+
+[[package]]
 name = "cursor_hero_taskbar"
 version = "0.1.0"
 dependencies = [
@@ -2326,10 +2349,32 @@ dependencies = [
  "cursor_hero_environment_types",
  "cursor_hero_pointer_types",
  "cursor_hero_screen",
+ "cursor_hero_taskbar_types",
  "cursor_hero_toolbelt_types",
  "cursor_hero_tools",
  "cursor_hero_winutils",
  "image",
+]
+
+[[package]]
+name = "cursor_hero_taskbar_tool"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy_xpbd_2d",
+ "cursor_hero_bevy",
+ "cursor_hero_screen",
+ "cursor_hero_taskbar_types",
+ "cursor_hero_toolbelt_types",
+ "cursor_hero_tools",
+ "cursor_hero_winutils",
+]
+
+[[package]]
+name = "cursor_hero_taskbar_types"
+version = "0.1.0"
+dependencies = [
+ "bevy",
 ]
 
 [[package]]

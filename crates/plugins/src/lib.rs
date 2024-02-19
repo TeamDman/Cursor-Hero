@@ -68,10 +68,18 @@ use cursor_hero_app::prelude::*;
 use cursor_hero_app_types::prelude::*;
 use cursor_hero_calculator_app::prelude::*;
 use cursor_hero_calculator_app_types::prelude::*;
+use cursor_hero_start_menu::prelude::*;
+use cursor_hero_start_menu_types::prelude::*;
+use cursor_hero_taskbar_tool::prelude::*;
+use cursor_hero_taskbar_types::prelude::TaskbarTypesPlugin;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(TaskbarToolPlugin);
+        app.add_plugins(TaskbarTypesPlugin);
+        app.add_plugins(StartMenuTypesPlugin);
+        app.add_plugins(StartMenuPlugin);
         app.add_plugins(CalculatorAppTypesPlugin);
         app.add_plugins(CalculatorAppPlugin);
         app.add_plugins(AppTypesPlugin);

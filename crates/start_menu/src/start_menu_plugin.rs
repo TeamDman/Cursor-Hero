@@ -1,28 +1,17 @@
 use bevy::prelude::*;
 use cursor_hero_winutils::win_colors::get_accent_color;
-
-use crate::start_menu_button_plugin::StartMenuButton;
+use cursor_hero_start_menu_types::prelude::*;
+use crate::start_menu_button_plugin::StartMenuButtonPlugin;
 
 pub struct StartMenuPlugin;
 
 impl Plugin for StartMenuPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<StartMenu>();
-        app.add_event::<StartMenuEvent>();
+        app.add_plugins(StartMenuButtonPlugin);
         app.add_systems(Update, handle_open_events);
         app.add_systems(Update, handle_close_events);
     }
 }
-
-#[derive(Component, Debug, Reflect)]
-pub struct StartMenu;
-
-#[derive(Event, Debug, Reflect)]
-pub enum StartMenuEvent {
-    Open { start_menu_button_id: Entity },
-    Close { start_menu_button_id: Entity },
-}
-
 fn handle_open_events(
     mut commands: Commands,
     mut start_menu_events: EventReader<StartMenuEvent>,

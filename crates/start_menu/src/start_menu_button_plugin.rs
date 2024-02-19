@@ -3,24 +3,19 @@ use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
 use bevy_xpbd_2d::components::Sensor;
 use cursor_hero_pointer_types::prelude::*;
-
-use crate::game_screen_taskbar_plugin::Taskbar;
-use crate::start_menu_plugin::StartMenu;
-use crate::start_menu_plugin::StartMenuEvent;
+use cursor_hero_taskbar_types::prelude::*;
+use cursor_hero_start_menu_types::prelude::*;
 
 pub struct StartMenuButtonPlugin;
 
 impl Plugin for StartMenuButtonPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<StartMenuButton>();
         app.add_systems(Update, add_start_menu_button_to_new_taskbars);
         app.add_systems(Update, click_listener);
         app.add_systems(Update, visuals);
     }
 }
 
-#[derive(Component, Debug, Reflect)]
-pub struct StartMenuButton;
 
 fn add_start_menu_button_to_new_taskbars(
     asset_server: Res<AssetServer>,

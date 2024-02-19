@@ -1,0 +1,14 @@
+[package]
+name = "cursor_hero_start_menu"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bevy = { workspace = true }
+cursor_hero_start_menu_types = { workspace = true }
+cursor_hero_winutils = { workspace = true }
+cursor_hero_taskbar_types = { workspace = true }
+cursor_hero_pointer_types = { workspace = true }
+bevy_xpbd_2d = { workspace = true }

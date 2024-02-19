@@ -1,6 +1,8 @@
 - start menu button
 - button creates a window with icon, title, decorations
 - taskbar lists windows
+- 
+- update tool plugin template
 
 - tree structure component that can render a tree structure following the flat-but-annotated style of the inspect.exe tree of the vscode file explorer
 - agent memory reset (gun?)

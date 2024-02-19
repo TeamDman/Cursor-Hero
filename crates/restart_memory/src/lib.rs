@@ -30,6 +30,7 @@ impl Plugin for MemoryPlugin {
 }
 
 #[derive(Debug)]
+#[allow(dead_code)]
 enum PersistError {
     Io(std::io::Error),
     WindowBounds(cursor_hero_winutils::win_window::WindowBoundsError),
@@ -46,6 +47,7 @@ enum PersistSuccess {
 }
 
 #[derive(Debug)]
+#[allow(dead_code)]
 enum RestoreError {
     Io(std::io::Error),
     Json(serde_json::Error),

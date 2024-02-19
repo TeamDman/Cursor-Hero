@@ -7,6 +7,8 @@ edition = "2021"
 
 
 [dependencies]
+cursor_hero_start_menu = { workspace = true }
+cursor_hero_start_menu_types = { workspace = true }
 cursor_hero_calculator_app = { workspace = true }
 cursor_hero_calculator_app_types = { workspace = true }
 cursor_hero_app = { workspace = true }
@@ -41,6 +43,8 @@ cursor_hero_sprint_tool_types = { workspace = true }
 cursor_hero_sprint_tool = { workspace = true }
 cursor_hero_agent = { workspace = true }
 cursor_hero_taskbar = { workspace = true }
+cursor_hero_taskbar_tool = { workspace = true }
+cursor_hero_taskbar_types = { workspace = true }
 cursor_hero_environment_nametag = { workspace = true }
 cursor_hero_environment = { workspace = true }
 cursor_hero_xelu_prompts = { workspace = true }

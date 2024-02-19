@@ -2,13 +2,13 @@ use bevy::prelude::*;
 use cursor_hero_screen::screen_plugin::GameScreen;
 use cursor_hero_screen::screen_plugin::Screen;
 use cursor_hero_winutils::win_colors::get_start_color;
+use cursor_hero_taskbar_types::prelude::*;
 
 pub struct GameScreenTaskbarPlugin;
 
 impl Plugin for GameScreenTaskbarPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<Taskbar>()
-            .add_event::<TaskbarEvent>()
+        app
             .add_systems(
                 Update,
                 (
@@ -17,15 +17,6 @@ impl Plugin for GameScreenTaskbarPlugin {
                 ),
             );
     }
-}
-
-#[derive(Component, Debug, Reflect)]
-pub struct Taskbar;
-
-#[derive(Event, Debug, Reflect)]
-pub enum TaskbarEvent {
-    Create { screen_id: Entity },
-    Open { taskbar_id: Entity },
 }
 
 fn detect_new_game_screens_and_send_taskbar_create_event(

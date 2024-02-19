@@ -9,6 +9,9 @@ members = ["crates/*", "other/gamepad_hell", "other/uparrow-enter"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace.dependencies]
+cursor_hero_taskbar_tool = { path = "./crates/taskbar_tool" }
+cursor_hero_start_menu_types = { path = "./crates/start_menu_types" }
+cursor_hero_start_menu = { path = "./crates/start_menu" }
 cursor_hero_calculator_app_types = { path = "./crates/calculator_app_types" }
 cursor_hero_calculator_app = { path = "./crates/calculator_app" }
 cursor_hero_app_types = { path = "./crates/app_types" }
@@ -42,6 +45,7 @@ cursor_hero_sprint_tool_types = { path = "./crates/sprint_tool_types" }
 cursor_hero_sprint_tool = { path = "./crates/sprint_tool" }
 cursor_hero_agent = { path = "./crates/agent" }
 cursor_hero_taskbar = { path = "./crates/taskbar" }
+cursor_hero_taskbar_types = { path = "./crates/taskbar_types" }
 cursor_hero_environment_nametag = { path = "./crates/environment_nametag" }
 cursor_hero_environment = { path = "./crates/environment" }
 cursor_hero_xelu_prompts = { path = "./crates/xelu_prompts" }
