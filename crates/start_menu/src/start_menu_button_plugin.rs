@@ -20,9 +20,17 @@ impl Plugin for StartMenuButtonPlugin {
 fn add_start_menu_button_to_new_taskbars(
     asset_server: Res<AssetServer>,
     mut commands: Commands,
-    taskbar_query: Query<(Entity, &Sprite), Added<Taskbar>>,
+    mut taskbar_events: EventReader<TaskbarEvent>,
+    taskbar_query: Query<&Sprite, With<Taskbar>>,
 ) {
-    for (taskbar_id, taskbar_sprite) in taskbar_query.iter() {
+    for event in taskbar_events.read() {
+        let TaskbarEvent::Populate { taskbar_id } = event;
+        let Ok(taskbar) = taskbar_query.get(*taskbar_id) else {
+            warn!("Taskbar {:?} not found", taskbar_id);
+            continue;
+        };
+        let taskbar_sprite = taskbar;
+
         let Some(taskbar_size) = taskbar_sprite.custom_size else {
             warn!("Taskbar {:?} has no custom size", taskbar_id);
             continue;
@@ -34,7 +42,7 @@ fn add_start_menu_button_to_new_taskbars(
             1.0,
         );
         info!("Adding start menu button to taskbar {:?}", taskbar_id);
-        commands.entity(taskbar_id).with_children(|parent| {
+        commands.entity(*taskbar_id).with_children(|parent| {
             parent.spawn((
                 SpriteBundle {
                     sprite: Sprite {

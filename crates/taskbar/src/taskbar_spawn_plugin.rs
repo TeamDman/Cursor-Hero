@@ -1,47 +1,23 @@
 use bevy::prelude::*;
 use cursor_hero_screen::screen_plugin::GameScreen;
-use cursor_hero_screen::screen_plugin::Screen;
-use cursor_hero_winutils::win_colors::get_start_color;
 use cursor_hero_taskbar_types::prelude::*;
+use cursor_hero_winutils::win_colors::get_start_color;
 
-pub struct GameScreenTaskbarPlugin;
+pub struct TaskbarSpawnPlugin;
 
-impl Plugin for GameScreenTaskbarPlugin {
+impl Plugin for TaskbarSpawnPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .add_systems(
-                Update,
-                (
-                    detect_new_game_screens_and_send_taskbar_create_event,
-                    handle_taskbar_create_events,
-                ),
-            );
+        app.add_systems(Update, spawn_taskbar);
     }
 }
 
-fn detect_new_game_screens_and_send_taskbar_create_event(
-    mut taskbar_events: EventWriter<TaskbarEvent>,
-    screen_query: Query<Entity, Added<GameScreen>>,
-) {
-    for screen_id in screen_query.iter() {
-        taskbar_events.send(TaskbarEvent::Create { screen_id });
-    }
-}
-
-fn handle_taskbar_create_events(
-    mut taskbar_events: EventReader<TaskbarEvent>,
+fn spawn_taskbar(
     mut commands: Commands,
-    screen_query: Query<&Sprite, With<Screen>>,
+    mut taskbar_events: EventWriter<TaskbarEvent>,
+    screen_query: Query<(Entity, &Sprite), Added<GameScreen>>,
 ) {
-    for event in taskbar_events.read() {
-        let TaskbarEvent::Create { screen_id } = event else {
-            continue;
-        };
-        let Ok(screen) = screen_query.get(*screen_id) else {
-            warn!("Couldn't find screen with id {:?}", screen_id);
-            continue;
-        };
-        let screen_sprite = screen;
+    for screen in screen_query.iter() {
+        let (screen_id, screen_sprite) = screen;
         let Some(screen_size) = screen_sprite.custom_size else {
             warn!("Screen {:?} has no custom size", screen_id);
             continue;
@@ -58,7 +34,7 @@ fn handle_taskbar_create_events(
         };
         color.set_a(0.9);
 
-        commands.entity(*screen_id).with_children(|parent| {
+        let taskbar_id = commands.entity(screen_id).with_children(|parent| {
             parent.spawn((
                 Taskbar,
                 Name::new("Taskbar"),
@@ -72,6 +48,10 @@ fn handle_taskbar_create_events(
                     ..default()
                 },
             ));
-        });
+        }).id();
+
+        let event = TaskbarEvent::Populate { taskbar_id };
+        debug!("Sending taskbar event: {:?}", event);
+        taskbar_events.send(event);
     }
 }

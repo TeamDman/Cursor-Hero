@@ -9,6 +9,5 @@ pub struct Taskbar;
 
 #[derive(Event, Debug, Reflect)]
 pub enum TaskbarEvent {
-    Create { screen_id: Entity },
-    Open { taskbar_id: Entity },
+    Populate { taskbar_id: Entity },
 }
