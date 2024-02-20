@@ -20,7 +20,17 @@ pub enum TaskbarEvent {
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 pub struct TaskbarMaterial {
     #[uniform(0)]
-    pub color: Color,
+    pub taskbar_height: f32,
+    // pub taskbar_blur_radius: u32,
+    // pub taskbar_blur_total_samples: u32,
+    #[uniform(0)]
+    pub taskbar_color: Color,
+    #[texture(1)]
+    #[sampler(2)]
+    pub wallpaper_texture: Option<Handle<Image>>,
+    #[uniform(0)]
+    pub wallpaper_size: Vec2,
+    pub alpha_mode: AlphaMode,
 }
 
 impl Material2d for TaskbarMaterial {

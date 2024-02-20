@@ -18,6 +18,7 @@ fn spawn_taskbar(
     screen_query: Query<(Entity, &Sprite), Added<GameScreen>>,
     mut materials: ResMut<Assets<TaskbarMaterial>>,
     mut meshes: ResMut<Assets<Mesh>>,
+    asset_server: Res<AssetServer>,
 ) {
     for screen in screen_query.iter() {
         let (screen_id, screen_sprite) = screen;
@@ -25,19 +26,21 @@ fn spawn_taskbar(
             warn!("Screen {:?} has no custom size", screen_id);
             continue;
         };
+        // let taskbar_size = Vec3::new(screen_size.x, 40.0, 1.0);
         let taskbar_size = Vec3::new(screen_size.x, 40.0, 1.0);
-        let taskbar_translation = Vec3::new(0.0, -screen_size.y / 2.0 + 40.0 / 2.0, 5.0);
+        let taskbar_translation = Vec3::new(0.0, -screen_size.y / 2.0 + taskbar_size.y / 2.0, 5.0);
 
-        let mut color = match get_start_color() {
+        let taskbar_color = match get_start_color() {
             Ok(color) => color,
             Err(err) => {
                 warn!("Couldn't get accent color: {:?}", err);
                 Color::rgba(0.0, 0.0, 0.0, 1.0)
             }
         };
-        color *= Vec3::new(1.0 / 2.5, 2.0, 0.5);
-        color.set_a(0.9);
-
+        // color *= Vec3::new(1.0 / 2.5, 2.0, 0.5);
+        // color.set_a(0.9);
+        // let taskbar_blur_radius = 5;
+        // let taskbar_blur_total_samples = ((taskbar_blur_radius * 2 + 1) * (taskbar_blur_radius * 2 + 1));
         commands.entity(screen_id).with_children(|parent| {
             parent.spawn((
                 Taskbar {
@@ -57,7 +60,17 @@ fn spawn_taskbar(
                     mesh: meshes.add(Mesh::from(shape::Cube::default())).into(),
                     transform: Transform::from_translation(taskbar_translation)
                         .with_scale(taskbar_size),
-                    material: materials.add(TaskbarMaterial { color }),
+                    material: materials.add(TaskbarMaterial {
+                        // taskbar_blur_radius,
+                        // taskbar_blur_total_samples,
+                        taskbar_height: taskbar_size.y,
+                        taskbar_color,
+                        wallpaper_size: screen_size.xy(),
+                        wallpaper_texture: Some(
+                            asset_server.load("textures/environment/game/wallpaper.png"),
+                        ),
+                        alpha_mode: AlphaMode::Opaque,
+                    }),
                     ..default()
                 },
             ));
