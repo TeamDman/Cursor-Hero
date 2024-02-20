@@ -21,7 +21,7 @@ fn add_start_menu_button_to_new_taskbars(
     asset_server: Res<AssetServer>,
     mut commands: Commands,
     mut taskbar_events: EventReader<TaskbarEvent>,
-    taskbar_query: Query<&Sprite, With<Taskbar>>,
+    taskbar_query: Query<(&Taskbar, &Transform, &Parent)>,
 ) {
     for event in taskbar_events.read() {
         let TaskbarEvent::Populate { taskbar_id } = event;
@@ -29,20 +29,16 @@ fn add_start_menu_button_to_new_taskbars(
             warn!("Taskbar {:?} not found", taskbar_id);
             continue;
         };
-        let taskbar_sprite = taskbar;
-
-        let Some(taskbar_size) = taskbar_sprite.custom_size else {
-            warn!("Taskbar {:?} has no custom size", taskbar_id);
-            continue;
-        };
+        let (taskbar, taskbar_transform, taskbar_parent) = taskbar;
+        let taskbar_size = taskbar.size;
         let start_menu_button_size = Vec2::new(48.0, 40.0);
         let start_menu_button_translation = Vec3::new(
             -taskbar_size.x / 2.0 + start_menu_button_size.x / 2.0,
             0.0,
             1.0,
-        );
-        info!("Adding start menu button to taskbar {:?}", taskbar_id);
-        commands.entity(*taskbar_id).with_children(|parent| {
+        ) + taskbar_transform.translation;
+        info!("Adding start menu button for taskbar {:?}", taskbar_id);
+        commands.entity(taskbar_parent.get()).with_children(|parent| {
             parent.spawn((
                 SpriteBundle {
                     sprite: Sprite {

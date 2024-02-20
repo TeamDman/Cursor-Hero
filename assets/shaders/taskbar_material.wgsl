@@ -1,8 +1,14 @@
 #import bevy_sprite::mesh2d_vertex_output::VertexOutput
 
-@group(2) @binding(0) var<uniform> material_color: vec4<f32>;
+
+struct TaskbarMaterial {
+    color: vec4<f32>,
+};
+
+
+@group(1) @binding(0) var<uniform> material: TaskbarMaterial;
 
 @fragment
 fn fragment(mesh: VertexOutput) -> @location(0) vec4<f32> {
-    return material_color;
+    return material.color;
 }

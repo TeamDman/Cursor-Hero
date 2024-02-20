@@ -40,24 +40,26 @@ fn spawn_taskbar(
 
         commands.entity(screen_id).with_children(|parent| {
             parent.spawn((
-                Taskbar,
-                Name::new("Taskbar"),
-                SpriteBundle {
-                    sprite: Sprite {
-                        custom_size: Some(taskbar_size.xy()),
-                        color,
-                        ..default()
-                    },
-                    transform: Transform::from_translation(taskbar_translation),
-                    ..default()
+                Taskbar {
+                    size: taskbar_size.xy(),
                 },
-                // MaterialMesh2dBundle {
-                //     mesh: meshes.add(Mesh::from(shape::Cube::default())).into(),
-                //     transform: Transform::from_translation(taskbar_translation)
-                //         .with_scale(taskbar_size),
-                //     material: materials.add(TaskbarMaterial { color }),
+                Name::new("Taskbar"),
+                // SpriteBundle {
+                //     sprite: Sprite {
+                //         custom_size: Some(taskbar_size.xy()),
+                //         color,
+                //         ..default()
+                //     },
+                //     transform: Transform::from_translation(taskbar_translation),
                 //     ..default()
                 // },
+                MaterialMesh2dBundle {
+                    mesh: meshes.add(Mesh::from(shape::Cube::default())).into(),
+                    transform: Transform::from_translation(taskbar_translation)
+                        .with_scale(taskbar_size),
+                    material: materials.add(TaskbarMaterial { color }),
+                    ..default()
+                },
             ));
         });
     }

@@ -8,7 +8,9 @@ use bevy::reflect::TypePath;
 pub struct AppWindow;
 
 #[derive(Component, Debug, Reflect)]
-pub struct Taskbar;
+pub struct Taskbar {
+    pub size: Vec2,
+}
 
 #[derive(Event, Debug, Reflect)]
 pub enum TaskbarEvent {
@@ -17,7 +19,7 @@ pub enum TaskbarEvent {
 
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 pub struct TaskbarMaterial {
-    // #[uniform(0)]
+    #[uniform(0)]
     pub color: Color,
 }
 
