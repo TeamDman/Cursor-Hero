@@ -25,12 +25,12 @@ use rand::thread_rng;
 use rand::Rng;
 use std::thread;
 
-pub struct InspectToolPlugin;
+pub struct ScreenshotToolPlugin;
 
-impl Plugin for InspectToolPlugin {
+impl Plugin for ScreenshotToolPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<InspectTool>()
-            .add_plugins(InputManagerPlugin::<InspectToolAction>::default())
+            .add_plugins(InputManagerPlugin::<ScreenshotToolAction>::default())
             .add_systems(Startup, spawn_worker_thread)
             .add_systems(Update, (toolbelt_events, handle_input, handle_replies));
     }
@@ -46,27 +46,27 @@ fn toolbelt_events(
 ) {
     for event in reader.read() {
         if let PopulateToolbeltEvent::Inspector { toolbelt_id } = event {
-            ToolSpawnConfig::<InspectTool, InspectToolAction>::new(
+            ToolSpawnConfig::<InspectTool, ScreenshotToolAction>::new(
                 InspectTool,
                 *toolbelt_id,
                 event,
             )
             .guess_name(file!())
-            .guess_image(file!(), &asset_server, "png")
-            .with_description("Inspect UI automation properties")
+            .guess_image(file!(), &asset_server, "webp")
+            .with_description("Turn UI elements into information.")
             .spawn(&mut commands);
         }
     }
 }
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
-enum InspectToolAction {
+enum ScreenshotToolAction {
     Dupe,
     Print,
     Fracture,
 }
 
-impl InspectToolAction {
+impl ScreenshotToolAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
             Self::Dupe => GamepadButtonType::RightTrigger.into(),
@@ -83,11 +83,11 @@ impl InspectToolAction {
         }
     }
 }
-impl ToolAction for InspectToolAction {
-    fn default_input_map(_event: &PopulateToolbeltEvent) -> Option<InputMap<InspectToolAction>> {
+impl ToolAction for ScreenshotToolAction {
+    fn default_input_map(_event: &PopulateToolbeltEvent) -> Option<InputMap<ScreenshotToolAction>> {
         let mut input_map = InputMap::default();
 
-        for variant in InspectToolAction::variants() {
+        for variant in ScreenshotToolAction::variants() {
             input_map.insert(variant.default_mkb_binding(), variant);
             input_map.insert(variant.default_gamepad_binding(), variant);
         }
@@ -103,7 +103,10 @@ enum ThreadboundMessage {
 }
 #[derive(Debug)]
 enum GameboundMessage {
-    Dupe(ElementInfo),
+    Dupe {
+        element_info: ElementInfo,
+        world_position: Vec3,
+    },
     Print(ElementInfo),
     Fracture {
         data: Vec<(ElementInfo, usize)>,
@@ -130,8 +133,11 @@ fn process_thread_message(
 
             let id = elem.get_automation_id()?;
             info!("Automation ID: {}", id);
-            let info = get_element_info(elem)?;
-            reply_tx.send(GameboundMessage::Dupe(info))?;
+            let element_info = get_element_info(elem)?;
+            reply_tx.send(GameboundMessage::Dupe {
+                element_info,
+                world_position,
+            })?;
         }
         ThreadboundMessage::Print { world_position } => {
             let mouse_position = world_position.xy().neg_y().as_ivec2();
@@ -191,7 +197,7 @@ fn spawn_worker_thread(mut commands: Commands) {
 }
 
 fn handle_input(
-    tools: Query<(&ActionState<InspectToolAction>, &Parent), With<ActiveTool>>,
+    tools: Query<(&ActionState<ScreenshotToolAction>, &Parent), With<ActiveTool>>,
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<&Children, With<Character>>,
     pointers: Query<&GlobalTransform, With<Pointer>>,
@@ -233,7 +239,7 @@ fn handle_input(
         if hovering_over_egui {
             continue;
         }
-        if tool_actions.just_pressed(InspectToolAction::Dupe) {
+        if tool_actions.just_pressed(ScreenshotToolAction::Dupe) {
             info!("PrintUnderMouse button");
             let msg = ThreadboundMessage::Dupe {
                 world_position: pointer_translation,
@@ -242,7 +248,7 @@ fn handle_input(
                 error!("Failed to send click: {:?}", e);
             }
         }
-        if tool_actions.just_pressed(InspectToolAction::Print) {
+        if tool_actions.just_pressed(ScreenshotToolAction::Print) {
             info!("PrintUnderMouse button");
             let msg = ThreadboundMessage::Print {
                 world_position: pointer_translation,
@@ -251,7 +257,7 @@ fn handle_input(
                 error!("Failed to send click: {:?}", e);
             }
         }
-        if tool_actions.just_pressed(InspectToolAction::Fracture) {
+        if tool_actions.just_pressed(ScreenshotToolAction::Fracture) {
             info!("FractureUnderMouse button");
             let msg = ThreadboundMessage::Fracture {
                 world_position: pointer_translation,
@@ -271,21 +277,23 @@ fn handle_replies(
 ) {
     while let Ok(msg) = bridge.receiver.try_recv() {
         match msg {
-            GameboundMessage::Dupe(info) => {
-                let Ok(image) = get_image(info.bounding_rect, &access) else {
+            GameboundMessage::Dupe { element_info, world_position } => {
+                let Ok(image) = get_image(element_info.bounding_rect, &access) else {
                     continue;
                 };
                 let texture_handle = asset_server.add(image);
 
                 // spawn the element image
-                let mut elem_center_pos = info.bounding_rect.center().extend(20.0);
-                elem_center_pos.y *= -1.0;
+                // let mut elem_center_pos = element_info.bounding_rect.center().extend(20.0);
+                // elem_center_pos.y *= -1.0;
+
+                // let size = element_info.bounding_rect.size();
+                let size = Vec2::new(30.0,30.0);
                 commands.spawn((
                     SpriteBundle {
-                        transform: Transform::from_translation(elem_center_pos),
+                        transform: Transform::from_translation(world_position),
                         sprite: Sprite {
-                            custom_size: Some(info.bounding_rect.size()),
-                            // color: Color::PURPLE,
+                            custom_size: Some(size),
                             ..default()
                         },
                         texture: texture_handle,
@@ -297,9 +305,9 @@ fn handle_replies(
                     },
                     CubeToolInteractable,
                     RigidBody::Dynamic,
-                    Collider::cuboid(info.bounding_rect.width(), info.bounding_rect.height()),
+                    Collider::cuboid(size.x, size.y),
                     MovementDamping::default(),
-                    Name::new(format!("Element - {}", info.name)),
+                    Name::new(format!("Element - {}", element_info.name)),
                 ));
             }
             GameboundMessage::Print(info) => {

@@ -51,6 +51,7 @@ enum FocusToolAction {
     ToggleFollowCharacter,
     FocusMainWindow,
 }
+// TODO: add an action to focus the character without teleporting it to the camera.
 
 impl FocusToolAction {
     fn default_gamepad_binding(&self) -> UserInput {
