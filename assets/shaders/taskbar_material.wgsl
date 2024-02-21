@@ -8,6 +8,7 @@ struct TaskbarMaterial {
 
 const amount = 5;
 
+//TODO: optimize
 @group(1) @binding(0) var<uniform> material: TaskbarMaterial;
 @group(1) @binding(1) var wallpaper_texture: texture_2d<f32>;
 @group(1) @binding(2) var wallpaper_sampler: sampler;
