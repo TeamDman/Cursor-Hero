@@ -1,9 +1,11 @@
 - data brick - screenshot tool creates physics object cube that contains the data
+  - only show hover preview and only process clicks for ui elements that match a known data provider pattern
   - agent can manipulate and observe the cube
   - cube observations do not map to the inner info, apps may be summarized in a few lines with hints about what subdata can be extracted
   - UI databrick - contains information extracted from UI Automation
   - File databrick - contains file contents and file handle info (path, size, etc)
   - Chat databrick - contains chat history
+  - brick observations shouldn't be retained from previous messages, only keep chat history / purge brick history? if the agent can only observe the bricks around it, and we create a brick to represent chat history, then we can have the agent manage its own context window by summarizing and discarding bricks. problem: how large is the context window? we need indicators. Not contained within, but referenced to be gathered later. 
 
 
 - context teleport tool

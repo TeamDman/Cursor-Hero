@@ -10,6 +10,7 @@ use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
 use cursor_hero_bevy::NegativeYVec2;
 use cursor_hero_character_types::prelude::*;
+use cursor_hero_pointer_types::prelude::*;
 use cursor_hero_physics::damping_plugin::MovementDamping;
 use cursor_hero_pointer_types::prelude::*;
 use cursor_hero_floaty_nametag_types::prelude::*;
@@ -309,6 +310,8 @@ fn handle_replies(
                         vertical_offset: 40.0,
                         appearance: NametagAppearance::Databrick,
                     },
+                    Hoverable,
+                    Clickable,
                     CubeToolInteractable,
                     RigidBody::Dynamic,
                     Collider::cuboid(size.x, size.y),
