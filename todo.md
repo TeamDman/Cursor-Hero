@@ -1,3 +1,14 @@
+- context teleport tool
+  - tab to place marker
+  - mouse1 to teleport cube to marker
+
+- camera tool
+  - f1 - env 1
+  - f2 - env 2
+  - 1 - teleport object to 1
+  - 2 - teleport object to 2
+
+
 - start menu button
 - button creates a window with icon, title, decorations
 - taskbar lists windows
