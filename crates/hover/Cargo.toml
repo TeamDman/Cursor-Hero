@@ -39,3 +39,4 @@ tokio = { workspace = true, features = ["net", "full"] }
 tokio-named-pipes = { workspace = true }
 bevy_xpbd_2d = { workspace = true }
 rand = { workspace = true }
+cursor_hero_floaty_nametag_types = { workspace = true }

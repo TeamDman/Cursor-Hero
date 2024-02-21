@@ -20,3 +20,4 @@ cursor_hero_camera = { workspace = true }
 bevy_xpbd_2d = { workspace = true }
 bevy-inspector-egui = { workspace = true}
 leafwing-input-manager = { workspace = true }
+cursor_hero_floaty_nametag_types = { workspace = true }

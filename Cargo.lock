@@ -1754,6 +1754,7 @@ dependencies = [
  "cursor_hero_camera",
  "cursor_hero_character_types",
  "cursor_hero_environment_types",
+ "cursor_hero_floaty_nametag_types",
  "cursor_hero_input",
  "cursor_hero_movement_tool_types",
  "cursor_hero_observation_types",
@@ -1827,6 +1828,7 @@ dependencies = [
  "cursor_hero_camera",
  "cursor_hero_character_types",
  "cursor_hero_environment_types",
+ "cursor_hero_floaty_nametag_types",
  "cursor_hero_input",
  "cursor_hero_physics",
  "cursor_hero_toolbelt_types",
@@ -1919,6 +1921,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "cursor_hero_floaty_nametag"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy_xpbd_2d",
+ "cursor_hero_floaty_nametag_types",
+]
+
+[[package]]
+name = "cursor_hero_floaty_nametag_types"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+]
+
+[[package]]
 name = "cursor_hero_glados_tts"
 version = "0.1.0"
 dependencies = [
@@ -1971,6 +1989,7 @@ dependencies = [
  "cursor_hero_bevy",
  "cursor_hero_camera",
  "cursor_hero_character_types",
+ "cursor_hero_floaty_nametag_types",
  "cursor_hero_physics",
  "cursor_hero_pointer_types",
  "cursor_hero_pressure_plate",
@@ -2177,6 +2196,8 @@ dependencies = [
  "cursor_hero_environment",
  "cursor_hero_environment_nametag",
  "cursor_hero_environment_types",
+ "cursor_hero_floaty_nametag",
+ "cursor_hero_floaty_nametag_types",
  "cursor_hero_glados_tts",
  "cursor_hero_glados_tts_types",
  "cursor_hero_host_event",

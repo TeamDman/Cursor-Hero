@@ -6,6 +6,7 @@ use cursor_hero_bevy::NegativeYVec2;
 use cursor_hero_camera::camera_plugin::CameraEvent;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_environment_types::prelude::*;
+use cursor_hero_floaty_nametag_types::prelude::*;
 use cursor_hero_physics::damping_plugin::MovementDamping;
 use cursor_hero_toolbelt_types::types::PopulateToolbeltEvent;
 use cursor_hero_toolbelt_types::types::ToolbeltBundle;
@@ -47,7 +48,12 @@ fn spawn_character(
         Character,
         MainCharacter,
         MovementDamping { factor: 0.90 },
-        Name::new("(Human) Tume Eena"),
+        Name::new("Character - (Human) Tume Eena"),
+        FloatyName {
+            text: "Tume Eena".to_string(),
+            vertical_offset: 40.0,
+            appearance: NametagAppearance::Character,
+        },
         RigidBody::Kinematic,
         Collider::capsule(15.0, 12.5),
         TrackEnvironmentTag,

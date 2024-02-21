@@ -12,6 +12,7 @@ use cursor_hero_bevy::NegativeYVec2;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_physics::damping_plugin::MovementDamping;
 use cursor_hero_pointer_types::prelude::*;
+use cursor_hero_floaty_nametag_types::prelude::*;
 
 use cursor_hero_screen::get_image::get_image;
 use cursor_hero_screen::get_image::ScreensToImageParam;
@@ -302,6 +303,11 @@ fn handle_replies(
                     AudioBundle {
                         source: asset_server.load("sounds/spring strung light 4.ogg"),
                         settings: PlaybackSettings::REMOVE.with_spatial(true),
+                    },
+                    FloatyName {
+                        text: element_info.name.clone(),
+                        vertical_offset: 40.0,
+                        appearance: NametagAppearance::Databrick,
                     },
                     CubeToolInteractable,
                     RigidBody::Dynamic,
