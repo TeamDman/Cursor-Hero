@@ -1,3 +1,11 @@
+- data brick - screenshot tool creates physics object cube that contains the data
+  - agent can manipulate and observe the cube
+  - cube observations do not map to the inner info, apps may be summarized in a few lines with hints about what subdata can be extracted
+  - UI databrick - contains information extracted from UI Automation
+  - File databrick - contains file contents and file handle info (path, size, etc)
+  - Chat databrick - contains chat history
+
+
 - context teleport tool
   - tab to place marker
   - mouse1 to teleport cube to marker
