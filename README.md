@@ -30,7 +30,7 @@ https://store.steampowered.com/app/1755100/The_Last_Clockwinder/
 
 ### Vision
 
-- [PTA-Text: A Text Only Click Model](https://huggingface.co/AskUI/pta-text-0.1) ([demo](https://huggingface.co/spaces/AskUI/pta-text-v0.1))
+- [PTA-Text: A Text Only Click Model - Prompt image, it tells you where it would click](https://huggingface.co/AskUI/pta-text-0.1) ([demo](https://huggingface.co/spaces/AskUI/pta-text-v0.1))
 - [Set-of-Mark Visual Prompting for GPT-4V](https://github.com/microsoft/SoM)
 - [LLaVA](https://llava.hliu.cc/)
 

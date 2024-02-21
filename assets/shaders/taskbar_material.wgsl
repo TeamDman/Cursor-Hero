@@ -31,9 +31,13 @@ fn fragment(mesh: VertexOutput) -> @location(0) vec4<f32> {
     blurred_color += textureSample(wallpaper_texture, wallpaper_sampler, uv + vec2<f32>(-d, d)) * mult;
     blurred_color += textureSample(wallpaper_texture, wallpaper_sampler, uv + vec2<f32>(d, d)) * mult;
     blurred_color /= 9.0;
-    // blurred_color += textureSample(wallpaper_texture, wallpaper_sampler, uv) * 0.55;
+    
+    blurred_color += textureSample(wallpaper_texture, wallpaper_sampler, uv) * 0.55;
+    blurred_color[3] = 1.0;
 
     // return blurred_color;
     // return material.taskbar_color;
-    return material.taskbar_color * blurred_color;
+    var out = material.taskbar_color / 2.0 + blurred_color / 2.0;
+    // out[3] = 0.75;
+    return out;
 }
