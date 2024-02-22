@@ -23,6 +23,7 @@ fn spawn_nametags(
     for entry in query.iter() {
         let (owner, transform, name) = entry;
         debug!("Spawning nametag for {:?}", name.text.clone());
+        let ratio = 2.0;
         commands.spawn((
             Name::new(format!("FloatyNametag: {}", name.text.clone())),
             FloatyNametag { owner },
@@ -31,11 +32,11 @@ fn spawn_nametags(
                 name.text.clone(),
                 TextStyle {
                     font: asset_server.load(name.appearance.get_font_path()),
-                    font_size: 14.0,
+                    font_size: 18.0 * ratio,
                     color: name.appearance.get_text_color(),
                 },
             ).with_alignment(TextAlignment::Center),
-            transform: Transform::from_translation(transform.translation() + Vec3::new(0.0, name.vertical_offset, 0.0)),
+            transform: Transform::from_translation(transform.translation() + Vec3::new(0.0, name.vertical_offset, 0.0)).with_scale(Vec3::new(1.0/ratio, 1.0/ratio, 1.0)),
             ..default()
         }));
     }   
