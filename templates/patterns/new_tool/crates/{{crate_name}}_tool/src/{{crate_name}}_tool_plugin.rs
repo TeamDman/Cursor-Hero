@@ -1,10 +1,9 @@
 use bevy::prelude::*;
 
-pub struct EnvironmentTypesPlugin;
+pub struct {{crate_name_pascal}}ToolPlugin;
 
-impl Plugin for EnvironmentTypesPlugin {
+impl Plugin for {{crate_name_pascal}}ToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<MyComponent>();
-        app.add_event::<MyEvent>();
+        app.add_plugins({{crate_name_pascal}}ToolPopulatePlugin);
     }
 }
