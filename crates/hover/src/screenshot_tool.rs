@@ -1,20 +1,19 @@
-use crate::hover_ui_automation_plugin::get_element_info;
-use crate::hover_ui_automation_plugin::ElementInfo;
-use bevy::prelude::*;
-use bevy::window::PrimaryWindow;
 use bevy_egui::EguiContext;
 use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
+use bevy::prelude::*;
+use bevy::window::PrimaryWindow;
+use crate::hover_ui_automation_plugin::ElementInfo;
+use crate::hover_ui_automation_plugin::get_element_info;
 use crossbeam_channel::bounded;
 use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
 use cursor_hero_bevy::NegativeYVec2;
 use cursor_hero_character_types::prelude::*;
-use cursor_hero_pointer_types::prelude::*;
+use cursor_hero_environment_types::prelude::TrackEnvironmentTag;
+use cursor_hero_floaty_nametag_types::prelude::*;
 use cursor_hero_physics::damping_plugin::MovementDamping;
 use cursor_hero_pointer_types::prelude::*;
-use cursor_hero_floaty_nametag_types::prelude::*;
-
 use cursor_hero_screen::get_image::get_image;
 use cursor_hero_screen::get_image::ScreensToImageParam;
 use cursor_hero_toolbelt_types::prelude::*;
@@ -23,8 +22,8 @@ use cursor_hero_tools::prelude::*;
 use cursor_hero_winutils::ui_automation::find_element_at;
 use cursor_hero_winutils::ui_automation::gather_elements_at;
 use leafwing_input_manager::prelude::*;
-use rand::thread_rng;
 use rand::Rng;
+use rand::thread_rng;
 use std::thread;
 
 pub struct ScreenshotToolPlugin;
@@ -314,6 +313,7 @@ fn handle_replies(
                     Clickable,
                     CubeToolInteractable,
                     RigidBody::Dynamic,
+                    TrackEnvironmentTag,
                     Collider::cuboid(size.x, size.y),
                     MovementDamping::default(),
                     Name::new(format!("Element - {}", element_info.name)),

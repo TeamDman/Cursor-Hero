@@ -3,7 +3,7 @@ use bevy::utils::HashMap;
 use cursor_hero_character_types::prelude::*;
 
 use cursor_hero_observation_types::observation_types::ObservationBuffer;
-use cursor_hero_observation_types::observation_types::ObservationEvent;
+use cursor_hero_observation_types::observation_types::SomethingObservableHappenedEvent;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -91,7 +91,7 @@ fn persist(
 
 fn restore(
     mut agent_query: Query<(Entity, &Name, &mut ObservationBuffer), Added<AgentCharacter>>,
-    mut observation_events: EventWriter<ObservationEvent>,
+    mut observation_events: EventWriter<SomethingObservableHappenedEvent>,
 ) -> Result<RestoreSuccess, RestoreError> {
     if agent_query.is_empty() {
         return Ok(RestoreSuccess::NoAction);
@@ -109,7 +109,7 @@ fn restore(
         if let Some(buffer) = data.observations.remove(agent_name.as_str()) {
             *agent_buffer = buffer;
 
-            let event = ObservationEvent::MemoryRestored {
+            let event = SomethingObservableHappenedEvent::MemoryRestored {
                 observation_buffer_id: agent_id,
             };
             debug!("Sending event {:?}", event);

@@ -76,10 +76,14 @@ use cursor_hero_host_event::prelude::*;
 use cursor_hero_host_event_types::prelude::*;
 use cursor_hero_floaty_nametag::prelude::*;
 use cursor_hero_floaty_nametag_types::prelude::*;
+use cursor_hero_ui_watcher::prelude::*;
+use cursor_hero_ui_watcher_types::prelude::*;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(UiWatcherTypesPlugin);
+        app.add_plugins(UiWatcherPlugin);
         app.add_plugins(FloatyNametagTypesPlugin);
         app.add_plugins(FloatyNametagPlugin);
         app.add_plugins(HostWatcherTypesPlugin);

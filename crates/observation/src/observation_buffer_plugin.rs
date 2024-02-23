@@ -12,7 +12,7 @@ impl Plugin for ObservationBufferPlugin {
 }
 
 fn update_buffers(
-    mut observation_events: EventReader<ObservationEvent>,
+    mut observation_events: EventReader<SomethingObservableHappenedEvent>,
     mut buffer_query: Query<(Entity, &mut ObservationBuffer, Option<&EnvironmentTag>)>,
     mut buffer_events: EventWriter<ObservationBufferEvent>,
 ) {
@@ -26,14 +26,14 @@ fn update_buffers(
                     Some(EnvironmentTag {
                         environment_id: buffer_environment_id,
                     }),
-                    ObservationEvent::Chat {
+                    SomethingObservableHappenedEvent::Chat {
                         environment_id: Some(event_environment_id),
                         ..
                     },
                 ) => *buffer_environment_id == *event_environment_id,
                 (
                     _,
-                    ObservationEvent::MemoryRestored {
+                    SomethingObservableHappenedEvent::MemoryRestored {
                         observation_buffer_id,
                     },
                 ) => buffer_id == *observation_buffer_id,

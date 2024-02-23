@@ -8,7 +8,7 @@ impl Plugin for ObservationTypesPlugin {
         app.register_type::<ObservationBuffer>();
         app.register_type::<ObservationBufferEntry>();
         app.register_type::<WhatsNew>();
-        app.add_event::<ObservationEvent>();
+        app.add_event::<SomethingObservableHappenedEvent>();
         app.add_event::<ObservationBufferEvent>();
     }
 }

@@ -1989,6 +1989,7 @@ dependencies = [
  "cursor_hero_bevy",
  "cursor_hero_camera",
  "cursor_hero_character_types",
+ "cursor_hero_environment_types",
  "cursor_hero_floaty_nametag_types",
  "cursor_hero_physics",
  "cursor_hero_pointer_types",
@@ -2239,6 +2240,8 @@ dependencies = [
  "cursor_hero_toolbelt_types",
  "cursor_hero_tools",
  "cursor_hero_ui",
+ "cursor_hero_ui_watcher",
+ "cursor_hero_ui_watcher_types",
  "cursor_hero_version",
  "cursor_hero_voice_to_text",
  "cursor_hero_voice_to_text_types",
@@ -2501,6 +2504,24 @@ dependencies = [
  "cursor_hero_camera",
  "cursor_hero_character_types",
  "cursor_hero_version",
+]
+
+[[package]]
+name = "cursor_hero_ui_watcher"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "crossbeam-channel",
+ "cursor_hero_ui_watcher_types",
+ "cursor_hero_winutils",
+]
+
+[[package]]
+name = "cursor_hero_ui_watcher_types"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "uiautomation",
 ]
 
 [[package]]

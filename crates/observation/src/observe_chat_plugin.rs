@@ -13,7 +13,7 @@ impl Plugin for ObserveChatPlugin {
 
 fn observe_chat(
     mut chat_events: EventReader<ChatEvent>,
-    mut observation_events: EventWriter<ObservationEvent>,
+    mut observation_events: EventWriter<SomethingObservableHappenedEvent>,
     character_query: Query<(Option<&Name>, Option<&EnvironmentTag>), With<Character>>,
 ) {
     for event in chat_events.read() {
@@ -40,7 +40,7 @@ fn observe_chat(
 
         let environment_id = character_environment_tag.map(|tag| tag.environment_id);
 
-        let event = ObservationEvent::Chat {
+        let event = SomethingObservableHappenedEvent::Chat {
             environment_id,
             character_id: *character_id,
             character_name: character_name.to_string(),

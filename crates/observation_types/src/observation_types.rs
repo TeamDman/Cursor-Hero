@@ -81,7 +81,7 @@ pub enum ObservationLogLevel {
 pub struct ObservationBufferEntry {
     #[reflect(ignore)]
     pub datetime: DateTime<Local>,
-    pub origin: ObservationEvent,
+    pub origin: SomethingObservableHappenedEvent,
 }
 
 #[derive(Event, Debug, Clone, Reflect)]
@@ -90,7 +90,7 @@ pub enum ObservationBufferEvent {
 }
 
 #[derive(Event, Debug, Clone, Reflect, Serialize, Deserialize, PartialEq, Eq)]
-pub enum ObservationEvent {
+pub enum SomethingObservableHappenedEvent {
     Chat {
         environment_id: Option<Entity>,
         character_id: Entity,
@@ -100,18 +100,21 @@ pub enum ObservationEvent {
     MemoryRestored {
         observation_buffer_id: Entity,
     },
+    // BrickEnteredEnvironment {
+
+    // }
 }
-impl Display for ObservationEvent {
+impl Display for SomethingObservableHappenedEvent {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            ObservationEvent::Chat {
+            SomethingObservableHappenedEvent::Chat {
                 character_name,
                 message,
                 ..
             } => {
                 write!(f, "{}: {}", character_name, message)
             }
-            ObservationEvent::MemoryRestored { .. } => {
+            SomethingObservableHappenedEvent::MemoryRestored { .. } => {
                 write!(
                     f,
                     "The game has restarted and the agent memory has been restored."
@@ -120,14 +123,14 @@ impl Display for ObservationEvent {
         }
     }
 }
-impl ObservationEvent {
+impl SomethingObservableHappenedEvent {
     pub fn into_whats_new(&self, observation_buffer_id: Entity) -> WhatsNew {
         match self {
-            ObservationEvent::Chat {
+            SomethingObservableHappenedEvent::Chat {
                 character_id: event_character_id,
                 ..
             } if *event_character_id == observation_buffer_id => WhatsNew::SelfChat,
-            ObservationEvent::Chat { message, .. }
+            SomethingObservableHappenedEvent::Chat { message, .. }
                 if message.ends_with("...")
                     || !message.ends_with('.')
                     && !message.ends_with('!')
@@ -135,8 +138,8 @@ impl ObservationEvent {
             {
                 WhatsNew::ChatReceivedButTheyProbablyStillThinking
             }
-            ObservationEvent::Chat { .. } => WhatsNew::ChatReceived,
-            ObservationEvent::MemoryRestored { .. } => WhatsNew::MemoryRestored,
+            SomethingObservableHappenedEvent::Chat { .. } => WhatsNew::ChatReceived,
+            SomethingObservableHappenedEvent::MemoryRestored { .. } => WhatsNew::MemoryRestored,
         }
     }
 }

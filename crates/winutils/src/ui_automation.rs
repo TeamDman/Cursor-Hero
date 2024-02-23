@@ -74,12 +74,12 @@ impl ToBevyIRect for uiautomation::types::Rect {
 }
 
 pub fn find_element_at(pos: IVec2) -> Result<UIElement, uiautomation::Error> {
-    let automation = UIAutomation::new().unwrap();
+    let automation = UIAutomation::new()?;
     automation.element_from_point(Point::new(pos.x, pos.y))
 }
 
 pub fn gather_elements_at(pos: IVec2) -> Result<Vec<(UIElement, usize)>, uiautomation::Error> {
-    let automation = UIAutomation::new().unwrap();
+    let automation = UIAutomation::new()?;
     let walker = automation.create_tree_walker()?;
     let start = automation.element_from_point(Point::new(pos.x, pos.y))?;
     let mut rtn = vec![];
@@ -99,8 +99,25 @@ pub fn gather_elements_at(pos: IVec2) -> Result<Vec<(UIElement, usize)>, uiautom
     Ok(rtn)
 }
 
+pub fn gather_toplevel_elements() -> Result<Vec<UIElement>, uiautomation::Error> {
+    let automation = UIAutomation::new()?;
+    let root = automation.get_root_element()?;
+    let walker = automation.create_tree_walker()?;
+    // lets just iterate through the top level to see what we get
+    let mut found = vec![];
+    if let Ok(child) = walker.get_first_child(&root) {
+        let mut next = child;
+        found.push(next.clone());
+        while let Ok(sibling) = walker.get_next_sibling(&next) {
+            next = sibling;
+            found.push(next.clone());
+        }
+    }
+    Ok(found)
+}
+
 // pub fn get_element_from_identifier(id: &str) -> Result<UIElement, uiautomation::Error> {
-//     let automation = UIAutomation::new().unwrap();
+//     let automation = UIAutomation::new()?;
 //     // find the elem.get_automation_id() that matches id
 //     let filter = automation.create_property_condition(
 //         uiautomation::types::UIProperty::AutomationId,
