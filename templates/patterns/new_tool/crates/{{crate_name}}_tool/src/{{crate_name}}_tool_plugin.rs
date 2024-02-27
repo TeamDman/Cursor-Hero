@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::{{crate_name}}_tool_populate_plugin::{{crate_name_pascal}}ToolPopulatePlugin;
 
 pub struct {{crate_name_pascal}}ToolPlugin;
 

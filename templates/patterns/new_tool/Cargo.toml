@@ -1,3 +1,4 @@
 {{before_first_workspace_dependency}}
 cursor_hero_{{crate_name}}_tool = { path = "./crates/{{crate_name}}_tool" }
+cursor_hero_{{crate_name}}_tool_types = { path = "./crates/{{crate_name}}_tool_types" }
 {{first_workspace_dependency_onwards}}

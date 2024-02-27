@@ -9,9 +9,9 @@ pub struct UiWatcherPlugin;
 
 impl Plugin for UiWatcherPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_worker_thread);
-        app.add_systems(Update, handle_gamebound_messages);
-        app.add_systems(Update, trigger_gather_app_info);
+        // app.add_systems(Startup, spawn_worker_thread);
+        // app.add_systems(Update, handle_gamebound_messages);
+        // app.add_systems(Update, trigger_gather_app_info);
     }
 }
 

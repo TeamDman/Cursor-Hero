@@ -83,12 +83,7 @@ where
 
     fn format_tool_name_from_source(file_path: &str) -> String {
         // Extract the file name from the path
-        let file_name = Path::new(file_path)
-            .file_stem() // Get the file stem (file name without extension)
-            .and_then(|stem| stem.to_str()) // Convert OsStr to &str
-            .unwrap_or("");
-
-        file_name
+        Self::clean_name(file_path)
             .split('_')
             .map(|word| {
                 word.chars()
@@ -116,15 +111,18 @@ where
         self
     }
 
+    fn clean_name(file_path: &str) -> &str {
+        Path::new(file_path)
+        .file_stem() // Get the file stem (file name without extension)
+        .and_then(|stem| stem.to_str()) // Convert OsStr to &str
+        .unwrap_or("")
+        .trim_end_matches("_plugin")
+        .trim_end_matches("_populate")
+        .trim_start_matches("spawn_")
+    }
+
     fn format_tool_image_from_source(file_path: &str, extension: &str) -> String {
-        // Extract the file name from the path
-        let file_name = Path::new(file_path)
-            .file_stem() // Get the file stem (file name without extension)
-            .and_then(|stem| stem.to_str()) // Convert OsStr to &str
-            .unwrap_or("")
-            .trim_end_matches("_plugin")
-            .trim_start_matches("spawn_");
-        format!("textures/tools/{}.{}", file_name, extension)
+        format!("textures/tools/{}.{}", Self::clean_name(file_path), extension)
     }
 
     pub fn with_asset_image(

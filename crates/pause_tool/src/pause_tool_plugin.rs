@@ -7,9 +7,9 @@ pub struct PauseToolPlugin;
 
 impl Plugin for PauseToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<PauseTool>()
-            .add_plugins(InputManagerPlugin::<PauseToolAction>::default())
-            .add_systems(Update, (toolbelt_events, handle_input));
+        // app.register_type::<PauseTool>();
+        // app.add_plugins(InputManagerPlugin::<PauseToolAction>::default());
+        // app.add_systems(Update, (toolbelt_events, handle_input));
     }
 }
 

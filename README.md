@@ -33,6 +33,8 @@ https://store.steampowered.com/app/1755100/The_Last_Clockwinder/
 - [PTA-Text: A Text Only Click Model - Prompt image, it tells you where it would click](https://huggingface.co/AskUI/pta-text-0.1) ([demo](https://huggingface.co/spaces/AskUI/pta-text-v0.1))
 - [Set-of-Mark Visual Prompting for GPT-4V](https://github.com/microsoft/SoM)
 - [LLaVA](https://llava.hliu.cc/)
+- [YOLOv9](https://github.com/WongKinYiu/yolov9)
+- 
 
 ### RPA
 
@@ -59,6 +61,7 @@ https://store.steampowered.com/app/1755100/The_Last_Clockwinder/
 ### Prompting
 
 - [guidance-ai/guidance: A guidance language for controlling large language models.](https://github.com/guidance-ai/guidance)
+- [Eladlev/AutoPrompt: A framework for prompt tuning using Intent-based Prompt Calibration (github.com)](https://github.com/Eladlev/AutoPrompt)
 
 ### RAG, Tools and Actions
 

@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy::window::RawHandleWrapper;
+use bevy::window::WindowMode;
 use bevy::window::WindowResolution;
 use bevy::winit::WinitWindows;
 use cursor_hero_winutils::win_window::get_window_inner_bounds;
@@ -64,6 +65,7 @@ impl Default for PrimaryWindowMemoryConfig {
 struct DiskData {
     resolution: Vec2,
     position: IVec2,
+    mode: WindowMode,
 }
 
 fn persist(
@@ -107,6 +109,7 @@ fn persist(
     let data = DiskData {
         resolution,
         position,
+        mode: window.mode,
     };
     if debounce.is_none() || debounce.as_ref().unwrap() != &data {
         let minimized = position.x == -32000 || position.y == -32000;
@@ -134,5 +137,6 @@ fn restore(
     let data = read_from_disk::<DiskData>(file)?;
     window.resolution = WindowResolution::from(data.resolution);
     window.position = WindowPosition::At(data.position);
+    window.mode = data.mode;
     Ok(RestoreSuccess::Performed)
 }

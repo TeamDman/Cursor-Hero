@@ -4,11 +4,13 @@ version = "0.3.0"
 edition = "2021"
 
 [workspace]
-members = ["crates/*", "other/gamepad_hell", "other/uparrow-enter"]
+members = ["crates/*", "other/gamepad_hell",  "other/uparrow-enter"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace.dependencies]
+cursor_hero_fullscreen_tool = { path = "./crates/fullscreen_tool" }
+cursor_hero_fullscreen_tool_types = { path = "./crates/fullscreen_tool_types" }
 cursor_hero_ui_watcher_types = { path = "./crates/ui_watcher_types" }
 cursor_hero_ui_watcher = { path = "./crates/ui_watcher" }
 cursor_hero_floaty_nametag_types = { path = "./crates/floaty_nametag_types" }

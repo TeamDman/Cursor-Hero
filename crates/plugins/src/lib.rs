@@ -78,10 +78,14 @@ use cursor_hero_floaty_nametag::prelude::*;
 use cursor_hero_floaty_nametag_types::prelude::*;
 use cursor_hero_ui_watcher::prelude::*;
 use cursor_hero_ui_watcher_types::prelude::*;
+use cursor_hero_fullscreen_tool::prelude::*;
+use cursor_hero_fullscreen_tool_types::prelude::*;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(FullscreenToolPlugin);
+        app.add_plugins(FullscreenToolTypesPlugin);
         app.add_plugins(UiWatcherTypesPlugin);
         app.add_plugins(UiWatcherPlugin);
         app.add_plugins(FloatyNametagTypesPlugin);
@@ -161,7 +165,19 @@ impl Plugin for MyPlugin {
         #[cfg(debug_assertions)]
         let log_plugin = LogPlugin {
             level: bevy::log::Level::DEBUG,
-            filter: "info,wgpu_core=warn,wgpu_hal=warn,bevy_ecs=info,cursor_hero=debug,cursor_hero_ollama::ollama_status_worker_plugin=info,cursor_hero_glados_tts::glados_tts_status_worker_plugin=info,cursor_hero_voice_to_text::voice_to_text_worker_plugin=info,cursor_hero_tools::click_tool=info,cursor_hero_restart_memory=info".into(),
+            filter: "
+info,
+wgpu_core=warn,
+wgpu_hal=warn,
+bevy_ecs=info,
+cursor_hero=debug,
+cursor_hero_pointer::pointer_hover_plugin=info,
+cursor_hero_ollama::ollama_status_worker_plugin=info,
+cursor_hero_voice_to_text::voice_to_text_ping_plugin=info,
+cursor_hero_voice_to_text::voice_to_text_worker_plugin=info,
+cursor_hero_glados_tts::glados_tts_status_worker_plugin=info,
+cursor_hero_tools::click_tool=info,cursor_hero_restart_memory=info
+            ".replace("\n","").trim().into(),
             // TODO: add world representation of all our cursor_hero crates where clicking them will toggle their log level to warn
             // TODO: fix warnings when minimized
         };
