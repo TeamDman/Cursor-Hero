@@ -21,12 +21,20 @@ fn tick(
         match event {
             ToolActivationEvent::Activate(tool_id) if tool_query.contains(*tool_id) => {
                 info!("FullscreenTool activated.");
+                if window_query.is_empty() {
+                    warn!("No window found");
+                    continue;
+                }
                 for mut window in window_query.iter_mut() {
                     window.mode = bevy::window::WindowMode::BorderlessFullscreen;
                 }
             }
             ToolActivationEvent::Deactivate(tool_id) if tool_query.contains(*tool_id) => {
                 info!("FullscreenTool deactivated.");
+                if window_query.is_empty() {
+                    warn!("No window found");
+                    continue;
+                }
                 for mut window in window_query.iter_mut() {
                     window.mode = bevy::window::WindowMode::Windowed;
                 }
