@@ -50,7 +50,7 @@ fn update_nametags(
     for floaty in floaty_query.iter_mut() {
         let (entity, mut text, mut transform, nametag) = floaty;
         let Ok(owner) = owner_query.get(nametag.owner) else {
-            warn!("Owner of nametag {:?} not found, despawning", nametag.owner);
+            debug!("Owner of nametag {:?} not found, despawning", nametag.owner);
             commands.entity(entity).despawn_recursive();
             continue;
         };

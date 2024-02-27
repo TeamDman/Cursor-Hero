@@ -80,10 +80,14 @@ use cursor_hero_ui_watcher::prelude::*;
 use cursor_hero_ui_watcher_types::prelude::*;
 use cursor_hero_fullscreen_tool::prelude::*;
 use cursor_hero_fullscreen_tool_types::prelude::*;
+use cursor_hero_brick::prelude::*;
+use cursor_hero_brick_types::prelude::*;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(BrickTypesPlugin);
+        app.add_plugins(BrickPlugin);
         app.add_plugins(FullscreenToolPlugin);
         app.add_plugins(FullscreenToolTypesPlugin);
         app.add_plugins(UiWatcherTypesPlugin);
