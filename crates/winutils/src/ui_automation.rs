@@ -116,6 +116,63 @@ pub fn gather_toplevel_elements() -> Result<Vec<UIElement>, uiautomation::Error>
     Ok(found)
 }
 
+// This is our recursive helper function.
+// It takes an additional `depth` parameter to manage indentation based on the recursion level.
+fn format_tree_recursive(element: &UIElement, automation: &UIAutomation, depth: usize) -> Result<String, uiautomation::Error> {
+    // Format the current element's label.
+    let mut result = format!(
+        "{}{}\n",
+        " ".repeat(depth * 2), // Increase indentation with depth.
+        format_tree_label(element)
+    );
+
+    // Use the TreeWalker to navigate the children.
+    let walker = automation.create_tree_walker()?;
+    if let Ok(child) = walker.get_first_child(element) {
+        // Recursively format the child and any siblings.
+        result.push_str(&format_tree_recursive(&child, automation, depth + 1)?);
+        let mut next_sibling = child;
+        while let Ok(sibling) = walker.get_next_sibling(&next_sibling) {
+            result.push_str(&format_tree_recursive(&sibling, automation, depth + 1)?);
+            next_sibling = sibling;
+        }
+    }
+    Ok(result)
+}
+
+// Our main public function that starts the recursion.
+pub fn get_tree_string(element: &UIElement) -> Result<String, uiautomation::Error> {
+    let automation = UIAutomation::new()?;
+    // Start the recursive formatting with the initial depth of 0.
+    format_tree_recursive(element, &automation, 0)
+}
+
+// Helper function to format a single element's label.
+fn format_tree_label(element: &UIElement) -> String {
+    format!(
+        "name={} control_type={} class_name={} runtime_id={} rect={}",
+        element
+            .get_name()
+            .map(|name| format!("{:?}", name))
+            .unwrap_or_else(|_| "(null)".to_string()),
+        element
+            .get_control_type()
+            .map(|ct| format!("{:?}", ct))
+            .unwrap_or_else(|_| "unknown control type".to_string()),
+        element
+            .get_classname()
+            .map(|name| format!("{:?}", name))
+            .unwrap_or_else(|_| "(null)".to_string()),
+        element
+            .get_runtime_id()
+            .map(|id| format!("{:?}", id))
+            .unwrap_or_else(|_| "(null)".to_string()),
+        element
+            .get_bounding_rectangle()
+            .map(|rect| format!("{:?}", rect))
+            .unwrap_or_else(|_| "(null)".to_string()),
+    )
+}
 // pub fn get_element_from_identifier(id: &str) -> Result<UIElement, uiautomation::Error> {
 //     let automation = UIAutomation::new()?;
 //     // find the elem.get_automation_id() that matches id

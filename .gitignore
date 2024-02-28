@@ -2,3 +2,4 @@
 crates/restart_memory/src/*.json
 __pycache__
 /*.json
+crates/ui_watcher/src/results.txt

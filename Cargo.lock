@@ -2552,6 +2552,7 @@ name = "cursor_hero_ui_watcher_types"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "cursor_hero_winutils",
  "uiautomation",
 ]
 

@@ -1,5 +1,9 @@
 use bevy::prelude::*;
 use cursor_hero_ui_watcher_types::ui_watcher_types::AppUIElement;
+use std::fs::OpenOptions;
+use std::io::Write;
+use std::path::Path;
+use std::path::PathBuf;
 use std::thread;
 
 use crossbeam_channel::bounded;
@@ -72,11 +76,45 @@ fn handle_threadbound_messages(
     Ok(())
 }
 
+fn get_persist_file(
+    current_path: &str,
+    file_name: &str,
+) -> Result<std::fs::File, std::io::Error> {
+    let mut file_path = PathBuf::new();
+
+    #[cfg(debug_assertions)]
+    {
+        let dir = Path::new(current_path).parent().ok_or(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            "Parent not found",
+        ))?;
+        file_path.push(dir);
+    }
+
+    file_path.push(file_name);
+    let handle = OpenOptions::new()
+        .write(true)
+        .truncate(true)
+        .create(true)
+        .open(file_path)?;
+    Ok(handle)
+}
+
 fn handle_gamebound_messages(bridge: Res<Bridge>) {
     while let Ok(msg) = bridge.receiver.try_recv() {
         match msg {
             GameboundMessage::AppInfo(app_info) => {
-                info!("Received app info:\n```\n{}\n```", app_info);
+                debug!("Received app info, length: {}", app_info.len());
+                match get_persist_file(file!(), "results.txt") {
+                    Ok(mut file) => {
+                        if let Err(e) = file.write_all(app_info.as_bytes()) {
+                            error!("Failed to write to file: {:?}", e);
+                        }
+                    }
+                    Err(e) => {
+                        error!("Failed to open file: {:?}", e);
+                    }
+                }
             }
         }
     }

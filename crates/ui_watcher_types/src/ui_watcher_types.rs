@@ -3,6 +3,7 @@ use uiautomation::UIElement;
 use std::fmt::Formatter;
 use std::fmt;
 use std::fmt::Display;
+use cursor_hero_winutils::ui_automation::get_tree_string;
 
 pub enum AppUIElement {
     VSCode(UIElement),
@@ -29,8 +30,10 @@ impl Display for AppUIElement {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             AppUIElement::VSCode(elem) => {
-                write!(f, "Visual Studio Code: {:?}", elem)
-
+                match get_tree_string(elem) {
+                    Ok(text) => write!(f, "Visual Studio Code: {}", text),
+                    Err(e) => write!(f, "Visual Studio Code: {:?}", e),
+                }
             },
             AppUIElement::Unknown(elem) => write!(f, "Unknown: {:?}", elem),
         }
