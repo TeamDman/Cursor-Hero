@@ -42,7 +42,7 @@ impl Default for ZoomTool {
             speed: 1.0,
             default_speed: 1.0,
             sprint_speed: 50.0,
-            scale_min: 0.1,
+            scale_min: 0.001,
             scale_max: 10.0,
         }
     }
