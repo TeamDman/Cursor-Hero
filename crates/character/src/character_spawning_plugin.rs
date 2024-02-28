@@ -49,11 +49,11 @@ fn spawn_character(
         MainCharacter,
         MovementDamping { factor: 0.90 },
         Name::new("Character - (Human) Tume Eena"),
-        FloatyName {
-            text: "Tume Eena".to_string(),
-            vertical_offset: 40.0,
-            appearance: NametagAppearance::Character,
-        },
+        // FloatyName {
+        //     text: "Tume Eena".to_string(),
+        //     vertical_offset: 40.0,
+        //     appearance: NametagAppearance::Character,
+        // },
         RigidBody::Kinematic,
         Collider::capsule(15.0, 12.5),
         TrackEnvironmentTag,
