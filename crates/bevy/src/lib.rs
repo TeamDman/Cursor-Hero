@@ -1,8 +1,10 @@
 use bevy::ecs::entity::Entity;
 use bevy::math::IRect;
 use bevy::math::IVec2;
+use bevy::math::IVec3;
 use bevy::math::Rect;
 use bevy::math::Vec2;
+use bevy::math::Vec3;
 use bevy::prelude::Name;
 
 // Define a trait that provides a method to return a string from an Option<&Name>
@@ -62,6 +64,24 @@ pub trait NegativeYIVec2 {
 impl NegativeYIVec2 for IVec2 {
     fn neg_y(&self) -> IVec2 {
         IVec2::new(self.x, -self.y)
+    }
+}
+
+pub trait NegativeYVec3 {
+    fn neg_y(&self) -> Vec3;
+}
+impl NegativeYVec3 for Vec3 {
+    fn neg_y(&self) -> Vec3 {
+        Vec3::new(self.x, -self.y, self.z)
+    }
+}
+
+pub trait NegativeYIVec3 {
+    fn neg_y(&self) -> IVec3;
+}
+impl NegativeYIVec3 for IVec3 {
+    fn neg_y(&self) -> IVec3 {
+        IVec3::new(self.x, -self.y, self.z)
     }
 }
 
