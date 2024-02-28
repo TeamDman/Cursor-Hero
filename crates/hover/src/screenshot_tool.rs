@@ -1,14 +1,15 @@
+use crate::hover_ui_automation_plugin::get_element_info;
+use crate::hover_ui_automation_plugin::ElementInfo;
+use bevy::prelude::*;
+use bevy::window::PrimaryWindow;
 use bevy_egui::EguiContext;
 use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
-use bevy::prelude::*;
-use bevy::window::PrimaryWindow;
-use crate::hover_ui_automation_plugin::ElementInfo;
-use crate::hover_ui_automation_plugin::get_element_info;
 use crossbeam_channel::bounded;
 use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
 use cursor_hero_bevy::NegativeYVec2;
+use cursor_hero_bevy::NegativeYVec3;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_environment_types::prelude::TrackEnvironmentTag;
 use cursor_hero_floaty_nametag_types::prelude::*;
@@ -22,8 +23,8 @@ use cursor_hero_tools::prelude::*;
 use cursor_hero_winutils::ui_automation::find_element_at;
 use cursor_hero_winutils::ui_automation::gather_elements_at;
 use leafwing_input_manager::prelude::*;
-use rand::Rng;
 use rand::thread_rng;
+use rand::Rng;
 use std::thread;
 
 pub struct ScreenshotToolPlugin;
@@ -62,7 +63,8 @@ fn toolbelt_events(
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
 enum ScreenshotToolAction {
-    Dupe,
+    Capture,
+    CaptureBrick,
     Print,
     Fracture,
 }
@@ -70,7 +72,8 @@ enum ScreenshotToolAction {
 impl ScreenshotToolAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
-            Self::Dupe => GamepadButtonType::RightTrigger.into(),
+            Self::Capture => GamepadButtonType::RightTrigger.into(),
+            Self::CaptureBrick => GamepadButtonType::South.into(),
             Self::Print => GamepadButtonType::North.into(),
             Self::Fracture => GamepadButtonType::Select.into(),
         }
@@ -78,7 +81,8 @@ impl ScreenshotToolAction {
 
     fn default_mkb_binding(&self) -> UserInput {
         match self {
-            Self::Dupe => MouseButton::Left.into(),
+            Self::Capture => MouseButton::Left.into(),
+            Self::CaptureBrick => MouseButton::Middle.into(),
             Self::Print => MouseButton::Right.into(),
             Self::Fracture => KeyCode::G.into(),
         }
@@ -98,13 +102,18 @@ impl ToolAction for ScreenshotToolAction {
 
 #[derive(Debug)]
 enum ThreadboundMessage {
-    Dupe { world_position: Vec3 },
+    Capture { world_position: Vec3 },
+    CaptureBrick { world_position: Vec3 },
     Print { world_position: Vec3 },
     Fracture { world_position: Vec3 },
 }
 #[derive(Debug)]
 enum GameboundMessage {
-    Dupe {
+    Capture {
+        element_info: ElementInfo,
+        world_position: Vec3,
+    },
+    CaptureBrick {
         element_info: ElementInfo,
         world_position: Vec3,
     },
@@ -125,7 +134,8 @@ fn process_thread_message(
     reply_tx: &Sender<GameboundMessage>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match action {
-        ThreadboundMessage::Dupe { world_position } => {
+        ThreadboundMessage::Capture { world_position }
+        | ThreadboundMessage::CaptureBrick { world_position } => {
             let mouse_position = world_position.xy().neg_y().as_ivec2();
             debug!("Worker received click: {:?} {:?}", action, mouse_position);
 
@@ -135,10 +145,20 @@ fn process_thread_message(
             let id = elem.get_automation_id()?;
             info!("Automation ID: {}", id);
             let element_info = get_element_info(elem)?;
-            reply_tx.send(GameboundMessage::Dupe {
-                element_info,
-                world_position,
-            })?;
+            let msg = match action {
+                ThreadboundMessage::Capture { world_position } => GameboundMessage::Capture {
+                    element_info,
+                    world_position,
+                },
+                ThreadboundMessage::CaptureBrick { world_position } => {
+                    GameboundMessage::CaptureBrick {
+                        element_info,
+                        world_position,
+                    }
+                }
+                _ => unreachable!(),
+            };
+            reply_tx.send(msg)?;
         }
         ThreadboundMessage::Print { world_position } => {
             let mouse_position = world_position.xy().neg_y().as_ivec2();
@@ -240,9 +260,18 @@ fn handle_input(
         if hovering_over_egui {
             continue;
         }
-        if tool_actions.just_pressed(ScreenshotToolAction::Dupe) {
-            info!("PrintUnderMouse button");
-            let msg = ThreadboundMessage::Dupe {
+        if tool_actions.just_pressed(ScreenshotToolAction::Capture) {
+            info!("Capture");
+            let msg = ThreadboundMessage::Capture {
+                world_position: pointer_translation,
+            };
+            if let Err(e) = bridge.sender.send(msg) {
+                error!("Failed to send click: {:?}", e);
+            }
+        }
+        if tool_actions.just_pressed(ScreenshotToolAction::CaptureBrick) {
+            info!("CaptureBrick");
+            let msg = ThreadboundMessage::CaptureBrick {
                 world_position: pointer_translation,
             };
             if let Err(e) = bridge.sender.send(msg) {
@@ -250,7 +279,7 @@ fn handle_input(
             }
         }
         if tool_actions.just_pressed(ScreenshotToolAction::Print) {
-            info!("PrintUnderMouse button");
+            info!("Print");
             let msg = ThreadboundMessage::Print {
                 world_position: pointer_translation,
             };
@@ -259,7 +288,7 @@ fn handle_input(
             }
         }
         if tool_actions.just_pressed(ScreenshotToolAction::Fracture) {
-            info!("FractureUnderMouse button");
+            info!("Fracture");
             let msg = ThreadboundMessage::Fracture {
                 world_position: pointer_translation,
             };
@@ -277,22 +306,33 @@ fn handle_replies(
     asset_server: Res<AssetServer>,
 ) {
     while let Ok(msg) = bridge.receiver.try_recv() {
-        match msg {
-            GameboundMessage::Dupe { element_info, world_position } => {
+        match &msg {
+            GameboundMessage::Capture {
+                element_info,
+                world_position,
+            }
+            | GameboundMessage::CaptureBrick {
+                element_info,
+                world_position,
+            } => {
                 let Ok(image) = get_image(element_info.bounding_rect, &access) else {
                     continue;
                 };
                 let texture_handle = asset_server.add(image);
-
-                // spawn the element image
-                // let mut elem_center_pos = element_info.bounding_rect.center().extend(20.0);
-                // elem_center_pos.y *= -1.0;
-
-                // let size = element_info.bounding_rect.size();
-                let size = Vec2::new(30.0,30.0);
+                let (size, pos) = match msg {
+                    GameboundMessage::Capture { .. } => (
+                        element_info.bounding_rect.size(),
+                        element_info.bounding_rect.center().extend(20.0).neg_y(),
+                    ),
+                    GameboundMessage::CaptureBrick { .. } => (
+                        element_info.bounding_rect.size().normalize() * 60.0,
+                        *world_position,
+                    ),
+                    _ => unreachable!(),
+                };
                 commands.spawn((
                     SpriteBundle {
-                        transform: Transform::from_translation(world_position),
+                        transform: Transform::from_translation(pos),
                         sprite: Sprite {
                             custom_size: Some(size),
                             ..default()
@@ -304,11 +344,11 @@ fn handle_replies(
                         source: asset_server.load("sounds/spring strung light 4.ogg"),
                         settings: PlaybackSettings::REMOVE.with_spatial(true),
                     },
-                    FloatyName {
-                        text: element_info.name.clone(),
-                        vertical_offset: 40.0,
-                        appearance: NametagAppearance::Databrick,
-                    },
+                    // FloatyName {
+                    //     text: element_info.name.clone(),
+                    //     vertical_offset: 40.0,
+                    //     appearance: NametagAppearance::Databrick,
+                    // },
                     Hoverable,
                     Clickable,
                     CubeToolInteractable,
@@ -337,7 +377,7 @@ fn handle_replies(
                 if !data.is_empty() {
                     commands.spawn((
                         SpatialBundle {
-                            transform: Transform::from_translation(world_position),
+                            transform: Transform::from_translation(*world_position),
                             ..default()
                         },
                         AudioBundle {
@@ -354,7 +394,7 @@ fn handle_replies(
                     // let texture_handle = asset_server.add(image);
 
                     // spawn the element image
-                    let mut elem_center_pos = info.bounding_rect.center().extend(depth as f32);
+                    let mut elem_center_pos = info.bounding_rect.center().extend(*depth as f32);
                     elem_center_pos.y *= -1.0;
                     commands.spawn((
                         SpriteBundle {
