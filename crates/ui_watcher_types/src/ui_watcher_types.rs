@@ -1,17 +1,8 @@
-use bevy::prelude::*;
 use uiautomation::controls::ControlType;
 use uiautomation::UIElement;
 use std::fmt::Formatter;
 use std::fmt;
 use std::fmt::Display;
-// #[derive(Component, Debug, Reflect)]
-// pub struct MyComponent;
-
-// #[derive(Event, Debug, Reflect)]
-// pub enum MyEvent {
-//     Guh,
-//     Uh
-// }
 
 pub enum AppUIElement {
     VSCode(UIElement),

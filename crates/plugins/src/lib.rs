@@ -22,7 +22,6 @@ use cursor_hero_icon::IconPlugin;
 use cursor_hero_input::InputPlugin;
 use cursor_hero_level_bounds::level_bounds_plugin::LevelBoundsPlugin;
 use cursor_hero_math::math_plugin::MathPlugin;
-use cursor_hero_pause_tool::pause_tool_plugin::PauseToolPlugin;
 use cursor_hero_physics::damping_plugin::DampingPlugin;
 use cursor_hero_physics::physics_plugin::PhysicsPlugin;
 use cursor_hero_physics_debug::physics_debug_plugin::PhysicsDebugPlugin;
@@ -144,7 +143,6 @@ impl Plugin for MyPlugin {
         app.add_plugins(LevelBoundsPlugin);
         app.add_plugins(MathPlugin);
         app.add_plugins(MemoryPlugin);
-        app.add_plugins(PauseToolPlugin);
         app.add_plugins(PhysicsDebugPlugin);
         app.add_plugins(PhysicsPlugin);
         app.add_plugins(PointerPlugin);
@@ -181,7 +179,7 @@ cursor_hero_voice_to_text::voice_to_text_ping_plugin=info,
 cursor_hero_voice_to_text::voice_to_text_worker_plugin=info,
 cursor_hero_glados_tts::glados_tts_status_worker_plugin=info,
 cursor_hero_tools::click_tool=info,cursor_hero_restart_memory=info
-            ".replace("\n","").trim().into(),
+            ".replace('\n',"").trim().into(),
             // TODO: add world representation of all our cursor_hero crates where clicking them will toggle their log level to warn
             // TODO: fix warnings when minimized
         };

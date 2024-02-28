@@ -249,7 +249,10 @@ fn state_to_string(state: u32) -> String {
     states.join(",")
 }
 
-pub fn set_win_event_hook() -> Result<isize, ()> {
+pub enum EventHookError {
+    ZERO,
+}
+pub fn set_win_event_hook() -> Result<isize, EventHookError> {
     unsafe {
         match SetWinEventHook(
             EVENT_MIN, // or specific event codes
@@ -260,13 +263,17 @@ pub fn set_win_event_hook() -> Result<isize, ()> {
             0, // idThread
             WINEVENT_OUTOFCONTEXT,
         ) {
-            HWINEVENTHOOK(0) => Err(()),
+            HWINEVENTHOOK(0) => Err(EventHookError::ZERO),
             HWINEVENTHOOK(x) => Ok(x),
         }
     }
 }
 
-pub fn message_loop() -> Result<(), ()> {
+#[derive(Debug)]
+pub enum MessageLoopError {
+    WIN32,
+}
+pub fn message_loop() -> Result<(), MessageLoopError> {
     unsafe {
         let mut msg = MSG::default();
 

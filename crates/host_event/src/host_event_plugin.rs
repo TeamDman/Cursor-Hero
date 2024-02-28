@@ -34,8 +34,8 @@ fn start_worker(mut commands: Commands) {
             match cursor_hero_winutils::win_events::set_win_event_hook() {
                 Ok(i) => {
                     info!("WinEventHook set: {}", i);
-                    if let Err(()) = message_loop() {
-                        error!("Message loop ended with an error.");
+                    if let Err(e) = message_loop() {
+                        error!("Message loop ended with an error: {:?}", e);
                     }
                 }
                 Err(_) => error!("Failed to set WinEventHook"),

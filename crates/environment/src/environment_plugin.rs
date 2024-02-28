@@ -29,6 +29,7 @@ fn send_create_game_event(mut events: EventWriter<CreateEnvironmentEvent>) {
     });
 }
 
+#[allow(clippy::type_complexity)]
 fn send_populate_events(
     environment_query: Query<
         (Entity, Option<&GameEnvironment>, Option<&HostEnvironment>),

@@ -20,23 +20,22 @@ fn handle_toolbelt_events(
     window_query: Query<&Window, With<PrimaryWindow>>,
 ) {
     for event in reader.read() {
-        match event {
-            PopulateToolbeltEvent::Default { toolbelt_id } => {
-                let mode = window_query
-                    .iter()
-                    .map(|w| w.mode)
-                    .next()
-                    .unwrap_or_default();
-                let state = FullscreenTool::state_for_mode(mode);
-                debug!("Window: {:?}, tool: {:?}", mode, state);
-                ToolSpawnConfig::<_, NoInputs>::new(FullscreenTool, *toolbelt_id, event)
-                    .guess_name(file!())
-                    .guess_image(file!(), &asset_server, "webp")
-                    .with_description("Toggles fullscreen mode.")
-                    .with_starting_state(state)
-                    .spawn(&mut commands);
-            }
-            _ => {}
-        }
+        let PopulateToolbeltEvent::Default { toolbelt_id } = event else {
+            continue;
+        };
+
+        let mode = window_query
+            .iter()
+            .map(|w| w.mode)
+            .next()
+            .unwrap_or_default();
+        let state = FullscreenTool::state_for_mode(mode);
+        debug!("Window: {:?}, tool: {:?}", mode, state);
+        ToolSpawnConfig::<_, NoInputs>::new(FullscreenTool, *toolbelt_id, event)
+            .guess_name(file!())
+            .guess_image(file!(), &asset_server, "webp")
+            .with_description("Toggles fullscreen mode.")
+            .with_starting_state(state)
+            .spawn(&mut commands);
     }
 }

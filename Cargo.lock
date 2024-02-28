@@ -2185,16 +2185,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cursor_hero_pause_tool"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "cursor_hero_toolbelt_types",
- "cursor_hero_tools",
- "leafwing-input-manager",
-]
-
-[[package]]
 name = "cursor_hero_physics"
 version = "0.1.0"
 dependencies = [
@@ -2259,7 +2249,6 @@ dependencies = [
  "cursor_hero_observation_types",
  "cursor_hero_ollama",
  "cursor_hero_ollama_types",
- "cursor_hero_pause_tool",
  "cursor_hero_physics",
  "cursor_hero_physics_debug",
  "cursor_hero_pointer",
