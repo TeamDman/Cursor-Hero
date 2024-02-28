@@ -3,7 +3,7 @@
 - Keyboard Tool D-Pad Chords for Arbitrary Letters
 - Understand why I can't use the app to hit its own close button
 
-
+- home and end buttons in keyboard tool
 
 - data brick - screenshot tool creates physics object cube that contains the data
   - only show hover preview and only process clicks for ui elements that match a known data provider pattern

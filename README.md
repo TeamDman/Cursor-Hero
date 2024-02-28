@@ -2,26 +2,24 @@
 
 [![Visitors](https://api.visitorbadge.io/api/visitors?path=github.com%2FTeamDman%2FCursor-Hero&countColor=%23263759)](https://visitorbadge.io/status?path=github.com%2FTeamDman%2FCursor-Hero)
 
-Something I'm making using Bevy. I'm not quite sure what it is yet, but the plan is a tool for robotic process automation.
+The plan: enhance LLM cooperation by leveraging Windows UI Automation.
+
+**Video demo**
+
+[![yt thumbnail](https://img.youtube.com/vi/t1PYks0UTL8/0.jpg)](https://youtu.be/t1PYks0UTL8)
+
 
 If you have a DualShock controller, you will need something like [DS4Windows](https://ds4windows.dev/).
-
-https://github.com/TeamDman/Cursor-Hero/assets/9356891/b3a82fd8-9101-4e56-96a0-5e5a96ee0ff3
-
-
-I haven't played this, but what I've seen is neat
-
-https://store.steampowered.com/app/1755100/The_Last_Clockwinder/
 
 ## Integrations
 
 - [TeamDman/voice2text: A python program that types what you say if you're holding the hotkey (github.com)](https://github.com/teamdman/voice2text)
+- [ollama/ollama: Get up and running with Llama 2, Mistral, and other large language models. (github.com)](https://github.com/ollama/ollama)
 
-## Useful Stuff
+## Research Notes
 
 ### Inference
 
-- [ollama/ollama: Get up and running with Llama 2, Mistral, and other large language models. (github.com)](https://github.com/ollama/ollama)
 - [LM Studio](https://lmstudio.ai/)
 
 ### Fine Tuning
@@ -98,3 +96,7 @@ https://store.steampowered.com/app/1755100/The_Last_Clockwinder/
 - [Kenney Fonts](https://kenney.nl/assets/kenney-fonts)
 - [Fira Mono - Google Fonts](https://fonts.google.com/specimen/Fira+Mono)
 - [Xelu's FREE Controller Prompts (thoseawesomeguys.com)](https://thoseawesomeguys.com/prompts/)
+
+### Game inspiration
+
+- [The Last Clockwinder](https://store.steampowered.com/app/1755100/The_Last_Clockwinder/)
