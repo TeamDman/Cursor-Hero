@@ -263,9 +263,18 @@ pub fn spawn_action_tool<T>(
 #[derive(Bundle)]
 pub struct NoopBundle {}
 
+#[derive(Debug)]
 pub enum StartingState {
     Active,
     Inactive,
+}
+impl StartingState {
+    pub fn as_active(&self) -> Option<ActiveTool> {
+        match self {
+            StartingState::Active => Some(ActiveTool),
+            StartingState::Inactive => None,
+        }
+    }
 }
 
 #[allow(clippy::too_many_arguments)]

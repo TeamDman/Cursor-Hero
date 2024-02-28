@@ -138,5 +138,6 @@ fn restore(
     window.resolution = WindowResolution::from(data.resolution);
     window.position = WindowPosition::At(data.position);
     window.mode = data.mode;
+
     Ok(RestoreSuccess::Performed)
 }

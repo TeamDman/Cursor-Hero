@@ -11,3 +11,4 @@ leafwing-input-manager = { workspace = true }
 bevy-inspector-egui = { workspace = true }
 cursor_hero_toolbelt_types = { workspace = true }
 cursor_hero_input = { workspace = true }
+cursor_hero_tools = { workspace = true }

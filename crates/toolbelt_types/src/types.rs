@@ -155,7 +155,7 @@ pub trait ToolAction: Actionlike {
     }
 }
 
-#[derive(Component, Reflect, Debug)]
+#[derive(Component, Reflect, Debug, PartialEq, Eq)]
 pub struct ActiveTool;
 
 #[derive(Event, Debug, Reflect)]

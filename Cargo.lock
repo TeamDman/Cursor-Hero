@@ -1970,6 +1970,7 @@ dependencies = [
  "bevy-inspector-egui",
  "cursor_hero_input",
  "cursor_hero_toolbelt_types",
+ "cursor_hero_tools",
  "leafwing-input-manager",
 ]
 
