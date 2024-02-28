@@ -1,3 +1,10 @@
+- window swap: swap the position of the game window with the window under the cursor
+- switch LLM to one that is better for programming and knows about VS Code.
+- Keyboard Tool D-Pad Chords for Arbitrary Letters
+- Understand why I can't use the app to hit its own close button
+
+
+
 - data brick - screenshot tool creates physics object cube that contains the data
   - only show hover preview and only process clicks for ui elements that match a known data provider pattern
   - agent can manipulate and observe the cube
