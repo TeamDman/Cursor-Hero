@@ -45,7 +45,9 @@ If you have a DualShock controller, you will need something like [DS4Windows](ht
 - [Accessibility tools - AccEvent (Accessible Event Watcher) - Win32 apps | Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/winauto/accessible-event-watcher)
 - [Accessibility tools - Inspect - Win32 apps | Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/winauto/inspect-objects)
 - [Accessibility Insights](https://accessibilityinsights.io/)
+- [Process Monitor - Sysinternals | Microsoft Learn](https://learn.microsoft.com/en-us/sysinternals/downloads/procmon)
 - [Navigation events for WebView2 apps - Microsoft Edge Developer documentation | Microsoft Learn](https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/navigation-events)
+- [(1) Building 25+ years of SysInternals: Exploring ZoomIt | BRK200H - YouTube](https://www.youtube.com/watch?v=W2bNgFrj3Iw)
 
 - [c# - Getting icon of "modern" Windows app from a desktop application? - Stack Overflow](https://stackoverflow.com/questions/32122679/getting-icon-of-modern-windows-app-from-a-desktop-application)
 
@@ -100,3 +102,8 @@ If you have a DualShock controller, you will need something like [DS4Windows](ht
 ### Game inspiration
 
 - [The Last Clockwinder](https://store.steampowered.com/app/1755100/The_Last_Clockwinder/)
+
+### Issues 👀
+
+- [Transparent example not working - Issue #2502 - rust-windowing/winit (github.com)](https://github.com/rust-windowing/winit/issues/2502)
+- 
