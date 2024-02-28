@@ -31,6 +31,10 @@ struct ZoomTool {
     default_speed: f32,
     #[inspector(min = 0.0)]
     sprint_speed: f32,
+    #[inspector(min = 0.0001, max = 10000.0)]
+    scale_min: f32,
+    #[inspector(min = 0.0001, max = 10000.0)]
+    scale_max: f32,
 }
 impl Default for ZoomTool {
     fn default() -> Self {
@@ -38,6 +42,8 @@ impl Default for ZoomTool {
             speed: 1.0,
             default_speed: 1.0,
             sprint_speed: 50.0,
+            scale_min: 0.1,
+            scale_max: 10.0,
         }
     }
 }
@@ -105,7 +111,8 @@ fn handle_input(
             let mut scale = camera_transform.scale;
             let diff = 0.1 * time.delta_seconds() * tool.speed;
             scale *= Vec3::splat(1.0) + Vec2::splat(diff).extend(0.0);
-            scale = scale.clamp(Vec3::splat(0.1), Vec3::splat(10.0));
+            debug!("scale_min: {}, scale_max: {}", tool.scale_min, tool.scale_max);
+            scale = scale.clamp(Vec3::splat(tool.scale_min), Vec3::splat(tool.scale_max));
             camera_transform.scale = scale;
             if tool_actions.just_pressed(ZoomToolAction::Out) {
                 info!("Zooming out");
@@ -115,7 +122,8 @@ fn handle_input(
             let mut scale = camera_transform.scale;
             let diff = 0.1 * time.delta_seconds() * tool.speed;
             scale *= Vec3::splat(1.0) - Vec2::splat(diff).extend(0.0);
-            scale = scale.clamp(Vec3::splat(0.1), Vec3::splat(10.0));
+            debug!("scale_min: {}, scale_max: {}", tool.scale_min, tool.scale_max);
+            scale = scale.clamp(Vec3::splat(tool.scale_min), Vec3::splat(tool.scale_max));
             camera_transform.scale = scale;
             if tool_actions.just_pressed(ZoomToolAction::In) {
                 info!("Zooming in");
