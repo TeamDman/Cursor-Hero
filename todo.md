@@ -1,3 +1,6 @@
+- fix r3 position cursor at title bar
+- fix mouse captive in gamepad input mode
+
 - window swap: swap the position of the game window with the window under the cursor
 - switch LLM to one that is better for programming and knows about VS Code.
 - Keyboard Tool D-Pad Chords for Arbitrary Letters
