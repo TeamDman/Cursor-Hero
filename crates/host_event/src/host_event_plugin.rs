@@ -4,10 +4,8 @@ use bevy::window::PrimaryWindow;
 use bevy::window::RawHandleWrapper;
 use crossbeam_channel::bounded;
 use crossbeam_channel::Receiver;
-use cursor_hero_winutils::win_events::message_loop;
-use cursor_hero_winutils::win_events::register_interest_in_all_events_with_os_with_default_callback;
 use cursor_hero_winutils::win_events::register_interest_in_mouse_with_os;
-use cursor_hero_winutils::win_events::MessageLoopMessage;
+use cursor_hero_winutils::win_events::WindowProcMessage;
 
 pub struct HostEventPlugin;
 
@@ -47,10 +45,6 @@ fn start_worker(
         Ok(()) => info!("mouse interest registered with hwnd={:?}", hwnd),
         Err(e) => error!("Failed to register mouse interest: {:?}", e),
     };
-    match register_interest_in_mouse_with_os(0) {
-        Ok(()) => info!("mouse interest registered with hwnd={:?}", 0),
-        Err(e) => error!("Failed to register mouse interest: {:?}", e),
-    };
     if let Err(e) = std::thread::Builder::new()
         .name("HostWatcher thread".to_string())
         .spawn(move || {
@@ -63,21 +57,9 @@ fn start_worker(
                 Ok(()) => info!("mouse interest registered with hwnd={:?}", hwnd),
                 Err(e) => error!("Failed to register mouse interest: {:?}", e),
             };
-            match register_interest_in_mouse_with_os(0) {
-                Ok(()) => info!("mouse interest registered with hwnd={:?}", 0),
-                Err(e) => error!("Failed to register mouse interest: {:?}", e),
-            };
 
-            fn receiver(msg: MessageLoopMessage) {
-                debug!("received message: {:?}", msg);
-            }
-            // loop {
-            //     std::thread::sleep(std::time::Duration::from_secs(1));
-            // }
             debug!("Launching message loop");
-            if let Err(e) = message_loop(hwnd, receiver) {
-                error!("Message loop ended with an error: {:?}", e);
-            }
+            todo!();
         })
     {
         error!("Failed to start worker thread: {:?}", e);

@@ -2613,6 +2613,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "bevy",
+ "crossbeam-channel",
  "cursor_hero_metrics",
  "enigo 0.2.0-rc2",
  "fxhash",

@@ -30,4 +30,5 @@ fxhash = {workspace = true}
 widestring = {workspace = true}
 enigo = {workspace = true}
 winreg = { workspace = true }
+crossbeam-channel = { workspace = true }
 

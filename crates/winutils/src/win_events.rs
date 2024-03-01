@@ -1,8 +1,9 @@
 #![allow(dead_code)]
-use bevy::log::debug;
-use bevy::log::error;
-use bevy::log::info;
 use bevy::math::IVec2;
+use crossbeam_channel::Receiver;
+use crossbeam_channel::Sender;
+use windows::core::PCWSTR;
+use windows::Win32::Devices::HumanInterfaceDevice::HID_USAGE_GENERIC_KEYBOARD;
 use windows::Win32::Devices::HumanInterfaceDevice::HID_USAGE_GENERIC_MOUSE;
 use windows::Win32::Devices::HumanInterfaceDevice::HID_USAGE_PAGE_GENERIC;
 use windows::Win32::Foundation::*;
@@ -19,6 +20,7 @@ use windows::Win32::UI::Input::RAWINPUTDEVICE;
 use windows::Win32::UI::Input::RAWINPUTHEADER;
 use windows::Win32::UI::Input::RIDEV_INPUTSINK;
 use windows::Win32::UI::Input::RID_INPUT;
+use windows::Win32::UI::Input::RIM_TYPEKEYBOARD;
 use windows::Win32::UI::Input::RIM_TYPEMOUSE;
 use windows::Win32::UI::WindowsAndMessaging::EVENT_OBJECT_CREATE;
 use windows::Win32::UI::WindowsAndMessaging::EVENT_OBJECT_DESTROY;
@@ -29,96 +31,205 @@ use windows::Win32::UI::WindowsAndMessaging::EVENT_OBJECT_VALUECHANGE;
 use windows::Win32::UI::WindowsAndMessaging::*;
 
 #[derive(Debug)]
-pub enum EventHookError {
-    Unknown,
+pub enum WindowProcMessage {
+    MouseMoved(IVec2),
+    KeyDown(char),
+    Event {
+        event_name: String,
+        name: String,
+        role: String,
+        state: String,
+        bounds: String,
+    },
 }
-pub fn register_interest_in_all_events_with_os_with_default_callback(
-) -> Result<isize, EventHookError> {
+pub fn create_os_event_listener() -> Result<Receiver<WindowProcMessage>, windows::core::Error> {
+    let (tx, rx) = crossbeam_channel::unbounded();
+    std::thread::spawn(move || match create_window_and_do_message_loop(tx) {
+        Ok(()) => {}
+        Err(e) => {
+            eprintln!("Error in os_event_listener_thread: {:?}", e);
+        }
+    });
+    Ok(rx)
+}
+
+fn create_window_and_do_message_loop(tx: Sender<WindowProcMessage>) -> Result<(), windows::core::Error> {
+    let hwnd = init_window(tx.clone())?;
+    // register_interest_in_mouse_with_os(hwnd.0)?;
+    register_interest_in_keyboard_with_os(hwnd.0)?;
+    register_os_event_listener()?;
+    unsafe {
+        let mut message = MSG::default();
+        println!("Starting message loop");
+        while GetMessageA(&mut message, hwnd, 0, 0).as_bool() {
+            TranslateMessage(&message);
+            DispatchMessageA(&message);
+        }
+        DestroyWindow(hwnd)?;
+    }
+    Ok(())
+}
+
+fn register_os_event_listener(
+) -> Result<isize, windows::core::Error> {
     unsafe {
         match SetWinEventHook(
             EVENT_MIN, // or specific event codes
             EVENT_MAX, // or specific event codes
             None,      // hmodWinEventProc
-            Some(win_event_proc),
+            Some(os_event_procedure),
             0, // idProcess
             0, // idThread
             WINEVENT_OUTOFCONTEXT,
         ) {
-            HWINEVENTHOOK(0) => Err(EventHookError::Unknown),
+            HWINEVENTHOOK(0) => Err(windows::core::Error::new(
+                windows::Win32::Foundation::E_FAIL,
+                "Failed to register interest in all events".into(),
+            )),
             HWINEVENTHOOK(x) => Ok(x),
         }
     }
 }
 
-pub fn register_interest_in_mouse_with_os(hwnd: isize) -> Result<(), windows::core::Error> {
+fn register_interest_in_mouse_with_os(hwnd: isize) -> Result<(), windows::core::Error> {
     unsafe {
-        let raw_input_device = RAWINPUTDEVICE {
+        let device = RAWINPUTDEVICE {
             usUsagePage: HID_USAGE_PAGE_GENERIC,
             usUsage: HID_USAGE_GENERIC_MOUSE,
             dwFlags: RIDEV_INPUTSINK,
             hwndTarget: HWND(hwnd),
         };
-        RegisterRawInputDevices(
-            &mut [raw_input_device],
-            std::mem::size_of::<RAWINPUTDEVICE>() as u32,
-        )
+        RegisterRawInputDevices(&mut [device], std::mem::size_of::<RAWINPUTDEVICE>() as u32)
     }
 }
 
-#[derive(Debug)]
-pub enum MessageLoopError {
-    WIN32,
-}
-#[derive(Debug)]
-pub enum MessageLoopMessage {
-    MouseMoved(IVec2),
-    Unknown,
-}
-pub fn message_loop(
-    hwnd: isize,
-    receiver: fn(x: MessageLoopMessage),
-) -> Result<(), MessageLoopError> {
+fn register_interest_in_keyboard_with_os(hwnd: isize) -> Result<(), windows::core::Error> {
     unsafe {
-        let mut win_msg = MSG::default();
-        debug!("Launching message loop");
-        while GetMessageW(&mut win_msg, HWND(hwnd), 0, 0).as_bool() {
-            debug!("GOT MESSAGE: {:?}", win_msg);
-            TranslateMessage(&win_msg);
-            DispatchMessageW(&win_msg);
-
-            if win_msg.message == WM_INPUT {
-                let mut input_data: RAWINPUT = std::mem::zeroed();
-                let mut size = std::mem::size_of::<RAWINPUT>() as u32;
-                let recv_size = GetRawInputData(
-                    HRAWINPUT(win_msg.lParam.0),
-                    RID_INPUT,
-                    Some(&mut input_data as *mut _ as *mut _),
-                    &mut size,
-                    std::mem::size_of::<RAWINPUTHEADER>() as u32,
-                );
-                if recv_size as i32 != -1 {
-                    if input_data.header.dwType == RIM_TYPEMOUSE.0 {
-                        let mouse_data = input_data.data.mouse;
-                        let x = mouse_data.lLastX;
-                        let y = mouse_data.lLastY;
-                        receiver(MessageLoopMessage::MouseMoved(IVec2::new(x, y)));
-                    }
-                }
-            } else {
-                debug!("Unknown message: {:?}", win_msg.message);
-            }
-        }
-
-        // if let Some(error) = windows::core::Error::from_win32() {
-        //     error!("An error occurred in the message loop: {:?}", error);
-        //     return Err(());
-        // }
-
-        Ok(())
+        let device = RAWINPUTDEVICE {
+            usUsagePage: HID_USAGE_PAGE_GENERIC,
+            usUsage: HID_USAGE_GENERIC_KEYBOARD,
+            dwFlags: RIDEV_INPUTSINK,
+            hwndTarget: HWND(hwnd),
+        };
+        RegisterRawInputDevices(&[device], std::mem::size_of::<RAWINPUTDEVICE>() as u32)
     }
 }
 
-extern "system" fn win_event_proc(
+fn init_window(tx: Sender<WindowProcMessage>) -> Result<HWND, windows::core::Error> {
+    let class_name =
+        widestring::U16CString::from_str("bruh").map_err(|_| windows::core::Error::OK)?;
+    let class_name_ptr = class_name.as_ptr();
+    let class_name_pcwstr = PCWSTR(class_name_ptr);
+
+    let hinstance = unsafe { windows::Win32::System::LibraryLoader::GetModuleHandleW(None)? };
+
+    let mut wnd = WNDCLASSEXW::default();
+    wnd.cbSize = std::mem::size_of::<WNDCLASSEXW>() as u32;
+    wnd.lpfnWndProc = Some(window_message_procedure);
+    wnd.hInstance = hinstance.into();
+    wnd.lpszClassName = class_name_pcwstr;
+
+    let _reg = unsafe { RegisterClassExW(&wnd) };
+
+    let window = unsafe {
+        CreateWindowExW(
+            WINDOW_EX_STYLE::default(),
+            PCWSTR::from(class_name_pcwstr),
+            None,
+            WINDOW_STYLE(0),
+            CW_USEDEFAULT,
+            CW_USEDEFAULT,
+            CW_USEDEFAULT,
+            CW_USEDEFAULT,
+            None,
+            None,
+            hinstance,
+            None,
+        )
+    };
+
+    unsafe { GetLastError()? };
+    if window.0 == 0 {
+        return Err(windows::core::Error::from_win32());
+    }
+
+    let tx_box = Box::new(tx); // Move tx into a Box
+    let tx_ptr = Box::into_raw(tx_box); // Convert Box into a raw pointer
+    unsafe {
+        SetWindowLongPtrW(window, GWLP_USERDATA, tx_ptr as isize);
+    }
+
+    Ok(window)
+}
+
+unsafe extern "system" fn window_message_procedure(
+    hwnd: HWND,
+    msg: u32,
+    w_param: WPARAM,
+    l_param: LPARAM,
+) -> LRESULT {
+    let next = || DefWindowProcW(hwnd, msg, w_param, l_param);
+
+    let sender_ptr = GetWindowLongPtrW(hwnd, GWLP_USERDATA) as *mut Sender<WindowProcMessage>;
+    if sender_ptr.is_null() {
+        // eprintln!("window_message_procedure: Sender pointer is null");
+        return next();
+    }
+    let tx = &*sender_ptr;
+
+    match msg {
+        WM_INPUT => {
+            let mut size = 0;
+            let result = GetRawInputData(
+                HRAWINPUT(l_param.0),
+                RID_INPUT,
+                None, // Pointer to data is null, requesting size only
+                &mut size,
+                std::mem::size_of::<RAWINPUTHEADER>() as u32,
+            );
+            assert_eq!(result as i32, 0);
+
+            let mut data = vec![0u8; size as usize];
+            let recv_size = GetRawInputData(
+                HRAWINPUT(l_param.0),
+                RID_INPUT,
+                Some(data.as_mut_ptr() as *mut std::ffi::c_void),
+                &mut size,
+                std::mem::size_of::<RAWINPUTHEADER>() as u32,
+            );
+            assert_eq!(recv_size as i32, size as i32);
+            let input = &*(data.as_ptr() as *const RAWINPUT);
+
+            if (*input).header.dwType == RIM_TYPEKEYBOARD.0
+                && (*input).data.keyboard.Message == WM_KEYDOWN as u32
+            {
+                let key = (*input).data.keyboard.VKey as u8 as char;
+                if let Err(e) = tx.send(WindowProcMessage::KeyDown(key)) {
+                    panic!("Error sending keyboard message: {:?}", e);
+                }
+            }
+
+            if (*input).header.dwType == RIM_TYPEMOUSE.0 {
+                let mouse_data = (*input).data.mouse;
+                let x = mouse_data.lLastX;
+                let y = mouse_data.lLastY;
+                if let Err(e) = tx.send(WindowProcMessage::MouseMoved(IVec2::new(x, y))) {
+                    panic!("Error sending mouse message: {:?}", e);
+                }
+            }
+
+            LRESULT(0)
+        }
+        WM_DESTROY => {
+            drop(unsafe { Box::from_raw(sender_ptr) });
+            PostQuitMessage(0);
+            LRESULT(0)
+        }
+        _ => next(),
+    }
+}
+
+unsafe extern "system" fn os_event_procedure(
     _h_win_event_hook: HWINEVENTHOOK,
     event: u32,
     hwnd: windows::Win32::Foundation::HWND,
@@ -127,95 +238,118 @@ extern "system" fn win_event_proc(
     _id_event_thread: u32,
     _dwms_event_time: u32,
 ) {
-    if event < 1000
-        || event == EVENT_OBJECT_SHOW
-        || event == EVENT_OBJECT_LOCATIONCHANGE
-        || event == EVENT_OBJECT_NAMECHANGE
-        || event == EVENT_OBJECT_REORDER
-        || event == EVENT_OBJECT_VALUECHANGE
-        || event == EVENT_OBJECT_CREATE
-        || event == EVENT_OBJECT_DESTROY
-        || event == EVENT_OBJECT_HIDE
-        || event == EVENT_OBJECT_LIVEREGIONCHANGED
-    {
+    // if event < 1000
+    //     || event == EVENT_OBJECT_SHOW
+    //     || event == EVENT_OBJECT_LOCATIONCHANGE
+    //     || event == EVENT_OBJECT_NAMECHANGE
+    //     || event == EVENT_OBJECT_REORDER
+    //     || event == EVENT_OBJECT_VALUECHANGE
+    //     || event == EVENT_OBJECT_CREATE
+    //     || event == EVENT_OBJECT_DESTROY
+    //     || event == EVENT_OBJECT_HIDE
+    //     || event == EVENT_OBJECT_LIVEREGIONCHANGED
+    // {
+    //     return;
+    // }
+    // println!("Event: {:?} ({}), HWND: {:?}, idObject: {:?}, idChild: {:?}", event, event_to_name(event), hwnd, object_id, child_id);
+
+    let sender_ptr = GetWindowLongPtrW(hwnd, GWLP_USERDATA) as *mut Sender<WindowProcMessage>;
+    if sender_ptr.is_null() {
+        // eprintln!("os_event_procedure: Sender pointer is null");
         return;
     }
-    // debug!(
-    //     "Event: {:?} ({}), HWND: {:?}, idObject: {:?}, idChild: {:?}",
-    //     event,
-    //     event_to_name(event),
-    //     hwnd,
-    //     object_id,
-    //     child_id
-    // );
-    if (event == EVENT_OBJECT_SELECTIONADD || event == EVENT_OBJECT_STATECHANGE)
-        && object_id == OBJID_CLIENT.0
-    {
-        // Here you get the name and state of the element that triggered the event.
-        // Implement the logic to retrieve the name and state using the AccessibleObjectFromEvent function.
-        let mut acc_ptr: Option<IAccessible> = None;
-        let mut elem = VARIANT::default();
+    // println!("Decoded sender pointer!");
+    let tx = &*sender_ptr;
 
-        unsafe {
-            let lookup = AccessibleObjectFromEvent(
-                hwnd,
-                object_id as u32,
-                child_id as u32,
-                &mut acc_ptr,
-                &mut elem,
-            );
+    if event < 1000 {
+        return;
+    }
+    if object_id != OBJID_CLIENT.0 {
+        return;
+    }
+    println!(
+        "Event: {:?} ({}), HWND: {:?}, idObject: {:?}, idChild: {:?}",
+        event,
+        event_to_name(event),
+        hwnd,
+        object_id,
+        child_id
+    );
+    // if (event == EVENT_OBJECT_SELECTIONADD || event == EVENT_OBJECT_STATECHANGE)
+    //     && object_id == OBJID_CLIENT.0 {}
+    // Here you get the name and state of the element that triggered the event.
+    // Implement the logic to retrieve the name and state using the AccessibleObjectFromEvent function.
+    let mut acc_ptr: Option<IAccessible> = None;
+    let mut elem = VARIANT::default();
 
-            if lookup.is_ok() {
-                let acc = acc_ptr.unwrap();
-                let name_bstr = match acc.get_accName(elem.clone()) {
-                    Ok(bstr) => bstr,
-                    Err(e) => {
-                        error!("Error getting name: {:?}", e);
-                        return;
-                    }
-                };
-                let role_var = match acc.get_accRole(elem.clone()) {
-                    Ok(role) => role,
-                    Err(e) => {
-                        error!("Error getting role: {:?}", e);
-                        return;
-                    }
-                };
-                let state_var = match acc.get_accState(elem.clone()) {
-                    Ok(state) => state,
-                    Err(e) => {
-                        error!("Error getting state: {:?}", e);
-                        return;
-                    }
-                };
+    let lookup = AccessibleObjectFromEvent(
+        hwnd,
+        object_id as u32,
+        child_id as u32,
+        &mut acc_ptr,
+        &mut elem,
+    );
 
-                let role = role_to_name(variant_to_int(&role_var).unwrap_or(-123) as u32);
-                let state = state_to_string(variant_to_int(&state_var).unwrap_or(-123) as u32);
-
-                let mut pxleft = 0;
-                let mut pytop = 0;
-                let mut pcxwidth = 0;
-                let mut pcyheight = 0;
-                if let Err(e) =
-                    acc.accLocation(&mut pxleft, &mut pytop, &mut pcxwidth, &mut pcyheight, elem)
-                {
-                    error!("Error getting location: {:?}", e);
-                    return;
-                }
-                let bounds = bevy::math::IRect::from_corners(
-                    bevy::math::IVec2::new(pxleft, pytop),
-                    bevy::math::IVec2::new(pxleft + pcxwidth, pytop + pcyheight),
-                );
-                info!(
-                    "{} Name={:?} Role={:?} State={:?}, bounds={:?}",
-                    event_to_name(event),
-                    name_bstr.to_string(),
-                    role,
-                    state,
-                    bounds,
-                );
-            }
+    if lookup.is_err() {
+        eprintln!("Error getting accessible object: {:?}", lookup);
+        return;
+    }
+    let acc = match acc_ptr {
+        Some(acc) => acc,
+        None => {
+            eprintln!("Error getting accessible object");
+            return;
+        },
+    };
+    let name_bstr = match acc.get_accName(elem.clone()) {
+        Ok(bstr) => bstr,
+        Err(e) => {
+            eprintln!("Error getting name: {:?}", e);
+            return;
         }
+    };
+    let role_var = match acc.get_accRole(elem.clone()) {
+        Ok(role) => role,
+        Err(e) => {
+            eprintln!("Error getting role: {:?}", e);
+            return;
+        }
+    };
+    let state_var = match acc.get_accState(elem.clone()) {
+        Ok(state) => state,
+        Err(e) => {
+            eprintln!("Error getting state: {:?}", e);
+            return;
+        }
+    };
+
+    let role = role_to_name(variant_to_int(&role_var).unwrap_or(-123) as u32);
+    let state = state_to_string(variant_to_int(&state_var).unwrap_or(-123) as u32);
+
+    let mut pxleft = 0;
+    let mut pytop = 0;
+    let mut pcxwidth = 0;
+    let mut pcyheight = 0;
+    if let Err(e) =
+        acc.accLocation(&mut pxleft, &mut pytop, &mut pcxwidth, &mut pcyheight, elem)
+    {
+        eprintln!("Error getting location: {:?}", e);
+        return;
+    }
+    let bounds = bevy::math::IRect::from_corners(
+        bevy::math::IVec2::new(pxleft, pytop),
+        bevy::math::IVec2::new(pxleft + pcxwidth, pytop + pcyheight),
+    );
+    if let Err(e) = tx.send(WindowProcMessage::Event {
+        event_name: event_to_name(event).to_string(),
+        name: name_bstr.to_string(),
+        role: role.to_string(),
+        state,
+        bounds: format!("{:?}", bounds),
+    }) {
+        panic!("Error sending event message: {:?}", e);
+    } else {
+        println!("Sent event message :D");
     }
 }
 
@@ -510,75 +644,73 @@ pub fn event_to_name(event: u32) -> &'static str {
 
 #[cfg(test)]
 mod tests {
-    use windows::core::PCWSTR;
+    use windows::Win32::UI::Input::RIM_TYPEKEYBOARD;
 
     use super::*;
 
     #[test]
-    fn listen_keyboard_events() {
-        let hwnd = init_window().unwrap();
-        let dev = RAWINPUTDEVICE {
-            usUsagePage: 0x01,
-            usUsage: 0x06,
-            dwFlags: RIDEV_INPUTSINK,
-            hwndTarget: hwnd,
-        };
+    fn listen_all() -> Result<(), windows::core::Error> {
+        let rx = create_os_event_listener()?;
+        while let Ok(msg) = rx.recv() {
+            println!("Received message: {:?}", msg);
+        }
+        Ok(())
+    }
 
+    #[test]
+    fn listen_keyboard_events() -> Result<(), windows::core::Error> {
+        let (tx, rx) = crossbeam_channel::unbounded();
+        let hwnd = init_window(tx)?;
+        register_interest_in_keyboard_with_os(hwnd.0)?;
+        std::thread::spawn(move || loop {
+            match rx.recv() {
+                Ok(msg) => {
+                    println!("Received message: {:?}", msg);
+                }
+                Err(e) => {
+                    panic!("Error receiving message: {:?}", e);
+                }
+            }
+        });
         unsafe {
-            RegisterRawInputDevices(&[dev], std::mem::size_of::<RAWINPUTDEVICE>() as u32).unwrap();
+            let mut message = MSG::default();
+            println!("Starting message loop");
+            while GetMessageW(&mut message, hwnd, 0, 0).as_bool() {
+                TranslateMessage(&message);
+                DispatchMessageW(&message);
+            }
+            DestroyWindow(hwnd)?;
+        }
+        Ok(())
+    }
 
+    #[test]
+    fn listen_mouse_events() -> Result<(), windows::core::Error> {
+        let (tx, rx) = crossbeam_channel::unbounded();
+        let hwnd = init_window(tx)?;
+        register_interest_in_mouse_with_os(hwnd.0)?;
+        std::thread::spawn(move || loop {
+            match rx.recv() {
+                Ok(msg) => {
+                    println!("Received message: {:?}", msg);
+                }
+                Err(e) => {
+                    println!("Error receiving message: {:?}", e);
+                }
+            }
+        });
+        unsafe {
             let mut message = MSG::default();
             println!("Starting message loop");
             while GetMessageA(&mut message, hwnd, 0, 0).as_bool() {
                 DispatchMessageA(&message);
             }
-
-            DestroyWindow(hwnd).unwrap();
+            DestroyWindow(hwnd)?;
         }
+        Ok(())
     }
 
-    fn init_window() -> Result<HWND, windows::core::Error> {
-        let class_name = widestring::U16CString::from_str("bruh")
-            .map_err(|_| windows::core::Error::OK)?;
-        let class_name_ptr = class_name.as_ptr();
-        let class_name_pcwstr = PCWSTR(class_name_ptr);
-
-        let hinstance = unsafe { windows::Win32::System::LibraryLoader::GetModuleHandleW(None)? };
-
-        let mut wnd = WNDCLASSEXW::default();
-        wnd.cbSize = std::mem::size_of::<WNDCLASSEXW>() as u32;
-        wnd.lpfnWndProc = Some(window_proc);
-        wnd.hInstance = hinstance.into();
-        wnd.lpszClassName = class_name_pcwstr;
-
-        let reg = unsafe { RegisterClassExW(&wnd) };
-
-        let window = unsafe {
-            CreateWindowExW(
-                WINDOW_EX_STYLE::default(),
-                PCWSTR::from(class_name_pcwstr),
-                None,
-                WINDOW_STYLE(0),
-                CW_USEDEFAULT,
-                CW_USEDEFAULT,
-                CW_USEDEFAULT,
-                CW_USEDEFAULT,
-                None,
-                None,
-                hinstance,
-                None,
-            )
-        };
-
-        unsafe { GetLastError()? };
-        if window.0 == 0 {
-            return Err(windows::core::Error::from_win32());
-        }
-
-        Ok(window)
-    }
-
-    unsafe extern "system" fn window_proc(
+    unsafe extern "system" fn window_message_procedure(
         hwnd: HWND,
         msg: u32,
         w_param: WPARAM,
@@ -590,24 +722,24 @@ mod tests {
                 let result = GetRawInputData(
                     HRAWINPUT(l_param.0),
                     RID_INPUT,
-                    None,
+                    None, // Pointer to data is null, requesting size only
                     &mut size,
                     std::mem::size_of::<RAWINPUTHEADER>() as u32,
                 );
                 assert_eq!(result as i32, 0);
 
                 let mut data = vec![0u8; size as usize];
-                let result = GetRawInputData(
+                let recv_size = GetRawInputData(
                     HRAWINPUT(l_param.0),
                     RID_INPUT,
                     Some(data.as_mut_ptr() as *mut std::ffi::c_void),
                     &mut size,
                     std::mem::size_of::<RAWINPUTHEADER>() as u32,
                 );
-                assert_eq!(result as i32, size as i32);
+                assert_eq!(recv_size as i32, size as i32);
 
                 let input = &*(data.as_ptr() as *const RAWINPUT);
-                if (*input).header.dwType == windows::Win32::UI::Input::RIM_TYPEKEYBOARD.0
+                if (*input).header.dwType == RIM_TYPEKEYBOARD.0
                     && (*input).data.keyboard.Message == WM_KEYDOWN as u32
                 {
                     let device = (*input).header.hDevice;
