@@ -2,12 +2,24 @@
 use bevy::log::debug;
 use bevy::log::error;
 use bevy::log::info;
+use bevy::math::IVec2;
+use windows::Win32::Devices::HumanInterfaceDevice::HID_USAGE_GENERIC_MOUSE;
+use windows::Win32::Devices::HumanInterfaceDevice::HID_USAGE_PAGE_GENERIC;
 use windows::Win32::Foundation::*;
 use windows::Win32::System::Ole::VarBstrFromDec;
 use windows::Win32::System::Variant::VARIANT;
 use windows::Win32::System::Variant::VT_BSTR;
 use windows::Win32::System::Variant::VT_I4;
 use windows::Win32::UI::Accessibility::*;
+use windows::Win32::UI::Input::GetRawInputData;
+use windows::Win32::UI::Input::RegisterRawInputDevices;
+use windows::Win32::UI::Input::HRAWINPUT;
+use windows::Win32::UI::Input::RAWINPUT;
+use windows::Win32::UI::Input::RAWINPUTDEVICE;
+use windows::Win32::UI::Input::RAWINPUTHEADER;
+use windows::Win32::UI::Input::RIDEV_INPUTSINK;
+use windows::Win32::UI::Input::RID_INPUT;
+use windows::Win32::UI::Input::RIM_TYPEMOUSE;
 use windows::Win32::UI::WindowsAndMessaging::EVENT_OBJECT_CREATE;
 use windows::Win32::UI::WindowsAndMessaging::EVENT_OBJECT_DESTROY;
 use windows::Win32::UI::WindowsAndMessaging::EVENT_OBJECT_HIDE;
@@ -15,6 +27,96 @@ use windows::Win32::UI::WindowsAndMessaging::EVENT_OBJECT_LIVEREGIONCHANGED;
 use windows::Win32::UI::WindowsAndMessaging::EVENT_OBJECT_STATECHANGE;
 use windows::Win32::UI::WindowsAndMessaging::EVENT_OBJECT_VALUECHANGE;
 use windows::Win32::UI::WindowsAndMessaging::*;
+
+#[derive(Debug)]
+pub enum EventHookError {
+    Unknown,
+}
+pub fn register_interest_in_all_events_with_os_with_default_callback(
+) -> Result<isize, EventHookError> {
+    unsafe {
+        match SetWinEventHook(
+            EVENT_MIN, // or specific event codes
+            EVENT_MAX, // or specific event codes
+            None,      // hmodWinEventProc
+            Some(win_event_proc),
+            0, // idProcess
+            0, // idThread
+            WINEVENT_OUTOFCONTEXT,
+        ) {
+            HWINEVENTHOOK(0) => Err(EventHookError::Unknown),
+            HWINEVENTHOOK(x) => Ok(x),
+        }
+    }
+}
+
+pub fn register_interest_in_mouse_with_os(hwnd: isize) -> Result<(), windows::core::Error> {
+    unsafe {
+        let raw_input_device = RAWINPUTDEVICE {
+            usUsagePage: HID_USAGE_PAGE_GENERIC,
+            usUsage: HID_USAGE_GENERIC_MOUSE,
+            dwFlags: RIDEV_INPUTSINK,
+            hwndTarget: HWND(hwnd),
+        };
+        RegisterRawInputDevices(
+            &mut [raw_input_device],
+            std::mem::size_of::<RAWINPUTDEVICE>() as u32,
+        )
+    }
+}
+
+#[derive(Debug)]
+pub enum MessageLoopError {
+    WIN32,
+}
+#[derive(Debug)]
+pub enum MessageLoopMessage {
+    MouseMoved(IVec2),
+    Unknown,
+}
+pub fn message_loop(
+    hwnd: isize,
+    receiver: fn(x: MessageLoopMessage),
+) -> Result<(), MessageLoopError> {
+    unsafe {
+        let mut win_msg = MSG::default();
+        debug!("Launching message loop");
+        while GetMessageW(&mut win_msg, HWND(hwnd), 0, 0).as_bool() {
+            debug!("GOT MESSAGE: {:?}", win_msg);
+            TranslateMessage(&win_msg);
+            DispatchMessageW(&win_msg);
+
+            if win_msg.message == WM_INPUT {
+                let mut input_data: RAWINPUT = std::mem::zeroed();
+                let mut size = std::mem::size_of::<RAWINPUT>() as u32;
+                let recv_size = GetRawInputData(
+                    HRAWINPUT(win_msg.lParam.0),
+                    RID_INPUT,
+                    Some(&mut input_data as *mut _ as *mut _),
+                    &mut size,
+                    std::mem::size_of::<RAWINPUTHEADER>() as u32,
+                );
+                if recv_size as i32 != -1 {
+                    if input_data.header.dwType == RIM_TYPEMOUSE.0 {
+                        let mouse_data = input_data.data.mouse;
+                        let x = mouse_data.lLastX;
+                        let y = mouse_data.lLastY;
+                        receiver(MessageLoopMessage::MouseMoved(IVec2::new(x, y)));
+                    }
+                }
+            } else {
+                debug!("Unknown message: {:?}", win_msg.message);
+            }
+        }
+
+        // if let Some(error) = windows::core::Error::from_win32() {
+        //     error!("An error occurred in the message loop: {:?}", error);
+        //     return Err(());
+        // }
+
+        Ok(())
+    }
+}
 
 extern "system" fn win_event_proc(
     _h_win_event_hook: HWINEVENTHOOK,
@@ -38,14 +140,14 @@ extern "system" fn win_event_proc(
     {
         return;
     }
-    debug!(
-        "Event: {:?} ({}), HWND: {:?}, idObject: {:?}, idChild: {:?}",
-        event,
-        event_to_name(event),
-        hwnd,
-        object_id,
-        child_id
-    );
+    // debug!(
+    //     "Event: {:?} ({}), HWND: {:?}, idObject: {:?}, idChild: {:?}",
+    //     event,
+    //     event_to_name(event),
+    //     hwnd,
+    //     object_id,
+    //     child_id
+    // );
     if (event == EVENT_OBJECT_SELECTIONADD || event == EVENT_OBJECT_STATECHANGE)
         && object_id == OBJID_CLIENT.0
     {
@@ -94,13 +196,9 @@ extern "system" fn win_event_proc(
                 let mut pytop = 0;
                 let mut pcxwidth = 0;
                 let mut pcyheight = 0;
-                if let Err(e) = acc.accLocation(
-                    &mut pxleft,
-                    &mut pytop,
-                    &mut pcxwidth,
-                    &mut pcyheight,
-                    elem,
-                ) {
+                if let Err(e) =
+                    acc.accLocation(&mut pxleft, &mut pytop, &mut pcxwidth, &mut pcyheight, elem)
+                {
                     error!("Error getting location: {:?}", e);
                     return;
                 }
@@ -116,7 +214,6 @@ extern "system" fn win_event_proc(
                     state,
                     bounds,
                 );
-
             }
         }
     }
@@ -247,48 +344,6 @@ fn state_to_string(state: u32) -> String {
         states.push("STATE_SYSTEM_VALID")
     }
     states.join(",")
-}
-
-pub enum EventHookError {
-    ZERO,
-}
-pub fn set_win_event_hook() -> Result<isize, EventHookError> {
-    unsafe {
-        match SetWinEventHook(
-            EVENT_MIN, // or specific event codes
-            EVENT_MAX, // or specific event codes
-            None,      // hmodWinEventProc
-            Some(win_event_proc),
-            0, // idProcess
-            0, // idThread
-            WINEVENT_OUTOFCONTEXT,
-        ) {
-            HWINEVENTHOOK(0) => Err(EventHookError::ZERO),
-            HWINEVENTHOOK(x) => Ok(x),
-        }
-    }
-}
-
-#[derive(Debug)]
-pub enum MessageLoopError {
-    WIN32,
-}
-pub fn message_loop() -> Result<(), MessageLoopError> {
-    unsafe {
-        let mut msg = MSG::default();
-
-        while GetMessageW(&mut msg, HWND::default(), 0, 0).as_bool() {
-            TranslateMessage(&msg);
-            DispatchMessageW(&msg);
-        }
-
-        // if let Some(error) = windows::core::Error::from_win32() {
-        //     error!("An error occurred in the message loop: {:?}", error);
-        //     return Err(());
-        // }
-
-        Ok(())
-    }
 }
 
 pub fn role_to_name(role: u32) -> &'static str {
@@ -450,5 +505,119 @@ pub fn event_to_name(event: u32) -> &'static str {
         EVENT_UIA_PROPID_END => "EVENT_UIA_PROPID_END",
         EVENT_UIA_PROPID_START => "EVENT_UIA_PROPID_START",
         _ => "<Unknown>",
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use windows::core::PCWSTR;
+
+    use super::*;
+
+    #[test]
+    fn listen_keyboard_events() {
+        let hwnd = init_window().unwrap();
+        let dev = RAWINPUTDEVICE {
+            usUsagePage: 0x01,
+            usUsage: 0x06,
+            dwFlags: RIDEV_INPUTSINK,
+            hwndTarget: hwnd,
+        };
+
+        unsafe {
+            RegisterRawInputDevices(&[dev], std::mem::size_of::<RAWINPUTDEVICE>() as u32).unwrap();
+
+            let mut message = MSG::default();
+            println!("Starting message loop");
+            while GetMessageA(&mut message, hwnd, 0, 0).as_bool() {
+                DispatchMessageA(&message);
+            }
+
+            DestroyWindow(hwnd).unwrap();
+        }
+    }
+
+    fn init_window() -> Result<HWND, windows::core::Error> {
+        let class_name = widestring::U16CString::from_str("bruh")
+            .map_err(|_| windows::core::Error::OK)?;
+        let class_name_ptr = class_name.as_ptr();
+        let class_name_pcwstr = PCWSTR(class_name_ptr);
+
+        let hinstance = unsafe { windows::Win32::System::LibraryLoader::GetModuleHandleW(None)? };
+
+        let mut wnd = WNDCLASSEXW::default();
+        wnd.cbSize = std::mem::size_of::<WNDCLASSEXW>() as u32;
+        wnd.lpfnWndProc = Some(window_proc);
+        wnd.hInstance = hinstance.into();
+        wnd.lpszClassName = class_name_pcwstr;
+
+        let reg = unsafe { RegisterClassExW(&wnd) };
+
+        let window = unsafe {
+            CreateWindowExW(
+                WINDOW_EX_STYLE::default(),
+                PCWSTR::from(class_name_pcwstr),
+                None,
+                WINDOW_STYLE(0),
+                CW_USEDEFAULT,
+                CW_USEDEFAULT,
+                CW_USEDEFAULT,
+                CW_USEDEFAULT,
+                None,
+                None,
+                hinstance,
+                None,
+            )
+        };
+
+        unsafe { GetLastError()? };
+        if window.0 == 0 {
+            return Err(windows::core::Error::from_win32());
+        }
+
+        Ok(window)
+    }
+
+    unsafe extern "system" fn window_proc(
+        hwnd: HWND,
+        msg: u32,
+        w_param: WPARAM,
+        l_param: LPARAM,
+    ) -> LRESULT {
+        match msg {
+            WM_INPUT => {
+                let mut size = 0;
+                let result = GetRawInputData(
+                    HRAWINPUT(l_param.0),
+                    RID_INPUT,
+                    None,
+                    &mut size,
+                    std::mem::size_of::<RAWINPUTHEADER>() as u32,
+                );
+                assert_eq!(result as i32, 0);
+
+                let mut data = vec![0u8; size as usize];
+                let result = GetRawInputData(
+                    HRAWINPUT(l_param.0),
+                    RID_INPUT,
+                    Some(data.as_mut_ptr() as *mut std::ffi::c_void),
+                    &mut size,
+                    std::mem::size_of::<RAWINPUTHEADER>() as u32,
+                );
+                assert_eq!(result as i32, size as i32);
+
+                let input = &*(data.as_ptr() as *const RAWINPUT);
+                if (*input).header.dwType == windows::Win32::UI::Input::RIM_TYPEKEYBOARD.0
+                    && (*input).data.keyboard.Message == WM_KEYDOWN as u32
+                {
+                    let device = (*input).header.hDevice;
+                    let key = (*input).data.keyboard.VKey as u8 as char;
+                    println!("[{:?}]: {}", device, key);
+                }
+
+                LRESULT(0)
+            }
+            _ => DefWindowProcW(hwnd, msg, w_param, l_param),
+        }
     }
 }

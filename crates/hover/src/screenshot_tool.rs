@@ -12,7 +12,6 @@ use cursor_hero_bevy::NegativeYVec2;
 use cursor_hero_bevy::NegativeYVec3;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_environment_types::prelude::TrackEnvironmentTag;
-use cursor_hero_floaty_nametag_types::prelude::*;
 use cursor_hero_physics::damping_plugin::MovementDamping;
 use cursor_hero_pointer_types::prelude::*;
 use cursor_hero_screen::get_image::get_image;

@@ -1,6 +1,18 @@
-- fix r3 position cursor at title bar
-- fix mouse captive in gamepad input mode
+# Current Priorities
 
+## Active
+
+- fix mouse captive in gamepad input mode
+  - planned resolution: detect hardware mouse movements to trigger mnk mode
+
+## Up Next
+
+- fix r3 position cursor at title bar
+
+
+## Grab Bag
+
+- rustdoc_json to create buttons to toggle log level for individual crates from within the game, persisting changes by modifying the log plugin init code 
 - window swap: swap the position of the game window with the window under the cursor
 - switch LLM to one that is better for programming and knows about VS Code.
 - Keyboard Tool D-Pad Chords for Arbitrary Letters

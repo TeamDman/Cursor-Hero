@@ -9,4 +9,5 @@ edition = "2021"
 bevy = { workspace = true }
 cursor_hero_host_event_types = { workspace = true }
 cursor_hero_winutils = {workspace = true}
+raw-window-handle = { workspace = true }
 crossbeam-channel = { workspace = true }

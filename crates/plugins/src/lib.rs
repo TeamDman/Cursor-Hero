@@ -164,21 +164,36 @@ impl Plugin for MyPlugin {
             mode: bevy_embedded_assets::PluginMode::ReplaceDefault,
         });
 
+//         #[cfg(debug_assertions)]
+//         let log_plugin = LogPlugin {
+//             level: bevy::log::Level::DEBUG,
+//             filter: "
+// info,
+// wgpu_core=warn,
+// wgpu_hal=warn,
+// bevy_ecs=info,
+// cursor_hero=debug,
+// cursor_hero_pointer::pointer_hover_plugin=info,
+// cursor_hero_ollama::ollama_status_worker_plugin=info,
+// cursor_hero_voice_to_text::voice_to_text_ping_plugin=info,
+// cursor_hero_voice_to_text::voice_to_text_worker_plugin=info,
+// cursor_hero_glados_tts::glados_tts_status_worker_plugin=info,
+// cursor_hero_tools::click_tool=info,cursor_hero_restart_memory=info
+//             ".replace('\n',"").trim().into(),
+//             // TODO: add world representation of all our cursor_hero crates where clicking them will toggle their log level to warn
+//             // TODO: fix warnings when minimized
+//         };
         #[cfg(debug_assertions)]
         let log_plugin = LogPlugin {
             level: bevy::log::Level::DEBUG,
             filter: "
-info,
+warn,
 wgpu_core=warn,
 wgpu_hal=warn,
-bevy_ecs=info,
-cursor_hero=debug,
-cursor_hero_pointer::pointer_hover_plugin=info,
-cursor_hero_ollama::ollama_status_worker_plugin=info,
-cursor_hero_voice_to_text::voice_to_text_ping_plugin=info,
-cursor_hero_voice_to_text::voice_to_text_worker_plugin=info,
-cursor_hero_glados_tts::glados_tts_status_worker_plugin=info,
-cursor_hero_tools::click_tool=info,cursor_hero_restart_memory=info
+bevy_ecs=warn,
+cursor_hero=warn,
+cursor_hero_host_event=debug,
+cursor_hero_winutils=debug,
             ".replace('\n',"").trim().into(),
             // TODO: add world representation of all our cursor_hero crates where clicking them will toggle their log level to warn
             // TODO: fix warnings when minimized

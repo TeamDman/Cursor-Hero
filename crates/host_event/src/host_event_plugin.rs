@@ -1,21 +1,21 @@
-#![allow(dead_code)]
-
 use bevy::prelude::*;
 
+use bevy::window::PrimaryWindow;
+use bevy::window::RawHandleWrapper;
 use crossbeam_channel::bounded;
 use crossbeam_channel::Receiver;
-// use crossbeam_channel::Sender;
 use cursor_hero_winutils::win_events::message_loop;
+use cursor_hero_winutils::win_events::register_interest_in_all_events_with_os_with_default_callback;
+use cursor_hero_winutils::win_events::register_interest_in_mouse_with_os;
+use cursor_hero_winutils::win_events::MessageLoopMessage;
 
 pub struct HostEventPlugin;
 
 impl Plugin for HostEventPlugin {
     #![allow(unused_variables)]
     fn build(&self, app: &mut App) {
-        // not using this right now
-
-        // app.add_systems(Startup, start_worker);
-        // app.add_systems(Update, process_events);
+        app.add_systems(Startup, start_worker);
+        app.add_systems(Update, process_events);
     }
 }
 
@@ -24,22 +24,60 @@ struct EventBridge {
     receiver: Receiver<()>,
 }
 
-fn start_worker(mut commands: Commands) {
+fn start_worker(
+    mut commands: Commands,
+    window_query: Query<&RawHandleWrapper, With<PrimaryWindow>>,
+) {
     info!("Starting worker thread");
     let (_sender, receiver) = bounded::<()>(100);
+
+    let Ok(window_handle) = window_query.get_single() else {
+        error!("Failed to get window handle");
+        return;
+    };
+    let hwnd = match window_handle.window_handle {
+        raw_window_handle::RawWindowHandle::Win32(handle) => handle.hwnd as isize,
+        _ => {
+            error!("Unsupported window handle type");
+            return;
+        }
+    };
+    
+    match register_interest_in_mouse_with_os(hwnd) {
+        Ok(()) => info!("mouse interest registered with hwnd={:?}", hwnd),
+        Err(e) => error!("Failed to register mouse interest: {:?}", e),
+    };
+    match register_interest_in_mouse_with_os(0) {
+        Ok(()) => info!("mouse interest registered with hwnd={:?}", 0),
+        Err(e) => error!("Failed to register mouse interest: {:?}", e),
+    };
     if let Err(e) = std::thread::Builder::new()
         .name("HostWatcher thread".to_string())
-        // .spawn(move || {
-        .spawn(|| {
-            match cursor_hero_winutils::win_events::set_win_event_hook() {
-                Ok(i) => {
-                    info!("WinEventHook set: {}", i);
-                    if let Err(e) = message_loop() {
-                        error!("Message loop ended with an error: {:?}", e);
-                    }
-                }
-                Err(_) => error!("Failed to set WinEventHook"),
+        .spawn(move || {
+            // match register_interest_in_all_events_with_os_with_default_callback() {
+            //     Ok(i) => info!("event interest registered hook={}", i),
+            //     Err(e) => error!("Failed to register event interest: {:?}", e),
+            // };
+            
+            match register_interest_in_mouse_with_os(hwnd) {
+                Ok(()) => info!("mouse interest registered with hwnd={:?}", hwnd),
+                Err(e) => error!("Failed to register mouse interest: {:?}", e),
             };
+            match register_interest_in_mouse_with_os(0) {
+                Ok(()) => info!("mouse interest registered with hwnd={:?}", 0),
+                Err(e) => error!("Failed to register mouse interest: {:?}", e),
+            };
+
+            fn receiver(msg: MessageLoopMessage) {
+                debug!("received message: {:?}", msg);
+            }
+            // loop {
+            //     std::thread::sleep(std::time::Duration::from_secs(1));
+            // }
+            debug!("Launching message loop");
+            if let Err(e) = message_loop(hwnd, receiver) {
+                error!("Message loop ended with an error: {:?}", e);
+            }
         })
     {
         error!("Failed to start worker thread: {:?}", e);
