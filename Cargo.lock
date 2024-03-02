@@ -2618,6 +2618,7 @@ dependencies = [
  "enigo 0.2.0-rc2",
  "fxhash",
  "image",
+ "once_cell",
  "uiautomation",
  "widestring",
  "windows 0.52.0",

@@ -5,7 +5,7 @@ use bevy::window::RawHandleWrapper;
 use crossbeam_channel::bounded;
 use crossbeam_channel::Receiver;
 use cursor_hero_winutils::win_events::register_interest_in_mouse_with_os;
-use cursor_hero_winutils::win_events::WindowProcMessage;
+use cursor_hero_winutils::win_events::ProcMessage;
 
 pub struct HostEventPlugin;
 

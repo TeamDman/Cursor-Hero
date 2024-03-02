@@ -33,6 +33,56 @@
       <sourceFolder url="file://$MODULE_DIR$/crates/xelu_prompts/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/other/gamepad_hell/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/other/uparrow-enter/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/agent/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/agent_types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/app/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/app_types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/brick/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/brick_types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/calculator_app/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/calculator_app_types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/character_types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/chat/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/chat_types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/environment/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/environment_nametag/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/environment_types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/floaty_nametag/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/floaty_nametag_types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/fullscreen_tool/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/fullscreen_tool_types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/glados_tts/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/glados_tts_types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/host_event/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/host_event_types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/inference/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/inference_types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/math/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/movement_tool/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/movement_tool_types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/observation/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/observation_types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/ollama/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/ollama_types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/physics_debug/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/pointer_types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/secret/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/secret_types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/sprint_tool/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/sprint_tool_types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/start_menu/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/start_menu_types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/taskbar/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/taskbar_tool/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/taskbar_types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/text_asset/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/text_asset_types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/toolbelt_types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/ui_watcher/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/ui_watcher_types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/voice_to_text/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/voice_to_text_types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/winutils/examples" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />

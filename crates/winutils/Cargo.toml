@@ -29,6 +29,7 @@ uiautomation = {workspace = true}
 fxhash = {workspace = true}
 widestring = {workspace = true}
 enigo = {workspace = true}
+once_cell = {workspace = true}
 winreg = { workspace = true }
 crossbeam-channel = { workspace = true }
 
