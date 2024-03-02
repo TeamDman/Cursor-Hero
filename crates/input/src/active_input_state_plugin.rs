@@ -28,8 +28,8 @@ pub enum ActiveInput {
 
 /// Switch the gamepad when any button is pressed or any axis input used
 fn activate_gamepad(
-    mut next_state: ResMut<NextState<ActiveInput>>,
     mut gamepad_evr: EventReader<GamepadEvent>,
+    mut next_state: ResMut<NextState<ActiveInput>>,
     mut active_input: ResMut<ActiveInput>,
 ) {
     let mut debounce = false;

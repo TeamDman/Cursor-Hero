@@ -12,6 +12,7 @@
 
 ## Grab Bag
 
+- add world representation of all our cursor_hero crates where clicking them will toggle their log level to warn
 - rustdoc_json to create buttons to toggle log level for individual crates from within the game, persisting changes by modifying the log plugin init code 
 - window swap: swap the position of the game window with the window under the cursor
 - switch LLM to one that is better for programming and knows about VS Code.

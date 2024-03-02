@@ -1,9 +1,11 @@
+use bevy::math::IRect;
 use bevy::math::IVec2;
 use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
 use std::sync::Mutex;
+use windows::core::BSTR;
 use windows::core::PCWSTR;
 use windows::Win32::Devices::HumanInterfaceDevice::HID_USAGE_GENERIC_KEYBOARD;
 use windows::Win32::Devices::HumanInterfaceDevice::HID_USAGE_GENERIC_MOUSE;
@@ -39,10 +41,10 @@ pub enum ProcMessage {
     KeyDown(char),
     Event {
         event_name: String,
-        name: String,
-        role: String,
-        state: String,
-        bounds: String,
+        name: Option<String>,
+        role: Option<String>,
+        state: Option<String>,
+        bounds: Option<IRect>,
     },
 }
 
@@ -57,13 +59,13 @@ fn store_sender_for_identifier(
     senders.insert(identifier, sender);
     Ok(())
 }
-fn get_sender_for_identifier(identifier: isize) -> Option<Sender<ProcMessage>> {
+fn get_sender_for_window(hwnd: HWND) -> Option<Sender<ProcMessage>> {
     let senders = SENDERS.lock().ok()?;
-    senders.get(&identifier).cloned()
+    senders.get(&hwnd.0).cloned()
 }
-fn get_hook_for_window(hwnd: isize) -> Option<isize> {
-    let map = HWND_TO_HOOK.lock().ok()?;
-    map.get(&hwnd).cloned()
+fn get_sender_for_hook(hook: HWINEVENTHOOK) -> Option<Sender<ProcMessage>> {
+    let senders = SENDERS.lock().ok()?;
+    senders.get(&hook.0).cloned()
 }
 fn store_sender(
     hwnd: HWND,
@@ -74,14 +76,18 @@ fn store_sender(
     store_sender_for_identifier(hook.0, sender)?;
     Ok(())
 }
-fn drop_sender(hwnd: HWND) -> Result<(), &'static str> {
+fn drop_senders_for_window(hwnd: HWND) -> Result<(), &'static str> {
     let mut senders = SENDERS.lock().map_err(|_| "Failed to lock SENDERS map")?;
+
+    // Remove the sender for the window
     senders.remove(&hwnd.0);
 
+    // Get the hook for the window
     let mut hook_map = HWND_TO_HOOK
         .lock()
         .map_err(|_| "Failed to lock HWND_TO_HOOK map")?;
     if let Some(hook) = hook_map.remove(&hwnd.0) {
+        // Drop the sender for the hook
         senders.remove(&hook);
     }
 
@@ -103,19 +109,9 @@ pub fn create_os_event_listener() -> Result<Receiver<ProcMessage>, windows::core
 
 fn create_window_and_do_message_loop(tx: Sender<ProcMessage>) -> Result<(), windows::core::Error> {
     let hwnd = init_window()?;
-    attach_tx_pointer(hwnd, tx.clone());
-    match register_os_event_listener() {
-        Ok(h_win_event_hook) => {
-            println!(
-                "Registered interest in all events with hook {:?}",
-                h_win_event_hook
-            );
-            attach_tx_pointer(HWND(h_win_event_hook), tx);
-        }
-        Err(e) => {
-            eprintln!("Error registering interest in all events: {:?}", e);
-        }
-    }
+    // attach_tx_pointer(hwnd, tx.clone());
+    let hook = register_os_event_listener()?;
+    store_sender(hwnd, hook, tx).map_err(|e| windows::core::Error::new(E_FAIL, e.into()))?;
 
     register_interest_in_mouse_with_os(hwnd.0)?;
     register_interest_in_keyboard_with_os(hwnd.0)?;
@@ -161,7 +157,7 @@ fn detach_tx_pointer_and_drop(hwnd: HWND) {
     }
 }
 
-fn register_os_event_listener() -> Result<isize, windows::core::Error> {
+fn register_os_event_listener() -> Result<HWINEVENTHOOK, windows::core::Error> {
     unsafe {
         match SetWinEventHook(
             EVENT_MIN, // or specific event codes
@@ -176,7 +172,7 @@ fn register_os_event_listener() -> Result<isize, windows::core::Error> {
                 E_FAIL,
                 "Failed to register interest in all events".into(),
             )),
-            HWINEVENTHOOK(x) => Ok(x),
+            x => Ok(x),
         }
     }
 }
@@ -254,7 +250,12 @@ unsafe extern "system" fn window_message_procedure(
 ) -> LRESULT {
     let next = || DefWindowProcW(hwnd, msg, w_param, l_param);
 
-    let tx = match get_tx_pointer(hwnd) {
+    // let tx = match get_tx_pointer(hwnd) {
+    //     Some(tx) => tx,
+    //     None => return next(),
+    // };
+
+    let tx = match get_sender_for_window(hwnd) {
         Some(tx) => tx,
         None => return next(),
     };
@@ -305,7 +306,8 @@ unsafe extern "system" fn window_message_procedure(
             LRESULT(0)
         }
         WM_DESTROY => {
-            detach_tx_pointer_and_drop(hwnd);
+            // detach_tx_pointer_and_drop(hwnd);
+            drop_senders_for_window(hwnd).unwrap();
             PostQuitMessage(0);
             LRESULT(0)
         }
@@ -314,7 +316,7 @@ unsafe extern "system" fn window_message_procedure(
 }
 
 unsafe extern "system" fn os_event_procedure(
-    h_win_event_hook: HWINEVENTHOOK,
+    hook: HWINEVENTHOOK,
     event: u32,
     hwnd: HWND,
     object_id: i32,
@@ -339,44 +341,33 @@ unsafe extern "system" fn os_event_procedure(
     //     return;
     // }
 
-    println!(
-        "Hook: {:?}, Event: {:?} ({}), HWND: {:?}, idObject: {:?}, idChild: {:?}",
-        h_win_event_hook,
-        event,
-        event_to_name(event),
-        hwnd,
-        object_id,
-        child_id
-    );
+    let event_name = event_to_name(event).to_string();
+    // println!(
+    //     "Hook: {:?}, Event: {:?} ({}), HWND: {:?}, idObject: {:?}, idChild: {:?}",
+    //     hook,
+    //     event,
+    //     event_name,
+    //     hwnd,
+    //     object_id,
+    //     child_id
+    // );
 
-    println!("Attempting getting tx from window hwnd: {:?}", hwnd);
-    let tx = match get_tx_pointer(hwnd) {
+    // println!("Attempting getting tx from window hwnd: {:?}", hwnd);
+    let tx = match get_sender_for_hook(hook) {
         Some(tx) => {
-            println!("Got tx from window hwnd: {:?}", hwnd);
+            // println!("Got tx from hook {:?}", hook);
             tx
-        }
+        },
         None => {
-            println!(
-                "No tx found, attempting from hook hwnd: {:?}",
-                h_win_event_hook
-            );
-            match get_tx_pointer(HWND(h_win_event_hook.0)) {
-                Some(tx) => {
-                    println!("Got tx from hook hwnd: {:?}", h_win_event_hook);
-                    tx
-                }
-                None => {
-                    eprintln!("No tx found for event");
-                    return;
-                }
-            }
+            eprintln!("No tx found for hook {:?}", hook);
+            return;
         }
     };
 
     if object_id != OBJID_CLIENT.0 {
         return;
     }
-    println!("happy path");
+    // println!("happy path");
     // if (event == EVENT_OBJECT_SELECTIONADD || event == EVENT_OBJECT_STATECHANGE)
     //     && object_id == OBJID_CLIENT.0 {}
     // Here you get the name and state of the element that triggered the event.
@@ -384,7 +375,7 @@ unsafe extern "system" fn os_event_procedure(
     let mut acc_ptr: Option<IAccessible> = None;
     let mut elem = VARIANT::default();
 
-    println!("Getting accessible object");
+    // println!("Getting accessible object");
     let lookup = AccessibleObjectFromEvent(
         hwnd,
         object_id as u32,
@@ -393,77 +384,64 @@ unsafe extern "system" fn os_event_procedure(
         &mut elem,
     );
     if lookup.is_err() {
-        eprintln!("Error getting accessible object: {:?}", lookup);
+        // eprintln!("Error getting accessible object: {:?}", lookup);
         return;
     }
     let acc = match acc_ptr {
         Some(acc) => acc,
         None => {
-            eprintln!("Error getting accessible object");
+            // eprintln!("Error getting accessible object");
             return;
         }
     };
 
-    println!("Getting name");
-    let name_bstr = match acc.get_accName(elem.clone()) {
-        Ok(bstr) => bstr,
-        Err(e) => {
-            eprintln!("Error getting name: {:?}", e);
-            return;
-        }
-    };
+    // println!("Getting name");
+    let name = acc.get_accName(elem.clone()).map(|x| x.to_string()).ok();
 
-    println!("Getting role");
-    let role_var = match acc.get_accRole(elem.clone()) {
-        Ok(role) => role,
-        Err(e) => {
-            eprintln!("Error getting role: {:?}", e);
-            return;
-        }
-    };
+    // println!("Getting role");
+    let role = acc
+        .get_accRole(elem.clone())
+        .and_then(|variant| variant_to_int(&variant))
+        .map(|i| role_to_name(i as u32).to_string())
+        .ok();
 
-    println!("Getting state");
-    let state_var = match acc.get_accState(elem.clone()) {
-        Ok(state) => state,
-        Err(e) => {
-            eprintln!("Error getting state: {:?}", e);
-            return;
-        }
-    };
-
-    let role = role_to_name(variant_to_int(&role_var).unwrap_or(-123) as u32);
-    let state = state_to_string(variant_to_int(&state_var).unwrap_or(-123) as u32);
+    // println!("Getting state");
+    let state = acc
+        .get_accState(elem.clone())
+        .and_then(|variant| variant_to_int(&variant))
+        .map(|i| state_to_string(i as u32))
+        .ok();
 
     let mut pxleft = 0;
     let mut pytop = 0;
     let mut pcxwidth = 0;
     let mut pcyheight = 0;
 
-    println!("Getting location");
-    if let Err(e) = acc.accLocation(&mut pxleft, &mut pytop, &mut pcxwidth, &mut pcyheight, elem) {
-        eprintln!("Error getting location: {:?}", e);
-        return;
-    }
-    let bounds = bevy::math::IRect::from_corners(
-        IVec2::new(pxleft, pytop),
-        IVec2::new(pxleft + pcxwidth, pytop + pcyheight),
-    );
-
-    println!("Building msg");
-    let msg = ProcMessage::Event {
-        event_name: event_to_name(event).to_string(),
-        name: name_bstr.to_string(),
-        role: role.to_string(),
-        state,
-        bounds: format!("{:?}", bounds),
+    // println!("Getting location");
+    let bounds = match acc.accLocation(&mut pxleft, &mut pytop, &mut pcxwidth, &mut pcyheight, elem)
+    {
+        Ok(()) => Some(IRect::from_corners(
+            IVec2::new(pxleft, pytop),
+            IVec2::new(pxleft + pcxwidth, pytop + pcyheight),
+        )),
+        Err(_) => None,
     };
 
-    println!("Sending event message {:?}", msg);
-    // if let Err(e) = tx.send(msg) {
-    //     eprintln!("Error sending event message: {:?}", e);
-    // } else {
-    //     println!("Sent event message :D");
-    // }
+    // println!("Building msg");
+    let msg = ProcMessage::Event {
+        event_name,
+        name,
+        role,
+        state,
+        bounds,
+    };
+
+    // println!("Sending event message {:?}", msg);
+    if let Err(e) = tx.send(msg) {
+        eprintln!("Error sending event message: {:?}", e);
+    } else {
+        // println!("Sent event message :D");
+    }
 }
 
 fn decimal_to_string(decimal: DECIMAL) -> Result<String, windows::core::Error> {

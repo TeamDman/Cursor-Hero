@@ -2006,6 +2006,7 @@ dependencies = [
  "bevy",
  "crossbeam-channel",
  "cursor_hero_host_event_types",
+ "cursor_hero_input",
  "cursor_hero_winutils",
  "raw-window-handle",
 ]
