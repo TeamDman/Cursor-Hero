@@ -89,11 +89,12 @@ impl Plugin for MyPlugin {
         app.add_plugins(BrickPlugin);
         app.add_plugins(FullscreenToolPlugin);
         app.add_plugins(FullscreenToolTypesPlugin);
-        app.add_plugins(UiWatcherTypesPlugin);
-        app.add_plugins(UiWatcherPlugin);
+        // TODO: fix hanging issue
+        // app.add_plugins(UiWatcherTypesPlugin);
+        // app.add_plugins(UiWatcherPlugin);
         app.add_plugins(FloatyNametagTypesPlugin);
         app.add_plugins(FloatyNametagPlugin);
-        app.add_plugins(HostWatcherTypesPlugin);
+        app.add_plugins(HostEventTypesPlugin);
         app.add_plugins(HostEventPlugin);
         app.add_plugins(TaskbarToolPlugin);
         app.add_plugins(StartMenuTypesPlugin);
@@ -122,9 +123,6 @@ impl Plugin for MyPlugin {
         app.add_plugins(CharacterTypesPlugin);
         app.add_plugins(AgentTypesPlugin);
         app.add_plugins(AgentPlugin);
-        //app.add_plugins(ClickDragMovementPlugin);
-        //app.add_plugins(HoverShowerRelayPlugin);
-        //app.add_plugins(HoverShowerServicePlugin);
         app.add_plugins(AboutTextPlugin);
         app.add_plugins(AfterimagePlugin);
         app.add_plugins(CameraPlugin);
@@ -147,7 +145,6 @@ impl Plugin for MyPlugin {
         app.add_plugins(PhysicsPlugin);
         app.add_plugins(PointerPlugin);
         app.add_plugins(PointerTypesPlugin);
-        // app.add_plugins(PositionTextPlugin);
         app.add_plugins(PressurePlatePlugin);
         app.add_plugins(ScreenPlugin);
         app.add_plugins(ScreenUpdatePlugin);
@@ -168,7 +165,7 @@ impl Plugin for MyPlugin {
         let log_plugin = LogPlugin {
             level: bevy::log::Level::DEBUG,
             filter: "
-debug,
+info,
 wgpu_core=warn,
 wgpu_hal=warn,
 bevy_ecs=info,
@@ -183,6 +180,14 @@ cursor_hero_restart_memory=info
             ".replace('\n',"").trim().into(),
             // TODO: fix warnings when minimized
         };
+//         #[cfg(debug_assertions)]
+//         let log_plugin = LogPlugin {
+//             level: bevy::log::Level::DEBUG,
+//             filter: "
+// debug
+//             ".replace('\n',"").trim().into(),
+//             // TODO: fix warnings when minimized
+//         };
         #[cfg(not(debug_assertions))]
         let log_plugin = LogPlugin {
             level: bevy::log::Level::INFO,

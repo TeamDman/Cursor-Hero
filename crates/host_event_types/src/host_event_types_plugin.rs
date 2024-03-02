@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 // use crate::prelude::*;
 
-pub struct HostWatcherTypesPlugin;
+pub struct HostEventTypesPlugin;
 
-impl Plugin for HostWatcherTypesPlugin {
+impl Plugin for HostEventTypesPlugin {
     fn build(&self, _app: &mut App) {
         // app.register_type::<MyComponent>();
         // app.add_event::<MyEvent>();
