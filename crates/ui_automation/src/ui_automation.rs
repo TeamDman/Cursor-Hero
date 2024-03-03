@@ -1,4 +1,5 @@
 use bevy::math::IVec2;
+use cursor_hero_ui_automation_types::ui_automation_types::AppUIElement;
 use std::collections::VecDeque;
 use uiautomation::types::Point;
 use uiautomation::UIAutomation;
@@ -41,6 +42,11 @@ pub fn gather_toplevel_elements() -> Result<Vec<UIElement>, uiautomation::Error>
     Ok(found)
 }
 
+pub fn gather_apps() -> Result<Vec<AppUIElement>, uiautomation::Error> {
+    let elements = gather_toplevel_elements()?;
+    Ok(elements.into_iter().map(AppUIElement::from).collect())
+}
+
 // pub fn get_element_from_identifier(id: &str) -> Result<UIElement, uiautomation::Error> {
 //     let automation = UIAutomation::new()?;
 //     // find the elem.get_automation_id() that matches id
@@ -80,7 +86,7 @@ pub fn gather_toplevel_elements() -> Result<Vec<UIElement>, uiautomation::Error>
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::prelude::get_taskbar;
 
     #[test]
     fn test_get_taskbar() {

@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use cursor_hero_ui_automation::prelude::gather_apps;
 use cursor_hero_ui_automation::prelude::gather_toplevel_elements;
 use cursor_hero_ui_watcher_types::ui_watcher_types::AppUIElement;
 use std::fs::OpenOptions;
@@ -64,12 +65,9 @@ fn handle_threadbound_messages(
 ) -> Result<(), Box<dyn std::error::Error>> {
     match action {
         ThreadboundMessage::GatherAppInfo => {
-            println!("Gathering app info");
-            let app_elements = gather_toplevel_elements()?;
-            println!("Gathered {} elements, processing...", app_elements.len());
-            let description = app_elements
+            let description = gather_apps()?
                 .into_iter()
-                .map(|x| AppUIElement::from(x).to_string())
+                .map(|x| x.to_string())
                 .collect::<Vec<String>>()
                 .join("\n");
             let msg = GameboundMessage::AppInfo(description);

@@ -1,8 +1,8 @@
-pub mod ui_automation_plugin;
+mod ui_automation_plugin;
 mod gather_children;
-pub mod formatting;
-pub mod taskbar;
-pub mod ui_automation;
+mod formatting;
+mod taskbar;
+mod ui_automation;
 
 pub mod prelude {
     pub use crate::ui_automation_plugin::*;
