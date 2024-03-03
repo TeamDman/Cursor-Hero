@@ -5,8 +5,8 @@ pub struct WallpaperPlugin;
 
 impl Plugin for WallpaperPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<Wallpaper>()
-            .add_systems(Update, spawn_wallpaper);
+        app.register_type::<Wallpaper>();
+        app.add_systems(Update, spawn_wallpaper);
     }
 }
 

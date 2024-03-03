@@ -14,10 +14,10 @@ pub struct CubeToolPlugin;
 
 impl Plugin for CubeToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<CubeTool>()
-            .register_type::<CubeToolInteractable>()
-            .add_plugins(InputManagerPlugin::<CubeToolAction>::default())
-            .add_systems(Update, (toolbelt_events, handle_input));
+        app.register_type::<CubeTool>();
+        app.register_type::<CubeToolInteractable>();
+        app.add_plugins(InputManagerPlugin::<CubeToolAction>::default());
+        app.add_systems(Update, (toolbelt_events, handle_input));
     }
 }
 

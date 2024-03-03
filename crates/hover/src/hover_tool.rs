@@ -8,9 +8,9 @@ pub struct HoverToolPlugin;
 
 impl Plugin for HoverToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<HoverTool>()
-            .add_systems(Update, toolbelt_events)
-            .add_systems(Update, tick);
+        app.register_type::<HoverTool>();
+        app.add_systems(Update, toolbelt_events);
+        app.add_systems(Update, tick);
     }
 }
 

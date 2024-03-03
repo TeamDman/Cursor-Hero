@@ -7,9 +7,9 @@ pub struct LevelBoundsVisibilityToolPlugin;
 
 impl Plugin for LevelBoundsVisibilityToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<LevelBoundsVisibilityTool>()
-            .add_systems(Update, toolbelt_events)
-            .add_systems(Update, tick);
+        app.register_type::<LevelBoundsVisibilityTool>();
+        app.add_systems(Update, toolbelt_events);
+        app.add_systems(Update, tick);
     }
 }
 

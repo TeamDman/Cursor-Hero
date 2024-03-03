@@ -12,21 +12,19 @@ pub struct LevelBoundsPlugin;
 
 impl Plugin for LevelBoundsPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<LevelBounds>()
-            .register_type::<LevelBoundsHolder>()
-            .add_event::<LevelBoundsEvent>()
-            .add_systems(
-                Update,
-                (
-                    (
-                        handle_populate_environment_events,
-                        apply_deferred,
-                        handle_level_bounds_events,
-                    )
-                        .chain(),
-                    enforce,
-                ),
-            );
+        app.register_type::<LevelBounds>();
+        app.register_type::<LevelBoundsHolder>();
+        app.add_event::<LevelBoundsEvent>();
+        app.add_systems(Update, enforce);
+        app.add_systems(
+            Update,
+            (
+                handle_populate_environment_events,
+                apply_deferred,
+                handle_level_bounds_events,
+            )
+                .chain(),
+        );
     }
 }
 

@@ -6,9 +6,9 @@ pub struct InspectWheelToolPlugin;
 
 impl Plugin for InspectWheelToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<InspectWheelTool>()
-            .add_systems(Update, toolbelt_events)
-            .add_systems(Update, tick);
+        app.register_type::<InspectWheelTool>();
+        app.add_systems(Update, toolbelt_events);
+        app.add_systems(Update, tick);
     }
 }
 

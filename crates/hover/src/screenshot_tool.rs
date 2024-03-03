@@ -30,10 +30,10 @@ pub struct ScreenshotToolPlugin;
 
 impl Plugin for ScreenshotToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<InspectTool>()
-            .add_plugins(InputManagerPlugin::<ScreenshotToolAction>::default())
-            .add_systems(Startup, spawn_worker_thread)
-            .add_systems(Update, (toolbelt_events, handle_input, handle_replies));
+        app.register_type::<InspectTool>();
+        app.add_plugins(InputManagerPlugin::<ScreenshotToolAction>::default());
+        app.add_systems(Startup, spawn_worker_thread);
+        app.add_systems(Update, (toolbelt_events, handle_input, handle_replies));
     }
 }
 

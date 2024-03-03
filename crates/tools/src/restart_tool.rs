@@ -14,9 +14,10 @@ pub struct RestartToolPlugin;
 
 impl Plugin for RestartToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<RestartTool>()
-            .add_plugins(InputManagerPlugin::<RestartToolAction>::default())
-            .add_systems(Update, (toolbelt_events, handle_input));
+        app.register_type::<RestartTool>();
+        app.add_plugins(InputManagerPlugin::<RestartToolAction>::default());
+        app.add_systems(Update, toolbelt_events);
+        app.add_systems(Update, handle_input);
     }
 }
 

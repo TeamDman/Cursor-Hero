@@ -11,10 +11,11 @@ pub struct WindowDragToolPlugin;
 
 impl Plugin for WindowDragToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<WindowDragTool>()
-            .register_type::<WindowDragToolInteractable>()
-            .add_plugins(InputManagerPlugin::<WindowDragToolAction>::default())
-            .add_systems(Update, (toolbelt_events, handle_input));
+        app.register_type::<WindowDragTool>();
+        app.register_type::<WindowDragToolInteractable>();
+        app.add_plugins(InputManagerPlugin::<WindowDragToolAction>::default());
+        app.add_systems(Update, toolbelt_events);
+        app.add_systems(Update, handle_input);
     }
 }
 

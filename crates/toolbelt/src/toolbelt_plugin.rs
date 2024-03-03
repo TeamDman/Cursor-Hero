@@ -20,30 +20,28 @@ pub struct ToolbeltPlugin;
 
 impl Plugin for ToolbeltPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(InputManagerPlugin::<ToolbeltAction>::default())
-            .add_systems(
-                Update,
-                (
-                    insert_hover_frame,
-                    remove_hover_frame,
-                    tool_color,
-                    tool_activation,
-                    tool_help_cleanup,
-                    (
-                        wheel_opening,
-                        wheel_audio,
-                        tool_visibility,
-                        tool_help_activation,
-                        tool_help_lifecycle,
-                    )
-                        .chain(),
-                ),
+        app.add_plugins(InputManagerPlugin::<ToolbeltAction>::default());
+        app.add_systems(Update, insert_hover_frame);
+        app.add_systems(Update, remove_hover_frame);
+        app.add_systems(Update, tool_color);
+        app.add_systems(Update, tool_activation);
+        app.add_systems(Update, tool_help_cleanup);
+        app.add_systems(
+            Update,
+            (
+                wheel_opening,
+                wheel_audio,
+                tool_visibility,
+                tool_help_activation,
+                tool_help_lifecycle,
             )
-            .add_systems(
-                PostUpdate,
-                tool_distribution
-                    .after(PhysicsSet::Sync)
-                    .after(TransformSystem::TransformPropagate),
-            );
+                .chain(),
+        );
+        app.add_systems(
+            PostUpdate,
+            tool_distribution
+                .after(PhysicsSet::Sync)
+                .after(TransformSystem::TransformPropagate),
+        );
     }
 }

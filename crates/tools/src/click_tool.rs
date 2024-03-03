@@ -26,10 +26,10 @@ pub struct ClickToolPlugin;
 
 impl Plugin for ClickToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<ClickTool>()
-            .add_plugins(InputManagerPlugin::<ClickToolAction>::default())
-            .add_systems(Startup, spawn_worker_thread)
-            .add_systems(Update, (toolbelt_events, handle_input));
+        app.register_type::<ClickTool>();
+        app.add_plugins(InputManagerPlugin::<ClickToolAction>::default());
+        app.add_systems(Startup, spawn_worker_thread);
+        app.add_systems(Update, (toolbelt_events, handle_input));
     }
 }
 

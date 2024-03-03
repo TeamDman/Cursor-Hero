@@ -9,17 +9,12 @@ pub struct EnvironmentNametagPlugin;
 
 impl Plugin for EnvironmentNametagPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<NametagEvent>()
-            .add_systems(
-                Update,
-                (
-                    spawn_nametags_in_new_environments,
-                    detect_new_screens_and_send_recalculate_position_event,
-                    handle_nametag_update_event,
-                    handle_nametag_recalculate_position_event,
-                ),
-            )
-            .register_type::<Nametag>();
+        app.add_event::<NametagEvent>();
+        app.add_systems(Update, spawn_nametags_in_new_environments);
+        app.add_systems(Update, recalc_new_screen_nametags);
+        app.add_systems(Update, handle_nametag_update_event);
+        app.add_systems(Update, handle_nametag_recalculate_position_event);
+        app.register_type::<Nametag>();
     }
 }
 
@@ -71,7 +66,7 @@ fn spawn_nametags_in_new_environments(
     }
 }
 
-fn detect_new_screens_and_send_recalculate_position_event(
+fn recalc_new_screen_nametags(
     mut nametag_events: EventWriter<NametagEvent>,
     screen_query: Query<&Parent, Added<Screen>>,
     screen_parent_query: Query<&Parent, With<ScreenParent>>,

@@ -4,8 +4,8 @@ use bevy::prelude::*;
 pub struct FpsTextPlugin;
 impl Plugin for FpsTextPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup)
-            .add_systems(Update, update_fps_text);
+        app.add_systems(Startup, setup);
+        app.add_systems(Update, update_fps_text);
     }
 }
 

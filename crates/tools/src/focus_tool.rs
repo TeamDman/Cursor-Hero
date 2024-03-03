@@ -20,9 +20,10 @@ pub struct FocusToolPlugin;
 
 impl Plugin for FocusToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<FocusTool>()
-            .add_plugins(InputManagerPlugin::<FocusToolAction>::default())
-            .add_systems(Update, (toolbelt_events, handle_input));
+        app.register_type::<FocusTool>();
+        app.add_plugins(InputManagerPlugin::<FocusToolAction>::default());
+        app.add_systems(Update, toolbelt_events);
+        app.add_systems(Update, handle_input);
     }
 }
 #[derive(Component, Reflect, Default)]

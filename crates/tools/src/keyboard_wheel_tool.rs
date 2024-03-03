@@ -6,9 +6,9 @@ pub struct KeyboardWheelToolPlugin;
 
 impl Plugin for KeyboardWheelToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<KeyboardWheelTool>()
-            .add_systems(Update, toolbelt_events)
-            .add_systems(Update, tick);
+        app.register_type::<KeyboardWheelTool>();
+        app.add_systems(Update, toolbelt_events);
+        app.add_systems(Update, tick);
     }
 }
 

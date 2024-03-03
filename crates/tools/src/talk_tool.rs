@@ -19,10 +19,11 @@ pub struct TalkToolPlugin;
 
 impl Plugin for TalkToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<TalkTool>()
-            .add_plugins(InputManagerPlugin::<TalkToolAction>::default())
-            .add_systems(Startup, spawn_worker_thread)
-            .add_systems(Update, (toolbelt_events, handle_input));
+        app.register_type::<TalkTool>();
+        app.add_plugins(InputManagerPlugin::<TalkToolAction>::default());
+        app.add_systems(Startup, spawn_worker_thread);
+        app.add_systems(Update, toolbelt_events);
+        app.add_systems(Update, handle_input);
     }
 }
 

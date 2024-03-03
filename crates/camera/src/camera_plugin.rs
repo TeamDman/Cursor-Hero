@@ -10,17 +10,17 @@ use cursor_hero_physics::damping_plugin::MovementDamping;
 pub struct CameraPlugin;
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_camera)
-            .add_systems(Update, (update_camera_zoom, handle_events))
-            .add_event::<CameraEvent>()
-            .add_systems(
-                PostUpdate,
-                follow
-                    .in_set(CameraSystemSet::Follow)
-                    .after(PhysicsSet::Sync)
-                    .before(TransformSystem::TransformPropagate),
-            )
-            .register_type::<MainCamera>();
+        app.register_type::<MainCamera>();
+        app.add_event::<CameraEvent>();
+        app.add_systems(Startup, spawn_camera);
+        app.add_systems(Update, (update_camera_zoom, handle_events));
+        app.add_systems(
+            PostUpdate,
+            follow
+                .in_set(CameraSystemSet::Follow)
+                .after(PhysicsSet::Sync)
+                .before(TransformSystem::TransformPropagate),
+        );
     }
 }
 

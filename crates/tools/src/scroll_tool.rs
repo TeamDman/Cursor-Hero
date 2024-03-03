@@ -15,12 +15,11 @@ pub struct ScrollToolPlugin;
 
 impl Plugin for ScrollToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<ScrollTool>()
-            .add_plugins(InputManagerPlugin::<ScrollToolAction>::default())
-            .add_systems(
-                Update,
-                (toolbelt_events, handle_input, handle_sprint_events),
-            );
+        app.register_type::<ScrollTool>();
+        app.add_plugins(InputManagerPlugin::<ScrollToolAction>::default());
+        app.add_systems(Update, toolbelt_events);
+        app.add_systems(Update, handle_input);
+        app.add_systems(Update, handle_sprint_events);
     }
 }
 

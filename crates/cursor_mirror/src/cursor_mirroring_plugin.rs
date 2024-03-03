@@ -6,10 +6,10 @@ use cursor_hero_winutils::win_mouse::get_cursor_position;
 pub struct CursorMirroringPlugin;
 impl Plugin for CursorMirroringPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<CursorMirror>()
-            .add_systems(Startup, setup)
-            .add_systems(Update, (update_cursor_position, update_visuals).chain())
-            .insert_resource(CursorPosition::default());
+        app.register_type::<CursorMirror>();
+        app.add_systems(Startup, setup);
+        app.add_systems(Update, (update_cursor_position, update_visuals).chain());
+        app.insert_resource(CursorPosition::default());
     }
 }
 

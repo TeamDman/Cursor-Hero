@@ -7,11 +7,11 @@ pub struct PositionTextPlugin;
 
 impl Plugin for PositionTextPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup_position_text)
-            .add_systems(Update, update_position_text)
-            .register_type::<CharacterPositionText>()
-            .register_type::<MouseWorldPositionText>()
-            .register_type::<MouseScreenPositionText>();
+        app.register_type::<CharacterPositionText>();
+        app.register_type::<MouseWorldPositionText>();
+        app.register_type::<MouseScreenPositionText>();
+        app.add_systems(Startup, setup_position_text);
+        app.add_systems(Update, update_position_text);
     }
 }
 

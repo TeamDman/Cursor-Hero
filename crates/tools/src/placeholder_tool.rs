@@ -12,9 +12,10 @@ pub struct PlaceholderToolPlugin;
 
 impl Plugin for PlaceholderToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<PlaceholderTool>()
-            .add_plugins(InputManagerPlugin::<PlaceholderToolAction>::default())
-            .add_systems(Update, (toolbelt_events, handle_input));
+        app.register_type::<PlaceholderTool>();
+        app.add_plugins(InputManagerPlugin::<PlaceholderToolAction>::default());
+        app.add_systems(Update, toolbelt_events);
+        app.add_systems(Update, handle_input);
     }
 }
 

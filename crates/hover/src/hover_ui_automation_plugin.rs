@@ -16,18 +16,18 @@ pub struct HoverUiAutomationPlugin;
 impl Plugin for HoverUiAutomationPlugin {
     fn build(&self, app: &mut App) {
         info!("Adding HoverInfo resource");
-        app.insert_resource(HoverInfo::default())
-            .register_type::<Element>()
-            .add_systems(Startup, setup)
-            .add_systems(
-                Update,
-                (
-                    update_game_mouse_position,
-                    update_hover_info,
-                    show_hovered_rect,
-                )
-                    .chain(),
-            );
+        app.insert_resource(HoverInfo::default());
+        app.register_type::<Element>();
+        app.add_systems(Startup, setup);
+        app.add_systems(
+            Update,
+            (
+                update_game_mouse_position,
+                update_hover_info,
+                show_hovered_rect,
+            )
+                .chain(),
+        );
     }
 }
 

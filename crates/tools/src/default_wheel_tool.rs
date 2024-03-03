@@ -6,9 +6,9 @@ pub struct DefaultWheelToolPlugin;
 
 impl Plugin for DefaultWheelToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<DefaultWheelTool>()
-            .add_systems(Update, toolbelt_events)
-            .add_systems(Update, tick);
+        app.register_type::<DefaultWheelTool>();
+        app.add_systems(Update, toolbelt_events);
+        app.add_systems(Update, tick);
     }
 }
 

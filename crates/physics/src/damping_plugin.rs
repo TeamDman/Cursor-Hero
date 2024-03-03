@@ -13,12 +13,12 @@ pub enum DampingSystemSet {
 
 impl Plugin for DampingPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<MovementDamping>()
-            .configure_sets(Update, DampingSystemSet::Dampen)
-            .add_systems(
-                Update,
-                apply_movement_damping.in_set(DampingSystemSet::Dampen),
-            );
+        app.register_type::<MovementDamping>();
+        app.configure_sets(Update, DampingSystemSet::Dampen);
+        app.add_systems(
+            Update,
+            apply_movement_damping.in_set(DampingSystemSet::Dampen),
+        );
     }
 }
 

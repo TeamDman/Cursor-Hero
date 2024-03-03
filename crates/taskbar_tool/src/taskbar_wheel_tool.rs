@@ -13,11 +13,11 @@ pub struct TaskbarWheelToolPlugin;
 
 impl Plugin for TaskbarWheelToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<TaskbarWheelTool>()
-            .register_type::<TaskbarEntryTool>()
-            .add_systems(Update, toolbelt_events)
-            .add_systems(Update, tick_wheel_switcher)
-            .add_systems(Update, tick_taskbar_switcher);
+        app.register_type::<TaskbarWheelTool>();
+        app.register_type::<TaskbarEntryTool>();
+        app.add_systems(Update, toolbelt_events);
+        app.add_systems(Update, tick_wheel_switcher);
+        app.add_systems(Update, tick_taskbar_switcher);
     }
 }
 
