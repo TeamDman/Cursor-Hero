@@ -25,6 +25,8 @@ If you have a DualShock controller, you will need something like [DS4Windows](ht
 ### Fine Tuning
 
 - [allenai/OLMo: Modeling, training, eval, and inference code for OLMo (github.com)](https://github.com/allenai/OLMo)
+- [hiyouga/LLaMA-Factory: Unify Efficient Fine-tuning of 100+ LLMs (github.com)](https://github.com/hiyouga/LLaMA-Factory)
+- [OpenAccess-AI-Collective/axolotl: Go ahead and axolotl questions (github.com)](https://github.com/OpenAccess-AI-Collective/axolotl)
 
 ### Vision
 
