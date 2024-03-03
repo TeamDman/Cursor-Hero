@@ -113,16 +113,20 @@ where
 
     fn clean_name(file_path: &str) -> &str {
         Path::new(file_path)
-        .file_stem() // Get the file stem (file name without extension)
-        .and_then(|stem| stem.to_str()) // Convert OsStr to &str
-        .unwrap_or("")
-        .trim_end_matches("_plugin")
-        .trim_end_matches("_populate")
-        .trim_start_matches("spawn_")
+            .file_stem() // Get the file stem (file name without extension)
+            .and_then(|stem| stem.to_str()) // Convert OsStr to &str
+            .unwrap_or("")
+            .trim_end_matches("_plugin")
+            .trim_end_matches("_populate")
+            .trim_start_matches("spawn_")
     }
 
     fn format_tool_image_from_source(file_path: &str, extension: &str) -> String {
-        format!("textures/tools/{}.{}", Self::clean_name(file_path), extension)
+        format!(
+            "textures/tools/{}.{}",
+            Self::clean_name(file_path),
+            extension
+        )
     }
 
     pub fn with_asset_image(

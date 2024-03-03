@@ -38,7 +38,10 @@ fn process_events(
         if *active_input != ActiveInput::MouseAndKeyboard
             && matches!(event, ProcMessage::MouseMoved { .. })
         {
-            info!("Switching to mouse and keyboard input because of {:?}", event);
+            info!(
+                "Switching to mouse and keyboard input because of {:?}",
+                event
+            );
             next_state.set(ActiveInput::MouseAndKeyboard);
             *active_input = ActiveInput::MouseAndKeyboard;
         }

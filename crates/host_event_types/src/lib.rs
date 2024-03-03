@@ -1,5 +1,5 @@
-pub mod host_event_types_plugin;
 pub mod host_event_types;
+pub mod host_event_types_plugin;
 
 pub mod prelude {
     // pub use crate::host_watcher_types::*;

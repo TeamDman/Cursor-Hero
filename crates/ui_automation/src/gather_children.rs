@@ -9,10 +9,7 @@ pub enum GatherChildrenStopBehaviour {
 }
 impl GatherChildrenStopBehaviour {
     fn include_last_child(&self) -> bool {
-        match self {
-            GatherChildrenStopBehaviour::TaskbarEndEncountered => false,
-            _ => true,
-        }
+        !matches!(self, GatherChildrenStopBehaviour::TaskbarEndEncountered)
     }
 }
 trait GatherChildrenStopBehaviourFn {
@@ -53,7 +50,7 @@ pub fn gather_children(
         GatherChildrenStopBehaviour::TaskbarEndEncountered => Box::new(TaskbarEndEncountered),
     };
     let mut children = vec![];
-    if let Ok(first) = walker.get_first_child(&parent) {
+    if let Ok(first) = walker.get_first_child(parent) {
         children.push(first.clone());
         let mut next = first;
         while let Ok(sibling) = walker.get_next_sibling(&next) {

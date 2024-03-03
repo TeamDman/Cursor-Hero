@@ -4,6 +4,5 @@ use bevy::prelude::*;
 pub struct UiAutomationTypesPlugin;
 
 impl Plugin for UiAutomationTypesPlugin {
-    fn build(&self, _app: &mut App) {
-    }
+    fn build(&self, _app: &mut App) {}
 }

@@ -6,5 +6,5 @@ pub struct MyComponent;
 #[derive(Event, Debug, Reflect)]
 pub enum MyEvent {
     Guh,
-    Uh
+    Uh,
 }

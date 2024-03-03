@@ -1,7 +1,5 @@
 use bevy::prelude::*;
 use cursor_hero_ui_automation::prelude::gather_apps;
-use cursor_hero_ui_automation::prelude::gather_toplevel_elements;
-use cursor_hero_ui_watcher_types::ui_watcher_types::AppUIElement;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::Path;

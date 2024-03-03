@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use crate::taskbar_wheel_tool::TaskbarWheelToolPlugin;
+use bevy::prelude::*;
 pub struct TaskbarToolPlugin;
 
 impl Plugin for TaskbarToolPlugin {

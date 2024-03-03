@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 use bevy::window::WindowMode;
-use cursor_hero_tools::tool_spawning::StartingState;
 use bevy_inspector_egui::prelude::ReflectInspectorOptions;
 use bevy_inspector_egui::InspectorOptions;
+use cursor_hero_tools::tool_spawning::StartingState;
 
 #[derive(Component, Reflect, Debug, InspectorOptions, Default)]
 #[reflect(Component, InspectorOptions)]

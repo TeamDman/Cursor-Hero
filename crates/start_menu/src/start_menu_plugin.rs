@@ -1,7 +1,7 @@
-use bevy::prelude::*;
-use cursor_hero_winutils::win_colors::get_accent_color;
-use cursor_hero_start_menu_types::prelude::*;
 use crate::start_menu_button_plugin::StartMenuButtonPlugin;
+use bevy::prelude::*;
+use cursor_hero_start_menu_types::prelude::*;
+use cursor_hero_winutils::win_colors::get_accent_color;
 
 pub struct StartMenuPlugin;
 

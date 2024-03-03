@@ -1,8 +1,8 @@
-use uiautomation::controls::ControlType;
-use uiautomation::UIElement;
-use std::fmt::Formatter;
 use std::fmt;
 use std::fmt::Display;
+use std::fmt::Formatter;
+use uiautomation::controls::ControlType;
+use uiautomation::UIElement;
 
 pub enum AppUIElement {
     VSCode(UIElement),
@@ -34,7 +34,7 @@ impl Display for AppUIElement {
                 //     Ok(text) => write!(f, "Visual Studio Code: {}", text),
                 //     Err(e) => write!(f, "Visual Studio Code: {:?}", e),
                 // }
-            },
+            }
             AppUIElement::Unknown(elem) => write!(f, "Unknown: {:?}", elem),
         }
     }

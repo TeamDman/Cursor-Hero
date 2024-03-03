@@ -3,8 +3,8 @@ use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
 use bevy_xpbd_2d::components::Sensor;
 use cursor_hero_pointer_types::prelude::*;
-use cursor_hero_taskbar_types::prelude::*;
 use cursor_hero_start_menu_types::prelude::*;
+use cursor_hero_taskbar_types::prelude::*;
 
 pub struct StartMenuButtonPlugin;
 
@@ -15,7 +15,6 @@ impl Plugin for StartMenuButtonPlugin {
         app.add_systems(Update, visuals);
     }
 }
-
 
 fn add_start_menu_button_to_new_taskbars(
     asset_server: Res<AssetServer>,
@@ -38,26 +37,29 @@ fn add_start_menu_button_to_new_taskbars(
             1.0,
         ) + taskbar_transform.translation;
         info!("Adding start menu button for taskbar {:?}", taskbar_id);
-        commands.entity(taskbar_parent.get()).with_children(|parent| {
-            parent.spawn((
-                SpriteBundle {
-                    sprite: Sprite {
-                        custom_size: Some(start_menu_button_size),
-                        ..default()
+        commands
+            .entity(taskbar_parent.get())
+            .with_children(|parent| {
+                parent.spawn((
+                    SpriteBundle {
+                        sprite: Sprite {
+                            custom_size: Some(start_menu_button_size),
+                            ..default()
+                        },
+                        texture: asset_server
+                            .load("textures/environment/game/start_menu_button.png"),
+                        transform: Transform::from_translation(start_menu_button_translation),
+                        ..Default::default()
                     },
-                    texture: asset_server.load("textures/environment/game/start_menu_button.png"),
-                    transform: Transform::from_translation(start_menu_button_translation),
-                    ..Default::default()
-                },
-                RigidBody::Static,
-                Collider::cuboid(start_menu_button_size.x, start_menu_button_size.y),
-                Sensor,
-                Name::new("Start Menu Button"),
-                StartMenuButton,
-                Hoverable,
-                Clickable,
-            ));
-        });
+                    RigidBody::Static,
+                    Collider::cuboid(start_menu_button_size.x, start_menu_button_size.y),
+                    Sensor,
+                    Name::new("Start Menu Button"),
+                    StartMenuButton,
+                    Hoverable,
+                    Clickable,
+                ));
+            });
     }
 }
 

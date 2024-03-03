@@ -22,7 +22,8 @@ impl NametagAppearance {
         match self {
             NametagAppearance::Character => "fonts/kenney_kenney-fonts/Fonts/Kenney Rocket.ttf",
             NametagAppearance::Databrick => "fonts/kenney_kenney-fonts/Fonts/Kenney Blocks.ttf",
-        }.to_string()
+        }
+        .to_string()
     }
     pub fn get_text_color(&self) -> Color {
         match self {

@@ -1,5 +1,6 @@
 use crate::prelude::*;
-use bevy::{prelude::*, sprite::Material2dPlugin};
+use bevy::prelude::*;
+use bevy::sprite::Material2dPlugin;
 
 pub struct TaskbarTypesPlugin;
 

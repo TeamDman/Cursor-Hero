@@ -1,8 +1,8 @@
 use bevy::prelude::*;
+use bevy::reflect::TypePath;
 use bevy::render::render_resource::AsBindGroup;
 use bevy::render::render_resource::ShaderRef;
 use bevy::sprite::Material2d;
-use bevy::reflect::TypePath;
 
 #[derive(Component, Debug, Reflect)]
 pub struct AppWindow;

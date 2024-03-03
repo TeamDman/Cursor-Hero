@@ -4,6 +4,5 @@ use bevy::prelude::*;
 pub struct UiWatcherTypesPlugin;
 
 impl Plugin for UiWatcherTypesPlugin {
-    fn build(&self, _app: &mut App) {
-    }
+    fn build(&self, _app: &mut App) {}
 }

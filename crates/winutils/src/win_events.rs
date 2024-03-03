@@ -1,5 +1,6 @@
 use bevy::math::IRect;
 use bevy::math::IVec2;
+use bevy::prelude::default;
 use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
 use once_cell::sync::Lazy;
@@ -153,7 +154,7 @@ fn register_interest_in_mouse_with_os(hwnd: isize) -> Result<(), windows::core::
             dwFlags: RIDEV_INPUTSINK,
             hwndTarget: HWND(hwnd),
         };
-        RegisterRawInputDevices(&mut [device], std::mem::size_of::<RAWINPUTDEVICE>() as u32)
+        RegisterRawInputDevices(&[device], std::mem::size_of::<RAWINPUTDEVICE>() as u32)
     }
 }
 
@@ -177,18 +178,20 @@ fn init_window() -> Result<HWND, windows::core::Error> {
 
     let hinstance = unsafe { windows::Win32::System::LibraryLoader::GetModuleHandleW(None)? };
 
-    let mut wnd = WNDCLASSEXW::default();
-    wnd.cbSize = std::mem::size_of::<WNDCLASSEXW>() as u32;
-    wnd.lpfnWndProc = Some(window_message_procedure);
-    wnd.hInstance = hinstance.into();
-    wnd.lpszClassName = class_name_pcwstr;
+    let wnd = WNDCLASSEXW {
+        cbSize: std::mem::size_of::<WNDCLASSEXW>() as u32,
+        lpfnWndProc: Some(window_message_procedure),
+        hInstance: hinstance.into(),
+        lpszClassName: class_name_pcwstr,
+        ..default()
+    };
 
     let _reg = unsafe { RegisterClassExW(&wnd) };
 
     let window = unsafe {
         CreateWindowExW(
             WINDOW_EX_STYLE::default(),
-            PCWSTR::from(class_name_pcwstr),
+            class_name_pcwstr,
             None,
             WINDOW_STYLE(0),
             CW_USEDEFAULT,
@@ -251,18 +254,18 @@ unsafe extern "system" fn window_message_procedure(
             assert_eq!(recv_size as i32, size as i32);
             let input = &*(data.as_ptr() as *const RAWINPUT);
 
-            if (*input).header.dwType == RIM_TYPEKEYBOARD.0
-                && (*input).data.keyboard.Message == WM_KEYDOWN as u32
+            if input.header.dwType == RIM_TYPEKEYBOARD.0
+                && input.data.keyboard.Message == WM_KEYDOWN
             {
-                let key = (*input).data.keyboard.VKey as u8 as char;
+                let key = input.data.keyboard.VKey as u8 as char;
                 if let Err(e) = tx.send(ProcMessage::KeyDown(key)) {
                     eprintln!("Error sending keyboard message: {:?}", e);
                     return LRESULT(0);
                 }
             }
 
-            if (*input).header.dwType == RIM_TYPEMOUSE.0 {
-                let mouse_data = (*input).data.mouse;
+            if input.header.dwType == RIM_TYPEMOUSE.0 {
+                let mouse_data = input.data.mouse;
                 let x = mouse_data.lLastX;
                 let y = mouse_data.lLastY;
                 if let Err(e) = tx.send(ProcMessage::MouseMoved(IVec2::new(x, y))) {
@@ -325,7 +328,7 @@ unsafe extern "system" fn os_event_procedure(
         Some(tx) => {
             // println!("Got tx from hook {:?}", hook);
             tx
-        },
+        }
         None => {
             eprintln!("No tx found for hook {:?}", hook);
             return;

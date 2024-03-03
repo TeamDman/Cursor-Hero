@@ -3,8 +3,6 @@ use bevy::prelude::*;
 #[derive(Component, Debug, Reflect)]
 pub struct StartMenuButton;
 
-
-
 #[derive(Component, Debug, Reflect)]
 pub struct StartMenu;
 

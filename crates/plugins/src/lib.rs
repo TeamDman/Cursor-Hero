@@ -13,11 +13,10 @@ use cursor_hero_character::character_plugin::CharacterPlugin;
 use cursor_hero_cursor_mirror::cursor_mirroring_plugin::CursorMirroringPlugin;
 use cursor_hero_environment::environment_plugin::EnvironmentPlugin;
 use cursor_hero_environment_nametag::environment_nametag_plugin::EnvironmentNametagPlugin;
-use cursor_hero_hover::afterimage_plugin::AfterimagePlugin;
 use cursor_hero_hover::hover_tool::HoverToolPlugin;
 use cursor_hero_hover::hover_ui_automation_plugin::HoverUiAutomationPlugin;
-use cursor_hero_hover::screenshot_tool::ScreenshotToolPlugin;
 use cursor_hero_hover::inspect_wheel_tool::InspectWheelToolPlugin;
+use cursor_hero_hover::screenshot_tool::ScreenshotToolPlugin;
 use cursor_hero_icon::IconPlugin;
 use cursor_hero_input::InputPlugin;
 use cursor_hero_level_bounds::level_bounds_plugin::LevelBoundsPlugin;
@@ -43,12 +42,24 @@ use cursor_hero_version::version_plugin::Version;
 use cursor_hero_wallpaper::wallpaper_plugin::WallpaperPlugin;
 
 use cursor_hero_agent_types::agent_types_plugin::AgentTypesPlugin;
+use cursor_hero_app::prelude::*;
+use cursor_hero_app_types::prelude::*;
+use cursor_hero_brick::prelude::*;
+use cursor_hero_brick_types::prelude::*;
+use cursor_hero_calculator_app::prelude::*;
+use cursor_hero_calculator_app_types::prelude::*;
 use cursor_hero_character_types::character_types_plugin::CharacterTypesPlugin;
 use cursor_hero_chat::chat_plugin::ChatPlugin;
 use cursor_hero_chat_types::chat_types_plugin::ChatTypesPlugin;
 use cursor_hero_environment_types::environment_types_plugin::EnvironmentTypesPlugin;
+use cursor_hero_floaty_nametag::prelude::*;
+use cursor_hero_floaty_nametag_types::prelude::*;
+use cursor_hero_fullscreen_tool::prelude::*;
+use cursor_hero_fullscreen_tool_types::prelude::*;
 use cursor_hero_glados_tts::prelude::*;
 use cursor_hero_glados_tts_types::prelude::*;
+use cursor_hero_host_event::prelude::*;
+use cursor_hero_host_event_types::prelude::*;
 use cursor_hero_inference::inference_plugin::InferencePlugin;
 use cursor_hero_inference_types::inference_types_plugin::InferenceTypesPlugin;
 use cursor_hero_movement_tool::movement_tool_plugin::MovementToolPlugin;
@@ -59,29 +70,17 @@ use cursor_hero_ollama::prelude::*;
 use cursor_hero_ollama_types::prelude::*;
 use cursor_hero_secret::prelude::*;
 use cursor_hero_secret_types::prelude::*;
-use cursor_hero_text_asset::prelude::*;
-use cursor_hero_text_asset_types::prelude::*;
-use cursor_hero_voice_to_text::prelude::*;
-use cursor_hero_voice_to_text_types::prelude::*;
-use cursor_hero_app::prelude::*;
-use cursor_hero_app_types::prelude::*;
-use cursor_hero_calculator_app::prelude::*;
-use cursor_hero_calculator_app_types::prelude::*;
 use cursor_hero_start_menu::prelude::*;
 use cursor_hero_start_menu_types::prelude::*;
 use cursor_hero_taskbar_tool::prelude::*;
 use cursor_hero_taskbar_types::prelude::TaskbarTypesPlugin;
-use cursor_hero_host_event::prelude::*;
-use cursor_hero_host_event_types::prelude::*;
-use cursor_hero_floaty_nametag::prelude::*;
-use cursor_hero_floaty_nametag_types::prelude::*;
+use cursor_hero_text_asset::prelude::*;
+use cursor_hero_text_asset_types::prelude::*;
+use cursor_hero_ui_automation::prelude::*;
 use cursor_hero_ui_watcher::prelude::*;
 use cursor_hero_ui_watcher_types::prelude::*;
-use cursor_hero_fullscreen_tool::prelude::*;
-use cursor_hero_fullscreen_tool_types::prelude::*;
-use cursor_hero_brick::prelude::*;
-use cursor_hero_brick_types::prelude::*;
-use cursor_hero_ui_automation::prelude::*;
+use cursor_hero_voice_to_text::prelude::*;
+use cursor_hero_voice_to_text_types::prelude::*;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
@@ -126,7 +125,6 @@ impl Plugin for MyPlugin {
         app.add_plugins(AgentTypesPlugin);
         app.add_plugins(AgentPlugin);
         app.add_plugins(AboutTextPlugin);
-        app.add_plugins(AfterimagePlugin);
         app.add_plugins(CameraPlugin);
         app.add_plugins(CharacterPlugin);
         app.add_plugins(CursorMirroringPlugin);
@@ -179,17 +177,20 @@ cursor_hero_voice_to_text::voice_to_text_worker_plugin=info,
 cursor_hero_glados_tts::glados_tts_status_worker_plugin=info,
 cursor_hero_tools::click_tool=info,
 cursor_hero_restart_memory=info
-            ".replace('\n',"").trim().into(),
+            "
+            .replace('\n', "")
+            .trim()
+            .into(),
             // TODO: fix warnings when minimized
         };
-//         #[cfg(debug_assertions)]
-//         let log_plugin = LogPlugin {
-//             level: bevy::log::Level::DEBUG,
-//             filter: "
-// debug
-//             ".replace('\n',"").trim().into(),
-//             // TODO: fix warnings when minimized
-//         };
+        //         #[cfg(debug_assertions)]
+        //         let log_plugin = LogPlugin {
+        //             level: bevy::log::Level::DEBUG,
+        //             filter: "
+        // debug
+        //             ".replace('\n',"").trim().into(),
+        //             // TODO: fix warnings when minimized
+        //         };
         #[cfg(not(debug_assertions))]
         let log_plugin = LogPlugin {
             level: bevy::log::Level::INFO,
@@ -227,7 +228,6 @@ cursor_hero_restart_memory=info
         app.add_plugins(TextAssetTypesPlugin);
         app.add_plugins(TextAssetPlugin);
         app.add_plugins(TaskbarTypesPlugin);
-
 
         // must be after the default plugins
         app.add_plugins(

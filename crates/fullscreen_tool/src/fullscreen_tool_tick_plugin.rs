@@ -39,7 +39,6 @@ fn match_window_state(
             }
         }
     }
-
 }
 
 fn handle_toggle(

@@ -6,9 +6,9 @@ use cursor_hero_agent_types::prelude::*;
 use cursor_hero_bevy::NegativeYVec2;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_environment_types::prelude::*;
+use cursor_hero_floaty_nametag_types::prelude::*;
 use cursor_hero_observation_types::prelude::*;
 use cursor_hero_physics::damping_plugin::MovementDamping;
-use cursor_hero_floaty_nametag_types::prelude::*;
 
 pub struct AgentSpawningPlugin;
 
@@ -42,7 +42,7 @@ fn spawn_agent(
                 },
                 Character,
                 AgentCharacter,
-                Name::new("Character - (Agent) Ithia Tig"),                
+                Name::new("Character - (Agent) Ithia Tig"),
                 FloatyName {
                     text: "Ithia Tig".to_string(),
                     vertical_offset: 40.0,
