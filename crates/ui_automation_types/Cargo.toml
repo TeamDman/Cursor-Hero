@@ -1,5 +1,5 @@
 [package]
-name = "cursor_hero_ui_watcher"
+name = "cursor_hero_ui_automation_types"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,6 +7,4 @@ edition = "2021"
 
 [dependencies]
 bevy = { workspace = true }
-cursor_hero_ui_watcher_types = { workspace = true }
-crossbeam-channel = { workspace = true }
-cursor_hero_ui_automation = { workspace = true }
+uiautomation = {workspace = true}

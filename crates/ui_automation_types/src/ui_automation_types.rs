@@ -3,6 +3,19 @@ use uiautomation::UIElement;
 use std::fmt::Formatter;
 use std::fmt;
 use std::fmt::Display;
+use bevy::prelude::*;
+
+
+#[derive(Debug, Reflect, Clone)]
+pub struct Taskbar {
+    pub entries: Vec<TaskbarEntry>,
+}
+#[derive(Debug, Reflect, Clone)]
+pub struct TaskbarEntry {
+    pub name: String,
+    pub bounds: IRect,
+}
+
 
 pub enum AppUIElement {
     VSCode(UIElement),
@@ -36,6 +49,18 @@ impl Display for AppUIElement {
                 // }
             },
             AppUIElement::Unknown(elem) => write!(f, "Unknown: {:?}", elem),
+        }
+    }
+}
+
+pub trait ToBevyIRect {
+    fn to_bevy_irect(&self) -> IRect;
+}
+impl ToBevyIRect for uiautomation::types::Rect {
+    fn to_bevy_irect(&self) -> IRect {
+        IRect {
+            min: IVec2::new(self.get_left(), self.get_top()),
+            max: IVec2::new(self.get_right(), self.get_bottom()),
         }
     }
 }

@@ -5,9 +5,9 @@ use cursor_hero_screen::get_image::get_image;
 use cursor_hero_screen::get_image::ScreensToImageParam;
 use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_tools::prelude::*;
-use cursor_hero_winutils::ui_automation::find_element_at;
-use cursor_hero_winutils::ui_automation::get_taskbar;
-use cursor_hero_winutils::ui_automation::TaskbarEntry;
+use cursor_hero_ui_automation::prelude::find_element_at;
+use cursor_hero_ui_automation::prelude::get_taskbar;
+use cursor_hero_ui_automation::prelude::TaskbarEntry;
 
 pub struct TaskbarWheelToolPlugin;
 

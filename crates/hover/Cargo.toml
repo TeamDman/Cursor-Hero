@@ -18,6 +18,7 @@ cursor_hero_pointer_types = { workspace = true}
 cursor_hero_character_types = { workspace = true}
 cursor_hero_camera = { workspace = true}
 cursor_hero_bevy = { workspace = true}
+cursor_hero_ui_automation = { workspace = true}
 cursor_hero_winutils = { workspace = true}
 bevy = { workspace = true }
 serde = { workspace = true }

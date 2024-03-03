@@ -7,6 +7,8 @@ edition = "2021"
 
 
 [dependencies]
+cursor_hero_ui_automation = { workspace = true }
+cursor_hero_ui_automation_types = { workspace = true }
 cursor_hero_brick = { workspace = true }
 cursor_hero_brick_types = { workspace = true }
 cursor_hero_fullscreen_tool = { workspace = true }

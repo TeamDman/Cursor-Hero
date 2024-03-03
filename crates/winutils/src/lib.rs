@@ -2,7 +2,6 @@
 
 use bevy::math::IRect;
 
-pub mod ui_automation;
 pub mod win_colors;
 pub mod win_keyboard;
 pub mod win_mouse;

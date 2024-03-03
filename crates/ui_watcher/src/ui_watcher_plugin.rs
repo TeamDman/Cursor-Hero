@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use cursor_hero_ui_automation::prelude::gather_toplevel_elements;
 use cursor_hero_ui_watcher_types::ui_watcher_types::AppUIElement;
 use std::fs::OpenOptions;
 use std::io::Write;
@@ -63,23 +64,24 @@ fn handle_threadbound_messages(
 ) -> Result<(), Box<dyn std::error::Error>> {
     match action {
         ThreadboundMessage::GatherAppInfo => {
-            let app_elements = cursor_hero_winutils::ui_automation::gather_toplevel_elements()?;
+            println!("Gathering app info");
+            let app_elements = gather_toplevel_elements()?;
+            println!("Gathered {} elements, processing...", app_elements.len());
             let description = app_elements
                 .into_iter()
                 .map(|x| AppUIElement::from(x).to_string())
                 .collect::<Vec<String>>()
                 .join("\n");
-            reply_tx.send(GameboundMessage::AppInfo(description))?;
+            let msg = GameboundMessage::AppInfo(description);
+            println!("Sending {:?}", msg);
+            reply_tx.send(msg)?;
         }
     }
 
     Ok(())
 }
 
-fn get_persist_file(
-    current_path: &str,
-    file_name: &str,
-) -> Result<std::fs::File, std::io::Error> {
+fn get_persist_file(current_path: &str, file_name: &str) -> Result<std::fs::File, std::io::Error> {
     let mut file_path = PathBuf::new();
 
     #[cfg(debug_assertions)]
@@ -132,10 +134,32 @@ fn trigger_gather_app_info(
             }
         }
         None => {
+            debug!("Triggering gather app info");
             if let Err(e) = bridge.sender.send(ThreadboundMessage::GatherAppInfo) {
                 error!("Failed to send thread message: {:?}", e);
             }
             *cooldown = Some(Timer::from_seconds(5.0, TimerMode::Once));
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use cursor_hero_winutils::ui_automation::gather_toplevel_elements;
+
+    use super::*;
+
+    #[test]
+    fn test_gather_app_info() -> Result<(), Box<dyn std::error::Error>> {
+        println!("Gathering app info");
+        let app_elements = gather_toplevel_elements()?;
+        println!("Gathered {} elements, processing...", app_elements.len());
+        let description = app_elements
+            .into_iter()
+            .map(|x| AppUIElement::from(x).to_string())
+            .collect::<Vec<String>>()
+            .join("\n");
+        println!("{}", description);
+        Ok(())
     }
 }

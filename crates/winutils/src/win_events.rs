@@ -5,16 +5,13 @@ use crossbeam_channel::Sender;
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
 use std::sync::Mutex;
-use windows::core::BSTR;
 use windows::core::PCWSTR;
 use windows::Win32::Devices::HumanInterfaceDevice::HID_USAGE_GENERIC_KEYBOARD;
 use windows::Win32::Devices::HumanInterfaceDevice::HID_USAGE_GENERIC_MOUSE;
 use windows::Win32::Devices::HumanInterfaceDevice::HID_USAGE_PAGE_GENERIC;
 use windows::Win32::Foundation::HWND;
 use windows::Win32::Foundation::*;
-use windows::Win32::System::Ole::VarBstrFromDec;
 use windows::Win32::System::Variant::VARIANT;
-use windows::Win32::System::Variant::VT_BSTR;
 use windows::Win32::System::Variant::VT_I4;
 use windows::Win32::UI::Accessibility::*;
 use windows::Win32::UI::Input::GetRawInputData;
@@ -126,35 +123,6 @@ fn create_window_and_do_message_loop(tx: Sender<ProcMessage>) -> Result<(), wind
         DestroyWindow(hwnd)?;
     }
     Ok(())
-}
-
-fn attach_tx_pointer(hwnd: HWND, tx: Sender<ProcMessage>) {
-    let tx_box = Box::new(tx); // Move tx into a Box
-    let tx_ptr = Box::into_raw(tx_box); // Convert Box into a raw pointer
-    unsafe {
-        SetWindowLongPtrW(hwnd, GWLP_USERDATA, tx_ptr as isize);
-    }
-}
-
-fn get_tx_pointer(hwnd: HWND) -> Option<&'static Sender<ProcMessage>> {
-    let sender_ptr = unsafe { GetWindowLongPtrW(hwnd, GWLP_USERDATA) } as *mut Sender<ProcMessage>;
-    if sender_ptr.is_null() {
-        return None;
-    }
-    // We want to return a REFERENCE so that the Sender is not dropped
-    let tx = unsafe { &*sender_ptr };
-    Some(tx)
-}
-
-fn detach_tx_pointer_and_drop(hwnd: HWND) {
-    let sender_ptr = unsafe { GetWindowLongPtrW(hwnd, GWLP_USERDATA) } as *mut Sender<ProcMessage>;
-    if sender_ptr.is_null() {
-        return;
-    }
-    unsafe {
-        drop(Box::from_raw(sender_ptr));
-        SetWindowLongPtrW(hwnd, GWLP_USERDATA, 0);
-    }
 }
 
 fn register_os_event_listener() -> Result<HWINEVENTHOOK, windows::core::Error> {
@@ -444,10 +412,6 @@ unsafe extern "system" fn os_event_procedure(
     }
 }
 
-fn decimal_to_string(decimal: DECIMAL) -> Result<String, windows::core::Error> {
-    unsafe { VarBstrFromDec(&decimal, 0, 0).map(|bstr| bstr.to_string()) }
-}
-
 fn variant_to_int(variant: &VARIANT) -> Result<i32, windows::core::Error> {
     let var_type = unsafe { variant.Anonymous.Anonymous.vt };
 
@@ -463,27 +427,31 @@ fn variant_to_int(variant: &VARIANT) -> Result<i32, windows::core::Error> {
     }
 }
 
-fn variant_to_string(variant: &VARIANT) -> Result<String, windows::core::Error> {
-    let var_type = unsafe { variant.Anonymous.Anonymous.vt };
+// fn decimal_to_string(decimal: DECIMAL) -> Result<String, windows::core::Error> {
+//     unsafe { VarBstrFromDec(&decimal, 0, 0).map(|bstr| bstr.to_string()) }
+// }
 
-    match var_type {
-        VT_BSTR => {
-            // Extract BSTR and convert to String
-            let bstr = unsafe { &variant.Anonymous.Anonymous.Anonymous.bstrVal };
-            Ok(bstr.to_string())
-        }
-        VT_I4 => {
-            // Extract 32-bit integer and convert to String
-            let int_val = unsafe { variant.Anonymous.Anonymous.Anonymous.lVal };
-            Ok(int_val.to_string())
-        }
-        // Add more cases as needed for other VARTYPEs you expect to handle
-        _ => Err(windows::core::Error::new(
-            windows::Win32::Foundation::E_FAIL,
-            "Unsupported VARIANT type".into(),
-        )),
-    }
-}
+// fn variant_to_string(variant: &VARIANT) -> Result<String, windows::core::Error> {
+//     let var_type = unsafe { variant.Anonymous.Anonymous.vt };
+
+//     match var_type {
+//         VT_BSTR => {
+//             // Extract BSTR and convert to String
+//             let bstr = unsafe { &variant.Anonymous.Anonymous.Anonymous.bstrVal };
+//             Ok(bstr.to_string())
+//         }
+//         VT_I4 => {
+//             // Extract 32-bit integer and convert to String
+//             let int_val = unsafe { variant.Anonymous.Anonymous.Anonymous.lVal };
+//             Ok(int_val.to_string())
+//         }
+//         // Add more cases as needed for other VARTYPEs you expect to handle
+//         _ => Err(windows::core::Error::new(
+//             windows::Win32::Foundation::E_FAIL,
+//             "Unsupported VARIANT type".into(),
+//         )),
+//     }
+// }
 
 fn state_to_string(state: u32) -> String {
     let mut states = Vec::new();

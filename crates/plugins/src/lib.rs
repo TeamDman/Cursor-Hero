@@ -81,17 +81,19 @@ use cursor_hero_fullscreen_tool::prelude::*;
 use cursor_hero_fullscreen_tool_types::prelude::*;
 use cursor_hero_brick::prelude::*;
 use cursor_hero_brick_types::prelude::*;
+use cursor_hero_ui_automation::prelude::*;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(UiAutomationTypesPlugin);
+        app.add_plugins(UiAutomationPlugin);
         app.add_plugins(BrickTypesPlugin);
         app.add_plugins(BrickPlugin);
         app.add_plugins(FullscreenToolPlugin);
         app.add_plugins(FullscreenToolTypesPlugin);
-        // TODO: fix hanging issue
-        // app.add_plugins(UiWatcherTypesPlugin);
-        // app.add_plugins(UiWatcherPlugin);
+        app.add_plugins(UiWatcherTypesPlugin);
+        app.add_plugins(UiWatcherPlugin);
         app.add_plugins(FloatyNametagTypesPlugin);
         app.add_plugins(FloatyNametagPlugin);
         app.add_plugins(HostEventTypesPlugin);
