@@ -5,6 +5,7 @@ mod rect_expand;
 mod rect_with_properties;
 mod rect_in_rect;
 mod translate;
+mod rect_scaled;
 
 pub mod prelude {
     pub use crate::neg_y::*;
@@ -14,4 +15,5 @@ pub mod prelude {
     pub use crate::rect_with_properties::*;
     pub use crate::rect_in_rect::*;
     pub use crate::translate::*;
+    pub use crate::rect_scaled::*;
 }

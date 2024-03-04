@@ -2,6 +2,35 @@ use bevy::math::IRect;
 use bevy::math::IVec2;
 use bevy::math::Rect;
 use bevy::math::Vec2;
+use cursor_hero_math::prelude::Corner;
+
+pub trait CornerOfRect {
+    fn of(&self, rect: &Rect) -> Vec2;
+}
+impl CornerOfRect for Corner {
+    fn of(&self, rect: &Rect) -> Vec2 {
+        match self {
+            Corner::TopLeft => rect.top_left(),
+            Corner::TopRight => rect.top_right(),
+            Corner::BottomLeft => rect.bottom_left(),
+            Corner::BottomRight => rect.bottom_right(),
+        }
+    }
+}
+
+pub trait CornerOfIRect {
+    fn of(&self, rect: &IRect) -> IVec2;
+}
+impl CornerOfIRect for Corner {
+    fn of(&self, rect: &IRect) -> IVec2 {
+        match self {
+            Corner::TopLeft => rect.top_left(),
+            Corner::TopRight => rect.top_right(),
+            Corner::BottomLeft => rect.bottom_left(),
+            Corner::BottomRight => rect.bottom_right(),
+        }
+    }
+}
 
 pub trait TopRight {
     fn top_right(&self) -> Vec2;

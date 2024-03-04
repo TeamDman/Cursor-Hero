@@ -2643,6 +2643,7 @@ dependencies = [
  "cursor_hero_tools",
  "cursor_hero_window_position_types",
  "cursor_hero_winutils",
+ "image",
  "raw-window-handle",
 ]
 
