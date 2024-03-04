@@ -66,19 +66,20 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Default { toolbelt_id } = event {
-            for _ in 0..1 {
-                // disabled for now
-                ToolSpawnConfig::<PlaceholderTool, PlaceholderToolAction>::new(
-                    PlaceholderTool,
-                    *toolbelt_id,
-                    event,
-                )
-                .guess_name(file!())
-                .guess_image(file!(), &asset_server, "png")
-                .with_description("Balances the wheel")
-                .spawn(&mut commands);
-            }
+        let ToolbeltLoadout::Default = event.loadout else {
+            continue;
+        };
+        for _ in 0..1 {
+            // disabled for now
+            ToolSpawnConfig::<PlaceholderTool, PlaceholderToolAction>::new(
+                PlaceholderTool,
+                event.id,
+                event,
+            )
+            .guess_name(file!())
+            .guess_image(file!(), &asset_server, "png")
+            .with_description("Balances the wheel")
+            .spawn(&mut commands);
         }
     }
 }

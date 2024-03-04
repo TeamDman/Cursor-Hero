@@ -21,18 +21,16 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Default { toolbelt_id } = event {
-            ToolSpawnConfig::<KeyboardWheelTool, NoInputs>::new(
-                KeyboardWheelTool,
-                *toolbelt_id,
-                event,
-            )
-            .guess_name(file!())
-            .guess_image(file!(), &asset_server, "png")
-            .with_description("Swaps to keyboard tools")
-            .with_starting_state(StartingState::Inactive)
-            .spawn(&mut commands);
-        }
+        let ToolbeltLoadout::Default = event.loadout else {
+            continue;
+        };
+            ToolSpawnConfig::<KeyboardWheelTool, NoInputs>::new(KeyboardWheelTool, event.id, event)
+                .guess_name(file!())
+                .guess_image(file!(), &asset_server, "png")
+                .with_description("Swaps to keyboard tools")
+                .with_starting_state(StartingState::Inactive)
+                .spawn(&mut commands);
+        
     }
 }
 
@@ -45,6 +43,9 @@ fn tick(
         info!("Switching toolbelt {:?} to keyboard tools", toolbelt_id);
         let toolbelt_id = toolbelt_id.get();
         commands.entity(toolbelt_id).despawn_descendants();
-        toolbelt_events.send(PopulateToolbeltEvent::Keyboard { toolbelt_id });
+        toolbelt_events.send(PopulateToolbeltEvent {
+            id: toolbelt_id,
+            loadout: ToolbeltLoadout::Keyboard,
+        });
     }
 }

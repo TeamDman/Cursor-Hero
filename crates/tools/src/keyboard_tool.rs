@@ -51,17 +51,18 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Keyboard { toolbelt_id } = event {
-            ToolSpawnConfig::<KeyboardTool, KeyboardToolAction>::new(
-                KeyboardTool::default(),
-                *toolbelt_id,
-                event,
-            )
-            .guess_name(file!())
-            .guess_image(file!(), &asset_server, "png")
-            .with_description("Keyboard inputs")
-            .spawn(&mut commands);
+        if event.loadout != ToolbeltLoadout::Keyboard {
+            continue;
         }
+        ToolSpawnConfig::<KeyboardTool, KeyboardToolAction>::new(
+            KeyboardTool::default(),
+            event.id,
+            event,
+        )
+        .guess_name(file!())
+        .guess_image(file!(), &asset_server, "png")
+        .with_description("Keyboard inputs")
+        .spawn(&mut commands);
     }
 }
 

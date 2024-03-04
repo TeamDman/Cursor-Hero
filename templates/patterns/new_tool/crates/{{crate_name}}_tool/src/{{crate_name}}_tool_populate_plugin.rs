@@ -21,7 +21,7 @@ fn handle_toolbelt_events(
             PopulateToolbeltEvent::Default { toolbelt_id } => {
                 ToolSpawnConfig::<_, {{crate_name_pascal}}ToolAction>::new(
                     {{crate_name_pascal}}Tool::default(),
-                    *toolbelt_id,
+                    event.id,
                     event,
                 )
                 .guess_name(file!())

@@ -36,41 +36,44 @@ fn toolbelt_events(
     access: ScreensToImageParam,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Default { toolbelt_id } = event {
-            ToolSpawnConfig::<TaskbarWheelTool, NoInputs>::new(
-                TaskbarWheelTool,
-                *toolbelt_id,
-                event,
-            )
-            .guess_name(file!())
-            .guess_image(file!(), &asset_server, "png")
-            .with_description("Swaps to taskbar tools")
-            .with_starting_state(StartingState::Inactive)
-            .spawn(&mut commands);
-        }
-        if let PopulateToolbeltEvent::Taskbar { toolbelt_id } = event {
-            let Ok(taskbar) = get_taskbar() else {
-                continue;
-            };
-            for entry in taskbar.entries {
-                let Ok(image) = get_image(entry.bounds.as_rect(), &access) else {
-                    warn!("Failed to get image for {:?}", &entry);
-                    continue;
-                };
-                ToolSpawnConfig::<TaskbarEntryTool, NoInputs>::new(
-                    TaskbarEntryTool {
-                        entry: entry.clone(),
-                    },
-                    *toolbelt_id,
+        match event.loadout {
+            ToolbeltLoadout::Default => {
+                ToolSpawnConfig::<TaskbarWheelTool, NoInputs>::new(
+                    TaskbarWheelTool,
+                    event.id,
                     event,
                 )
-                .with_name(entry.name)
+                .guess_name(file!())
+                .guess_image(file!(), &asset_server, "png")
                 .with_description("Swaps to taskbar tools")
-                .with_image(asset_server.add(image))
-                .with_size(entry.bounds.size().as_vec2())
                 .with_starting_state(StartingState::Inactive)
                 .spawn(&mut commands);
             }
+            ToolbeltLoadout::Taskbar => {
+                let Ok(taskbar) = get_taskbar() else {
+                    continue;
+                };
+                for entry in taskbar.entries {
+                    let Ok(image) = get_image(entry.bounds.as_rect(), &access) else {
+                        warn!("Failed to get image for {:?}", &entry);
+                        continue;
+                    };
+                    ToolSpawnConfig::<TaskbarEntryTool, NoInputs>::new(
+                        TaskbarEntryTool {
+                            entry: entry.clone(),
+                        },
+                        event.id,
+                        event,
+                    )
+                    .with_name(entry.name)
+                    .with_description("Swaps to taskbar tools")
+                    .with_image(asset_server.add(image))
+                    .with_size(entry.bounds.size().as_vec2())
+                    .with_starting_state(StartingState::Inactive)
+                    .spawn(&mut commands);
+                }
+            }
+            _ => {}
         }
     }
 }
@@ -83,7 +86,10 @@ fn tick_wheel_switcher(
     for toolbelt_id in tool_query.iter() {
         let toolbelt_id = toolbelt_id.get();
         commands.entity(toolbelt_id).despawn_descendants();
-        toolbelt_events.send(PopulateToolbeltEvent::Taskbar { toolbelt_id });
+        toolbelt_events.send(PopulateToolbeltEvent {
+            id: toolbelt_id,
+            loadout: ToolbeltLoadout::Taskbar,
+        });
     }
 }
 
@@ -100,7 +106,10 @@ fn tick_taskbar_switcher(
             info!("Switching toolbelt {:?} to default tools", toolbelt_id);
             let character_id = character_id.get();
             commands.entity(toolbelt_id).despawn_descendants();
-            toolbelt_events.send(PopulateToolbeltEvent::Default { toolbelt_id });
+            toolbelt_events.send(PopulateToolbeltEvent {
+                id: toolbelt_id,
+                loadout: ToolbeltLoadout::Default,
+            });
             if let Ok(mut position) = character_query.get_mut(character_id) {
                 let center = tool.entry.bounds.center();
                 position.0 = center.as_vec2().neg_y();

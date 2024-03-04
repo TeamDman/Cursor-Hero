@@ -28,8 +28,8 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Inspector { toolbelt_id } = event {
-            ToolSpawnConfig::<HelloTool, NoInputs>::new(HelloTool, *toolbelt_id, event)
+        if event.loadout == ToolbeltLoadout::Inspector {
+            ToolSpawnConfig::<HelloTool, NoInputs>::new(HelloTool, event.id, event)
                 .guess_name(file!())
                 .guess_image(file!(), &asset_server, "png")
                 .with_description("Prints hello.")

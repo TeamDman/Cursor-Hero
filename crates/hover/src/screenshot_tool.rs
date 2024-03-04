@@ -4,6 +4,7 @@ use bevy::reflect::TypeRegistry;
 use bevy::window::PrimaryWindow;
 use bevy_egui::egui;
 use bevy_egui::egui::Pos2;
+use bevy_egui::systems::update_window_contexts_system;
 use bevy_egui::EguiContext;
 use bevy_egui::EguiContexts;
 use bevy_inspector_egui::reflect_inspector::Context;
@@ -72,10 +73,10 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Inspector { toolbelt_id } = event {
+        if event.loadout == ToolbeltLoadout::Inspector {
             ToolSpawnConfig::<ScreenshotTool, ScreenshotToolAction>::new(
                 ScreenshotTool,
-                *toolbelt_id,
+                event.id,
                 event,
             )
             .guess_name(file!())
@@ -451,16 +452,21 @@ fn ui(
     };
     let (camera_transform, camera) = camera;
 
+    let ctx = contexts.ctx_mut();
+    // let scale = (camera_transform.compute_transform().scale.x * 1.0).round();
+    // debug!("Scale: {}", scale);
+    // ctx.set_zoom_factor(scale);
 
     for brick in brick_query.iter_mut() {
         let (brick_id, mut brick, name, brick_global_transform) = brick;
         let pos = camera
             .world_to_viewport(camera_transform, brick_global_transform.translation())
             .unwrap_or_default();
+
         egui::Window::new(name.to_string())
             .id(egui::Id::new(brick_id))
             .fixed_pos(Pos2::new(pos.x, pos.y))
-            .show(contexts.ctx_mut(), |ui| {
+            .show(ctx, |ui| {
                 egui::ScrollArea::both().show(ui, |ui| {
                     ui_for_element_info(ui, &mut brick.info, &type_registry);
                 });

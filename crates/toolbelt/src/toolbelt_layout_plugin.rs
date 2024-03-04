@@ -1,13 +1,29 @@
-use cursor_hero_toolbelt_types::types::*;
+use bevy::transform::TransformSystem;
+use cursor_hero_toolbelt_types::toolbelt_types::*;
 
 use bevy::prelude::*;
 use bevy_xpbd_2d::math::PI;
 use bevy_xpbd_2d::prelude::*;
 use itertools::Itertools;
 
+use bevy::prelude::*;
+
+pub struct ToolbeltLayoutPlugin;
+
+impl Plugin for ToolbeltLayoutPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(
+            PostUpdate,
+            circle_distribution
+                .after(PhysicsSet::Sync)
+                .after(TransformSystem::TransformPropagate),
+        );
+    }
+}
+
 #[allow(clippy::type_complexity)]
-pub fn tool_distribution(
-    toolbelt_query: Query<(Ref<Wheel>, &Children, &Parent), (With<Toolbelt>, Without<Tool>)>,
+pub fn circle_distribution(
+    toolbelt_query: Query<(Ref<Toolbelt>, &Children, &Parent), Without<Tool>>,
     character_query: Query<&GlobalTransform>,
     mut tool_query: Query<
         (&mut Transform, &mut Position, &mut Rotation, &Children),
@@ -18,10 +34,13 @@ pub fn tool_distribution(
         (With<ToolHelpTrigger>, Without<Tool>),
     >,
 ) {
-    for (wheel, toolbelt_kids, toolbelt_parent) in toolbelt_query.iter() {
-        if !wheel.is_changed() {
+    for (toolbelt, toolbelt_kids, toolbelt_parent) in toolbelt_query.iter() {
+        if !toolbelt.is_changed() {
             continue;
         }
+        let ToolbeltLayout::Circle { wheel } = toolbelt.layout else {
+            continue;
+        };
         if let Ok(character_position) = character_query.get(**toolbelt_parent) {
             let tool_ids = toolbelt_kids
                 .iter()

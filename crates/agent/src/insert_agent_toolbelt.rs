@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use cursor_hero_agent_types::agent_types::Agent;
 use cursor_hero_character_types::prelude::*;
-use cursor_hero_toolbelt_types::types::*;
+use cursor_hero_toolbelt_types::toolbelt_types::*;
 
 pub struct InsertAgentToolbeltPlugin;
 
@@ -20,8 +20,9 @@ pub fn insert_agent_toolbelt(
         let character_id = character;
         commands.entity(character_id).with_children(|c_commands| {
             let toolbelt = c_commands.spawn(ToolbeltBundle::default());
-            writer.send(PopulateToolbeltEvent::Agent {
-                toolbelt_id: toolbelt.id(),
+            writer.send(PopulateToolbeltEvent {
+                id: toolbelt.id(),
+                loadout: ToolbeltLoadout::Agent,
             });
             info!(
                 "Sent populate agent toolbelt event for agent {:?}",

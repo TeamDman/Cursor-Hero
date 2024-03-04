@@ -21,18 +21,15 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Default { toolbelt_id } = event {
-            ToolSpawnConfig::<InspectWheelTool, NoInputs>::new(
-                InspectWheelTool,
-                *toolbelt_id,
-                event,
-            )
+        let ToolbeltLoadout::Default = event.loadout else {
+            continue;
+        };
+        ToolSpawnConfig::<InspectWheelTool, NoInputs>::new(InspectWheelTool, event.id, event)
             .guess_name(file!())
             .guess_image(file!(), &asset_server, "png")
             .with_description("Swaps to inspection tools")
             .with_starting_state(StartingState::Inactive)
             .spawn(&mut commands);
-        }
     }
 }
 
@@ -44,6 +41,9 @@ fn tick(
     for toolbelt_id in tool_query.iter() {
         let toolbelt_id = toolbelt_id.get();
         commands.entity(toolbelt_id).despawn_descendants();
-        toolbelt_events.send(PopulateToolbeltEvent::Inspector { toolbelt_id });
+        toolbelt_events.send(PopulateToolbeltEvent {
+            id: toolbelt_id,
+            loadout: ToolbeltLoadout::Inspector,
+        });
     }
 }

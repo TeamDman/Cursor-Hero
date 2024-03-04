@@ -4,7 +4,7 @@ use cursor_hero_math::Lerp;
 use cursor_hero_pointer_types::prelude::*;
 
 use cursor_hero_sprint_tool_types::sprint_tool_types_plugin::SprintEvent;
-use cursor_hero_toolbelt_types::types::Wheel;
+use cursor_hero_toolbelt_types::toolbelt_types::Wheel;
 
 pub struct PointerReachPlugin;
 

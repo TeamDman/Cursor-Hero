@@ -1,4 +1,4 @@
-use cursor_hero_toolbelt_types::types::*;
+use cursor_hero_toolbelt_types::toolbelt_types::*;
 
 use bevy::audio::Volume;
 use bevy::audio::VolumeLevel;
@@ -10,14 +10,13 @@ pub struct WheelAudio;
 pub fn wheel_audio(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut toolbelt_events: EventReader<ToolbeltStateEvent>,
+    mut toolbelt_events: EventReader<ToolbeltOpeningEvent>,
     toolbelt_query: Query<&GlobalTransform>,
 ) {
     for event in toolbelt_events.read() {
         match event {
-            ToolbeltStateEvent::Opened {
+            ToolbeltOpeningEvent::Opened {
                 toolbelt_id,
-                character_id: _,
             } => {
                 let Ok(toolbelt_transform) = toolbelt_query.get(*toolbelt_id) else {
                     continue;
@@ -37,9 +36,8 @@ pub fn wheel_audio(
                     Name::new("opening sound"),
                 ));
             }
-            ToolbeltStateEvent::Closed {
+            ToolbeltOpeningEvent::Closed {
                 toolbelt_id,
-                character_id: _,
             } => {
                 let Ok(toolbelt_transform) = toolbelt_query.get(*toolbelt_id) else {
                     continue;

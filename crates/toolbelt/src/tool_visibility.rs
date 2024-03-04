@@ -1,4 +1,4 @@
-use cursor_hero_toolbelt_types::types::*;
+use cursor_hero_toolbelt_types::toolbelt_types::*;
 
 use bevy::prelude::*;
 use leafwing_input_manager::action_state::ActionState;
@@ -13,14 +13,14 @@ pub fn tool_visibility(
 ) {
     for (toolbelt_actions, wheel, toolbelt_kids) in toolbelts.iter_mut() {
         if toolbelt_actions.just_pressed(ToolbeltAction::Show) {
-            info!("Show toolbelt");
+            debug!("Updating toolbelt visibility => visible");
             for child_id in toolbelt_kids.iter() {
                 if let Ok((_, _, mut tool_visibility, _)) = tool_query.get_mut(*child_id) {
                     *tool_visibility = Visibility::Visible;
                 }
             }
         } else if toolbelt_actions.just_released(ToolbeltAction::Show) {
-            info!("Hide toolbelt");
+            debug!("Updating toolbelt visibility => hidden");
             for child_id in toolbelt_kids.iter() {
                 if let Ok((_, _, mut tool_visibility, _)) = tool_query.get_mut(*child_id) {
                     *tool_visibility = Visibility::Hidden;

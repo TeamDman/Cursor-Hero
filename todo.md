@@ -12,6 +12,14 @@
 
 ## Grab Bag
 
+- window position tool
+  - mini representation of your three monitors
+  - each monitor has hitboxes for 
+    - fullscreen
+    - corners
+    - center, medium windowed
+  - minimize, close, restart options
+
 - emoji text in world and in egui test
 - add world representation of all our cursor_hero crates where clicking them will toggle their log level to warn
   - button to set all scope to warn and all open tabs to trace

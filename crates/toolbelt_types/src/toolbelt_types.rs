@@ -35,7 +35,20 @@ impl ToolbeltAction {
 }
 
 #[derive(Component, Reflect, Clone, Copy, Debug)]
-pub struct Toolbelt;
+pub struct Toolbelt {
+    pub open: bool,
+    pub loadout: ToolbeltLoadout,
+    pub layout: ToolbeltLayout,
+}
+impl Default for Toolbelt {
+    fn default() -> Self {
+        Self {
+            open: false,
+            loadout: ToolbeltLoadout::Default,
+            layout: ToolbeltLoadout::Default.layout(),
+        }
+    }
+}
 
 #[derive(Bundle)]
 pub struct ToolbeltBundle {
@@ -58,30 +71,58 @@ impl Default for ToolbeltBundle {
                 input_map: ToolbeltAction::default_input_map(),
                 ..Default::default()
             },
-            toolbelt: Toolbelt,
+            toolbelt: Toolbelt::default(),
+        }
+    }
+}
+
+#[derive(Reflect, Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum ToolbeltLoadout {
+    #[default]
+    Default,
+    Inspector,
+    Taskbar,
+    Keyboard,
+    Agent,
+    Chat,
+}
+impl ToolbeltLoadout {
+    pub fn layout(&self) -> ToolbeltLayout {
+        match self {
+            Self::Taskbar => ToolbeltLayout::Taskbar,
+            _ => ToolbeltLayout::default(),
+        }
+    }
+}
+
+#[derive(Reflect, Clone, Copy, Debug)]
+pub enum ToolbeltLayout {
+    Circle {
+        wheel: Wheel
+    },
+    Taskbar,
+}
+impl Default for ToolbeltLayout {
+    fn default() -> Self {
+        Self::Circle {
+            wheel: Wheel::default()
         }
     }
 }
 
 #[derive(Event, Debug, Reflect, Clone, Copy)]
-pub enum PopulateToolbeltEvent {
-    Default { toolbelt_id: Entity },
-    Inspector { toolbelt_id: Entity },
-    Taskbar { toolbelt_id: Entity },
-    Keyboard { toolbelt_id: Entity },
-    Agent { toolbelt_id: Entity },
-    Chat { toolbelt_id: Entity },
+pub struct PopulateToolbeltEvent {
+    pub id: Entity,
+    pub loadout: ToolbeltLoadout,
 }
 
 #[derive(Event, Debug, Reflect)]
-pub enum ToolbeltStateEvent {
+pub enum ToolbeltOpeningEvent {
     Opened {
         toolbelt_id: Entity,
-        character_id: Entity,
     },
     Closed {
         toolbelt_id: Entity,
-        character_id: Entity,
     },
 }
 

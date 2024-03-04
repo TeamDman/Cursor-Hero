@@ -32,8 +32,8 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Inspector { toolbelt_id } = event {
-            ToolSpawnConfig::<HoverTool, NoInputs>::new(HoverTool, *toolbelt_id, event)
+        if event.loadout == ToolbeltLoadout::Inspector {
+            ToolSpawnConfig::<HoverTool, NoInputs>::new(HoverTool, event.id, event)
                 .guess_name(file!())
                 .guess_image(file!(), &asset_server, "png")
                 .with_description("UI hover visuals")

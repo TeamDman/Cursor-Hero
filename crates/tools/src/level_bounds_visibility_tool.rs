@@ -22,18 +22,19 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Inspector { toolbelt_id } = event {
-            ToolSpawnConfig::<LevelBoundsVisibilityTool, NoInputs>::new(
-                LevelBoundsVisibilityTool,
-                *toolbelt_id,
-                event,
-            )
-            .guess_name(file!())
-            .guess_image(file!(), &asset_server, "png")
-            .with_description("Shows the play area.")
-            .with_starting_state(StartingState::Inactive)
-            .spawn(&mut commands);
-        }
+        let ToolbeltLoadout::Inspector = event.loadout else {
+            continue;
+        };
+        ToolSpawnConfig::<LevelBoundsVisibilityTool, NoInputs>::new(
+            LevelBoundsVisibilityTool,
+            event.id,
+            event,
+        )
+        .guess_name(file!())
+        .guess_image(file!(), &asset_server, "png")
+        .with_description("Shows the play area.")
+        .with_starting_state(StartingState::Inactive)
+        .spawn(&mut commands);
     }
 }
 

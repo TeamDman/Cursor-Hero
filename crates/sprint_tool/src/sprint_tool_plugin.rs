@@ -55,16 +55,16 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Default { toolbelt_id }
-        | PopulateToolbeltEvent::Inspector { toolbelt_id }
-        | PopulateToolbeltEvent::Keyboard { toolbelt_id } = event
-        {
-            ToolSpawnConfig::<SprintTool, SprintToolAction>::new(SprintTool, *toolbelt_id, event)
-                .guess_name(file!())
-                .guess_image(file!(), &asset_server, "png")
-                .with_description("Go faster, reach further")
-                .spawn(&mut commands);
-        }
+        let (ToolbeltLoadout::Default | ToolbeltLoadout::Inspector | ToolbeltLoadout::Keyboard) =
+            event.loadout
+        else {
+            continue;
+        };
+        ToolSpawnConfig::<SprintTool, SprintToolAction>::new(SprintTool, event.id, event)
+            .guess_name(file!())
+            .guess_image(file!(), &asset_server, "png")
+            .with_description("Go faster, reach further")
+            .spawn(&mut commands);
     }
 }
 

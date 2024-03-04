@@ -17,14 +17,14 @@ fn handle_toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        match event {
-            PopulateToolbeltEvent::Default { toolbelt_id }
-            | PopulateToolbeltEvent::Inspector { toolbelt_id }
-            | PopulateToolbeltEvent::Taskbar { toolbelt_id }
-            | PopulateToolbeltEvent::Keyboard { toolbelt_id } => {
+        match event.loadout {
+            ToolbeltLoadout::Default
+            | ToolbeltLoadout::Inspector
+            | ToolbeltLoadout::Taskbar
+            | ToolbeltLoadout::Keyboard => {
                 ToolSpawnConfig::<_, MovementToolAction>::new(
                     MovementTool::default(),
-                    *toolbelt_id,
+                    event.id,
                     event,
                 )
                 .guess_name(file!())
@@ -32,10 +32,10 @@ fn handle_toolbelt_events(
                 .with_description("Go faster, reach further")
                 .spawn(&mut commands);
             }
-            PopulateToolbeltEvent::Agent { toolbelt_id } => {
+            ToolbeltLoadout::Agent => {
                 ToolSpawnConfig::<_, MovementToolAction>::new(
                     MovementTool::default(),
-                    *toolbelt_id,
+                    event.id,
                     event,
                 )
                 .with_input_map(None)

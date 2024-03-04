@@ -23,18 +23,15 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Chat { toolbelt_id }
-        | PopulateToolbeltEvent::Default { toolbelt_id } = event
+        let (ToolbeltLoadout::Chat | ToolbeltLoadout::Default) = event.loadout else {
+            continue;
+        };
         {
-            ToolSpawnConfig::<ChatTool, ChatToolAction>::new(
-                ChatTool::default(),
-                *toolbelt_id,
-                event,
-            )
-            .guess_name(file!())
-            .guess_image(file!(), &asset_server, "webp")
-            .with_description("Send chat messages into the world")
-            .spawn(&mut commands);
+            ToolSpawnConfig::<ChatTool, ChatToolAction>::new(ChatTool::default(), event.id, event)
+                .guess_name(file!())
+                .guess_image(file!(), &asset_server, "webp")
+                .with_description("Send chat messages into the world")
+                .spawn(&mut commands);
         }
     }
 }

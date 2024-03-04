@@ -1,4 +1,4 @@
-use cursor_hero_toolbelt_types::types::*;
+use cursor_hero_toolbelt_types::toolbelt_types::*;
 
 use bevy::prelude::*;
 use bevy_xpbd_2d::components::Collider;

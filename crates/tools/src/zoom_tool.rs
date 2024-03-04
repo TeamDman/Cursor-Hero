@@ -53,15 +53,12 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Default { toolbelt_id }
-        | PopulateToolbeltEvent::Inspector { toolbelt_id } = event
-        {
-            ToolSpawnConfig::<_, ZoomToolAction>::new(ZoomTool::default(), *toolbelt_id, event)
-                .guess_name(file!())
-                .guess_image(file!(), &asset_server, "png")
-                .with_description("Send scroll events")
-                .spawn(&mut commands);
-        }
+        let (ToolbeltLoadout::Default | ToolbeltLoadout::Inspector) = event.loadout else { continue };
+        ToolSpawnConfig::<_, ZoomToolAction>::new(ZoomTool::default(), event.id, event)
+            .guess_name(file!())
+            .guess_image(file!(), &asset_server, "png")
+            .with_description("Send scroll events")
+            .spawn(&mut commands);
     }
 }
 

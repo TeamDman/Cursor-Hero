@@ -42,10 +42,8 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Default { toolbelt_id }
-        | PopulateToolbeltEvent::Keyboard { toolbelt_id } = event
-        {
-            ToolSpawnConfig::<ClickTool, ClickToolAction>::new(ClickTool, *toolbelt_id, event)
+        if let ToolbeltLoadout::Default | ToolbeltLoadout::Keyboard = event.loadout {
+            ToolSpawnConfig::<ClickTool, ClickToolAction>::new(ClickTool, event.id, event)
                 .guess_name(file!())
                 .guess_image(file!(), &asset_server, "png")
                 .with_description("Send mouse clicks")
@@ -134,12 +132,12 @@ impl ClickToolAction {
 
 impl ToolAction for ClickToolAction {
     fn default_input_map(event: &PopulateToolbeltEvent) -> Option<InputMap<ClickToolAction>> {
-        match event {
-            PopulateToolbeltEvent::Default { .. } => Some(Self::with_defaults(
+        match event.loadout {
+            ToolbeltLoadout::Default => Some(Self::with_defaults(
                 Self::default_wheel_gamepad_binding,
                 Self::default_wheel_keyboard_binding,
             )),
-            PopulateToolbeltEvent::Keyboard { .. } => Some(Self::with_defaults(
+            ToolbeltLoadout::Keyboard => Some(Self::with_defaults(
                 Self::keyboard_wheel_gamepad_binding,
                 Self::keyboard_wheel_keyboard_binding,
             )),

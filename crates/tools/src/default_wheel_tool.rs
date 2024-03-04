@@ -21,22 +21,19 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Inspector { toolbelt_id }
-        | PopulateToolbeltEvent::Taskbar { toolbelt_id }
-        | PopulateToolbeltEvent::Chat { toolbelt_id }
-        | PopulateToolbeltEvent::Keyboard { toolbelt_id } = event
-        {
-            ToolSpawnConfig::<DefaultWheelTool, NoInputs>::new(
-                DefaultWheelTool,
-                *toolbelt_id,
-                event,
-            )
+        let (ToolbeltLoadout::Inspector
+        | ToolbeltLoadout::Taskbar
+        | ToolbeltLoadout::Chat
+        | ToolbeltLoadout::Keyboard) = event.loadout
+        else {
+            continue;
+        };
+        ToolSpawnConfig::<DefaultWheelTool, NoInputs>::new(DefaultWheelTool, event.id, event)
             .guess_name(file!())
             .guess_image(file!(), &asset_server, "png")
             .with_description("Swaps to default tools")
             .with_starting_state(StartingState::Inactive)
             .spawn(&mut commands);
-        }
     }
 }
 
@@ -49,6 +46,9 @@ fn tick(
         info!("Switching toolbelt {:?} to default tools", toolbelt_id);
         let toolbelt_id = toolbelt_id.get();
         commands.entity(toolbelt_id).despawn_descendants();
-        toolbelt_events.send(PopulateToolbeltEvent::Default { toolbelt_id });
+        toolbelt_events.send(PopulateToolbeltEvent {
+            id: toolbelt_id,
+            loadout: ToolbeltLoadout::Default,
+        });
     }
 }

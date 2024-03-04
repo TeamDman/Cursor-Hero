@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use cursor_hero_toolbelt_types::types::ToolHelp;
+use cursor_hero_toolbelt_types::toolbelt_types::ToolHelp;
 
 pub fn tool_help_cleanup(
     mut commands: Commands,

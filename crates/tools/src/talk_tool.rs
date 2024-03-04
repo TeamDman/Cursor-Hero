@@ -36,10 +36,12 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Keyboard { toolbelt_id }
-        | PopulateToolbeltEvent::Default { toolbelt_id } = event
+        let (ToolbeltLoadout::Keyboard | ToolbeltLoadout::Default) = event.loadout
+        else {
+            continue;
+        };
         {
-            ToolSpawnConfig::<TalkTool, TalkToolAction>::new(TalkTool, *toolbelt_id, event)
+            ToolSpawnConfig::<TalkTool, TalkToolAction>::new(TalkTool, event.id, event)
                 .guess_name(file!())
                 .guess_image(file!(), &asset_server, "png")
                 .with_description("Presses F23")
@@ -100,12 +102,12 @@ impl TalkToolAction {
 }
 impl ToolAction for TalkToolAction {
     fn default_input_map(event: &PopulateToolbeltEvent) -> Option<InputMap<TalkToolAction>> {
-        match event {
-            PopulateToolbeltEvent::Default { .. } => Some(Self::with_defaults(
+        match event.loadout {
+            ToolbeltLoadout::Default => Some(Self::with_defaults(
                 Self::default_wheel_gamepad_binding,
                 Self::default_wheel_mkb_binding,
             )),
-            PopulateToolbeltEvent::Keyboard { .. } => Some(Self::with_defaults(
+            ToolbeltLoadout::Keyboard => Some(Self::with_defaults(
                 Self::talk_wheel_gamepad_binding,
                 Self::talk_wheel_mkb_binding,
             )),

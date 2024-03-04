@@ -23,10 +23,10 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        if let PopulateToolbeltEvent::Agent { toolbelt_id } = event {
+        if event.loadout == ToolbeltLoadout::Agent {
             ToolSpawnConfig::<ObservationTool, NoInputs>::new(
                 ObservationTool::default(),
-                *toolbelt_id,
+                event.id,
                 event,
             )
             .guess_name(file!())
