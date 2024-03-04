@@ -5,6 +5,7 @@ use cursor_hero_pointer_types::pointer_click_types::ClickEvent;
 use cursor_hero_pointer_types::pointer_click_types::Way;
 use cursor_hero_toolbelt_types::toolbelt_types::ToolHelpTrigger;
 
+/// Doesn't work with loadouts without the click tool lol
 pub fn help_click_listener(
     mut click_events: EventReader<ClickEvent>,
     help_query: Query<&HostPath, With<ToolHelpTrigger>>,
