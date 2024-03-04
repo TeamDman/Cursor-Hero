@@ -19,6 +19,7 @@ use cursor_hero_tools::prelude::ToolSpawnConfig;
 use cursor_hero_tools::tool_spawning::StartingState;
 use cursor_hero_window_position_types::prelude::HostWindowPosition;
 use cursor_hero_window_position_types::prelude::WindowPositionTool;
+use cursor_hero_winutils::win_mouse::set_cursor_position;
 use cursor_hero_winutils::win_screen_capture::get_all_monitors;
 use cursor_hero_winutils::win_screen_capture::get_monitor_infos;
 use cursor_hero_winutils::win_screen_capture::Monitor;
@@ -217,6 +218,10 @@ fn do_position(
                 window.position = WindowPosition::At(dest_bounds.top_left());
                 window.resolution =
                     WindowResolution::new(dest_bounds.width() as f32, dest_bounds.height() as f32);
+                    
+                if let Err(e) = set_cursor_position(dest_bounds.center()) {
+                    warn!("Failed to set cursor position: {}", e);
+                }
                 commands.entity(tool_id).remove::<ActiveTool>();
             }
             HostWindowPosition::Fullscreen { monitor } => {
@@ -231,6 +236,9 @@ fn do_position(
                     monitor.work_area.height() as f32,
                 );
                 window.mode = WindowMode::BorderlessFullscreen;
+                if let Err(e) = set_cursor_position(monitor.work_area.center()) {
+                    warn!("Failed to set cursor position: {}", e);
+                }
                 commands.entity(tool_id).remove::<ActiveTool>();
             }
         }
