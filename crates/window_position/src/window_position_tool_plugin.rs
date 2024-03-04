@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy::window::RawHandleWrapper;
+use bevy::window::WindowMode;
 use bevy::window::WindowResolution;
 use cursor_hero_bevy::prelude::BottomRightI;
 use cursor_hero_bevy::prelude::CornerOfIRect;
@@ -20,6 +21,7 @@ use cursor_hero_window_position_types::prelude::HostWindowPosition;
 use cursor_hero_window_position_types::prelude::WindowPositionTool;
 use cursor_hero_winutils::win_screen_capture::get_all_monitors;
 use cursor_hero_winutils::win_screen_capture::get_monitor_infos;
+use cursor_hero_winutils::win_screen_capture::Monitor;
 use image::ImageBuffer;
 use image::Rgba;
 pub struct WindowPositionToolPlugin;
@@ -73,49 +75,11 @@ fn populate_toolbelts(
             ));
         }
 
-        let scale = icon_size.as_vec2() / world.size().as_vec2();
-
         for monitor in monitors.iter() {
             for corner in Corner::variants() {
                 let name = format!("{:?} Monitor {}", corner, monitor.info.name);
 
-                // Create a new ImgBuf with width: imgx and height: imgy
-                let mut imgbuf = ImageBuffer::from_pixel(
-                    icon_size.x,
-                    icon_size.y,
-                    Rgba([173u8, 216u8, 230u8, 255u8]),
-                ); // Light blue background
-
-                // we want to convert the monitor from world space to icon space
-                // this means that the left monitor will go from a negative x to a positive x in icon space
-                let monitor_icon_region = monitor.info.rect.translate(&-world.min).scale(scale);
-                debug!(
-                    "Monitor icon region: {:?}, scale: {:?}",
-                    monitor_icon_region, scale
-                );
-
-                let dest_icon_region = IRect::from_corners(
-                    monitor_icon_region.center(),
-                    corner.of(&monitor_icon_region),
-                );
-                // Iterate over the coordinates and pixels of the image
-                for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
-                    // Check if the current pixel is within the bounds of the square
-                    // if x >= square_start
-                    //     && x < (square_start + square_size)
-                    //     && y >= square_start
-                    //     && y < (square_start + square_size)
-                    if monitor_icon_region.contains(IVec2::new(x as i32, y as i32)) {
-                        // Color the pixel red
-                        *pixel = Rgba([255u8, 0u8, 0u8, 255u8]);
-                    }
-                    if dest_icon_region.contains(IVec2::new(x as i32, y as i32)) {
-                        *pixel = Rgba([0u8, 255u8, 0u8, 255u8]);
-                    }
-                }
-
-                // let dynamic_image = DynamicImage::
-                let image = Image::from_dynamic(imgbuf.into(), true);
+                let image = image_for_monitor_corner(icon_size, world, monitor, &corner);
                 let texture = textures.add(image);
 
                 ToolSpawnConfig::<WindowPositionTool, NoInputs>::new(
@@ -146,13 +110,64 @@ fn populate_toolbelts(
                 event,
             )
             .with_name(name.clone())
-            .with_image(asset_server.load(format!("textures/tools/window_position/{}.webp", name)))
+            .with_image(textures.add(image_for_monitor(icon_size, world, monitor)))
             .with_description("Moves the game window")
             .with_size(Vec2::new(100.0, 100.0))
             .with_starting_state(StartingState::Inactive)
             .spawn(&mut commands);
         }
     }
+}
+
+fn image_for_monitor_corner(
+    icon_size: UVec2,
+    world: IRect,
+    monitor: &Monitor,
+    corner: &Corner,
+) -> Image {
+    let mut imgbuf =
+        ImageBuffer::from_pixel(icon_size.x, icon_size.y, Rgba([173u8, 216u8, 230u8, 255u8])); // Light blue background
+
+    let scale = icon_size.as_vec2() / world.size().as_vec2();
+    let monitor_icon_region = monitor.info.rect.translate(&-world.min).scale(scale);
+    debug!(
+        "Monitor icon region: {:?}, scale: {:?}",
+        monitor_icon_region, scale
+    );
+
+    let dest_icon_region = IRect::from_corners(
+        monitor_icon_region.center(),
+        corner.of(&monitor_icon_region),
+    );
+    for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
+        if monitor_icon_region.contains(IVec2::new(x as i32, y as i32)) {
+            *pixel = Rgba([255u8, 0u8, 0u8, 255u8]);
+        }
+        if dest_icon_region.contains(IVec2::new(x as i32, y as i32)) {
+            *pixel = Rgba([0u8, 255u8, 0u8, 255u8]);
+        }
+    }
+    let image = Image::from_dynamic(imgbuf.into(), true);
+    image
+}
+
+fn image_for_monitor(icon_size: UVec2, world: IRect, monitor: &Monitor) -> Image {
+    let mut imgbuf =
+        ImageBuffer::from_pixel(icon_size.x, icon_size.y, Rgba([173u8, 216u8, 230u8, 255u8])); // Light blue background
+
+    let scale = icon_size.as_vec2() / world.size().as_vec2();
+    let monitor_icon_region = monitor.info.rect.translate(&-world.min).scale(scale);
+    debug!(
+        "Monitor icon region: {:?}, scale: {:?}",
+        monitor_icon_region, scale
+    );
+    for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
+        if monitor_icon_region.contains(IVec2::new(x as i32, y as i32)) {
+            *pixel = Rgba([0u8, 0u8, 255u8, 255u8]);
+        }
+    }
+    let image = Image::from_dynamic(imgbuf.into(), true);
+    image
 }
 
 fn do_position(
@@ -198,13 +213,26 @@ fn do_position(
                             * 100.0)
                             .as_ivec2(),
                 );
-                // IRect::from_center_size(IVec2::new(600, 600), IVec2::new(300, 400));
+                window.mode = WindowMode::Windowed;
                 window.position = WindowPosition::At(dest_bounds.top_left());
                 window.resolution =
                     WindowResolution::new(dest_bounds.width() as f32, dest_bounds.height() as f32);
                 commands.entity(tool_id).remove::<ActiveTool>();
             }
-            _ => {}
+            HostWindowPosition::Fullscreen { monitor } => {
+                let Some(monitor) = monitor_infos.iter().find(|info| info.id == monitor) else {
+                    warn!("No monitor found with id: {}", monitor);
+                    continue;
+                };
+                debug!("Activating fullscreen on monitor: {}", monitor.name);
+                window.position = WindowPosition::At(monitor.work_area.top_left());
+                window.resolution = WindowResolution::new(
+                    monitor.work_area.width() as f32,
+                    monitor.work_area.height() as f32,
+                );
+                window.mode = WindowMode::BorderlessFullscreen;
+                commands.entity(tool_id).remove::<ActiveTool>();
+            }
         }
     }
 }
