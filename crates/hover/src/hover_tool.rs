@@ -34,6 +34,7 @@ fn toolbelt_events(
     for event in reader.read() {
         if event.loadout == ToolbeltLoadout::Inspector {
             ToolSpawnConfig::<HoverTool, NoInputs>::new(HoverTool, event.id, event)
+                .with_src_path(file!().into())
                 .guess_name(file!())
                 .guess_image(file!(), &asset_server, "png")
                 .with_description("UI hover visuals")
@@ -107,7 +108,8 @@ fn ui(
         let (name, global_transform) = brick;
         let title = name.to_string();
 
-        let Some(pos) = camera.world_to_viewport(camera_transform, global_transform.translation()) else {
+        let Some(pos) = camera.world_to_viewport(camera_transform, global_transform.translation())
+        else {
             warn!("No world position found");
             continue;
         };
@@ -117,12 +119,12 @@ fn ui(
             .show(contexts.ctx_mut(), |ui| {
                 egui::ScrollArea::both().show(ui, |ui| {
                     egui::CollapsingHeader::new("MATEYS")
-                    .default_open(true)
-                    .show(ui, |ui| {
-                        ui.label("Hello, world!");
-                        ui.label("Hello, world!");
-                        ui.label("Hello, world!");
-                    });
+                        .default_open(true)
+                        .show(ui, |ui| {
+                            ui.label("Hello, world!");
+                            ui.label("Hello, world!");
+                            ui.label("Hello, world!");
+                        });
                 });
             });
     }

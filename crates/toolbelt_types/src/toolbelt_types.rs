@@ -98,15 +98,13 @@ impl ToolbeltLoadout {
 
 #[derive(Reflect, Clone, Copy, Debug)]
 pub enum ToolbeltLayout {
-    Circle {
-        wheel: Wheel
-    },
+    Circle { wheel: Wheel },
     Taskbar,
 }
 impl Default for ToolbeltLayout {
     fn default() -> Self {
         Self::Circle {
-            wheel: Wheel::default()
+            wheel: Wheel::default(),
         }
     }
 }
@@ -119,12 +117,8 @@ pub struct PopulateToolbeltEvent {
 
 #[derive(Event, Debug, Reflect)]
 pub enum ToolbeltOpeningEvent {
-    Opened {
-        toolbelt_id: Entity,
-    },
-    Closed {
-        toolbelt_id: Entity,
-    },
+    Opened { toolbelt_id: Entity },
+    Closed { toolbelt_id: Entity },
 }
 
 #[derive(Component, Reflect, Clone, Copy, Debug)]

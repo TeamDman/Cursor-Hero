@@ -1,11 +1,13 @@
 use bevy::prelude::*;
 use bevy::utils::HashMap;
 use bevy_xpbd_2d::prelude::*;
+use cursor_hero_host_fs_types::host_fs_types::HostPath;
 use cursor_hero_pointer_types::prelude::*;
 
 use cursor_hero_toolbelt_types::prelude::*;
 use leafwing_input_manager::prelude::*;
 use std::path::Path;
+use std::path::PathBuf;
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
 pub enum NoInputs {}
@@ -31,6 +33,7 @@ where
     starting_state: StartingState,
     size: Option<Vec2>,
     input_map: Option<InputMap<Action>>,
+    src_path: Option<PathBuf>,
 }
 
 impl<T, Action> ToolSpawnConfig<T, Action>
@@ -50,8 +53,14 @@ where
             size: Some(Vec2::new(100.0, 100.0)),
             input_map: None,
             display_actions: HashMap::new(),
+            src_path: None,
         }
         .with_input_map(Action::default_input_map(event))
+    }
+
+    pub fn with_src_path(mut self, path: PathBuf) -> Self {
+        self.src_path = Some(path);
+        self
     }
 
     pub fn with_name(mut self, name: String) -> Self {
@@ -180,6 +189,9 @@ where
             ));
             if let StartingState::Active = self.starting_state {
                 tool.insert(ActiveTool);
+            }
+            if let Some(src_path) = self.src_path {
+                tool.insert(HostPath { path: src_path });
             }
             let input_map = self.input_map.unwrap_or_default();
             tool.insert(InputManagerBundle {

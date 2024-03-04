@@ -12,22 +12,22 @@ impl IExpandable for IRect {
     }
     fn expand_from(&self, corner: Corner, amount: IVec2) -> IRect {
         match corner {
-            Corner::TopLeft => IRect{
-                min: self.min - amount, 
+            Corner::TopLeft => IRect {
+                min: self.min - amount,
                 max: self.max,
             },
-            Corner::TopRight => IRect{
+            Corner::TopRight => IRect {
                 min: self.min - IVec2::new(0, amount.y),
                 max: self.max + IVec2::new(amount.x, 0),
             },
-            Corner::BottomLeft => IRect{
+            Corner::BottomLeft => IRect {
                 min: self.min - IVec2::new(amount.x, 0),
                 max: self.max + IVec2::new(0, amount.y),
             },
-            Corner::BottomRight => IRect{
+            Corner::BottomRight => IRect {
                 min: self.min,
                 max: self.max + amount,
-            }
+            },
         }
     }
 }

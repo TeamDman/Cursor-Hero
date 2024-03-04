@@ -30,6 +30,7 @@ fn toolbelt_events(
     for event in reader.read() {
         if event.loadout == ToolbeltLoadout::Inspector {
             ToolSpawnConfig::<HelloTool, NoInputs>::new(HelloTool, event.id, event)
+                .with_src_path(file!().into())
                 .guess_name(file!())
                 .guess_image(file!(), &asset_server, "png")
                 .with_description("Prints hello.")

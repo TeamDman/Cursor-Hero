@@ -1,9 +1,10 @@
 use bevy::prelude::*;
-use cursor_hero_toolbelt_types::toolbelt_types::{ActiveTool, ToolbeltLoadout};
-use cursor_hero_tools::prelude::NoInputs;
-use cursor_hero_tools::tool_spawning::StartingState;
-use cursor_hero_tools::prelude::ToolSpawnConfig;
 use cursor_hero_toolbelt_types::prelude::PopulateToolbeltEvent;
+use cursor_hero_toolbelt_types::toolbelt_types::ActiveTool;
+use cursor_hero_toolbelt_types::toolbelt_types::ToolbeltLoadout;
+use cursor_hero_tools::prelude::NoInputs;
+use cursor_hero_tools::prelude::ToolSpawnConfig;
+use cursor_hero_tools::tool_spawning::StartingState;
 use cursor_hero_window_position_types::window_position_types::WindowPositionLoadoutSwitcherTool;
 
 pub struct WindowPositionLoadoutSwitcherToolPlugin;
@@ -29,6 +30,7 @@ fn populate_toolbelts(
             event.id,
             event,
         )
+        .with_src_path(file!().into())
         .guess_name(file!())
         .with_image(asset_server.load("textures/tools/window_position.webp"))
         .with_description("Swaps to taskbar tools")

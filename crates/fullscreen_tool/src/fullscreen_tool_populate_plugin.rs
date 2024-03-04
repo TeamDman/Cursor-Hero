@@ -32,6 +32,7 @@ fn handle_toolbelt_events(
         let state = FullscreenTool::state_for_mode(mode);
         debug!("Window: {:?}, tool: {:?}", mode, state);
         ToolSpawnConfig::<_, NoInputs>::new(FullscreenTool, event.id, event)
+            .with_src_path(file!().into())
             .guess_name(file!())
             .guess_image(file!(), &asset_server, "webp")
             .with_description("Toggles fullscreen mode.")

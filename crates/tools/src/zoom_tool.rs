@@ -53,8 +53,11 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        let (ToolbeltLoadout::Default | ToolbeltLoadout::Inspector) = event.loadout else { continue };
+        let (ToolbeltLoadout::Default | ToolbeltLoadout::Inspector) = event.loadout else {
+            continue;
+        };
         ToolSpawnConfig::<_, ZoomToolAction>::new(ZoomTool::default(), event.id, event)
+            .with_src_path(file!().into())
             .guess_name(file!())
             .guess_image(file!(), &asset_server, "png")
             .with_description("Send scroll events")

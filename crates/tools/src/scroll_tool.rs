@@ -49,11 +49,11 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        let (ToolbeltLoadout::Inspector | ToolbeltLoadout::Default) = event.loadout
-        else {
+        let (ToolbeltLoadout::Inspector | ToolbeltLoadout::Default) = event.loadout else {
             continue;
         };
         ToolSpawnConfig::<_, ScrollToolAction>::new(ScrollTool::default(), event.id, event)
+            .with_src_path(file!().into())
             .guess_name(file!())
             .guess_image(file!(), &asset_server, "png")
             .with_description("Send scroll events")

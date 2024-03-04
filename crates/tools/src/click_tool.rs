@@ -44,6 +44,7 @@ fn toolbelt_events(
     for event in reader.read() {
         if let ToolbeltLoadout::Default | ToolbeltLoadout::Keyboard = event.loadout {
             ToolSpawnConfig::<ClickTool, ClickToolAction>::new(ClickTool, event.id, event)
+                .with_src_path(file!().into())
                 .guess_name(file!())
                 .guess_image(file!(), &asset_server, "png")
                 .with_description("Send mouse clicks")

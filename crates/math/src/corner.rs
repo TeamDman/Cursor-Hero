@@ -11,6 +11,11 @@ pub enum Corner {
 }
 impl Corner {
     pub fn variants() -> [Self; 4] {
-        [Self::TopLeft, Self::TopRight, Self::BottomLeft, Self::BottomRight]
+        [
+            Self::TopLeft,
+            Self::TopRight,
+            Self::BottomLeft,
+            Self::BottomRight,
+        ]
     }
 }

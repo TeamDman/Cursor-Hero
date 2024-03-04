@@ -60,6 +60,8 @@ use cursor_hero_glados_tts::prelude::*;
 use cursor_hero_glados_tts_types::prelude::*;
 use cursor_hero_host_event::prelude::*;
 use cursor_hero_host_event_types::prelude::*;
+use cursor_hero_host_fs::prelude::*;
+use cursor_hero_host_fs_types::prelude::*;
 use cursor_hero_inference::inference_plugin::InferencePlugin;
 use cursor_hero_inference_types::inference_types_plugin::InferenceTypesPlugin;
 use cursor_hero_movement_tool::movement_tool_plugin::MovementToolPlugin;
@@ -87,6 +89,8 @@ pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(HostFsTypesPlugin);
+        app.add_plugins(HostFsPlugin);
         app.add_plugins(WindowPositionTypesPlugin);
         app.add_plugins(WindowPositionPlugin);
         app.add_plugins(UiAutomationTypesPlugin);

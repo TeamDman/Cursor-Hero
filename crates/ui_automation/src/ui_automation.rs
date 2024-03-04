@@ -49,7 +49,6 @@ pub fn gather_apps() -> Result<Vec<AppUIElement>, uiautomation::Error> {
     Ok(elements.into_iter().map(AppUIElement::from).collect())
 }
 
-
 pub fn get_element_info(element: UIElement) -> Result<ElementInfo, uiautomation::errors::Error> {
     let name = element.get_name()?;
     let bb = element.get_bounding_rectangle()?;

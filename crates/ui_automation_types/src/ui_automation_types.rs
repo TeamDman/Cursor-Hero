@@ -63,10 +63,7 @@ impl ToBevyIRect for uiautomation::types::Rect {
     }
 }
 
-
-
-#[derive(Debug, Clone)]
-#[derive(Reflect)]
+#[derive(Debug, Clone, Reflect)]
 // #[reflect(no_field_bounds)] //https://github.com/bevyengine/bevy/issues/8965
 pub struct ElementInfo {
     pub name: String,

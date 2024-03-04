@@ -30,8 +30,11 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        let ToolbeltLoadout::Inspector = event.loadout else { continue };
+        let ToolbeltLoadout::Inspector = event.loadout else {
+            continue;
+        };
         ToolSpawnConfig::<CubeTool, CubeToolAction>::new(CubeTool, event.id, event)
+            .with_src_path(file!().into())
             .guess_name(file!())
             .guess_image(file!(), &asset_server, "png")
             .with_description("Spawn and attract cubes")

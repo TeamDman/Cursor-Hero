@@ -18,3 +18,4 @@ bevy-inspector-egui = { workspace = true }
 bevy_xpbd_2d = { workspace = true }
 leafwing-input-manager = { workspace = true }
 itertools = { workspace = true }
+cursor_hero_host_fs_types = { workspace = true }

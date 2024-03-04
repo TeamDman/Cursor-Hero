@@ -17,17 +17,18 @@ pub fn opening(
 ) {
     for toolbelt in toolbelt_query.iter_mut() {
         let (toolbelt_id, mut toolbelt, toolbelt_actions) = toolbelt;
-        match (toolbelt.open, toolbelt_actions.pressed(ToolbeltAction::Show)) {
-            (false, true) => { // Not open but we are holding the open button
-                toolbelt_events.send(ToolbeltOpeningEvent::Opened {
-                    toolbelt_id,
-                });
+        match (
+            toolbelt.open,
+            toolbelt_actions.pressed(ToolbeltAction::Show),
+        ) {
+            (false, true) => {
+                // Not open but we are holding the open button
+                toolbelt_events.send(ToolbeltOpeningEvent::Opened { toolbelt_id });
                 toolbelt.open = true;
             }
-            (true, false) => { // Open but we are not holding the open button
-                toolbelt_events.send(ToolbeltOpeningEvent::Closed {
-                    toolbelt_id,
-                });
+            (true, false) => {
+                // Open but we are not holding the open button
+                toolbelt_events.send(ToolbeltOpeningEvent::Closed { toolbelt_id });
                 toolbelt.open = false;
             }
             _ => {}

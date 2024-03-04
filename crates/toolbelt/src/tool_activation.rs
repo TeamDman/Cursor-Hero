@@ -21,17 +21,11 @@ pub fn tool_activation(
                 if hovered_active.is_some() {
                     commands.entity(hovered_id).remove::<ActiveTool>();
                     events.send(ToolActivationEvent::Deactivate(hovered_id));
-                    info!(
-                        "Deactivating tool: {:?} ({:?})",
-                        hovered_name, hovered_id
-                    );
+                    info!("Deactivating tool: {:?} ({:?})", hovered_name, hovered_id);
                 } else {
                     commands.entity(hovered_id).insert(ActiveTool);
                     events.send(ToolActivationEvent::Activate(hovered_id));
-                    info!(
-                        "Activating tool: {:?} ({:?})",
-                        hovered_name, hovered_id
-                    );
+                    info!("Activating tool: {:?} ({:?})", hovered_name, hovered_id);
                 }
             }
         }

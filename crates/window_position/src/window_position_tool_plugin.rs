@@ -93,6 +93,7 @@ fn populate_toolbelts(
                     event.id,
                     event,
                 )
+                .with_src_path(file!().into())
                 .with_name(name.clone())
                 .with_image(texture)
                 .with_description("Moves the game window")
@@ -110,6 +111,7 @@ fn populate_toolbelts(
                 event.id,
                 event,
             )
+            .with_src_path(file!().into())
             .with_name(name.clone())
             .with_image(textures.add(image_for_monitor(icon_size, world, monitor)))
             .with_description("Moves the game window")
@@ -218,7 +220,7 @@ fn do_position(
                 window.position = WindowPosition::At(dest_bounds.top_left());
                 window.resolution =
                     WindowResolution::new(dest_bounds.width() as f32, dest_bounds.height() as f32);
-                    
+
                 if let Err(e) = set_cursor_position(dest_bounds.center()) {
                     warn!("Failed to set cursor position: {}", e);
                 }

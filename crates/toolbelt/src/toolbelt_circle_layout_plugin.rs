@@ -6,7 +6,6 @@ use cursor_hero_pointer_types::prelude::*;
 
 use leafwing_input_manager::action_state::ActionState;
 
-
 pub struct ToolbeltCircleLayoutPlugin;
 
 impl Plugin for ToolbeltCircleLayoutPlugin {

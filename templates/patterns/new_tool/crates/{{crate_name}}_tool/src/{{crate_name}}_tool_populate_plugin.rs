@@ -24,6 +24,7 @@ fn handle_toolbelt_events(
                     event.id,
                     event,
                 )
+                .with_src_path(file!().into())
                 .guess_name(file!())
                 .guess_image(file!(), &asset_server, "png")
                 .with_description("REPLACE THIS DESCRIPTION!!!")

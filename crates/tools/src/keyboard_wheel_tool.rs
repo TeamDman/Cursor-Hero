@@ -24,13 +24,13 @@ fn toolbelt_events(
         let ToolbeltLoadout::Default = event.loadout else {
             continue;
         };
-            ToolSpawnConfig::<KeyboardWheelTool, NoInputs>::new(KeyboardWheelTool, event.id, event)
-                .guess_name(file!())
-                .guess_image(file!(), &asset_server, "png")
-                .with_description("Swaps to keyboard tools")
-                .with_starting_state(StartingState::Inactive)
-                .spawn(&mut commands);
-        
+        ToolSpawnConfig::<KeyboardWheelTool, NoInputs>::new(KeyboardWheelTool, event.id, event)
+            .with_src_path(file!().into())
+            .guess_name(file!())
+            .guess_image(file!(), &asset_server, "png")
+            .with_description("Swaps to keyboard tools")
+            .with_starting_state(StartingState::Inactive)
+            .spawn(&mut commands);
     }
 }
 

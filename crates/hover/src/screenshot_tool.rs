@@ -79,6 +79,7 @@ fn toolbelt_events(
                 event.id,
                 event,
             )
+            .with_src_path(file!().into())
             .guess_name(file!())
             .guess_image(file!(), &asset_server, "webp")
             .with_description("Turn UI elements into information.")

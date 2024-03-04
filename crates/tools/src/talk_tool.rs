@@ -36,12 +36,12 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        let (ToolbeltLoadout::Keyboard | ToolbeltLoadout::Default) = event.loadout
-        else {
+        let (ToolbeltLoadout::Keyboard | ToolbeltLoadout::Default) = event.loadout else {
             continue;
         };
         {
             ToolSpawnConfig::<TalkTool, TalkToolAction>::new(TalkTool, event.id, event)
+                .with_src_path(file!().into())
                 .guess_name(file!())
                 .guess_image(file!(), &asset_server, "png")
                 .with_description("Presses F23")

@@ -1,4 +1,3 @@
-
 pub trait Lerp {
     fn lerp(self, open: f32) -> f32;
 }

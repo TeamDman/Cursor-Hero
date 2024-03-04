@@ -30,20 +30,16 @@ fn toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        let (ToolbeltLoadout::Inspector | ToolbeltLoadout::Default) = event.loadout
-        else {
+        let (ToolbeltLoadout::Inspector | ToolbeltLoadout::Default) = event.loadout else {
             continue;
         };
         {
-            ToolSpawnConfig::<RestartTool, RestartToolAction>::new(
-                RestartTool,
-                event.id,
-                event,
-            )
-            .guess_name(file!())
-            .guess_image(file!(), &asset_server, "png")
-            .with_description("Send Ctrl+C, uparrow, enter")
-            .spawn(&mut commands);
+            ToolSpawnConfig::<RestartTool, RestartToolAction>::new(RestartTool, event.id, event)
+                .with_src_path(file!().into())
+                .guess_name(file!())
+                .guess_image(file!(), &asset_server, "png")
+                .with_description("Send Ctrl+C, uparrow, enter")
+                .spawn(&mut commands);
         }
     }
 }

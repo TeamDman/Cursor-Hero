@@ -7,8 +7,8 @@ pub enum HostWindowPosition {
     },
     Corner {
         corner: cursor_hero_math::prelude::Corner,
-        monitor: u32
-    }
+        monitor: u32,
+    },
 }
 
 #[derive(Component, Reflect, Default)]
