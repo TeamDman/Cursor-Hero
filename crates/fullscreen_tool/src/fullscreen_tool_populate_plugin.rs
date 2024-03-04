@@ -20,7 +20,7 @@ fn handle_toolbelt_events(
     window_query: Query<&Window, With<PrimaryWindow>>,
 ) {
     for event in reader.read() {
-        let ToolbeltLoadout::Default = event.loadout else {
+        let ToolbeltLoadout::WindowPosition = event.loadout else {
             continue;
         };
 

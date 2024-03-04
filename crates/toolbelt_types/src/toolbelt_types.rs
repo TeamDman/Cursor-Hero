@@ -85,6 +85,7 @@ pub enum ToolbeltLoadout {
     Keyboard,
     Agent,
     Chat,
+    WindowPosition,
 }
 impl ToolbeltLoadout {
     pub fn layout(&self) -> ToolbeltLayout {

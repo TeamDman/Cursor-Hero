@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_xpbd_2d::components::Position;
-use cursor_hero_bevy::NegativeYVec2;
+use cursor_hero_bevy::prelude::NegativeYVec2;
 use cursor_hero_screen::get_image::get_image;
 use cursor_hero_screen::get_image::ScreensToImageParam;
 use cursor_hero_toolbelt_types::prelude::*;

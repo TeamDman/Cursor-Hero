@@ -24,7 +24,8 @@ fn toolbelt_events(
         let (ToolbeltLoadout::Inspector
         | ToolbeltLoadout::Taskbar
         | ToolbeltLoadout::Chat
-        | ToolbeltLoadout::Keyboard) = event.loadout
+        | ToolbeltLoadout::Keyboard
+        | ToolbeltLoadout::WindowPosition) = event.loadout
         else {
             continue;
         };

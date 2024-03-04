@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
 use cursor_hero_agent_types::prelude::*;
-use cursor_hero_bevy::NegativeYVec2;
+use cursor_hero_bevy::prelude::NegativeYVec2;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_environment_types::prelude::*;
 use cursor_hero_floaty_nametag_types::prelude::*;

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use bevy_xpbd_2d::prelude::*;
 
-use cursor_hero_bevy::NegativeYVec2;
+use cursor_hero_bevy::prelude::NegativeYVec2;
 use cursor_hero_camera::camera_plugin::CameraEvent;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_environment_types::prelude::*;

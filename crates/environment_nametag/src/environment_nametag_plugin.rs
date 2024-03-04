@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy::utils::HashSet;
-use cursor_hero_bevy::Vec2ToRect;
+use cursor_hero_bevy::prelude::Vec2ToRect;
 use cursor_hero_environment_types::prelude::*;
 use cursor_hero_screen::screen_plugin::Screen;
 use cursor_hero_screen::screen_plugin::ScreenParent;
@@ -153,7 +153,7 @@ fn handle_nametag_recalculate_position_event(
                             {
                                 if let Some(screen_size) = screen_sprite.custom_size {
                                     max_extents =
-                                        max_extents.union(screen_size.to_rect_with_center(
+                                        max_extents.union(screen_size.as_size_of_rect_with_center(
                                             &screen_transform.translation().xy(),
                                         ));
                                 } else {

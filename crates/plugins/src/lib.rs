@@ -81,10 +81,14 @@ use cursor_hero_ui_watcher::prelude::*;
 use cursor_hero_ui_watcher_types::prelude::*;
 use cursor_hero_voice_to_text::prelude::*;
 use cursor_hero_voice_to_text_types::prelude::*;
+use cursor_hero_window_position::prelude::*;
+use cursor_hero_window_position_types::prelude::*;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(WindowPositionTypesPlugin);
+        app.add_plugins(WindowPositionPlugin);
         app.add_plugins(UiAutomationTypesPlugin);
         app.add_plugins(UiAutomationPlugin);
         app.add_plugins(BrickTypesPlugin);

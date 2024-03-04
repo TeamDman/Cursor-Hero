@@ -1,7 +1,6 @@
 use cursor_hero_toolbelt_types::toolbelt_types::*;
 
 use bevy::prelude::*;
-use cursor_hero_bevy::NameOrEntityDisplay;
 use cursor_hero_pointer_types::prelude::*;
 
 use leafwing_input_manager::action_state::ActionState;
@@ -23,15 +22,15 @@ pub fn tool_activation(
                     commands.entity(hovered_id).remove::<ActiveTool>();
                     events.send(ToolActivationEvent::Deactivate(hovered_id));
                     info!(
-                        "Deactivating tool: {:?}",
-                        hovered_name.name_or_entity(hovered_id)
+                        "Deactivating tool: {:?} ({:?})",
+                        hovered_name, hovered_id
                     );
                 } else {
                     commands.entity(hovered_id).insert(ActiveTool);
                     events.send(ToolActivationEvent::Activate(hovered_id));
                     info!(
-                        "Activating tool: {:?}",
-                        hovered_name.name_or_entity(hovered_id)
+                        "Activating tool: {:?} ({:?})",
+                        hovered_name, hovered_id
                     );
                 }
             }

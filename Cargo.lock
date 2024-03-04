@@ -2283,6 +2283,8 @@ dependencies = [
  "cursor_hero_voice_to_text",
  "cursor_hero_voice_to_text_types",
  "cursor_hero_wallpaper",
+ "cursor_hero_window_position",
+ "cursor_hero_window_position_types",
  "cursor_hero_winutils",
  "cursor_hero_xelu_prompts",
 ]
@@ -2627,6 +2629,25 @@ dependencies = [
  "cursor_hero_winutils",
  "image",
  "windows 0.52.0",
+]
+
+[[package]]
+name = "cursor_hero_window_position"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "cursor_hero_bevy",
+ "cursor_hero_toolbelt_types",
+ "cursor_hero_tools",
+ "cursor_hero_window_position_types",
+ "raw-window-handle",
+]
+
+[[package]]
+name = "cursor_hero_window_position_types"
+version = "0.1.0"
+dependencies = [
+ "bevy",
 ]
 
 [[package]]

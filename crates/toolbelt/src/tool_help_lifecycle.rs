@@ -4,7 +4,6 @@ use bevy::prelude::*;
 use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
 use bevy_xpbd_2d::components::Sensor;
-use cursor_hero_bevy::NameOrEntityDisplay;
 use cursor_hero_pointer_types::prelude::*;
 
 use leafwing_input_manager::action_state::ActionState;
@@ -27,8 +26,8 @@ pub fn tool_help_lifecycle(
                     commands.entity(tool_id).with_children(|parent| {
                         parent.spawn((
                             Name::new(format!(
-                                "Help Trigger for {}",
-                                tool_name.name_or_entity(tool_id)
+                                "Help Trigger for {:?} ({:?})",
+                                tool_name, tool_id
                             )),
                             SpriteBundle {
                                 sprite: Sprite {
