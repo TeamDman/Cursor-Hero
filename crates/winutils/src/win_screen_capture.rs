@@ -21,6 +21,11 @@ use std::sync::Arc;
 
 use anyhow::anyhow;
 use anyhow::Result;
+use bevy::math::IRect;
+use cursor_hero_bevy::prelude::LeftI;
+use cursor_hero_bevy::prelude::TopI;
+use cursor_hero_bevy::prelude::TopLeftI;
+use cursor_hero_bevy::prelude::TranslateIVec2;
 // use display_info::DisplayInfo;
 // use fxhash::hash32;
 use image::RgbaImage;
@@ -60,6 +65,8 @@ use windows::Win32::Graphics::Gdi::STRETCH_HALFTONE;
 
 use cursor_hero_metrics::Metrics;
 
+use crate::ToBevyIRect;
+
 //////////////////////
 /// GET MONITOR INFOS
 //////////////////////
@@ -68,8 +75,8 @@ use cursor_hero_metrics::Metrics;
 pub struct MonitorInfo {
     pub id: u32,
     pub name: String,
-    pub rect: RECT,
-    pub work_area: RECT, // the area of the monitor not covered by the taskbar
+    pub rect: IRect,
+    pub work_area: IRect, // the area of the monitor not covered by the taskbar
     pub is_primary: bool,
 }
 
@@ -101,8 +108,8 @@ pub fn get_monitor_infos() -> Result<Vec<MonitorInfo>> {
             MonitorInfo {
                 id: fxhash::hash32(sz_device_string.as_bytes()), // same algorithm as screen crate
                 name: sz_device_string,
-                rect: info.monitorInfo.rcMonitor,
-                work_area: info.monitorInfo.rcWork,
+                rect: info.monitorInfo.rcMonitor.to_bevy_irect(),
+                work_area: info.monitorInfo.rcWork.to_bevy_irect(),
                 is_primary: info.monitorInfo.dwFlags == 1,
             }
         })
@@ -174,9 +181,7 @@ pub fn get_all_monitors() -> Result<Vec<Monitor>> {
 
 pub struct MonitorRegionCapturer {
     pub monitor: Arc<Monitor>,
-    pub capture_region: RECT,
-    pub width: i32,
-    pub height: i32,
+    pub capture_region: IRect,
     device_context: HDC,
     bitmap: HBITMAP,
 }
@@ -194,12 +199,15 @@ pub fn get_full_monitor_capturers() -> Result<Vec<MonitorRegionCapturer>> {
     Ok(capturers)
 }
 
-pub fn get_monitor_capturer(monitor: Arc<Monitor>, region: RECT) -> MonitorRegionCapturer {
-    let width = region.right - region.left;
-    let height = region.bottom - region.top;
-
+pub fn get_monitor_capturer(monitor: Arc<Monitor>, capture_region: IRect) -> MonitorRegionCapturer {
     let capture_device_context = unsafe { CreateCompatibleDC(monitor.device_context) };
-    let bitmap = unsafe { CreateCompatibleBitmap(monitor.device_context, width, height) };
+    let bitmap = unsafe {
+        CreateCompatibleBitmap(
+            monitor.device_context,
+            capture_region.width(),
+            capture_region.height(),
+        )
+    };
 
     unsafe {
         SelectObject(capture_device_context, bitmap);
@@ -210,9 +218,7 @@ pub fn get_monitor_capturer(monitor: Arc<Monitor>, region: RECT) -> MonitorRegio
         monitor,
         device_context: capture_device_context,
         bitmap,
-        capture_region: region,
-        width,
-        height,
+        capture_region,
     }
 }
 
@@ -236,13 +242,13 @@ impl MonitorRegionCapturer {
                 self.device_context,
                 0,
                 0,
-                self.width,
-                self.height,
+                self.capture_region.width(),
+                self.capture_region.height(),
                 self.monitor.device_context,
-                self.monitor.info.rect.left - self.capture_region.left,
-                self.monitor.info.rect.top - self.capture_region.top,
-                self.width,
-                self.height,
+                self.monitor.info.rect.left() - self.capture_region.left(),
+                self.monitor.info.rect.top() - self.capture_region.top(),
+                self.capture_region.width(),
+                self.capture_region.height(),
                 SRCCOPY,
             )
             .ok()?;
@@ -254,8 +260,8 @@ impl MonitorRegionCapturer {
         let mut bitmap_info = BITMAPINFO {
             bmiHeader: BITMAPINFOHEADER {
                 biSize: mem::size_of::<BITMAPINFOHEADER>() as u32,
-                biWidth: self.width,
-                biHeight: self.height, // Here you can pass a negative number, but don't know why it will throw an error
+                biWidth: self.capture_region.width(),
+                biHeight: self.capture_region.height(), // Here you can pass a negative number, but don't know why it will throw an error
                 biPlanes: 1,
                 biBitCount: 32,
                 biCompression: 0,
@@ -268,7 +274,8 @@ impl MonitorRegionCapturer {
             bmiColors: [RGBQUAD::default(); 1],
         };
 
-        let data = vec![0u8; (self.width * self.height) as usize * 4];
+        let data =
+            vec![0u8; (self.capture_region.width() * self.capture_region.height()) as usize * 4];
         let buf_prt = data.as_ptr() as *mut _;
 
         if let Some(metrics) = metrics {
@@ -279,7 +286,7 @@ impl MonitorRegionCapturer {
                 self.device_context,
                 self.bitmap,
                 0,
-                self.height as u32,
+                self.capture_region.height() as u32,
                 Some(buf_prt),
                 &mut bitmap_info,
                 DIB_RGB_COLORS,
@@ -316,7 +323,7 @@ impl MonitorRegionCapturer {
             metrics.begin("reverse");
         }
         let mut data = data
-            .chunks(self.width as usize * 4)
+            .chunks(self.capture_region.width() as usize * 4)
             .map(|x| x.to_vec())
             .collect::<Vec<Vec<u8>>>();
         data.reverse();
@@ -347,7 +354,11 @@ impl MonitorRegionCapturer {
             metrics.end("shuffle");
         }
 
-        let data = RgbaImage::from_vec(self.width as u32, self.height as u32, data);
+        let data = RgbaImage::from_vec(
+            self.capture_region.width() as u32,
+            self.capture_region.height() as u32,
+            data,
+        );
         data.ok_or_else(|| anyhow!("Invalid image data"))
     }
 }
@@ -355,6 +366,8 @@ impl MonitorRegionCapturer {
 #[cfg(test)]
 #[allow(unused_imports)]
 mod tests {
+    use bevy::math::IVec2;
+
     use super::*;
 
     #[test]
@@ -383,12 +396,9 @@ mod tests {
         let mut capturers = Vec::new();
 
         for monitor in monitors {
-            let region = RECT {
-                left: monitor.info.rect.left,
-                top: monitor.info.rect.top,
-                right: monitor.info.rect.left + 100,
-                bottom: monitor.info.rect.top + 100,
-            };
+            let p0 = monitor.info.rect.top_left();
+            let p1 = p0 + IVec2::new(100, 100);
+            let region = IRect::from_corners(p0, p1);
             let capturer = get_monitor_capturer(Arc::new(monitor), region);
             capturers.push(capturer);
         }

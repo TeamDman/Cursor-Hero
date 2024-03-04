@@ -32,4 +32,4 @@ enigo = {workspace = true}
 once_cell = {workspace = true}
 winreg = { workspace = true }
 crossbeam-channel = { workspace = true }
-
+cursor_hero_bevy = { workspace = true }

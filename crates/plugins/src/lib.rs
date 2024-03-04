@@ -20,7 +20,7 @@ use cursor_hero_hover::screenshot_tool::ScreenshotToolPlugin;
 use cursor_hero_icon::IconPlugin;
 use cursor_hero_input::InputPlugin;
 use cursor_hero_level_bounds::level_bounds_plugin::LevelBoundsPlugin;
-use cursor_hero_math::math_plugin::MathPlugin;
+use cursor_hero_math::prelude::MathPlugin;
 use cursor_hero_physics::damping_plugin::DampingPlugin;
 use cursor_hero_physics::physics_plugin::PhysicsPlugin;
 use cursor_hero_physics_debug::physics_debug_plugin::PhysicsDebugPlugin;

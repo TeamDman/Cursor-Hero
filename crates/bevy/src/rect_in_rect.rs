@@ -1,11 +1,5 @@
-use bevy::ecs::entity::Entity;
-use bevy::math::IRect;
-use bevy::math::IVec2;
-use bevy::math::IVec3;
 use bevy::math::Rect;
 use bevy::math::Vec2;
-use bevy::math::Vec3;
-use bevy::prelude::Name;
 
 pub trait AtInsideBottom {
     fn at_inside_bottom(&self, other: &Rect) -> Rect;

@@ -1790,6 +1790,7 @@ name = "cursor_hero_bevy"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "cursor_hero_math",
 ]
 
 [[package]]
@@ -2637,9 +2638,11 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "cursor_hero_bevy",
+ "cursor_hero_math",
  "cursor_hero_toolbelt_types",
  "cursor_hero_tools",
  "cursor_hero_window_position_types",
+ "cursor_hero_winutils",
  "raw-window-handle",
 ]
 
@@ -2648,6 +2651,7 @@ name = "cursor_hero_window_position_types"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "cursor_hero_math",
 ]
 
 [[package]]
@@ -2657,6 +2661,7 @@ dependencies = [
  "anyhow",
  "bevy",
  "crossbeam-channel",
+ "cursor_hero_bevy",
  "cursor_hero_metrics",
  "enigo 0.2.0-rc2",
  "fxhash",

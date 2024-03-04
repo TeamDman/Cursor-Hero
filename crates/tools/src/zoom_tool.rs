@@ -4,7 +4,7 @@ use bevy_inspector_egui::prelude::ReflectInspectorOptions;
 use bevy_inspector_egui::InspectorOptions;
 use cursor_hero_camera::camera_plugin::MainCamera;
 use cursor_hero_character_types::prelude::*;
-use cursor_hero_math::Lerp;
+use cursor_hero_math::prelude::Lerp;
 use cursor_hero_sprint_tool_types::sprint_tool_types_plugin::SprintEvent;
 use cursor_hero_toolbelt_types::prelude::*;
 use itertools::Itertools;

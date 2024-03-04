@@ -1,9 +1,7 @@
 use bevy::prelude::*;
-use bevy::prelude::*;
 use cursor_hero_toolbelt_types::toolbelt_types::{ActiveTool, ToolbeltLoadout};
 use cursor_hero_tools::prelude::NoInputs;
 use cursor_hero_tools::tool_spawning::StartingState;
-use cursor_hero_window_position_types::prelude::WindowPositionTool;
 use cursor_hero_tools::prelude::ToolSpawnConfig;
 use cursor_hero_toolbelt_types::prelude::PopulateToolbeltEvent;
 use cursor_hero_window_position_types::window_position_types::WindowPositionLoadoutSwitcherTool;

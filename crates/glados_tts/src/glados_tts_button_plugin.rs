@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_xpbd_2d::prelude::*;
 use cursor_hero_environment_types::prelude::*;
 use cursor_hero_glados_tts_types::prelude::*;
-use cursor_hero_math::Lerp;
+use cursor_hero_math::prelude::Lerp;
 use cursor_hero_pointer_types::prelude::*;
 
 use crate::glados_tts;

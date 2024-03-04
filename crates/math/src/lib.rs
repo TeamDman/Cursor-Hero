@@ -1,12 +1,9 @@
-pub mod math_plugin;
+mod corner;
+mod lerp;
+mod math_plugin;
 
-pub trait Lerp {
-    fn lerp(self, open: f32) -> f32;
-}
-
-impl Lerp for (f32, f32) {
-    fn lerp(self, open: f32) -> f32 {
-        let (start, end) = self;
-        start + (end - start) * open.clamp(0.0, 1.0)
-    }
+pub mod prelude {
+    pub use crate::corner::*;
+    pub use crate::lerp::*;
+    pub use crate::math_plugin::*;
 }

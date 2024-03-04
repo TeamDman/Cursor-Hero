@@ -10,7 +10,9 @@ use cursor_hero_tools::prelude::ToolSpawnConfig;
 use cursor_hero_tools::tool_spawning::StartingState;
 use cursor_hero_window_position_types::prelude::HostWindowPosition;
 use cursor_hero_window_position_types::prelude::WindowPositionTool;
-use cursor_hero_window_position_types::window_position_types::Corner;
+use cursor_hero_winutils::win_screen_capture::get_all_monitors;
+use cursor_hero_winutils::win_screen_capture::get_monitor_infos;
+use cursor_hero_math::prelude::Corner;
 pub struct WindowPositionToolPlugin;
 
 impl Plugin for WindowPositionToolPlugin {
@@ -29,23 +31,51 @@ fn populate_toolbelts(
         if event.loadout != ToolbeltLoadout::WindowPosition {
             continue;
         }
+        let Ok(monitors) = get_all_monitors() else {
+            warn!("No screens found");
+            continue;
+        };
 
-        ToolSpawnConfig::<WindowPositionTool, NoInputs>::new(
-            WindowPositionTool {
-                window_position: HostWindowPosition::Corner {
-                    corner: Corner::TopRight,
-                    monitor: 3,
+        for monitor in monitors {
+            for corner in Corner::variants() {
+                let name = format!("{:?} Monitor {}", corner, monitor.info.id);
+                ToolSpawnConfig::<WindowPositionTool, NoInputs>::new(
+                    WindowPositionTool {
+                        window_position: HostWindowPosition::Corner {
+                            corner,
+                            monitor: monitor.info.id,
+                        },
+                    },
+                    event.id,
+                    event,
+                )
+                .with_name(name.clone())
+                .with_image(
+                    asset_server.load(format!("textures/tools/window_position/{}.webp", name)),
+                )
+                .with_description("Moves the game window")
+                .with_size(Vec2::new(100.0, 100.0))
+                .with_starting_state(StartingState::Inactive)
+                .spawn(&mut commands);
+            }
+            let name = format!("fullscreen_monitor_{}", monitor.info.id);
+            ToolSpawnConfig::<WindowPositionTool, NoInputs>::new(
+                WindowPositionTool {
+                    window_position: HostWindowPosition::Corner {
+                        corner: Corner::TopRight,
+                        monitor: 3,
+                    },
                 },
-            },
-            event.id,
-            event,
-        )
-        .with_name("Top Right Monitor 3".to_string())
-        .with_image(asset_server.load("textures/tools/window_position/fullscreen_monitor_1.webp"))
-        .with_description("Swaps to taskbar tools")
-        .with_size(Vec2::new(100.0, 100.0))
-        .with_starting_state(StartingState::Inactive)
-        .spawn(&mut commands);
+                event.id,
+                event,
+            )
+            .with_name(name.clone())
+            .with_image(asset_server.load(format!("textures/tools/window_position/{}.webp", name)))
+            .with_description("Moves the game window")
+            .with_size(Vec2::new(100.0, 100.0))
+            .with_starting_state(StartingState::Inactive)
+            .spawn(&mut commands);
+        }
     }
 }
 
@@ -54,6 +84,11 @@ fn do_position(
     tool_query: Query<(Entity, &WindowPositionTool), With<ActiveTool>>,
     mut window_query: Query<(&RawHandleWrapper, &mut Window), With<PrimaryWindow>>,
 ) {
+    
+    let Ok(monitor_infos) = get_monitor_infos() else {
+        return;
+    };
+
     for tool in tool_query.iter() {
         let (tool_id, tool) = tool;
         let Ok(window) = window_query.get_single_mut() else {
@@ -66,13 +101,22 @@ fn do_position(
             _ => panic!("Unsupported window handle"),
         };
 
+
         match tool.window_position {
-            HostWindowPosition::Corner { ref corner, monitor } => {
-                debug!("Activating corner: {:?} on monitor: {}", corner, monitor);
-                let dest_bounds = IRect::from_center_size(IVec2::new(600,600), IVec2::new(300,400));
+            HostWindowPosition::Corner {
+                ref corner,
+                monitor,
+            } => {
+                let Some(monitor) = monitor_infos.iter().find(|info| info.id == monitor) else {
+                    warn!("No monitor found with id: {}", monitor);
+                    continue;
+                };
+                debug!("Activating corner: {:?} on monitor: {}", corner, monitor.name);
+                let dest_bounds = monitor.rect;
+                    // IRect::from_center_size(IVec2::new(600, 600), IVec2::new(300, 400));
                 window.position = WindowPosition::At(dest_bounds.top_right());
                 commands.entity(tool_id).remove::<ActiveTool>();
-            },
+            }
             _ => {}
         }
     }
