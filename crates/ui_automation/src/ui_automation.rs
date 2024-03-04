@@ -1,5 +1,7 @@
 use bevy::math::IVec2;
+use bevy::math::Rect;
 use cursor_hero_ui_automation_types::ui_automation_types::AppUIElement;
+use cursor_hero_ui_automation_types::ui_automation_types::ElementInfo;
 use std::collections::VecDeque;
 use uiautomation::types::Point;
 use uiautomation::UIAutomation;
@@ -45,6 +47,32 @@ pub fn gather_toplevel_elements() -> Result<Vec<UIElement>, uiautomation::Error>
 pub fn gather_apps() -> Result<Vec<AppUIElement>, uiautomation::Error> {
     let elements = gather_toplevel_elements()?;
     Ok(elements.into_iter().map(AppUIElement::from).collect())
+}
+
+
+pub fn get_element_info(element: UIElement) -> Result<ElementInfo, uiautomation::errors::Error> {
+    let name = element.get_name()?;
+    let bb = element.get_bounding_rectangle()?;
+    let class_name = element.get_classname()?;
+    let automation_id = element.get_automation_id()?;
+    let runtime_id = element.get_runtime_id()?;
+    let children = vec![];
+
+    let info = ElementInfo {
+        name,
+        bounding_rect: Rect::new(
+            bb.get_left() as f32,
+            bb.get_top() as f32,
+            bb.get_right() as f32,
+            bb.get_bottom() as f32,
+        ),
+        control_type: class_name.clone(),
+        class_name,
+        automation_id,
+        runtime_id,
+        children,
+    };
+    Ok(info)
 }
 
 // pub fn get_element_from_identifier(id: &str) -> Result<UIElement, uiautomation::Error> {

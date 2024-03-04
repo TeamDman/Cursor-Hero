@@ -1,8 +1,14 @@
-use crate::hover_ui_automation_plugin::get_element_info;
-use crate::hover_ui_automation_plugin::ElementInfo;
+use bevy::ecs::system::CommandQueue;
 use bevy::prelude::*;
+use bevy::reflect::TypeRegistry;
 use bevy::window::PrimaryWindow;
+use bevy_egui::egui;
+use bevy_egui::egui::Pos2;
 use bevy_egui::EguiContext;
+use bevy_egui::EguiContexts;
+use bevy_inspector_egui::reflect_inspector::Context;
+use bevy_inspector_egui::reflect_inspector::InspectorUi;
+use bevy_inspector_egui::restricted_world_view::RestrictedWorldView;
 use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
 use crossbeam_channel::bounded;
@@ -10,6 +16,7 @@ use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
 use cursor_hero_bevy::NegativeYVec2;
 use cursor_hero_bevy::NegativeYVec3;
+use cursor_hero_camera::camera_plugin::MainCamera;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_environment_types::prelude::TrackEnvironmentTag;
 use cursor_hero_physics::damping_plugin::MovementDamping;
@@ -21,6 +28,8 @@ use cursor_hero_tools::cube_tool::CubeToolInteractable;
 use cursor_hero_tools::prelude::*;
 use cursor_hero_ui_automation::prelude::find_element_at;
 use cursor_hero_ui_automation::prelude::gather_elements_at;
+use cursor_hero_ui_automation::prelude::get_element_info;
+use cursor_hero_ui_automation::prelude::ElementInfo;
 use leafwing_input_manager::prelude::*;
 use rand::thread_rng;
 use rand::Rng;
@@ -30,15 +39,32 @@ pub struct ScreenshotToolPlugin;
 
 impl Plugin for ScreenshotToolPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<InspectTool>();
+        app.register_type::<ScreenshotTool>();
+        app.register_type::<ScreenshotBrick>();
         app.add_plugins(InputManagerPlugin::<ScreenshotToolAction>::default());
         app.add_systems(Startup, spawn_worker_thread);
-        app.add_systems(Update, (toolbelt_events, handle_input, handle_replies));
+        app.add_systems(Update, toolbelt_events);
+        app.add_systems(Update, handle_input);
+        app.add_systems(Update, handle_replies);
+        app.add_systems(Update, ui);
     }
 }
 
 #[derive(Component, Reflect, Default)]
-struct InspectTool;
+struct ScreenshotTool;
+
+#[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
+enum ScreenshotToolAction {
+    Capture,
+    CaptureBrick,
+    Print,
+    Fracture,
+}
+
+#[derive(Component, Reflect)]
+struct ScreenshotBrick {
+    info: ElementInfo,
+}
 
 fn toolbelt_events(
     mut commands: Commands,
@@ -47,8 +73,8 @@ fn toolbelt_events(
 ) {
     for event in reader.read() {
         if let PopulateToolbeltEvent::Inspector { toolbelt_id } = event {
-            ToolSpawnConfig::<InspectTool, ScreenshotToolAction>::new(
-                InspectTool,
+            ToolSpawnConfig::<ScreenshotTool, ScreenshotToolAction>::new(
+                ScreenshotTool,
                 *toolbelt_id,
                 event,
             )
@@ -60,19 +86,11 @@ fn toolbelt_events(
     }
 }
 
-#[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
-enum ScreenshotToolAction {
-    Capture,
-    CaptureBrick,
-    Print,
-    Fracture,
-}
-
 impl ScreenshotToolAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
-            Self::Capture => GamepadButtonType::RightTrigger.into(),
-            Self::CaptureBrick => GamepadButtonType::South.into(),
+            Self::Capture => GamepadButtonType::South.into(),
+            Self::CaptureBrick => GamepadButtonType::RightTrigger.into(),
             Self::Print => GamepadButtonType::North.into(),
             Self::Fracture => GamepadButtonType::Select.into(),
         }
@@ -80,8 +98,8 @@ impl ScreenshotToolAction {
 
     fn default_mkb_binding(&self) -> UserInput {
         match self {
-            Self::Capture => MouseButton::Left.into(),
-            Self::CaptureBrick => MouseButton::Middle.into(),
+            Self::Capture => MouseButton::Middle.into(),
+            Self::CaptureBrick => MouseButton::Left.into(),
             Self::Print => MouseButton::Right.into(),
             Self::Fracture => KeyCode::G.into(),
         }
@@ -353,6 +371,9 @@ fn handle_replies(
                     CubeToolInteractable,
                     RigidBody::Dynamic,
                     TrackEnvironmentTag,
+                    ScreenshotBrick {
+                        info: element_info.clone(),
+                    },
                     Collider::cuboid(size.x, size.y),
                     MovementDamping::default(),
                     Name::new(format!("Element - {}", element_info.name)),
@@ -416,4 +437,63 @@ fn handle_replies(
             }
         }
     }
+}
+
+fn ui(
+    mut contexts: EguiContexts,
+    mut brick_query: Query<(Entity, &mut ScreenshotBrick, &Name, &GlobalTransform)>,
+    camera_query: Query<(&GlobalTransform, &Camera), With<MainCamera>>,
+    type_registry: Res<AppTypeRegistry>,
+) {
+    let Ok(camera) = camera_query.get_single() else {
+        warn!("No camera found");
+        return;
+    };
+    let (camera_transform, camera) = camera;
+
+
+    for brick in brick_query.iter_mut() {
+        let (brick_id, mut brick, name, brick_global_transform) = brick;
+        let pos = camera
+            .world_to_viewport(camera_transform, brick_global_transform.translation())
+            .unwrap_or_default();
+        egui::Window::new(name.to_string())
+            .id(egui::Id::new(brick_id))
+            .fixed_pos(Pos2::new(pos.x, pos.y))
+            .show(contexts.ctx_mut(), |ui| {
+                egui::ScrollArea::both().show(ui, |ui| {
+                    ui_for_element_info(ui, &mut brick.info, &type_registry);
+                });
+            });
+    }
+}
+
+fn ui_for_element_info(
+    // world: &mut RestrictedWorldView<'_>,
+    ui: &mut egui::Ui,
+    element_info: &mut ElementInfo,
+    type_registry: &Res<AppTypeRegistry>,
+) {
+    let mut cx = Context {
+        world: None,
+        queue: None,
+    };
+
+    let type_registry = (*type_registry).0.clone();
+    let type_registry = type_registry.read();
+
+    let mut inspector = InspectorUi::for_bevy(&type_registry, &mut cx);
+    egui::CollapsingHeader::new(format!("Element Info - {}", element_info.name))
+        .default_open(true)
+        .show(ui, |ui| {
+            inspector.ui_for_reflect(element_info, ui);
+            // ui_for_reflect()
+            // ui.label(format!("name: {}", element_info.name));
+            // ui.label(format!("bounding_rect: {}", element_info.class_name));
+            // ui.label(format!("class_name: {}", element_info.class_name));
+            // ui.label(format!("automation_id: {}", element_info.id));
+            // ui.label(format!("runtime_id: {}", element_info.id));
+            // ui.label(format!("children: {}", element_info.tag));
+            // ui.label(format!("Bounding Rect: {:?}", element_info.bounding_rect));
+        });
 }

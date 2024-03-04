@@ -5,9 +5,10 @@ use bevy::window::PrimaryWindow;
 use crossbeam_channel::bounded;
 use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
+use cursor_hero_ui_automation::prelude::find_element_at;
+use cursor_hero_ui_automation::prelude::get_element_info;
+use cursor_hero_ui_automation::prelude::ElementInfo;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
-use uiautomation::UIAutomation;
-use uiautomation::UIElement;
 
 use cursor_hero_camera::camera_plugin::MainCamera;
 
@@ -17,7 +18,7 @@ impl Plugin for HoverUiAutomationPlugin {
     fn build(&self, app: &mut App) {
         info!("Adding HoverInfo resource");
         app.insert_resource(HoverInfo::default());
-        app.register_type::<Element>();
+        app.register_type::<HoveredElement>();
         app.add_systems(Startup, setup);
         app.add_systems(
             Update,
@@ -51,7 +52,7 @@ struct Bridge {
     pub receiver: Receiver<GameboundMessage>,
 }
 
-#[derive(Resource, Reflect, Default)]
+#[derive(Resource, Default)]
 pub struct HoverInfo {
     screen_element: Option<ElementInfo>,
     game_element: Option<ElementInfo>,
@@ -70,42 +71,9 @@ impl HoverInfo {
     }
 }
 
-#[derive(Debug, Reflect, Clone)]
-pub struct ElementInfo {
-    pub name: String,
-    pub bounding_rect: Rect,
-    pub control_type: String,
-    pub class_name: String,
-    pub automation_id: String,
-    // value: Option<String>,
-}
-
 #[derive(Component, Reflect)]
-pub struct Element {
+pub struct HoveredElement {
     pub info: ElementInfo,
-}
-
-pub fn get_element_info(element: UIElement) -> Result<ElementInfo, uiautomation::errors::Error> {
-    let name = element.get_name()?;
-    let bb = element.get_bounding_rectangle()?;
-    let class_name = element.get_classname()?;
-    let automation_id = element.get_automation_id()?;
-    // let value = element.get_property_value().unwrap();
-
-    let info = ElementInfo {
-        name,
-        bounding_rect: Rect::new(
-            bb.get_left() as f32,
-            bb.get_top() as f32,
-            bb.get_right() as f32,
-            bb.get_bottom() as f32,
-        ),
-        control_type: class_name.clone(),
-        class_name,
-        automation_id,
-        // value,
-    };
-    Ok(info)
 }
 
 fn setup(mut commands: Commands) {
@@ -121,12 +89,9 @@ fn setup(mut commands: Commands) {
         .name("Screen element hover info thread".to_string())
         .spawn(move || {
             let game_tx = game_tx_clone;
-            let automation = UIAutomation::new().unwrap();
             loop {
                 if let Ok(cursor_pos) = get_cursor_position() {
-                    if let Ok(root) = automation.element_from_point(
-                        uiautomation::types::Point::new(cursor_pos.x, cursor_pos.y),
-                    ) {
+                    if let Ok(root) = find_element_at(cursor_pos) {
                         let info = get_element_info(root);
                         match info {
                             Ok(info) => {
@@ -148,7 +113,6 @@ fn setup(mut commands: Commands) {
     thread::Builder::new()
         .name("Game element hover info thread".to_string())
         .spawn(move || {
-            let automation = UIAutomation::new().unwrap();
             loop {
                 // Block until at least one message is available
                 let mut msg = match thread_rx.recv() {
@@ -169,9 +133,7 @@ fn setup(mut commands: Commands) {
                         continue;
                     }
                     ThreadboundMessage::CursorPosition(cursor_pos) => {
-                        if let Ok(root) = automation.element_from_point(
-                            uiautomation::types::Point::new(cursor_pos.x, cursor_pos.y),
-                        ) {
+                        if let Ok(root) = find_element_at(cursor_pos) {
                             let info = get_element_info(root);
                             match info {
                                 Ok(info) => {
@@ -253,14 +215,14 @@ struct GameHoveredIndicatorTag;
 #[allow(clippy::type_complexity)]
 fn show_hovered_rect(
     mut screen_indicator: Query<
-        (Entity, &mut Sprite, &mut Transform, &mut Element),
+        (Entity, &mut Sprite, &mut Transform, &mut HoveredElement),
         (
             With<ScreenHoveredIndicatorTag>,
             Without<GameHoveredIndicatorTag>,
         ),
     >,
     mut game_indicator: Query<
-        (Entity, &mut Sprite, &mut Transform, &mut Element),
+        (Entity, &mut Sprite, &mut Transform, &mut HoveredElement),
         (
             With<GameHoveredIndicatorTag>,
             Without<ScreenHoveredIndicatorTag>,
@@ -305,7 +267,7 @@ fn show_hovered_rect(
             },
             Name::new("Screen Hovered Indicator"),
             ScreenHoveredIndicatorTag,
-            Element { info: info.clone() },
+            HoveredElement { info: info.clone() },
         ));
     }
 
@@ -344,7 +306,7 @@ fn show_hovered_rect(
             },
             Name::new("Game Hovered Indicator"),
             GameHoveredIndicatorTag,
-            Element { info: info.clone() },
+            HoveredElement { info: info.clone() },
         ));
     }
 }

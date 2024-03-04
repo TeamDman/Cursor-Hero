@@ -1,11 +1,9 @@
-use bevy::math;
 use bevy::prelude::*;
 use bevy_egui::egui;
 use bevy_egui::egui::Pos2;
 use bevy_egui::EguiContexts;
 use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
-use cursor_hero_bevy::NegativeYVec2;
 use cursor_hero_camera::camera_plugin::MainCamera;
 use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_tools::prelude::*;
@@ -20,8 +18,8 @@ impl Plugin for HoverToolPlugin {
         app.register_type::<WindowBrick>();
         app.add_systems(Update, toolbelt_events);
         app.add_systems(Update, tick);
-        app.add_systems(Update, ui);
-        app.add_systems(Startup, spawn_brick);
+        // app.add_systems(Update, ui);
+        // app.add_systems(Startup, spawn_brick);
     }
 }
 
@@ -96,7 +94,6 @@ fn spawn_brick(mut commands: Commands) {
 
 fn ui(
     mut contexts: EguiContexts,
-    time: Res<Time>,
     window_brick_query: Query<(&Name, &GlobalTransform), With<WindowBrick>>,
     camera_query: Query<(&GlobalTransform, &Camera), With<MainCamera>>,
 ) {
@@ -118,7 +115,15 @@ fn ui(
         egui::Window::new(title)
             .fixed_pos(Pos2::new(pos.x, pos.y))
             .show(contexts.ctx_mut(), |ui| {
-                ui.label("Hello, world!");
+                egui::ScrollArea::both().show(ui, |ui| {
+                    egui::CollapsingHeader::new("MATEYS")
+                    .default_open(true)
+                    .show(ui, |ui| {
+                        ui.label("Hello, world!");
+                        ui.label("Hello, world!");
+                        ui.label("Hello, world!");
+                    });
+                });
             });
     }
 }

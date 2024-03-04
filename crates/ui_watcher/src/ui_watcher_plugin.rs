@@ -141,9 +141,8 @@ fn trigger_gather_app_info(
 
 #[cfg(test)]
 mod tests {
-    use cursor_hero_winutils::ui_automation::gather_toplevel_elements;
-
-    use super::*;
+    use cursor_hero_ui_automation::prelude::gather_toplevel_elements;
+    use cursor_hero_ui_automation::prelude::AppUIElement;
 
     #[test]
     fn test_gather_app_info() -> Result<(), Box<dyn std::error::Error>> {

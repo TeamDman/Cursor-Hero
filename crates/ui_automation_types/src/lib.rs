@@ -1,3 +1,5 @@
+#![feature(trivial_bounds)]
+
 pub mod ui_automation_types;
 pub mod ui_automation_types_plugin;
 

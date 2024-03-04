@@ -62,3 +62,19 @@ impl ToBevyIRect for uiautomation::types::Rect {
         }
     }
 }
+
+
+
+#[derive(Debug, Clone)]
+#[derive(Reflect)]
+// #[reflect(no_field_bounds)] //https://github.com/bevyengine/bevy/issues/8965
+pub struct ElementInfo {
+    pub name: String,
+    pub bounding_rect: Rect,
+    pub control_type: String,
+    pub class_name: String,
+    pub automation_id: String,
+    pub runtime_id: Vec<i32>,
+    #[reflect(ignore)]
+    pub children: Vec<ElementInfo>,
+}
