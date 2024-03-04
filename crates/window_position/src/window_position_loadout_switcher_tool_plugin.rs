@@ -30,7 +30,7 @@ fn populate_toolbelts(
             event,
         )
         .guess_name(file!())
-        .with_image(asset_server.load("textures/tools/window_position.png"))
+        .with_image(asset_server.load("textures/tools/window_position.webp"))
         .with_description("Swaps to taskbar tools")
         .with_starting_state(StartingState::Inactive)
         .spawn(&mut commands);
