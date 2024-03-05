@@ -90,7 +90,9 @@ pub enum ToolbeltLoadout {
 impl ToolbeltLoadout {
     pub fn layout(&self) -> ToolbeltLayout {
         match self {
-            Self::Taskbar => ToolbeltLayout::Taskbar,
+            Self::Taskbar => ToolbeltLayout::Taskbar {
+                wheel: Wheel::default(),
+            },
             _ => ToolbeltLayout::default(),
         }
     }
@@ -99,7 +101,7 @@ impl ToolbeltLoadout {
 #[derive(Reflect, Clone, Copy, Debug)]
 pub enum ToolbeltLayout {
     Circle { wheel: Wheel },
-    Taskbar,
+    Taskbar { wheel: Wheel },
 }
 impl Default for ToolbeltLayout {
     fn default() -> Self {
