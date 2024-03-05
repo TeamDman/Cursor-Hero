@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use cursor_hero_toolbelt_types::prelude::PopulateToolbeltEvent;
+use cursor_hero_toolbelt_types::prelude::ToolbeltPopulateEvent;
 use cursor_hero_toolbelt_types::toolbelt_types::ActiveTool;
 use cursor_hero_toolbelt_types::toolbelt_types::ToolbeltLoadout;
 use cursor_hero_tools::prelude::NoInputs;
@@ -19,7 +19,7 @@ impl Plugin for WindowPositionLoadoutSwitcherToolPlugin {
 fn populate_toolbelts(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<PopulateToolbeltEvent>,
+    mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for event in reader.read() {
         if event.loadout != ToolbeltLoadout::Default {
@@ -42,12 +42,12 @@ fn populate_toolbelts(
 fn do_switch(
     mut commands: Commands,
     tool_query: Query<&Parent, (Added<ActiveTool>, With<WindowPositionLoadoutSwitcherTool>)>,
-    mut toolbelt_events: EventWriter<PopulateToolbeltEvent>,
+    mut toolbelt_events: EventWriter<ToolbeltPopulateEvent>,
 ) {
     for toolbelt_id in tool_query.iter() {
         let toolbelt_id = toolbelt_id.get();
         commands.entity(toolbelt_id).despawn_descendants();
-        toolbelt_events.send(PopulateToolbeltEvent {
+        toolbelt_events.send(ToolbeltPopulateEvent {
             id: toolbelt_id,
             loadout: ToolbeltLoadout::WindowPosition,
         });

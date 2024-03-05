@@ -38,7 +38,7 @@ impl SprintToolAction {
     }
 }
 impl ToolAction for SprintToolAction {
-    fn default_input_map(_event: &PopulateToolbeltEvent) -> Option<InputMap<SprintToolAction>> {
+    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<SprintToolAction>> {
         let mut input_map = InputMap::default();
 
         for variant in SprintToolAction::variants() {
@@ -52,7 +52,7 @@ impl ToolAction for SprintToolAction {
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<PopulateToolbeltEvent>,
+    mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for event in reader.read() {
         let (ToolbeltLoadout::Default | ToolbeltLoadout::Inspector | ToolbeltLoadout::Keyboard) =

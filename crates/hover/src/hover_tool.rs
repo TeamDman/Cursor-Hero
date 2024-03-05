@@ -20,7 +20,7 @@ struct HoverTool;
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<PopulateToolbeltEvent>,
+    mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for event in reader.read() {
         if event.loadout == ToolbeltLoadout::Inspector {

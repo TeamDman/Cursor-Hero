@@ -9,7 +9,7 @@ impl Plugin for ToolbeltTypesPlugin {
         app.register_type::<Wheel>();
         app.register_type::<Tool>();
         app.register_type::<ActiveTool>();
-        app.add_event::<PopulateToolbeltEvent>();
+        app.add_event::<ToolbeltPopulateEvent>();
         app.add_event::<ToolbeltOpeningEvent>();
         app.add_event::<ToolActivationEvent>();
     }

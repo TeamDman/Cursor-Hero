@@ -78,7 +78,7 @@ impl MovementToolAction {
     }
 }
 impl ToolAction for MovementToolAction {
-    fn default_input_map(_event: &PopulateToolbeltEvent) -> Option<InputMap<MovementToolAction>> {
+    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<MovementToolAction>> {
         let mut input_map = InputMap::default();
 
         for variant in MovementToolAction::variants() {

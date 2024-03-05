@@ -53,7 +53,7 @@ impl ChatToolAction {
     }
 }
 impl ToolAction for ChatToolAction {
-    fn default_input_map(_event: &PopulateToolbeltEvent) -> Option<InputMap<ChatToolAction>> {
+    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<ChatToolAction>> {
         let mut input_map = InputMap::default();
 
         for variant in ChatToolAction::variants() {

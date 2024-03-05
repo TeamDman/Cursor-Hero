@@ -46,7 +46,7 @@ impl Default for ScrollTool {
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<PopulateToolbeltEvent>,
+    mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for event in reader.read() {
         let (ToolbeltLoadout::Inspector | ToolbeltLoadout::Default) = event.loadout else {
@@ -83,7 +83,7 @@ impl ScrollToolAction {
     }
 }
 impl ToolAction for ScrollToolAction {
-    fn default_input_map(_event: &PopulateToolbeltEvent) -> Option<InputMap<ScrollToolAction>> {
+    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<ScrollToolAction>> {
         let mut input_map = InputMap::default();
 
         for variant in ScrollToolAction::variants() {

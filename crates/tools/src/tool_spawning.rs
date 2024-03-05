@@ -13,7 +13,7 @@ use std::path::PathBuf;
 pub enum NoInputs {}
 
 impl ToolAction for NoInputs {
-    fn default_input_map(_event: &PopulateToolbeltEvent) -> Option<InputMap<Self>> {
+    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<Self>> {
         None
     }
 }
@@ -24,7 +24,7 @@ where
     Action: ToolAction + Actionlike,
 {
     tag: T,
-    event: PopulateToolbeltEvent,
+    event: ToolbeltPopulateEvent,
     name: String,
     description: String,
     display_actions: HashMap<String, Vec<UserInput>>,
@@ -41,7 +41,7 @@ where
     T: Bundle,
     Action: ToolAction + Actionlike + core::fmt::Debug,
 {
-    pub fn new(tag: T, toolbelt_id: Entity, event: &PopulateToolbeltEvent) -> Self {
+    pub fn new(tag: T, toolbelt_id: Entity, event: &ToolbeltPopulateEvent) -> Self {
         Self {
             tag,
             event: *event,
@@ -206,7 +206,7 @@ where
 #[allow(clippy::too_many_arguments)]
 fn spawn_tool_impl(
     tool: Tool,
-    event: &PopulateToolbeltEvent,
+    event: &ToolbeltPopulateEvent,
     commands: &mut Commands,
     toolbelt_id: Entity,
     _asset_server: &Res<AssetServer>,
@@ -249,7 +249,7 @@ fn spawn_tool_impl(
 #[allow(clippy::too_many_arguments)]
 pub fn spawn_action_tool<T>(
     tool: Tool,
-    event: &PopulateToolbeltEvent,
+    event: &ToolbeltPopulateEvent,
     commands: &mut Commands,
     toolbelt_id: Entity,
     _character_id: Entity,
@@ -296,7 +296,7 @@ impl StartingState {
 #[allow(clippy::too_many_arguments)]
 pub fn spawn_tool(
     tool: Tool,
-    event: &PopulateToolbeltEvent,
+    event: &ToolbeltPopulateEvent,
     commands: &mut Commands,
     toolbelt_id: Entity,
     _character_id: Entity,

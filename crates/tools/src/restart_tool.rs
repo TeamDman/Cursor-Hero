@@ -27,7 +27,7 @@ struct RestartTool;
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<PopulateToolbeltEvent>,
+    mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for event in reader.read() {
         let (ToolbeltLoadout::Inspector | ToolbeltLoadout::Default) = event.loadout else {
@@ -63,7 +63,7 @@ impl RestartToolAction {
     }
 }
 impl ToolAction for RestartToolAction {
-    fn default_input_map(_event: &PopulateToolbeltEvent) -> Option<InputMap<RestartToolAction>> {
+    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<RestartToolAction>> {
         let mut input_map = InputMap::default();
 
         for variant in RestartToolAction::variants() {

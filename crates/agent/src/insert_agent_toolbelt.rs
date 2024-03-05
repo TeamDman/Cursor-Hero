@@ -13,14 +13,14 @@ impl Plugin for InsertAgentToolbeltPlugin {
 
 pub fn insert_agent_toolbelt(
     mut commands: Commands,
-    mut writer: EventWriter<PopulateToolbeltEvent>,
+    mut writer: EventWriter<ToolbeltPopulateEvent>,
     fresh_characters: Query<Entity, (Added<Agent>, With<Character>)>,
 ) {
     for character in fresh_characters.iter() {
         let character_id = character;
         commands.entity(character_id).with_children(|c_commands| {
             let toolbelt = c_commands.spawn(ToolbeltBundle::default());
-            writer.send(PopulateToolbeltEvent {
+            writer.send(ToolbeltPopulateEvent {
                 id: toolbelt.id(),
                 loadout: ToolbeltLoadout::Agent,
             });

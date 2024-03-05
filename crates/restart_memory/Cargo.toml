@@ -10,6 +10,7 @@ bevy = { workspace = true }
 cursor_hero_winutils = { workspace = true }
 cursor_hero_character_types = { workspace = true }
 cursor_hero_camera = { workspace = true }
+cursor_hero_toolbelt_types = { workspace = true }
 cursor_hero_voice_to_text_types = { workspace = true }
 cursor_hero_secret_types = { workspace = true }
 cursor_hero_observation_types = { workspace = true }

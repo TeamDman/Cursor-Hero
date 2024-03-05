@@ -9,7 +9,7 @@ pub mod tool_help_click;
 pub mod tool_help_populate;
 pub mod tool_visibility;
 pub mod toolbelt_circle_layout_plugin;
-pub mod toolbelt_layout_plugin;
+pub mod toolbelt_properties_plugin;
 pub mod toolbelt_opening_plugin;
 pub mod toolbelt_plugin;
 pub mod toolbelt_taskbar_layout_plugin;

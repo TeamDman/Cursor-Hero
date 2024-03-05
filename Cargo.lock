@@ -2360,6 +2360,7 @@ dependencies = [
  "cursor_hero_character_types",
  "cursor_hero_observation_types",
  "cursor_hero_secret_types",
+ "cursor_hero_toolbelt_types",
  "cursor_hero_voice_to_text_types",
  "cursor_hero_winutils",
  "raw-window-handle",
@@ -2523,6 +2524,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "leafwing-input-manager",
+ "serde",
 ]
 
 [[package]]

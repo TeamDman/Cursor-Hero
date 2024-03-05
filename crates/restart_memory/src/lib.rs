@@ -51,6 +51,7 @@ enum PersistSuccess {
 enum RestoreError {
     Io(std::io::Error),
     Json(serde_json::Error),
+    Query,
 }
 
 #[derive(Debug)]

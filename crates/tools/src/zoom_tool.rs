@@ -50,7 +50,7 @@ impl Default for ZoomTool {
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<PopulateToolbeltEvent>,
+    mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for event in reader.read() {
         let (ToolbeltLoadout::Default | ToolbeltLoadout::Inspector) = event.loadout else {
@@ -87,7 +87,7 @@ impl ZoomToolAction {
     }
 }
 impl ToolAction for ZoomToolAction {
-    fn default_input_map(_event: &PopulateToolbeltEvent) -> Option<InputMap<ZoomToolAction>> {
+    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<ZoomToolAction>> {
         let mut input_map = InputMap::default();
 
         for variant in ZoomToolAction::variants() {

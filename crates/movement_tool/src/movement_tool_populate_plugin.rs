@@ -14,7 +14,7 @@ impl Plugin for MovementToolPopulatePlugin {
 fn handle_toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<PopulateToolbeltEvent>,
+    mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for event in reader.read() {
         match event.loadout {

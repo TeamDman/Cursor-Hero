@@ -16,7 +16,7 @@ impl Plugin for FullscreenToolPopulatePlugin {
 fn handle_toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<PopulateToolbeltEvent>,
+    mut reader: EventReader<ToolbeltPopulateEvent>,
     window_query: Query<&Window, With<PrimaryWindow>>,
 ) {
     for event in reader.read() {

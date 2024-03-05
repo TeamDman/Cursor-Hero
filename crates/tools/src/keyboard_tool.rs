@@ -48,7 +48,7 @@ impl Default for KeyboardTool {
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<PopulateToolbeltEvent>,
+    mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for event in reader.read() {
         if event.loadout != ToolbeltLoadout::Keyboard {
@@ -139,7 +139,7 @@ impl KeyboardToolAction {
 }
 
 impl ToolAction for KeyboardToolAction {
-    fn default_input_map(_event: &PopulateToolbeltEvent) -> Option<InputMap<KeyboardToolAction>> {
+    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<KeyboardToolAction>> {
         let mut input_map = InputMap::default();
 
         for variant in KeyboardToolAction::variants() {

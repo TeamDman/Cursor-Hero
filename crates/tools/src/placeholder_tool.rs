@@ -48,7 +48,7 @@ impl PlaceholderToolAction {
 }
 impl ToolAction for PlaceholderToolAction {
     fn default_input_map(
-        _event: &PopulateToolbeltEvent,
+        _event: &ToolbeltPopulateEvent,
     ) -> Option<InputMap<PlaceholderToolAction>> {
         let mut input_map = InputMap::default();
 
@@ -63,7 +63,7 @@ impl ToolAction for PlaceholderToolAction {
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<PopulateToolbeltEvent>,
+    mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for event in reader.read() {
         let ToolbeltLoadout::Default = event.loadout else {

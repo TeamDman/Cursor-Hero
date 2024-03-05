@@ -18,7 +18,7 @@ struct InspectWheelTool;
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<PopulateToolbeltEvent>,
+    mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for event in reader.read() {
         let ToolbeltLoadout::Default = event.loadout else {
@@ -37,12 +37,12 @@ fn toolbelt_events(
 fn tick(
     mut commands: Commands,
     tool_query: Query<&Parent, (Added<ActiveTool>, With<InspectWheelTool>)>,
-    mut toolbelt_events: EventWriter<PopulateToolbeltEvent>,
+    mut toolbelt_events: EventWriter<ToolbeltPopulateEvent>,
 ) {
     for toolbelt_id in tool_query.iter() {
         let toolbelt_id = toolbelt_id.get();
         commands.entity(toolbelt_id).despawn_descendants();
-        toolbelt_events.send(PopulateToolbeltEvent {
+        toolbelt_events.send(ToolbeltPopulateEvent {
             id: toolbelt_id,
             loadout: ToolbeltLoadout::Inspector,
         });

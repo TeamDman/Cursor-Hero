@@ -7,7 +7,7 @@ use cursor_hero_camera::camera_plugin::CameraEvent;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_environment_types::prelude::*;
 use cursor_hero_physics::damping_plugin::MovementDamping;
-use cursor_hero_toolbelt_types::toolbelt_types::PopulateToolbeltEvent;
+use cursor_hero_toolbelt_types::toolbelt_types::ToolbeltPopulateEvent;
 use cursor_hero_toolbelt_types::toolbelt_types::ToolbeltBundle;
 use cursor_hero_toolbelt_types::toolbelt_types::ToolbeltLoadout;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
@@ -23,7 +23,7 @@ fn spawn_character(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut camera_events: EventWriter<CameraEvent>,
-    mut writer: EventWriter<PopulateToolbeltEvent>,
+    mut writer: EventWriter<ToolbeltPopulateEvent>,
 ) {
     let os_cursor_pos = match get_cursor_position() {
         Ok(pos) => pos,
@@ -64,7 +64,7 @@ fn spawn_character(
     let character_id = character.id();
     character.with_children(|c_commands| {
         let toolbelt = c_commands.spawn(ToolbeltBundle::default());
-        writer.send(PopulateToolbeltEvent {
+        writer.send(ToolbeltPopulateEvent {
             id: toolbelt.id(),
             loadout: ToolbeltLoadout::default(),
         });

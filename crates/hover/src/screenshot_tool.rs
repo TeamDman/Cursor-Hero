@@ -69,7 +69,7 @@ struct ScreenshotBrick {
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<PopulateToolbeltEvent>,
+    mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for event in reader.read() {
         if event.loadout == ToolbeltLoadout::Inspector {
@@ -107,7 +107,7 @@ impl ScreenshotToolAction {
     }
 }
 impl ToolAction for ScreenshotToolAction {
-    fn default_input_map(_event: &PopulateToolbeltEvent) -> Option<InputMap<ScreenshotToolAction>> {
+    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<ScreenshotToolAction>> {
         let mut input_map = InputMap::default();
 
         for variant in ScreenshotToolAction::variants() {

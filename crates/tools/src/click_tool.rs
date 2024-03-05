@@ -39,7 +39,7 @@ struct ClickTool;
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<PopulateToolbeltEvent>,
+    mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for event in reader.read() {
         if let ToolbeltLoadout::Default | ToolbeltLoadout::Keyboard = event.loadout {
@@ -132,7 +132,7 @@ impl ClickToolAction {
 }
 
 impl ToolAction for ClickToolAction {
-    fn default_input_map(event: &PopulateToolbeltEvent) -> Option<InputMap<ClickToolAction>> {
+    fn default_input_map(event: &ToolbeltPopulateEvent) -> Option<InputMap<ClickToolAction>> {
         match event.loadout {
             ToolbeltLoadout::Default => Some(Self::with_defaults(
                 Self::default_wheel_gamepad_binding,

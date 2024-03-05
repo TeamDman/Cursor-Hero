@@ -32,7 +32,7 @@ struct TaskbarEntryTool {
 fn toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<PopulateToolbeltEvent>,
+    mut reader: EventReader<ToolbeltPopulateEvent>,
     access: ScreensToImageParam,
 ) {
     for event in reader.read() {
@@ -83,12 +83,12 @@ fn toolbelt_events(
 fn tick_wheel_switcher(
     mut commands: Commands,
     tool_query: Query<&Parent, (Added<ActiveTool>, With<TaskbarWheelTool>)>,
-    mut toolbelt_events: EventWriter<PopulateToolbeltEvent>,
+    mut toolbelt_events: EventWriter<ToolbeltPopulateEvent>,
 ) {
     for toolbelt_id in tool_query.iter() {
         let toolbelt_id = toolbelt_id.get();
         commands.entity(toolbelt_id).despawn_descendants();
-        toolbelt_events.send(PopulateToolbeltEvent {
+        toolbelt_events.send(ToolbeltPopulateEvent {
             id: toolbelt_id,
             loadout: ToolbeltLoadout::Taskbar,
         });
@@ -100,7 +100,7 @@ fn tick_taskbar_switcher(
     tool_query: Query<(&Parent, &TaskbarEntryTool), Added<ActiveTool>>,
     toolbelt_query: Query<&Parent, With<Toolbelt>>,
     mut character_query: Query<&mut Position>,
-    mut toolbelt_events: EventWriter<PopulateToolbeltEvent>,
+    mut toolbelt_events: EventWriter<ToolbeltPopulateEvent>,
 ) {
     for (toolbelt_id, tool) in tool_query.iter() {
         let toolbelt_id = toolbelt_id.get();
@@ -108,7 +108,7 @@ fn tick_taskbar_switcher(
             info!("Switching toolbelt {:?} to default tools", toolbelt_id);
             let character_id = character_id.get();
             commands.entity(toolbelt_id).despawn_descendants();
-            toolbelt_events.send(PopulateToolbeltEvent {
+            toolbelt_events.send(ToolbeltPopulateEvent {
                 id: toolbelt_id,
                 loadout: ToolbeltLoadout::Default,
             });

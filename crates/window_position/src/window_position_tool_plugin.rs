@@ -10,7 +10,7 @@ use cursor_hero_bevy::prelude::IRectScale;
 use cursor_hero_bevy::prelude::TopLeftI;
 use cursor_hero_bevy::prelude::TranslateIVec2;
 use cursor_hero_math::prelude::Corner;
-use cursor_hero_toolbelt_types::prelude::PopulateToolbeltEvent;
+use cursor_hero_toolbelt_types::prelude::ToolbeltPopulateEvent;
 use cursor_hero_toolbelt_types::toolbelt_types::ActiveTool;
 use cursor_hero_toolbelt_types::toolbelt_types::ToolbeltLoadout;
 use cursor_hero_tools::prelude::NoInputs;
@@ -36,7 +36,7 @@ impl Plugin for WindowPositionToolPlugin {
 
 fn populate_toolbelts(
     mut commands: Commands,
-    mut reader: EventReader<PopulateToolbeltEvent>,
+    mut reader: EventReader<ToolbeltPopulateEvent>,
     mut textures: ResMut<Assets<Image>>,
 ) {
     for event in reader.read() {

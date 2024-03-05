@@ -47,7 +47,7 @@ impl WindowSwapToolAction {
     }
 }
 impl ToolAction for WindowSwapToolAction {
-    fn default_input_map(_event: &PopulateToolbeltEvent) -> Option<InputMap<WindowSwapToolAction>> {
+    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<WindowSwapToolAction>> {
         let mut input_map = InputMap::default();
 
         for variant in WindowSwapToolAction::variants() {

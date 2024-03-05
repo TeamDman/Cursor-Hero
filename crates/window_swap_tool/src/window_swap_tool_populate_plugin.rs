@@ -14,10 +14,10 @@ impl Plugin for WindowSwapToolPopulatePlugin {
 fn handle_toolbelt_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut reader: EventReader<PopulateToolbeltEvent>,
+    mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for event in reader.read() {
-        let PopulateToolbeltEvent {
+        let ToolbeltPopulateEvent {
             loadout: ToolbeltLoadout::WindowPosition,
             ..
         } = event

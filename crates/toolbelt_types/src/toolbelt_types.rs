@@ -4,6 +4,7 @@ use bevy::prelude::*;
 use bevy::utils::HashMap;
 use leafwing_input_manager::prelude::*;
 use leafwing_input_manager::user_input::InputKind;
+use serde::{Deserialize, Serialize};
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
 pub enum ToolbeltAction {
@@ -34,7 +35,7 @@ impl ToolbeltAction {
     }
 }
 
-#[derive(Component, Reflect, Clone, Copy, Debug)]
+#[derive(Component, Reflect, Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Toolbelt {
     pub open: bool,
     pub loadout: ToolbeltLoadout,
@@ -76,7 +77,7 @@ impl Default for ToolbeltBundle {
     }
 }
 
-#[derive(Reflect, Clone, Copy, Debug, Default, Eq, PartialEq)]
+#[derive(Reflect, Clone, Copy, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
 pub enum ToolbeltLoadout {
     #[default]
     Default,
@@ -98,7 +99,7 @@ impl ToolbeltLoadout {
     }
 }
 
-#[derive(Reflect, Clone, Copy, Debug)]
+#[derive(Reflect, Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 pub enum ToolbeltLayout {
     Circle { wheel: Wheel },
     Taskbar { wheel: Wheel },
@@ -112,7 +113,7 @@ impl Default for ToolbeltLayout {
 }
 
 #[derive(Event, Debug, Reflect, Clone, Copy)]
-pub struct PopulateToolbeltEvent {
+pub struct ToolbeltPopulateEvent {
     pub id: Entity,
     pub loadout: ToolbeltLoadout,
 }
@@ -123,7 +124,7 @@ pub enum ToolbeltOpeningEvent {
     Closed { toolbelt_id: Entity },
 }
 
-#[derive(Component, Reflect, Clone, Copy, Debug)]
+#[derive(Component, Reflect, Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Wheel {
     pub radius: f32,
     pub radius_start: f32,
@@ -174,7 +175,7 @@ pub struct Tool {
 pub struct ToolHelpTrigger;
 
 pub trait ToolAction: Actionlike {
-    fn default_input_map(_event: &PopulateToolbeltEvent) -> Option<InputMap<Self>>;
+    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<Self>>;
     fn with_defaults<G, K>(gamepad: G, keyboard: K) -> InputMap<Self>
     where
         G: Fn(&Self) -> UserInput,

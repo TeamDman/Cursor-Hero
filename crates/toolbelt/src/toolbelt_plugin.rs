@@ -11,7 +11,7 @@ use crate::tool_help_click::help_click_listener;
 use crate::tool_help_populate::tool_help_lifecycle;
 use crate::tool_visibility::tool_visibility;
 use crate::toolbelt_circle_layout_plugin::ToolbeltCircleLayoutPlugin;
-use crate::toolbelt_layout_plugin::ToolbeltLayoutPlugin;
+use crate::toolbelt_properties_plugin::ToolbeltPropertiesPlugin;
 use crate::toolbelt_opening_plugin::ToolbeltOpeningPlugin;
 use crate::toolbelt_taskbar_layout_plugin::ToolbeltTaskbarLayoutPlugin;
 use crate::wheel_audio::wheel_audio;
@@ -21,7 +21,7 @@ pub struct ToolbeltPlugin;
 impl Plugin for ToolbeltPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(ToolbeltOpeningPlugin);
-        app.add_plugins(ToolbeltLayoutPlugin);
+        app.add_plugins(ToolbeltPropertiesPlugin);
         app.add_plugins(ToolbeltCircleLayoutPlugin);
         app.add_plugins(ToolbeltTaskbarLayoutPlugin);
         app.add_plugins(InputManagerPlugin::<ToolbeltAction>::default());
