@@ -17,20 +17,20 @@ fn handle_toolbelt_events(
     mut reader: EventReader<PopulateToolbeltEvent>,
 ) {
     for event in reader.read() {
-        match event {
-            PopulateToolbeltEvent::Default { toolbelt_id } => {
-                ToolSpawnConfig::<_, {{crate_name_pascal}}ToolAction>::new(
-                    {{crate_name_pascal}}Tool::default(),
-                    event.id,
-                    event,
-                )
-                .with_src_path(file!().into())
-                .guess_name(file!())
-                .guess_image(file!(), &asset_server, "png")
-                .with_description("REPLACE THIS DESCRIPTION!!!")
-                .spawn(&mut commands);
-            }
-            _ => {}
+        let PopulateToolbeltEvent::Default { toolbelt_id, .. } = event else {
+            continue;
+        };
+        PopulateToolbeltEvent::Default { toolbelt_id } => {
+            ToolSpawnConfig::<_, {{crate_name_pascal}}ToolAction>::new(
+                {{crate_name_pascal}}Tool::default(),
+                event.id,
+                event,
+            )
+            .with_src_path(file!().into())
+            .guess_name(file!())
+            .guess_image(file!(), &asset_server, "png")
+            .with_description("REPLACE THIS DESCRIPTION!!!")
+            .spawn(&mut commands);
         }
     }
 }

@@ -8,5 +8,7 @@ impl Plugin for WindowPositionTypesPlugin {
         app.register_type::<crate::window_position_types::HostWindowPosition>();
         app.register_type::<WindowPositionLoadoutSwitcherTool>();
         app.register_type::<WindowPositionTool>();
+        app.register_type::<WindowPositionCommand>();
+        app.register_type::<WindowPositionCommandQueue>();
     }
 }

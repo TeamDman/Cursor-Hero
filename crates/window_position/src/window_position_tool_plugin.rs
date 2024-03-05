@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy::window::WindowMode;
@@ -221,15 +223,18 @@ fn do_position(
                     continue;
                 };
                 debug!("Activating fullscreen on monitor: {}", monitor.name);
+                window.mode = WindowMode::Windowed;
+                std::thread::sleep(Duration::from_millis(1000)); // Ensure fullscreen takes hold properly
                 window.position = WindowPosition::At(monitor.work_area.top_left());
                 window.resolution = WindowResolution::new(
                     monitor.work_area.width() as f32,
                     monitor.work_area.height() as f32,
                 );
-                window.mode = WindowMode::BorderlessFullscreen;
                 if let Err(e) = set_cursor_position(monitor.work_area.center()) {
                     warn!("Failed to set cursor position: {}", e);
                 }
+                std::thread::sleep(Duration::from_millis(1000)); // Ensure fullscreen takes hold properly
+                window.mode = WindowMode::BorderlessFullscreen;
                 commands.entity(tool_id).remove::<ActiveTool>();
             }
         }

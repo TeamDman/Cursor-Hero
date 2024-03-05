@@ -463,7 +463,7 @@ fn spawn_brick(
         Name::new(format!("Element - {}", element_info.name)),
     ));
 }
-w
+
 fn ui(
     mut commands: Commands,
     screen_access: ScreensToImageParam,
