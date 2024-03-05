@@ -24,8 +24,9 @@ use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_tools::cube_tool::CubeToolInteractable;
 use cursor_hero_tools::prelude::*;
 use cursor_hero_ui_automation::prelude::find_element_at;
+use cursor_hero_ui_automation::prelude::gather_deep_element_info;
 use cursor_hero_ui_automation::prelude::gather_elements_at;
-use cursor_hero_ui_automation::prelude::get_element_info;
+use cursor_hero_ui_automation::prelude::gather_shallow_element_info;
 use cursor_hero_ui_automation::prelude::ElementInfo;
 use leafwing_input_manager::prelude::*;
 use rand::thread_rng;
@@ -159,7 +160,11 @@ fn process_thread_message(
 
             let id = elem.get_automation_id()?;
             info!("Automation ID: {}", id);
-            let element_info = get_element_info(elem)?;
+            let element_info = match action {
+                ThreadboundMessage::Capture { .. } => gather_shallow_element_info(elem)?,
+                ThreadboundMessage::CaptureBrick { .. } => gather_deep_element_info(elem)?,
+                _ => unreachable!(),
+            };
             let msg = match action {
                 ThreadboundMessage::Capture { world_position } => GameboundMessage::Capture {
                     element_info,
@@ -188,7 +193,7 @@ fn process_thread_message(
             // Send the info
             let id = elem.get_automation_id()?;
             info!("Automation ID: {}", id);
-            let info = get_element_info(elem)?;
+            let info = gather_shallow_element_info(elem)?;
             reply_tx.send(GameboundMessage::Print(info))?;
         }
         ThreadboundMessage::Fracture { world_position } => {
@@ -198,7 +203,11 @@ fn process_thread_message(
             let found = gather_elements_at(mouse_position)?;
             let data = found
                 .into_iter()
-                .filter_map(|(elem, depth)| get_element_info(elem).ok().map(|info| (info, depth)))
+                .filter_map(|(elem, depth)| {
+                    gather_shallow_element_info(elem)
+                        .ok()
+                        .map(|info| (info, depth))
+                })
                 .collect();
             reply_tx.send(GameboundMessage::Fracture {
                 data,
@@ -486,17 +495,26 @@ fn ui_for_element_info(
     let type_registry = type_registry.read();
 
     let mut inspector = InspectorUi::for_bevy(&type_registry, &mut cx);
+    ui_for_element_info_inner(ui, element_info, &mut inspector);
+}
+
+fn ui_for_element_info_inner(
+    ui: &mut egui::Ui,
+    element_info: &mut ElementInfo,
+    inspector: &mut InspectorUi,
+) {
     egui::CollapsingHeader::new(format!("Element Info - {}", element_info.name))
         .default_open(true)
         .show(ui, |ui| {
             inspector.ui_for_reflect(element_info, ui);
-            // ui_for_reflect()
-            // ui.label(format!("name: {}", element_info.name));
-            // ui.label(format!("bounding_rect: {}", element_info.class_name));
-            // ui.label(format!("class_name: {}", element_info.class_name));
-            // ui.label(format!("automation_id: {}", element_info.id));
-            // ui.label(format!("runtime_id: {}", element_info.id));
-            // ui.label(format!("children: {}", element_info.tag));
-            // ui.label(format!("Bounding Rect: {:?}", element_info.bounding_rect));
+            if let Some(children) = &mut element_info.children {
+                egui::CollapsingHeader::new("Children")
+                    .default_open(!children.is_empty())
+                    .show(ui, |ui| {
+                        for child in children.iter_mut() {
+                            ui_for_element_info_inner(ui, child, inspector);
+                        }
+                    });
+            }
         });
 }

@@ -73,5 +73,5 @@ pub struct ElementInfo {
     pub automation_id: String,
     pub runtime_id: Vec<i32>,
     #[reflect(ignore)]
-    pub children: Vec<ElementInfo>,
+    pub children: Option<Vec<ElementInfo>>,
 }

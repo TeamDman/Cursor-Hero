@@ -6,7 +6,7 @@ use crossbeam_channel::bounded;
 use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
 use cursor_hero_ui_automation::prelude::find_element_at;
-use cursor_hero_ui_automation::prelude::get_element_info;
+use cursor_hero_ui_automation::prelude::gather_shallow_element_info;
 use cursor_hero_ui_automation::prelude::ElementInfo;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
 
@@ -92,7 +92,7 @@ fn setup(mut commands: Commands) {
             loop {
                 if let Ok(cursor_pos) = get_cursor_position() {
                     if let Ok(root) = find_element_at(cursor_pos) {
-                        let info = get_element_info(root);
+                        let info = gather_shallow_element_info(root);
                         match info {
                             Ok(info) => {
                                 game_tx
@@ -134,7 +134,7 @@ fn setup(mut commands: Commands) {
                     }
                     ThreadboundMessage::CursorPosition(cursor_pos) => {
                         if let Ok(root) = find_element_at(cursor_pos) {
-                            let info = get_element_info(root);
+                            let info = gather_shallow_element_info(root);
                             match info {
                                 Ok(info) => {
                                     game_tx.send(GameboundMessage::GameHoverInfo(info)).unwrap();

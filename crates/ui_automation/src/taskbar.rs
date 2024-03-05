@@ -17,7 +17,7 @@ pub fn get_taskbar() -> Result<Taskbar, uiautomation::Error> {
     let taskbar_entries = gather_children(
         &taskbar_entry_walker,
         &taskbar,
-        GatherChildrenStopBehaviour::TaskbarEndEncountered,
+        &GatherChildrenStopBehaviour::TaskbarEndEncountered,
     );
     let entries = taskbar_entries
         .into_iter()

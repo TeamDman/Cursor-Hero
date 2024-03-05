@@ -38,7 +38,7 @@ impl GatherChildrenStopBehaviourFn for TaskbarEndEncountered {
 pub fn gather_children(
     walker: &UITreeWalker,
     parent: &UIElement,
-    stop_behaviour: GatherChildrenStopBehaviour,
+    stop_behaviour: &GatherChildrenStopBehaviour,
 ) -> Vec<UIElement> {
     let stop: Box<dyn GatherChildrenStopBehaviourFn> = match stop_behaviour {
         GatherChildrenStopBehaviour::EndOfSiblings => Box::new(EndOfSiblings),
