@@ -1,14 +1,11 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
-use bevy::window::RawHandleWrapper;
 use bevy::window::WindowMode;
 use bevy::window::WindowResolution;
 use cursor_hero_bevy::prelude::BottomRightI;
 use cursor_hero_bevy::prelude::CornerOfIRect;
-use cursor_hero_bevy::prelude::IExpandable;
 use cursor_hero_bevy::prelude::IRectScale;
 use cursor_hero_bevy::prelude::TopLeftI;
-use cursor_hero_bevy::prelude::TopRightI;
 use cursor_hero_bevy::prelude::TranslateIVec2;
 use cursor_hero_math::prelude::Corner;
 use cursor_hero_toolbelt_types::prelude::PopulateToolbeltEvent;
@@ -36,7 +33,6 @@ impl Plugin for WindowPositionToolPlugin {
 
 fn populate_toolbelts(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
     mut reader: EventReader<PopulateToolbeltEvent>,
     mut textures: ResMut<Assets<Image>>,
 ) {
@@ -150,8 +146,7 @@ fn image_for_monitor_corner(
             *pixel = Rgba([0u8, 255u8, 0u8, 255u8]);
         }
     }
-    let image = Image::from_dynamic(imgbuf.into(), true);
-    image
+    Image::from_dynamic(imgbuf.into(), true)
 }
 
 fn image_for_monitor(icon_size: UVec2, world: IRect, monitor: &Monitor) -> Image {
@@ -169,14 +164,13 @@ fn image_for_monitor(icon_size: UVec2, world: IRect, monitor: &Monitor) -> Image
             *pixel = Rgba([0u8, 0u8, 255u8, 255u8]);
         }
     }
-    let image = Image::from_dynamic(imgbuf.into(), true);
-    image
+    Image::from_dynamic(imgbuf.into(), true)
 }
 
 fn do_position(
     mut commands: Commands,
     tool_query: Query<(Entity, &WindowPositionTool), With<ActiveTool>>,
-    mut window_query: Query<(&RawHandleWrapper, &mut Window), With<PrimaryWindow>>,
+    mut window_query: Query<&mut Window, With<PrimaryWindow>>,
 ) {
     let Ok(monitor_infos) = get_monitor_infos() else {
         return;
@@ -188,12 +182,7 @@ fn do_position(
             error!("No primary window found");
             return;
         };
-        let (window_handle, mut window) = window;
-        let win32handle = match window_handle.window_handle {
-            raw_window_handle::RawWindowHandle::Win32(handle) => handle,
-            _ => panic!("Unsupported window handle"),
-        };
-
+        let mut window = window;
         match tool.window_position {
             HostWindowPosition::Corner {
                 ref corner,

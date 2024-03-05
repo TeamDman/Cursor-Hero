@@ -1,5 +1,3 @@
-use bevy::math::IRect;
-use bevy::math::IVec2;
 use bevy::reflect::Reflect;
 
 #[derive(Debug, Reflect, Eq, Clone, PartialEq, Hash)]

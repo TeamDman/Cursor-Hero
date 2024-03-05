@@ -1,8 +1,6 @@
 use bevy::math::IRect;
-use bevy::math::IVec2;
 use bevy::math::Rect;
 use bevy::math::URect;
-use bevy::math::UVec2;
 use bevy::math::Vec2;
 
 pub trait RectScale {

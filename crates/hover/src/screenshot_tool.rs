@@ -1,15 +1,11 @@
-use bevy::ecs::system::CommandQueue;
 use bevy::prelude::*;
-use bevy::reflect::TypeRegistry;
 use bevy::window::PrimaryWindow;
 use bevy_egui::egui;
 use bevy_egui::egui::Pos2;
-use bevy_egui::systems::update_window_contexts_system;
 use bevy_egui::EguiContext;
 use bevy_egui::EguiContexts;
 use bevy_inspector_egui::reflect_inspector::Context;
 use bevy_inspector_egui::reflect_inspector::InspectorUi;
-use bevy_inspector_egui::restricted_world_view::RestrictedWorldView;
 use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
 use crossbeam_channel::bounded;
@@ -486,7 +482,7 @@ fn ui_for_element_info(
         queue: None,
     };
 
-    let type_registry = (*type_registry).0.clone();
+    let type_registry = type_registry.0.clone();
     let type_registry = type_registry.read();
 
     let mut inspector = InspectorUi::for_bevy(&type_registry, &mut cx);

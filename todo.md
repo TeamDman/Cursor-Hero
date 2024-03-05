@@ -2,16 +2,14 @@
 
 ## Active
 
-- window position tool custom layout
 
 ## Up Next
 
-- fix r3 position cursor at title bar
 
 
 ## Grab Bag
 
-
+- fix r3 position cursor at title bar
 - emoji text in world and in egui test
 - add world representation of all our cursor_hero crates where clicking them will toggle their log level to warn
   - button to set all scope to warn and all open tabs to trace
