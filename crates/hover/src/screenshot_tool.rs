@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy_egui::egui;
+use bevy_egui::egui::text_edit;
 use bevy_egui::egui::Pos2;
 use bevy_egui::EguiContext;
 use bevy_egui::EguiContexts;
@@ -28,6 +29,7 @@ use cursor_hero_ui_automation::prelude::gather_deep_element_info;
 use cursor_hero_ui_automation::prelude::gather_elements_at;
 use cursor_hero_ui_automation::prelude::gather_shallow_element_info;
 use cursor_hero_ui_automation::prelude::ElementInfo;
+use itertools::Itertools;
 use leafwing_input_manager::prelude::*;
 use rand::thread_rng;
 use rand::Rng;
@@ -521,6 +523,7 @@ fn ui(
             .id(egui::Id::new(brick_id))
             .fixed_pos(Pos2::new(egui_pos.x, egui_pos.y))
             .show(ctx, |ui| {
+                // ui.heading("AHOY!");
                 egui::ScrollArea::both().show(ui, |ui| {
                     ui_for_element_info(
                         &mut commands,
@@ -534,6 +537,11 @@ fn ui(
                 });
             });
     }
+}
+
+#[derive(Reflect, Debug)]
+struct ElementUIData {
+    runtime_id: String,
 }
 
 fn ui_for_element_info(
@@ -558,7 +566,21 @@ fn ui_for_element_info(
                     asset_server,
                 )
             }
-            inspector.ui_for_reflect(element_info, ui);
+            // inspector.ui_for_reflect(element_info, ui);
+            let mut data = ElementUIData {
+                runtime_id: format!(
+                    "[{}]",
+                    element_info
+                        .runtime_id
+                        .iter()
+                        .map(|x| format!("{:x}", x).to_string())
+                        .collect_vec()
+                        .join(",")
+                ),
+            };
+            inspector.ui_for_reflect_readonly(&data, ui);
+            ui.text_edit_singleline(&mut data.runtime_id);
+            // inspector.ui_for_reflect(&mut data, ui);
             if let Some(children) = &mut element_info.children {
                 egui::CollapsingHeader::new("Children")
                     .default_open(!children.is_empty())

@@ -1,11 +1,11 @@
 use bevy::prelude::*;
-use cursor_hero_{{crate_name}}_tool_types::prelude::*;
 use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_tools::tool_spawning::ToolSpawnConfig;
+use cursor_hero_window_swap_tool_types::prelude::*;
 
-pub struct {{crate_name_pascal}}ToolPopulatePlugin;
+pub struct WindowSwapToolPopulatePlugin;
 
-impl Plugin for {{crate_name_pascal}}ToolPopulatePlugin {
+impl Plugin for WindowSwapToolPopulatePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, handle_toolbelt_events);
     }
@@ -24,15 +24,11 @@ fn handle_toolbelt_events(
         else {
             continue;
         };
-        ToolSpawnConfig::<_, {{crate_name_pascal}}ToolAction>::new(
-            {{crate_name_pascal}}Tool::default(),
-            event.id,
-            event,
-        )
-        .with_src_path(file!().into())
-        .guess_name(file!())
-        .guess_image(file!(), &asset_server, "webp")
-        .with_description("REPLACE THIS DESCRIPTION!!!")
-        .spawn(&mut commands);
+        ToolSpawnConfig::<_, WindowSwapToolAction>::new(WindowSwapTool::default(), event.id, event)
+            .with_src_path(file!().into())
+            .guess_name(file!())
+            .guess_image(file!(), &asset_server, "webp")
+            .with_description("Swap the positions of windows.")
+            .spawn(&mut commands);
     }
 }

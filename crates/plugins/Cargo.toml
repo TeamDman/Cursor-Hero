@@ -7,6 +7,8 @@ edition = "2021"
 
 
 [dependencies]
+cursor_hero_window_swap_tool = { workspace = true }
+cursor_hero_window_swap_tool_types = { workspace = true }
 cursor_hero_host_fs = { workspace = true }
 cursor_hero_host_fs_types = { workspace = true }
 cursor_hero_window_position = { workspace = true }

@@ -85,10 +85,14 @@ use cursor_hero_voice_to_text::prelude::*;
 use cursor_hero_voice_to_text_types::prelude::*;
 use cursor_hero_window_position::prelude::*;
 use cursor_hero_window_position_types::prelude::*;
+use cursor_hero_window_swap_tool::prelude::*;
+use cursor_hero_window_swap_tool_types::prelude::*;
 pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(WindowSwapToolPlugin);
+        app.add_plugins(WindowSwapToolTypesPlugin);
         app.add_plugins(HostFsTypesPlugin);
         app.add_plugins(HostFsPlugin);
         app.add_plugins(WindowPositionTypesPlugin);
