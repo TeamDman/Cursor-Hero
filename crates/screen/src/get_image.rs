@@ -15,17 +15,17 @@ pub struct ScreensToImageParam<'w, 's> {
     pub screens: Query<'w, 's, (&'static Handle<Image>, &'static GlobalTransform), With<Screen>>,
 }
 
-pub fn get_image(bounds: Rect, access: &ScreensToImageParam) -> Result<Image, GetImageError> {
+pub fn get_image(bounds: Rect, screen_access: &ScreensToImageParam) -> Result<Image, GetImageError> {
     if bounds.is_empty() {
         return Err(GetImageError::ElementEmpty);
     }
     let mut tex = RgbImage::new(bounds.width() as u32, bounds.height() as u32);
 
     // find out what parts of each screen are intersecting with the element
-    for (screen_image_handle, screen_trans) in access.screens.iter() {
+    for (screen_image_handle, screen_trans) in screen_access.screens.iter() {
         // find out the image size
         let screen_center_pos = screen_trans.translation();
-        match access.images.get(screen_image_handle) {
+        match screen_access.images.get(screen_image_handle) {
             None => {}
             Some(screen_image) => {
                 // Calculate the overlapping area

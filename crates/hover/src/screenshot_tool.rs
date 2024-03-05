@@ -326,7 +326,7 @@ fn handle_input(
 fn handle_replies(
     mut commands: Commands,
     bridge: Res<Bridge>,
-    access: ScreensToImageParam,
+    screen_access: ScreensToImageParam,
     asset_server: Res<AssetServer>,
 ) {
     while let Ok(msg) = bridge.receiver.try_recv() {
@@ -339,10 +339,6 @@ fn handle_replies(
                 element_info,
                 world_position,
             } => {
-                let Ok(image) = get_image(element_info.bounding_rect, &access) else {
-                    continue;
-                };
-                let texture_handle = asset_server.add(image);
                 let (size, pos) = match msg {
                     GameboundMessage::Capture { .. } => (
                         element_info.bounding_rect.size(),
@@ -354,37 +350,14 @@ fn handle_replies(
                     ),
                     _ => unreachable!(),
                 };
-                commands.spawn((
-                    SpriteBundle {
-                        transform: Transform::from_translation(pos),
-                        sprite: Sprite {
-                            custom_size: Some(size),
-                            ..default()
-                        },
-                        texture: texture_handle,
-                        ..default()
-                    },
-                    AudioBundle {
-                        source: asset_server.load("sounds/spring strung light 4.ogg"),
-                        settings: PlaybackSettings::REMOVE.with_spatial(true),
-                    },
-                    // FloatyName {
-                    //     text: element_info.name.clone(),
-                    //     vertical_offset: 40.0,
-                    //     appearance: NametagAppearance::Databrick,
-                    // },
-                    Hoverable,
-                    Clickable,
-                    CubeToolInteractable,
-                    RigidBody::Dynamic,
-                    TrackEnvironmentTag,
-                    ScreenshotBrick {
-                        info: element_info.clone(),
-                    },
-                    Collider::cuboid(size.x, size.y),
-                    MovementDamping::default(),
-                    Name::new(format!("Element - {}", element_info.name)),
-                ));
+                spawn_brick(
+                    &mut commands,
+                    element_info,
+                    size,
+                    pos,
+                    &screen_access,
+                    &asset_server,
+                );
             }
             GameboundMessage::Print(info) => {
                 info!("Received info for element {:?}", info);
@@ -446,9 +419,63 @@ fn handle_replies(
     }
 }
 
+fn spawn_brick(
+    commands: &mut Commands,
+    element_info: &ElementInfo,
+    size: Vec2,
+    pos: Vec3,
+    screen_access: &ScreensToImageParam,
+    asset_server: &Res<AssetServer>,
+) {
+    let Ok(image) = get_image(element_info.bounding_rect, &screen_access) else {
+        return;
+    };
+    let texture_handle = asset_server.add(image);
+    commands.spawn((
+        SpriteBundle {
+            transform: Transform::from_translation(pos),
+            sprite: Sprite {
+                custom_size: Some(size),
+                ..default()
+            },
+            texture: texture_handle,
+            ..default()
+        },
+        AudioBundle {
+            source: asset_server.load("sounds/spring strung light 4.ogg"),
+            settings: PlaybackSettings::REMOVE.with_spatial(true),
+        },
+        // FloatyName {
+        //     text: element_info.name.clone(),
+        //     vertical_offset: 40.0,
+        //     appearance: NametagAppearance::Databrick,
+        // },
+        Hoverable,
+        Clickable,
+        CubeToolInteractable,
+        RigidBody::Dynamic,
+        TrackEnvironmentTag,
+        ScreenshotBrick {
+            info: element_info.clone(),
+        },
+        Collider::cuboid(size.x, size.y),
+        MovementDamping::default(),
+        Name::new(format!("Element - {}", element_info.name)),
+    ));
+}
+w
 fn ui(
+    mut commands: Commands,
+    screen_access: ScreensToImageParam,
+    asset_server: Res<AssetServer>,
     mut contexts: EguiContexts,
-    mut brick_query: Query<(Entity, &mut ScreenshotBrick, &Name, &GlobalTransform)>,
+    mut brick_query: Query<(
+        Entity,
+        &mut ScreenshotBrick,
+        &Sprite,
+        &Name,
+        &GlobalTransform,
+    )>,
     camera_query: Query<(&GlobalTransform, &Camera), With<MainCamera>>,
     type_registry: Res<AppTypeRegistry>,
 ) {
@@ -463,29 +490,10 @@ fn ui(
     // debug!("Scale: {}", scale);
     // ctx.set_zoom_factor(scale);
 
-    for brick in brick_query.iter_mut() {
-        let (brick_id, mut brick, name, brick_global_transform) = brick;
-        let pos = camera
-            .world_to_viewport(camera_transform, brick_global_transform.translation())
-            .unwrap_or_default();
-
-        egui::Window::new(name.to_string())
-            .id(egui::Id::new(brick_id))
-            .fixed_pos(Pos2::new(pos.x, pos.y))
-            .show(ctx, |ui| {
-                egui::ScrollArea::both().show(ui, |ui| {
-                    ui_for_element_info(ui, &mut brick.info, &type_registry);
-                });
-            });
+    if brick_query.is_empty() {
+        return;
     }
-}
 
-fn ui_for_element_info(
-    // world: &mut RestrictedWorldView<'_>,
-    ui: &mut egui::Ui,
-    element_info: &mut ElementInfo,
-    type_registry: &Res<AppTypeRegistry>,
-) {
     let mut cx = Context {
         world: None,
         queue: None,
@@ -495,24 +503,76 @@ fn ui_for_element_info(
     let type_registry = type_registry.read();
 
     let mut inspector = InspectorUi::for_bevy(&type_registry, &mut cx);
-    ui_for_element_info_inner(ui, element_info, &mut inspector);
+
+    for brick in brick_query.iter_mut() {
+        let (brick_id, mut brick, brick_sprite, brick_name, brick_global_transform) = brick;
+        let brick_global_translation = brick_global_transform.translation();
+        let popout_pos = brick_global_translation
+            + Vec3::new(
+                brick_sprite.custom_size.unwrap_or_default().x + 50.0,
+                0.0,
+                0.0,
+            );
+        let egui_pos = camera
+            .world_to_viewport(camera_transform, brick_global_translation)
+            .unwrap_or_default();
+
+        egui::Window::new(brick_name.to_string())
+            .id(egui::Id::new(brick_id))
+            .fixed_pos(Pos2::new(egui_pos.x, egui_pos.y))
+            .show(ctx, |ui| {
+                egui::ScrollArea::both().show(ui, |ui| {
+                    ui_for_element_info(
+                        &mut commands,
+                        &screen_access,
+                        &asset_server,
+                        ui,
+                        &mut brick.info,
+                        &mut inspector,
+                        &popout_pos,
+                    );
+                });
+            });
+    }
 }
 
-fn ui_for_element_info_inner(
+fn ui_for_element_info(
+    commands: &mut Commands,
+    screen_access: &ScreensToImageParam,
+    asset_server: &Res<AssetServer>,
     ui: &mut egui::Ui,
     element_info: &mut ElementInfo,
     inspector: &mut InspectorUi,
+    popout_pos: &Vec3,
 ) {
     egui::CollapsingHeader::new(format!("Element Info - {}", element_info.name))
         .default_open(true)
         .show(ui, |ui| {
+            if ui.button("Popout").clicked() {
+                spawn_brick(
+                    commands,
+                    element_info,
+                    element_info.bounding_rect.size(),
+                    *popout_pos,
+                    screen_access,
+                    asset_server,
+                )
+            }
             inspector.ui_for_reflect(element_info, ui);
             if let Some(children) = &mut element_info.children {
                 egui::CollapsingHeader::new("Children")
                     .default_open(!children.is_empty())
                     .show(ui, |ui| {
                         for child in children.iter_mut() {
-                            ui_for_element_info_inner(ui, child, inspector);
+                            ui_for_element_info(
+                                commands,
+                                screen_access,
+                                asset_server,
+                                ui,
+                                child,
+                                inspector,
+                                popout_pos,
+                            );
                         }
                     });
             }
