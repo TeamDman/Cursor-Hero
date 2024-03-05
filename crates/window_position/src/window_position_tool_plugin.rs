@@ -18,6 +18,7 @@ use cursor_hero_tools::prelude::ToolSpawnConfig;
 use cursor_hero_tools::tool_spawning::StartingState;
 use cursor_hero_window_position_types::prelude::HostWindowPosition;
 use cursor_hero_window_position_types::prelude::WindowPositionTool;
+use cursor_hero_window_position_types::window_position_types::WindowPositionCommand;
 use cursor_hero_winutils::win_mouse::set_cursor_position;
 use cursor_hero_winutils::win_screen_capture::get_all_monitors;
 use cursor_hero_winutils::win_screen_capture::get_monitor_infos;
@@ -172,7 +173,8 @@ fn image_for_monitor(icon_size: UVec2, world: IRect, monitor: &Monitor) -> Image
 fn do_position(
     mut commands: Commands,
     tool_query: Query<(Entity, &WindowPositionTool), With<ActiveTool>>,
-    mut window_query: Query<&mut Window, With<PrimaryWindow>>,
+    mut window_query: Query<Entity, With<PrimaryWindow>>,
+    mut window_commands: EventWriter<WindowPositionCommand>,
 ) {
     let Ok(monitor_infos) = get_monitor_infos() else {
         return;
@@ -184,7 +186,7 @@ fn do_position(
             error!("No primary window found");
             return;
         };
-        let mut window = window;
+        let window_id = window;
         match tool.window_position {
             HostWindowPosition::Corner {
                 ref corner,
@@ -207,11 +209,15 @@ fn do_position(
                             * 100.0)
                             .as_ivec2(),
                 );
-                window.mode = WindowMode::Windowed;
-                window.position = WindowPosition::At(dest_bounds.top_left());
-                window.resolution =
-                    WindowResolution::new(dest_bounds.width() as f32, dest_bounds.height() as f32);
-
+                window_commands.send(WindowPositionCommand {
+                    window: window_id,
+                    position: Some(WindowPosition::At(dest_bounds.top_left())),
+                    resolution: Some(WindowResolution::new(
+                        dest_bounds.width() as f32,
+                        dest_bounds.height() as f32,
+                    )),
+                    mode: Some(WindowMode::Windowed),
+                });
                 if let Err(e) = set_cursor_position(dest_bounds.center()) {
                     warn!("Failed to set cursor position: {}", e);
                 }
@@ -223,18 +229,35 @@ fn do_position(
                     continue;
                 };
                 debug!("Activating fullscreen on monitor: {}", monitor.name);
-                window.mode = WindowMode::Windowed;
-                std::thread::sleep(Duration::from_millis(1000)); // Ensure fullscreen takes hold properly
-                window.position = WindowPosition::At(monitor.work_area.top_left());
-                window.resolution = WindowResolution::new(
-                    monitor.work_area.width() as f32,
-                    monitor.work_area.height() as f32,
-                );
+                let margin = 50;
+                window_commands.send(WindowPositionCommand {
+                    window: window_id,
+                    position: Some(WindowPosition::At(
+                        monitor.work_area.top_left() + IVec2::splat(margin),
+                    )),
+                    resolution: Some(WindowResolution::new(
+                        (monitor.work_area.width() + margin * 2) as f32,
+                        (monitor.work_area.height() + margin * 2) as f32,
+                    )),
+                    mode: Some(WindowMode::Windowed),
+                });
+                // send second command to ensure fullscreen applies over the taskbar properly
+                let cmd = WindowPositionCommand {
+                    window: window_id,
+                    // position: Some(WindowPosition::At(monitor.work_area.top_left())),
+                    // resolution: Some(WindowResolution::new(
+                    //     monitor.work_area.width() as f32,
+                    //     monitor.work_area.height() as f32,
+                    // )),
+                    mode: Some(WindowMode::BorderlessFullscreen),
+                    position: None,
+                    resolution: None,
+                };
+                window_commands.send(cmd);
+
                 if let Err(e) = set_cursor_position(monitor.work_area.center()) {
                     warn!("Failed to set cursor position: {}", e);
                 }
-                std::thread::sleep(Duration::from_millis(1000)); // Ensure fullscreen takes hold properly
-                window.mode = WindowMode::BorderlessFullscreen;
                 commands.entity(tool_id).remove::<ActiveTool>();
             }
         }

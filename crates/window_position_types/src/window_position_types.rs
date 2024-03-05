@@ -20,14 +20,10 @@ pub struct WindowPositionTool {
 }
 
 
-#[derive(Reflect, Debug, Default)]
+#[derive(Event, Reflect, Debug, Clone)]
 pub struct WindowPositionCommand {
+    pub window: Entity,
     pub mode: Option<WindowMode>,
     pub resolution: Option<WindowResolution>,
     pub position: Option<WindowPosition>,
-}
-
-#[derive(Resource, Reflect, Debug, Default)]
-pub struct WindowPositionCommandQueue {
-    pub commands: Vec<WindowPositionCommand>,
 }

@@ -3,9 +3,9 @@ use cursor_hero_movement_tool_types::prelude::*;
 use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_tools::tool_spawning::ToolSpawnConfig;
 
-pub struct SpawnMovementToolPlugin;
+pub struct MovementToolPopulatePlugin;
 
-impl Plugin for SpawnMovementToolPlugin {
+impl Plugin for MovementToolPopulatePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, handle_toolbelt_events);
     }
@@ -21,6 +21,7 @@ fn handle_toolbelt_events(
             ToolbeltLoadout::Default
             | ToolbeltLoadout::Inspector
             | ToolbeltLoadout::Taskbar
+            | ToolbeltLoadout::WindowPosition
             | ToolbeltLoadout::Keyboard => {
                 ToolSpawnConfig::<_, MovementToolAction>::new(
                     MovementTool::default(),

@@ -9,6 +9,6 @@ impl Plugin for WindowPositionTypesPlugin {
         app.register_type::<WindowPositionLoadoutSwitcherTool>();
         app.register_type::<WindowPositionTool>();
         app.register_type::<WindowPositionCommand>();
-        app.register_type::<WindowPositionCommandQueue>();
+        app.add_event::<WindowPositionCommand>();
     }
 }

@@ -4,7 +4,7 @@ use crate::movement_speed_plugin::MovementSpeedPlugin;
 use crate::movement_sprint_plugin::MovementSprintPlugin;
 use crate::movement_target_plugin::MovementTargetPlugin;
 use crate::movement_tool_tick_plugin::MovementToolTickPlugin;
-use crate::spawn_movement_tool_plugin::SpawnMovementToolPlugin;
+use crate::movement_tool_populate_plugin::MovementToolPopulatePlugin;
 
 pub struct MovementToolPlugin;
 
@@ -14,6 +14,6 @@ impl Plugin for MovementToolPlugin {
         app.add_plugins(MovementSprintPlugin);
         app.add_plugins(MovementToolTickPlugin);
         app.add_plugins(MovementTargetPlugin);
-        app.add_plugins(SpawnMovementToolPlugin);
+        app.add_plugins(MovementToolPopulatePlugin);
     }
 }

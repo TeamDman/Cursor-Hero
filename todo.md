@@ -9,6 +9,7 @@
 
 ## Grab Bag
 
+- rename plugin refactoring action - rename file snake case, rename plugin pascal case
 - fix r3 position cursor at title bar
 - emoji text in world and in egui test
 - add world representation of all our cursor_hero crates where clicking them will toggle their log level to warn
