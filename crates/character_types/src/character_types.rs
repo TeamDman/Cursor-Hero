@@ -3,8 +3,7 @@ use bevy::prelude::*;
 use bevy_inspector_egui::prelude::ReflectInspectorOptions;
 use bevy_inspector_egui::InspectorOptions;
 
-#[derive(Component, InspectorOptions, Reflect, Default)]
-#[reflect(Component, InspectorOptions)]
+#[derive(Component, Reflect, Default)]
 pub struct Character;
 
 #[derive(Component, Reflect, Default)]

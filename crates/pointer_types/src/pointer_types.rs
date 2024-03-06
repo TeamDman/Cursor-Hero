@@ -17,7 +17,7 @@ pub enum PointerLogBehaviour {
 }
 
 #[derive(Component, InspectorOptions, Debug, Reflect)]
-#[reflect(Component, InspectorOptions)]
+#[reflect(InspectorOptions)]
 pub struct Pointer {
     #[inspector(min = 0.0)]
     pub reach: f32,

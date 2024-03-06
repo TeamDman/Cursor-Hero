@@ -519,21 +519,42 @@ fn ui(
             .world_to_viewport(camera_transform, brick_global_translation)
             .unwrap_or_default();
 
-        egui::Window::new(brick_name.to_string())
-            .id(egui::Id::new(brick_id))
+        let id = egui::Id::new(brick_id);
+
+        egui::Window::new(brick_name.chars().take(64).collect::<String>())
+            .id(id)
             .fixed_pos(Pos2::new(egui_pos.x, egui_pos.y))
+            .default_width(600.0)
+            // .resizable(true)
             .show(ctx, |ui| {
-                // ui.heading("AHOY!");
-                egui::ScrollArea::both().show(ui, |ui| {
-                    ui_for_element_info(
-                        &mut commands,
-                        &screen_access,
-                        &asset_server,
-                        ui,
-                        &mut brick.info,
-                        &mut inspector,
-                        &popout_pos,
-                    );
+                egui::SidePanel::left(id.with("tree"))
+                    .resizable(true)
+                    .width_range(100.0..=4000.0)
+                    .show_inside(ui, |ui| {
+                        ui.vertical_centered(|ui| {
+                            ui.heading("UI Tree");
+                        });
+                        egui::ScrollArea::both().show(ui, |ui| {
+                            ui_for_element_info(
+                                id.with(brick.info.runtime_id.clone()),
+                                &mut commands,
+                                &screen_access,
+                                &asset_server,
+                                ui,
+                                &mut brick.info,
+                                &mut inspector,
+                                &popout_pos,
+                            );
+                            ui.allocate_space(ui.available_size());
+                        });
+                    });
+
+                egui::TopBottomPanel::bottom(id.with("invisible bottom panel"))
+                    .show_separator_line(false)
+                    .show_inside(ui, |_| ());
+
+                egui::CentralPanel::default().show_inside(ui, |ui| {
+                    ui.heading("AHOY!");
                 });
             });
     }
@@ -542,9 +563,11 @@ fn ui(
 #[derive(Reflect, Debug)]
 struct ElementUIData {
     runtime_id: String,
+    frick: String,
 }
 
 fn ui_for_element_info(
+    id: egui::Id,
     commands: &mut Commands,
     screen_access: &ScreensToImageParam,
     asset_server: &Res<AssetServer>,
@@ -553,9 +576,10 @@ fn ui_for_element_info(
     inspector: &mut InspectorUi,
     popout_pos: &Vec3,
 ) {
-    egui::CollapsingHeader::new(format!("Element Info - {}", element_info.name))
+    egui::CollapsingHeader::new(format!("{} | {}", element_info.name, element_info.class_name))
         .default_open(true)
         .show(ui, |ui| {
+
             if ui.button("Popout").clicked() {
                 spawn_brick(
                     commands,
@@ -566,27 +590,29 @@ fn ui_for_element_info(
                     asset_server,
                 )
             }
+
             // inspector.ui_for_reflect(element_info, ui);
-            let mut data = ElementUIData {
-                runtime_id: format!(
-                    "[{}]",
-                    element_info
-                        .runtime_id
-                        .iter()
-                        .map(|x| format!("{:x}", x).to_string())
-                        .collect_vec()
-                        .join(",")
-                ),
-            };
-            inspector.ui_for_reflect_readonly(&data, ui);
-            ui.text_edit_singleline(&mut data.runtime_id);
-            // inspector.ui_for_reflect(&mut data, ui);
+            // let mut data = ElementUIData {
+            //     runtime_id: format!(
+            //         "[{}]",
+            //         element_info
+            //             .runtime_id
+            //             .iter()
+            //             .map(|x| format!("{:x}", x).to_string())
+            //             .collect_vec()
+            //             .join(",")
+            //     ),
+            //     frick: "Here's something longer, gimme enough space please.".to_string(),
+            // };
+            // inspector.ui_for_reflect_readonly(&data, ui);
+
             if let Some(children) = &mut element_info.children {
-                egui::CollapsingHeader::new("Children")
+                egui::CollapsingHeader::new("Children").id_source(id.with("children_header"))
                     .default_open(!children.is_empty())
                     .show(ui, |ui| {
                         for child in children.iter_mut() {
                             ui_for_element_info(
+                                id.with(child.runtime_id.clone()),
                                 commands,
                                 screen_access,
                                 asset_server,
