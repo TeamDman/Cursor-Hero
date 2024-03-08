@@ -1,4 +1,6 @@
-use bevy::{prelude::*, window::{WindowMode, WindowResolution}};
+use bevy::prelude::*;
+use bevy::window::WindowMode;
+use bevy::window::WindowResolution;
 
 #[derive(Debug, Reflect)]
 pub enum HostWindowPosition {
@@ -18,7 +20,6 @@ pub struct WindowPositionLoadoutSwitcherTool;
 pub struct WindowPositionTool {
     pub window_position: HostWindowPosition,
 }
-
 
 #[derive(Event, Reflect, Debug, Clone)]
 pub struct WindowPositionCommand {

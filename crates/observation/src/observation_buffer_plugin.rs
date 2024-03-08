@@ -37,6 +37,15 @@ fn update_buffers(
                         observation_buffer_id,
                     },
                 ) => buffer_id == *observation_buffer_id,
+                (
+                    Some(EnvironmentTag {
+                        environment_id: buffer_environment_id,
+                    }),
+                    SomethingObservableHappenedEvent::UISnapshot {
+                        environment_id: Some(event_environment_id),
+                        ..
+                    },
+                ) => *buffer_environment_id == *event_environment_id,
                 // A buffer outside all environments will observe all environments
                 (None, _) => true,
                 _ => false,

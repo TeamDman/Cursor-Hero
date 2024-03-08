@@ -2,6 +2,12 @@
 
 ## Active
 
+- left click on screenshot brick to toggle egui visibility
+<!-- - move "click tool" to its own crates
+  - ensure element z-index considered when executing click handlers -->
+  <!-- why is z-index important? If something is important, don't have multiple click handlers in the same spot doofus. -->
+- agent click toggle inspector
+
 
 ## Up Next
 

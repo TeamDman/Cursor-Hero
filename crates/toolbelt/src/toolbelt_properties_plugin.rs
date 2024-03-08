@@ -1,6 +1,6 @@
 use bevy::prelude::*;
-use cursor_hero_toolbelt_types::toolbelt_types::ToolbeltPopulateEvent;
 use cursor_hero_toolbelt_types::toolbelt_types::Toolbelt;
+use cursor_hero_toolbelt_types::toolbelt_types::ToolbeltPopulateEvent;
 
 pub struct ToolbeltPropertiesPlugin;
 

@@ -1,13 +1,11 @@
 use bevy::prelude::*;
+use serde::Deserialize;
+use serde::Serialize;
 use std::collections::VecDeque;
 use std::fmt;
 use std::fmt::Display;
 use std::fmt::Formatter;
-use uiautomation::controls::ControlType;
 use uiautomation::core::UICondition;
-use uiautomation::types::PropertyConditionFlags;
-use uiautomation::types::UIProperty;
-use uiautomation::variants::Variant;
 use uiautomation::UIAutomation;
 use uiautomation::UIElement;
 use uiautomation::UITreeWalker;
@@ -37,10 +35,65 @@ pub struct TaskbarEntry {
     pub bounds: IRect,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Reflect)]
+pub struct DetachableUIElement(Option<UIElement>);
+impl Eq for DetachableUIElement {}
+impl PartialEq for DetachableUIElement {
+    fn eq(&self, other: &Self) -> bool {
+        match (&self.0, &other.0) {
+            (Some(x), Some(y)) => x.get_runtime_id() == y.get_runtime_id(),
+            (None, None) => true,
+            _ => false,
+        }
+    }
+}
+pub trait TryAsRef<T> {
+    type Error;
+
+    fn try_as_ref(&self) -> Result<&T, Self::Error>;
+}
+impl TryInto<UIElement> for DetachableUIElement {
+    type Error = AppResolveError;
+    fn try_into(self) -> Result<UIElement, Self::Error> {
+        match self.0 {
+            Some(x) => Ok(x),
+            None => Err(AppResolveError::Detached),
+        }
+    }
+}
+impl TryAsRef<UIElement> for DetachableUIElement {
+    type Error = AppResolveError;
+
+    fn try_as_ref(&self) -> Result<&UIElement, Self::Error> {
+        self.0.as_ref().ok_or(AppResolveError::Detached)
+    }
+}
+impl From<UIElement> for DetachableUIElement {
+    fn from(elem: UIElement) -> Self {
+        DetachableUIElement(Some(elem))
+    }
+}
+impl Serialize for DetachableUIElement {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::ser::Serializer,
+    {
+        serializer.serialize_none()
+    }
+}
+impl<'de> Deserialize<'de> for DetachableUIElement {
+    fn deserialize<D>(_deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::de::Deserializer<'de>,
+    {
+        Ok(DetachableUIElement(None))
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, Reflect)]
 pub struct EditorArea {
     pub groups: Vec<EditorGroup>,
-    pub elem: UIElement,
+    // pub elem: DetachableUIElement,
 }
 impl EditorArea {
     pub fn get_expected_automation_id() -> &'static str {
@@ -48,27 +101,27 @@ impl EditorArea {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, Reflect)]
 pub struct EditorGroup {
     pub tabs: Vec<EditorTab>,
     pub content: Option<EditorContent>,
-    pub elem: UIElement,
+    // pub elem: DetachableUIElement,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, Reflect)]
 pub struct EditorTab {
     pub title: String,
     pub active: bool,
-    pub elem: UIElement,
+    // pub elem: DetachableUIElement,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, Reflect)]
 pub struct EditorContent {
     pub content: String,
-    pub elem: UIElement,
+    // pub elem: DetachableUIElement,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, Reflect)]
 pub enum SideTabKind {
     Explorer,
     Search,
@@ -120,76 +173,98 @@ impl TryFrom<String> for SideTabKind {
             "Chat" => Ok(SideTabKind::Chat),
             "GitHub Actions" => Ok(SideTabKind::GitHubActions),
             "Todo" => Ok(SideTabKind::Todo),
-            _ => Err(AppResolveError::BadStructure(format!("Unknown SideTabKind: {}", s))),
+            _ => Err(AppResolveError::BadStructure(format!(
+                "Unknown SideTabKind: {}",
+                s
+            ))),
         }
     }
 }
 
-
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, Reflect)]
 pub enum SideTab {
     Closed {
         kind: SideTabKind,
-        button: UIElement,
+        // button: DetachableUIElement,
     },
     Open {
         kind: SideTabKind,
-        button: UIElement,
+        // button: DetachableUIElement,
         view: View,
     },
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, Reflect)]
 pub enum View {
     Explorer {
         // workbench.view.explorer
-        elem: UIElement,
+        // elem: DetachableUIElement,
     },
     Unknown {
-        elem: UIElement,
+        // elem: DetachableUIElement,
     },
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, Reflect)]
+pub struct UISnapshot {
+    pub app_windows: Vec<AppWindow>,
+}
+
+impl Display for UISnapshot {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "UISnapshot: {:?}", self.app_windows)
+    }
+}
 
 pub enum VSCodeState {
     Editor {
-        tabs: UIElement,
-        editor: UIElement,
+        tabs: DetachableUIElement,
+        editor: DetachableUIElement,
     },
     LeftTabOpen {
-        side_nav_tabs: UIElement,
-        side_nav_view: UIElement,
-        editor: UIElement,
+        side_nav_tabs: DetachableUIElement,
+        side_nav_view: DetachableUIElement,
+        editor: DetachableUIElement,
     },
     Unknown,
 }
 impl VSCodeState {
     pub fn get_side_nav_tabs_root_elem(&self) -> Result<&UIElement, AppResolveError> {
         match self {
-            VSCodeState::Editor { tabs, .. } => Ok(tabs),
-            VSCodeState::LeftTabOpen { side_nav_tabs: tabs, .. } => Ok(tabs),
-            VSCodeState::Unknown => Err(AppResolveError::BadStructure("Unknown VSCodeState".to_string())),
+            VSCodeState::Editor { tabs, .. } => Ok(tabs.try_as_ref()?),
+            VSCodeState::LeftTabOpen {
+                side_nav_tabs: tabs,
+                ..
+            } => Ok(tabs.try_as_ref()?),
+            VSCodeState::Unknown => Err(AppResolveError::BadStructure(
+                "Unknown VSCodeState".to_string(),
+            )),
         }
     }
     pub fn get_side_nav_view_root_elem(&self) -> Result<&UIElement, AppResolveError> {
         match self {
-            VSCodeState::Editor { tabs, .. } => Ok(tabs),
-            VSCodeState::LeftTabOpen { side_nav_view: view, .. } => Ok(view),
-            VSCodeState::Unknown => Err(AppResolveError::BadStructure("Unknown VSCodeState".to_string())),
+            VSCodeState::Editor { tabs, .. } => Ok(tabs.try_as_ref()?),
+            VSCodeState::LeftTabOpen {
+                side_nav_view: view,
+                ..
+            } => Ok(view.try_as_ref()?),
+            VSCodeState::Unknown => Err(AppResolveError::BadStructure(
+                "Unknown VSCodeState".to_string(),
+            )),
         }
     }
     pub fn get_editor_root_elem(&self) -> Result<&UIElement, AppResolveError> {
         match self {
-            VSCodeState::Editor { editor, .. } => Ok(editor),
-            VSCodeState::LeftTabOpen { editor, .. } => Ok(editor),
-            VSCodeState::Unknown => Err(AppResolveError::BadStructure("Unknown VSCodeState".to_string())),
+            VSCodeState::Editor { editor, .. } => Ok(editor.try_as_ref()?),
+            VSCodeState::LeftTabOpen { editor, .. } => Ok(editor.try_as_ref()?),
+            VSCodeState::Unknown => Err(AppResolveError::BadStructure(
+                "Unknown VSCodeState".to_string(),
+            )),
         }
     }
 }
 pub enum VSCodeStateResolveError {
-    BadChildCount {
-        tried_accessing: u32,
-    }
+    BadChildCount { tried_accessing: u32 },
 }
 impl From<u32> for VSCodeStateResolveError {
     fn from(tried_accessing: u32) -> Self {
@@ -201,13 +276,13 @@ impl TryFrom<VecDeque<UIElement>> for VSCodeState {
     fn try_from(mut kids: VecDeque<UIElement>) -> Result<Self, Self::Error> {
         let state = match kids.len() {
             2 => VSCodeState::Editor {
-                tabs: kids.pop_front().ok_or(0u32)?,
-                editor: kids.pop_front().ok_or(1u32)?,
+                tabs: kids.pop_front().ok_or(0u32)?.into(),
+                editor: kids.pop_front().ok_or(1u32)?.into(),
             },
             3 => VSCodeState::LeftTabOpen {
-                side_nav_tabs: kids.pop_front().ok_or(0u32)?,
-                side_nav_view: kids.pop_front().ok_or(1u32)?,
-                editor: kids.pop_front().ok_or(2u32)?,
+                side_nav_tabs: kids.pop_front().ok_or(0u32)?.into(),
+                side_nav_view: kids.pop_front().ok_or(1u32)?.into(),
+                editor: kids.pop_front().ok_or(2u32)?.into(),
             },
             _ => VSCodeState::Unknown,
         };
@@ -215,10 +290,11 @@ impl TryFrom<VecDeque<UIElement>> for VSCodeState {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Reflect)]
 pub enum AppWindow {
     VSCode {
-        root: UIElement,
+        // root: DetachableUIElement,
+        focused: bool,
         editor_area: EditorArea,
         side_nav: Vec<SideTab>,
     },
@@ -227,7 +303,7 @@ pub enum AppWindow {
 impl Display for AppWindow {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            AppWindow::VSCode { root, .. } => {
+            AppWindow::VSCode { .. } => {
                 write!(f, "Visual Studio Code: {:?}", self)
                 // match get_tree_string(elem) {
                 //     Ok(text) => write!(f, "Visual Studio Code: {}", text),
@@ -255,6 +331,7 @@ pub enum AppResolveError {
     UI(uiautomation::Error),
     BadStructure(String),
     NoMatch,
+    Detached,
 }
 impl From<uiautomation::Error> for AppResolveError {
     fn from(e: uiautomation::Error) -> Self {
@@ -282,12 +359,14 @@ impl From<VSCodeStateResolveError> for AppResolveError {
     fn from(e: VSCodeStateResolveError) -> Self {
         match e {
             VSCodeStateResolveError::BadChildCount { tried_accessing } => {
-                AppResolveError::BadStructure(format!("Bad child count when accessing index={}", tried_accessing))
+                AppResolveError::BadStructure(format!(
+                    "Bad child count when accessing index={}",
+                    tried_accessing
+                ))
             }
         }
     }
 }
-
 
 impl fmt::Display for AppResolveError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -316,10 +395,6 @@ impl fmt::Display for GatherAppsError {
     }
 }
 impl std::error::Error for GatherAppsError {}
-
-
-
-
 
 pub fn all_of(
     automation: &UIAutomation,
@@ -407,8 +482,6 @@ fn drill_inner(
         drill_inner(&child, walker, path)
     }
 }
-
-
 
 pub trait ToBevyIRect {
     fn to_bevy_irect(&self) -> IRect;

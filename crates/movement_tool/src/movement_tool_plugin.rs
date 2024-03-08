@@ -3,8 +3,8 @@ use bevy::prelude::*;
 use crate::movement_speed_plugin::MovementSpeedPlugin;
 use crate::movement_sprint_plugin::MovementSprintPlugin;
 use crate::movement_target_plugin::MovementTargetPlugin;
-use crate::movement_tool_tick_plugin::MovementToolTickPlugin;
 use crate::movement_tool_populate_plugin::MovementToolPopulatePlugin;
+use crate::movement_tool_tick_plugin::MovementToolTickPlugin;
 
 pub struct MovementToolPlugin;
 

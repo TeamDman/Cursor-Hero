@@ -38,10 +38,18 @@ impl GatherChildrenStopBehaviourFn for TaskbarEndEncountered {
     }
 }
 pub trait GatherChildrenable {
-    fn gather_children(&self, walker: &UITreeWalker, stop_behaviour: &StopBehaviour) -> VecDeque<UIElement>;
+    fn gather_children(
+        &self,
+        walker: &UITreeWalker,
+        stop_behaviour: &StopBehaviour,
+    ) -> VecDeque<UIElement>;
 }
 impl GatherChildrenable for UIElement {
-    fn gather_children(&self, walker: &UITreeWalker, stop_behaviour: &StopBehaviour) -> VecDeque<UIElement> {
+    fn gather_children(
+        &self,
+        walker: &UITreeWalker,
+        stop_behaviour: &StopBehaviour,
+    ) -> VecDeque<UIElement> {
         gather_children(walker, self, stop_behaviour)
     }
 }

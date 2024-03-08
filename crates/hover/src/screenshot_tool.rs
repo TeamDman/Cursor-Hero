@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy_egui::egui;
-use bevy_egui::egui::text_edit;
 use bevy_egui::egui::Pos2;
 use bevy_egui::EguiContext;
 use bevy_egui::EguiContexts;
@@ -29,7 +28,6 @@ use cursor_hero_ui_automation::prelude::gather_deep_element_info;
 use cursor_hero_ui_automation::prelude::gather_elements_at;
 use cursor_hero_ui_automation::prelude::gather_shallow_element_info;
 use cursor_hero_ui_automation::prelude::ElementInfo;
-use itertools::Itertools;
 use leafwing_input_manager::prelude::*;
 use rand::thread_rng;
 use rand::Rng;
@@ -576,53 +574,56 @@ fn ui_for_element_info(
     inspector: &mut InspectorUi,
     popout_pos: &Vec3,
 ) {
-    egui::CollapsingHeader::new(format!("{} | {}", element_info.name, element_info.class_name))
-        .default_open(true)
-        .show(ui, |ui| {
+    egui::CollapsingHeader::new(format!(
+        "{} | {}",
+        element_info.name, element_info.class_name
+    ))
+    .default_open(true)
+    .show(ui, |ui| {
+        if ui.button("Popout").clicked() {
+            spawn_brick(
+                commands,
+                element_info,
+                element_info.bounding_rect.size(),
+                *popout_pos,
+                screen_access,
+                asset_server,
+            )
+        }
 
-            if ui.button("Popout").clicked() {
-                spawn_brick(
-                    commands,
-                    element_info,
-                    element_info.bounding_rect.size(),
-                    *popout_pos,
-                    screen_access,
-                    asset_server,
-                )
-            }
+        // inspector.ui_for_reflect(element_info, ui);
+        // let mut data = ElementUIData {
+        //     runtime_id: format!(
+        //         "[{}]",
+        //         element_info
+        //             .runtime_id
+        //             .iter()
+        //             .map(|x| format!("{:x}", x).to_string())
+        //             .collect_vec()
+        //             .join(",")
+        //     ),
+        //     frick: "Here's something longer, gimme enough space please.".to_string(),
+        // };
+        // inspector.ui_for_reflect_readonly(&data, ui);
 
-            // inspector.ui_for_reflect(element_info, ui);
-            // let mut data = ElementUIData {
-            //     runtime_id: format!(
-            //         "[{}]",
-            //         element_info
-            //             .runtime_id
-            //             .iter()
-            //             .map(|x| format!("{:x}", x).to_string())
-            //             .collect_vec()
-            //             .join(",")
-            //     ),
-            //     frick: "Here's something longer, gimme enough space please.".to_string(),
-            // };
-            // inspector.ui_for_reflect_readonly(&data, ui);
-
-            if let Some(children) = &mut element_info.children {
-                egui::CollapsingHeader::new("Children").id_source(id.with("children_header"))
-                    .default_open(!children.is_empty())
-                    .show(ui, |ui| {
-                        for child in children.iter_mut() {
-                            ui_for_element_info(
-                                id.with(child.runtime_id.clone()),
-                                commands,
-                                screen_access,
-                                asset_server,
-                                ui,
-                                child,
-                                inspector,
-                                popout_pos,
-                            );
-                        }
-                    });
-            }
-        });
+        if let Some(children) = &mut element_info.children {
+            egui::CollapsingHeader::new("Children")
+                .id_source(id.with("children_header"))
+                .default_open(!children.is_empty())
+                .show(ui, |ui| {
+                    for child in children.iter_mut() {
+                        ui_for_element_info(
+                            id.with(child.runtime_id.clone()),
+                            commands,
+                            screen_access,
+                            asset_server,
+                            ui,
+                            child,
+                            inspector,
+                            popout_pos,
+                        );
+                    }
+                });
+        }
+    });
 }

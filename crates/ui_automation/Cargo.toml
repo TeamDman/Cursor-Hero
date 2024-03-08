@@ -10,3 +10,4 @@ bevy = { workspace = true }
 uiautomation = {workspace = true}
 itertools = {workspace = true}
 cursor_hero_ui_automation_types = { workspace = true }
+chrono = {workspace = true}

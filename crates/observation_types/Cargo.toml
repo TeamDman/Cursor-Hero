@@ -9,3 +9,4 @@ edition = "2021"
 bevy = { workspace = true }
 chrono = {workspace = true, features=["serde"]}
 serde = {workspace = true}
+cursor_hero_ui_automation_types = { workspace = true}

@@ -1,8 +1,9 @@
 use bevy::prelude::*;
-use cursor_hero_ui_automation::prelude::gather_apps;
-use cursor_hero_ui_automation::prelude::gather_focus;
-use cursor_hero_ui_automation::prelude::AppResolveError;
-use std::any::type_name_of_val;
+use cursor_hero_environment_types::environment_types::EnvironmentTag;
+use cursor_hero_observation_types::observation_types::SomethingObservableHappenedEvent;
+use cursor_hero_character_types::prelude::MainCharacter;
+use cursor_hero_ui_automation::prelude::take_snapshot;
+use cursor_hero_ui_automation::prelude::UISnapshot;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::Path;
@@ -24,14 +25,12 @@ impl Plugin for UiWatcherPlugin {
 
 #[derive(Debug)]
 enum ThreadboundMessage {
-    GatherAppInfo,
-    GatherFocusInfo,
+    TakeSnapshot,
 }
 
 #[derive(Debug)]
 enum GameboundMessage {
-    AppInfo(String),
-    FocusInfo(String),
+    Snapshot(UISnapshot),
 }
 
 #[derive(Resource)]
@@ -67,20 +66,9 @@ fn handle_threadbound_messages(
     reply_tx: &Sender<GameboundMessage>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match action {
-        ThreadboundMessage::GatherAppInfo => {
-            let description = gather_apps()?
-                .into_iter()
-                .map(|x| x.to_string())
-                .collect::<Vec<String>>()
-                .join("\n");
-            let msg = GameboundMessage::AppInfo(description);
-            // println!("Sending {:?}", msg);
-            reply_tx.send(msg)?;
-        }
-        ThreadboundMessage::GatherFocusInfo => {
-            let focused = gather_focus()?;
-            let description = focused.to_string();
-            let msg = GameboundMessage::FocusInfo(description);
+        ThreadboundMessage::TakeSnapshot => {
+            let snapshot = take_snapshot()?;
+            let msg = GameboundMessage::Snapshot(snapshot);
             // println!("Sending {:?}", msg);
             reply_tx.send(msg)?;
         }
@@ -110,18 +98,30 @@ fn get_persist_file(current_path: &str, file_name: &str) -> Result<std::fs::File
     Ok(handle)
 }
 
-fn handle_gamebound_messages(bridge: Res<Bridge>) {
+fn handle_gamebound_messages(
+    bridge: Res<Bridge>,
+    mut observation_events: EventWriter<SomethingObservableHappenedEvent>,
+    character_query: Query<&EnvironmentTag, With<MainCharacter>>,
+) {
+    let Ok(character) = character_query.get_single() else {
+        warn!("Expected single main character, failed");
+        while let Ok(msg) = bridge.receiver.try_recv() { // drain the channel
+        }
+        return;
+    };
+    let character_environment = character;
     while let Ok(msg) = bridge.receiver.try_recv() {
-        let (name, content) = match msg {
-            GameboundMessage::AppInfo(app_info) => ("AppInfo", app_info),
-            GameboundMessage::FocusInfo(focus_info) => ("FocusInfo", focus_info),
-        };
+        let (msg_kind, GameboundMessage::Snapshot(snapshot)) = ("Snapshot", msg);
+        debug!("Received message {}:\n{}", msg_kind, snapshot);
 
-        debug!("Received message {}:\n{}", name, content);
+        observation_events.send(SomethingObservableHappenedEvent::UISnapshot {
+            snapshot: snapshot.clone(),
+            environment_id: Some(character_environment.environment_id),
+        });
 
         match get_persist_file(file!(), "results.txt") {
             Ok(mut file) => {
-                if let Err(e) = file.write_all(content.as_bytes()) {
+                if let Err(e) = file.write_all(snapshot.to_string().as_bytes()) {
                     error!("Failed to write to file: {:?}", e);
                 }
             }
@@ -148,30 +148,10 @@ fn trigger_gather_info(
             // if let Err(e) = bridge.sender.send(ThreadboundMessage::GatherFocusInfo) {
             //     error!("Failed to send thread message: {:?}", e);
             // }
-            if let Err(e) = bridge.sender.send(ThreadboundMessage::GatherAppInfo) {
+            if let Err(e) = bridge.sender.send(ThreadboundMessage::TakeSnapshot) {
                 error!("Failed to send thread message: {:?}", e);
             }
             *cooldown = Some(Timer::from_seconds(5.0, TimerMode::Once));
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use cursor_hero_ui_automation::prelude::gather_toplevel_elements;
-    use cursor_hero_ui_automation::prelude::AppWindow;
-
-    #[test]
-    fn test_gather_app_info() -> Result<(), Box<dyn std::error::Error>> {
-        println!("Gathering app info");
-        let app_elements = gather_toplevel_elements()?;
-        println!("Gathered {} elements, processing...", app_elements.len());
-        let description = app_elements
-            .into_iter()
-            .map(|x| AppWindow::from(x).to_string())
-            .collect::<Vec<String>>()
-            .join("\n");
-        println!("{}", description);
-        Ok(())
     }
 }

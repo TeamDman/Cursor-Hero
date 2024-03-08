@@ -6,6 +6,8 @@ use std::time::Duration;
 use bevy::prelude::*;
 use chrono::DateTime;
 use chrono::Local;
+use cursor_hero_ui_automation_types::ui_automation_types::AppWindow;
+use cursor_hero_ui_automation_types::ui_automation_types::UISnapshot;
 use serde::Deserialize;
 use serde::Serialize;
 #[derive(Component, Reflect, Default)]
@@ -17,18 +19,19 @@ pub struct ObservationTool {
 
 #[derive(Debug, Reflect, PartialEq, Eq, Clone, Copy)]
 pub enum WhatsNew {
-    // When the agent replies, it sends a chat, which becomes its own observation
-    // Letting this trigger the inference again is a loop
-    // We want to allow this loop, but only after a longer period of inactivity compared
-    // to if a chat was received from another entity.
-    SelfChat,
     Nothing,
+    SelfChat,
     ChatReceived,
     ChatReceivedButTheyProbablyStillThinking,
     MemoryRestored,
+    UISnapshot,
 }
 
 impl WhatsNew {
+    /// When the agent replies, it sends a chat, which becomes its own observation
+    /// Letting this trigger the inference again is a loop
+    /// We want to allow this loop, but only after a longer period of inactivity compared
+    /// to if a chat was received from another entity.
     pub fn reply_delay(&self) -> Duration {
         match self {
             WhatsNew::SelfChat => Duration::from_secs(60),
@@ -36,26 +39,15 @@ impl WhatsNew {
             WhatsNew::ChatReceived => Duration::ZERO,
             WhatsNew::ChatReceivedButTheyProbablyStillThinking => Duration::from_secs(25),
             WhatsNew::MemoryRestored => Duration::from_secs(5),
+            WhatsNew::UISnapshot => Duration::from_secs(60 * 2),
         }
     }
 }
 
 impl Ord for WhatsNew {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        match match (self, other) {
-            (a, b) if a == b => std::cmp::Ordering::Equal,
-            (WhatsNew::ChatReceived, _) => std::cmp::Ordering::Greater,
-            (_, WhatsNew::ChatReceived) => std::cmp::Ordering::Less,
-
-            (WhatsNew::Nothing, _) => std::cmp::Ordering::Less,
-            (_, WhatsNew::Nothing) => std::cmp::Ordering::Greater,
-
-            _ => std::cmp::Ordering::Equal,
-        } {
-            // If equal, lower delay takes priority
-            std::cmp::Ordering::Equal => self.reply_delay().cmp(&other.reply_delay()).reverse(),
-            x => x,
-        }
+        // In-declaration order of importance, higher is more important
+        (*self as u32).cmp(&(*other as u32))
     }
 }
 impl PartialOrd for WhatsNew {
@@ -100,6 +92,10 @@ pub enum SomethingObservableHappenedEvent {
     MemoryRestored {
         observation_buffer_id: Entity,
     },
+    UISnapshot {
+        environment_id: Option<Entity>,
+        snapshot: UISnapshot,
+    },
     // BrickEnteredEnvironment {
 
     // }
@@ -119,6 +115,9 @@ impl Display for SomethingObservableHappenedEvent {
                     f,
                     "The game has restarted and the agent memory has been restored."
                 )
+            }
+            SomethingObservableHappenedEvent::UISnapshot { snapshot, .. } => {
+                write!(f, "Snapshot of an app window: {:?}", snapshot)
             }
         }
     }
@@ -140,6 +139,7 @@ impl SomethingObservableHappenedEvent {
             }
             SomethingObservableHappenedEvent::Chat { .. } => WhatsNew::ChatReceived,
             SomethingObservableHappenedEvent::MemoryRestored { .. } => WhatsNew::MemoryRestored,
+            SomethingObservableHappenedEvent::UISnapshot { .. } => WhatsNew::UISnapshot,
         }
     }
 }

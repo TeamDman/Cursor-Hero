@@ -59,7 +59,7 @@ impl Default for MainCharacterMemoryConfig {
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Eq, Default)]
 struct DiskData {
-    observations: HashMap<String, ObservationBuffer>,
+    observations_by_observer_name: HashMap<String, ObservationBuffer>,
 }
 
 fn persist(
@@ -74,7 +74,7 @@ fn persist(
 
     let mut data = DiskData::default();
     for agent in agent_query.iter() {
-        data.observations
+        data.observations_by_observer_name
             .insert(agent.0.as_str().to_string(), agent.1.clone());
     }
 
@@ -102,11 +102,15 @@ fn restore(
     let mut data: DiskData = read_from_disk(file)?;
     info!(
         "Restoring agent memories, found {} entries",
-        data.observations.len()
+        data.observations_by_observer_name.len()
     );
     for agent in agent_query.iter_mut() {
         let (agent_id, agent_name, mut agent_buffer) = agent;
-        if let Some(buffer) = data.observations.remove(agent_name.as_str()) {
+        let agent_name = agent_name.as_str();
+        // Each agent's observations is keyed by its name in the save file.
+        if let Some(buffer) = data.observations_by_observer_name.remove(agent_name) {
+            // Previous observations that reference entity IDs will have odd appearances in world inspectors because the IDs have been reused from restarts.
+
             *agent_buffer = buffer;
 
             let event = SomethingObservableHappenedEvent::MemoryRestored {

@@ -7,9 +7,9 @@ use cursor_hero_camera::camera_plugin::CameraEvent;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_environment_types::prelude::*;
 use cursor_hero_physics::damping_plugin::MovementDamping;
-use cursor_hero_toolbelt_types::toolbelt_types::ToolbeltPopulateEvent;
 use cursor_hero_toolbelt_types::toolbelt_types::ToolbeltBundle;
 use cursor_hero_toolbelt_types::toolbelt_types::ToolbeltLoadout;
+use cursor_hero_toolbelt_types::toolbelt_types::ToolbeltPopulateEvent;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
 pub struct CharacterSpawningPlugin;
 

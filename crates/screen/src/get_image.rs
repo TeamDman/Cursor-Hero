@@ -15,7 +15,10 @@ pub struct ScreensToImageParam<'w, 's> {
     pub screens: Query<'w, 's, (&'static Handle<Image>, &'static GlobalTransform), With<Screen>>,
 }
 
-pub fn get_image(bounds: Rect, screen_access: &ScreensToImageParam) -> Result<Image, GetImageError> {
+pub fn get_image(
+    bounds: Rect,
+    screen_access: &ScreensToImageParam,
+) -> Result<Image, GetImageError> {
     if bounds.is_empty() {
         return Err(GetImageError::ElementEmpty);
     }

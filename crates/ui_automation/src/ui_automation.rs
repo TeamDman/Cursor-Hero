@@ -15,6 +15,7 @@ use cursor_hero_ui_automation_types::ui_automation_types::HexList;
 use cursor_hero_ui_automation_types::ui_automation_types::SideTab;
 use cursor_hero_ui_automation_types::ui_automation_types::SideTabKind;
 use cursor_hero_ui_automation_types::ui_automation_types::ToBevyIRect;
+use cursor_hero_ui_automation_types::ui_automation_types::UISnapshot;
 use cursor_hero_ui_automation_types::ui_automation_types::VSCodeState;
 use cursor_hero_ui_automation_types::ui_automation_types::View;
 use itertools::Itertools;
@@ -61,7 +62,7 @@ pub fn gather_elements_at(pos: IVec2) -> Result<Vec<(UIElement, usize)>, uiautom
     Ok(rtn)
 }
 
-pub fn gather_apps() -> Result<Vec<AppWindow>, GatherAppsError> {
+pub fn take_snapshot() -> Result<UISnapshot, GatherAppsError> {
     let automation = UIAutomation::new()?;
     let root = automation.get_root_element()?;
     println!("Boutta gather top level children");
@@ -70,12 +71,18 @@ pub fn gather_apps() -> Result<Vec<AppWindow>, GatherAppsError> {
     let condition = &automation.create_true_condition()?;
     let found = root.find_all(TreeScope::Children, condition)?;
     println!("Found {} top level children", found.len());
+
+    let walker = automation.create_tree_walker()?;
+    let focused = automation.get_focused_element()?;
+    let focused_app = walker.normalize(&focused)?;
+
     let mut apps = vec![];
     let mut errors = vec![];
     for elem in found {
-        match resolve_app(elem, &automation) {
+        let focused = elem.get_runtime_id() == focused_app.get_runtime_id();
+        match resolve_app(&elem, &automation, focused) {
             Ok(app) => {
-                apps.push(app);
+                apps.push((elem, app));
             }
             Err(e) => errors.push(e),
         }
@@ -87,10 +94,18 @@ pub fn gather_apps() -> Result<Vec<AppWindow>, GatherAppsError> {
     if !bad_errors.is_empty() {
         return Err(GatherAppsError::ResolveFailed(bad_errors));
     }
-    Ok(apps)
+
+    let snapshot = UISnapshot {
+        app_windows: apps.into_iter().map(|(elem, app)| app).collect(),
+    };
+    Ok(snapshot)
 }
 
-fn resolve_app(elem: UIElement, automation: &UIAutomation) -> Result<AppWindow, AppResolveError> {
+fn resolve_app(
+    elem: &UIElement,
+    automation: &UIAutomation,
+    focused: bool,
+) -> Result<AppWindow, AppResolveError> {
     match (
         elem.get_name(),
         elem.get_control_type(),
@@ -133,18 +148,25 @@ fn resolve_app(elem: UIElement, automation: &UIAutomation) -> Result<AppWindow, 
                                 if Some(id.as_str())
                                     == SideTabKind::Explorer.get_view_automation_id() =>
                             {
-                                View::Explorer { elem: view }
+                                View::Explorer { 
+                                    // elem: view.into() 
+                                }
                             }
-                            _ => View::Unknown { elem: view },
+                            _ => View::Unknown { 
+                                // elem: view.into() 
+                            },
                         };
 
                         Ok(SideTab::Open {
                             kind,
-                            button: elem,
+                            // button: elem.into(),
                             view,
                         })
                     } else {
-                        Ok(SideTab::Closed { kind, button: elem })
+                        Ok(SideTab::Closed {
+                            kind,
+                            // button: elem.into(),
+                        })
                     }
                 })
                 .filter_map(|res: Result<SideTab, AppResolveError>| res.ok())
@@ -177,7 +199,7 @@ fn resolve_app(elem: UIElement, automation: &UIAutomation) -> Result<AppWindow, 
                             let active = selected == Some(title.clone());
                             Ok(EditorTab {
                                 title,
-                                elem: group_tab_elem,
+                                // elem: group_tab_elem.into(),
                                 active,
                             })
                         })
@@ -189,13 +211,13 @@ fn resolve_app(elem: UIElement, automation: &UIAutomation) -> Result<AppWindow, 
                         .map(|variant| variant.to_string())
                         .map(|text_content| EditorContent {
                             content: text_content,
-                            elem: content_elem,
+                            // elem: content_elem.into(),
                         })
                         .ok();
 
                     Ok(EditorGroup {
                         tabs: group_tabs,
-                        elem: group_elem,
+                        // elem: group_elem.into(),
                         content,
                     })
                 })
@@ -203,11 +225,12 @@ fn resolve_app(elem: UIElement, automation: &UIAutomation) -> Result<AppWindow, 
                 .collect();
             let editor_area = EditorArea {
                 groups: editor_groups,
-                elem: editor_area_elem,
+                // elem: editor_area_elem.into(),
             };
 
             Ok(AppWindow::VSCode {
-                root,
+                // root: root.into(),
+                focused,
                 editor_area,
                 side_nav,
             })
@@ -260,13 +283,13 @@ fn resolve_app(elem: UIElement, automation: &UIAutomation) -> Result<AppWindow, 
             //     .collect();
             // let nav = LeftNav {
             //     buttons,
-            //     elem: nav_elem,
+            //     elem: nav_elem.into(),
             // };
             // let view = match n {
             //     3 => {
             //         let left_view_elem = x_kids.remove(0);
             //         let left_view = View::Explorer {
-            //             elem: left_view_elem,
+            //             elem: left_view_elem.into(),
             //         };
             //         Some(left_view)
             //     }
@@ -278,7 +301,7 @@ fn resolve_app(elem: UIElement, automation: &UIAutomation) -> Result<AppWindow, 
             //     root,
             //     editor_area: EditorArea {
             //         groups: vec![],
-            //         elem: editor,
+            //         elem: editor.into(),
             //     },
             //     tabs: left_area,
             // };
@@ -286,15 +309,6 @@ fn resolve_app(elem: UIElement, automation: &UIAutomation) -> Result<AppWindow, 
         }
         _ => Err(AppResolveError::NoMatch),
     }
-}
-
-pub fn gather_focus() -> Result<AppWindow, AppResolveError> {
-    let automation = UIAutomation::new()?;
-    let focused = automation.get_focused_element()?;
-    let walker = automation.create_tree_walker()?;
-    let ancestor = walker.normalize(&focused)?;
-    let app = resolve_app(ancestor, &automation)?;
-    Ok(app)
 }
 
 pub fn gather_shallow_element_info(
@@ -418,10 +432,14 @@ mod tests {
 
     #[test]
     fn test_gather_apps() {
+        // TODO: test to call this 10,000 times to see if we can reproduce the slow down over time issue.
+
+
         // Restarting my computer made this faster
         // I hate this. I hate this so much.
         let start = std::time::Instant::now();
-        let apps = super::gather_apps().unwrap();
+        let snapshot = super::take_snapshot().unwrap();
+        let apps = snapshot.app_windows;
         assert!(apps.len() > 0);
         for app in apps {
             println!("app: {:?}", app);
