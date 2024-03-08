@@ -1,5 +1,5 @@
 use crate::gather_children::gather_children;
-use crate::gather_children::GatherChildrenStopBehaviour;
+use crate::gather_children::StopBehaviour;
 use crate::prelude::*;
 use uiautomation::controls::ControlType;
 use uiautomation::UIAutomation;
@@ -17,7 +17,7 @@ pub fn get_taskbar() -> Result<Taskbar, uiautomation::Error> {
     let taskbar_entries = gather_children(
         &taskbar_entry_walker,
         &taskbar,
-        &GatherChildrenStopBehaviour::TaskbarEndEncountered,
+        &StopBehaviour::TaskbarEndEncountered,
     );
     let entries = taskbar_entries
         .into_iter()

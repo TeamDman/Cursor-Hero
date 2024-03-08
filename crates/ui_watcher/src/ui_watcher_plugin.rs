@@ -1,5 +1,8 @@
 use bevy::prelude::*;
 use cursor_hero_ui_automation::prelude::gather_apps;
+use cursor_hero_ui_automation::prelude::gather_focus;
+use cursor_hero_ui_automation::prelude::AppResolveError;
+use std::any::type_name_of_val;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::Path;
@@ -15,18 +18,20 @@ impl Plugin for UiWatcherPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_worker_thread);
         app.add_systems(Update, handle_gamebound_messages);
-        // app.add_systems(Update, trigger_gather_app_info);
+        app.add_systems(Update, trigger_gather_info);
     }
 }
 
 #[derive(Debug)]
 enum ThreadboundMessage {
     GatherAppInfo,
+    GatherFocusInfo,
 }
 
 #[derive(Debug)]
 enum GameboundMessage {
     AppInfo(String),
+    FocusInfo(String),
 }
 
 #[derive(Resource)]
@@ -69,7 +74,14 @@ fn handle_threadbound_messages(
                 .collect::<Vec<String>>()
                 .join("\n");
             let msg = GameboundMessage::AppInfo(description);
-            println!("Sending {:?}", msg);
+            // println!("Sending {:?}", msg);
+            reply_tx.send(msg)?;
+        }
+        ThreadboundMessage::GatherFocusInfo => {
+            let focused = gather_focus()?;
+            let description = focused.to_string();
+            let msg = GameboundMessage::FocusInfo(description);
+            // println!("Sending {:?}", msg);
             reply_tx.send(msg)?;
         }
     }
@@ -100,25 +112,27 @@ fn get_persist_file(current_path: &str, file_name: &str) -> Result<std::fs::File
 
 fn handle_gamebound_messages(bridge: Res<Bridge>) {
     while let Ok(msg) = bridge.receiver.try_recv() {
-        match msg {
-            GameboundMessage::AppInfo(app_info) => {
-                debug!("Received app info, length: {}", app_info.len());
-                match get_persist_file(file!(), "results.txt") {
-                    Ok(mut file) => {
-                        if let Err(e) = file.write_all(app_info.as_bytes()) {
-                            error!("Failed to write to file: {:?}", e);
-                        }
-                    }
-                    Err(e) => {
-                        error!("Failed to open file: {:?}", e);
-                    }
+        let (name, content) = match msg {
+            GameboundMessage::AppInfo(app_info) => ("AppInfo", app_info),
+            GameboundMessage::FocusInfo(focus_info) => ("FocusInfo", focus_info),
+        };
+
+        debug!("Received message {}:\n{}", name, content);
+
+        match get_persist_file(file!(), "results.txt") {
+            Ok(mut file) => {
+                if let Err(e) = file.write_all(content.as_bytes()) {
+                    error!("Failed to write to file: {:?}", e);
                 }
+            }
+            Err(e) => {
+                error!("Failed to open file: {:?}", e);
             }
         }
     }
 }
 
-fn trigger_gather_app_info(
+fn trigger_gather_info(
     bridge: ResMut<Bridge>,
     mut cooldown: Local<Option<Timer>>,
     time: Res<Time>,
@@ -130,7 +144,10 @@ fn trigger_gather_app_info(
             }
         }
         None => {
-            debug!("Triggering gather app info");
+            debug!("Triggering gather info");
+            // if let Err(e) = bridge.sender.send(ThreadboundMessage::GatherFocusInfo) {
+            //     error!("Failed to send thread message: {:?}", e);
+            // }
             if let Err(e) = bridge.sender.send(ThreadboundMessage::GatherAppInfo) {
                 error!("Failed to send thread message: {:?}", e);
             }
@@ -142,7 +159,7 @@ fn trigger_gather_app_info(
 #[cfg(test)]
 mod tests {
     use cursor_hero_ui_automation::prelude::gather_toplevel_elements;
-    use cursor_hero_ui_automation::prelude::AppUIElement;
+    use cursor_hero_ui_automation::prelude::AppWindow;
 
     #[test]
     fn test_gather_app_info() -> Result<(), Box<dyn std::error::Error>> {
@@ -151,7 +168,7 @@ mod tests {
         println!("Gathered {} elements, processing...", app_elements.len());
         let description = app_elements
             .into_iter()
-            .map(|x| AppUIElement::from(x).to_string())
+            .map(|x| AppWindow::from(x).to_string())
             .collect::<Vec<String>>()
             .join("\n");
         println!("{}", description);

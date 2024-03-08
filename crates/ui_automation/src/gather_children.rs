@@ -1,15 +1,17 @@
+use std::collections::VecDeque;
+
 use uiautomation::UIElement;
 use uiautomation::UITreeWalker;
 
 #[allow(dead_code)]
-pub enum GatherChildrenStopBehaviour {
+pub enum StopBehaviour {
     EndOfSiblings,
     LastChildEncountered,
     TaskbarEndEncountered,
 }
-impl GatherChildrenStopBehaviour {
+impl StopBehaviour {
     fn include_last_child(&self) -> bool {
-        !matches!(self, GatherChildrenStopBehaviour::TaskbarEndEncountered)
+        !matches!(self, StopBehaviour::TaskbarEndEncountered)
     }
 }
 trait GatherChildrenStopBehaviourFn {
@@ -35,32 +37,40 @@ impl GatherChildrenStopBehaviourFn for TaskbarEndEncountered {
         element.get_automation_id() == Ok("TaskbarEndAccessibilityElement".to_string())
     }
 }
+pub trait GatherChildrenable {
+    fn gather_children(&self, walker: &UITreeWalker, stop_behaviour: &StopBehaviour) -> VecDeque<UIElement>;
+}
+impl GatherChildrenable for UIElement {
+    fn gather_children(&self, walker: &UITreeWalker, stop_behaviour: &StopBehaviour) -> VecDeque<UIElement> {
+        gather_children(walker, self, stop_behaviour)
+    }
+}
 pub fn gather_children(
     walker: &UITreeWalker,
     parent: &UIElement,
-    stop_behaviour: &GatherChildrenStopBehaviour,
-) -> Vec<UIElement> {
+    stop_behaviour: &StopBehaviour,
+) -> VecDeque<UIElement> {
     let stop: Box<dyn GatherChildrenStopBehaviourFn> = match stop_behaviour {
-        GatherChildrenStopBehaviour::EndOfSiblings => Box::new(EndOfSiblings),
-        GatherChildrenStopBehaviour::LastChildEncountered => {
+        StopBehaviour::EndOfSiblings => Box::new(EndOfSiblings),
+        StopBehaviour::LastChildEncountered => {
             let last = walker.get_last_child(parent).unwrap(); // Handle error appropriately
             let runtime_id_of_last = last.get_runtime_id().unwrap(); // Handle error appropriately
             Box::new(LastChildEncountered { runtime_id_of_last })
         }
-        GatherChildrenStopBehaviour::TaskbarEndEncountered => Box::new(TaskbarEndEncountered),
+        StopBehaviour::TaskbarEndEncountered => Box::new(TaskbarEndEncountered),
     };
-    let mut children = vec![];
+    let mut children = VecDeque::new();
     if let Ok(first) = walker.get_first_child(parent) {
-        children.push(first.clone());
+        children.push_back(first.clone());
         let mut next = first;
         while let Ok(sibling) = walker.get_next_sibling(&next) {
             if stop.should_stop(&sibling) {
                 if stop_behaviour.include_last_child() {
-                    children.push(sibling.clone());
+                    children.push_back(sibling.clone());
                 }
                 break;
             } else {
-                children.push(sibling.clone());
+                children.push_back(sibling.clone());
                 next = sibling;
             }
         }
