@@ -35,65 +35,9 @@ pub struct TaskbarEntry {
     pub bounds: IRect,
 }
 
-#[derive(Debug, Clone, Reflect)]
-pub struct DetachableUIElement(Option<UIElement>);
-impl Eq for DetachableUIElement {}
-impl PartialEq for DetachableUIElement {
-    fn eq(&self, other: &Self) -> bool {
-        match (&self.0, &other.0) {
-            (Some(x), Some(y)) => x.get_runtime_id() == y.get_runtime_id(),
-            (None, None) => true,
-            _ => false,
-        }
-    }
-}
-pub trait TryAsRef<T> {
-    type Error;
-
-    fn try_as_ref(&self) -> Result<&T, Self::Error>;
-}
-impl TryInto<UIElement> for DetachableUIElement {
-    type Error = AppResolveError;
-    fn try_into(self) -> Result<UIElement, Self::Error> {
-        match self.0 {
-            Some(x) => Ok(x),
-            None => Err(AppResolveError::Detached),
-        }
-    }
-}
-impl TryAsRef<UIElement> for DetachableUIElement {
-    type Error = AppResolveError;
-
-    fn try_as_ref(&self) -> Result<&UIElement, Self::Error> {
-        self.0.as_ref().ok_or(AppResolveError::Detached)
-    }
-}
-impl From<UIElement> for DetachableUIElement {
-    fn from(elem: UIElement) -> Self {
-        DetachableUIElement(Some(elem))
-    }
-}
-impl Serialize for DetachableUIElement {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::ser::Serializer,
-    {
-        serializer.serialize_none()
-    }
-}
-impl<'de> Deserialize<'de> for DetachableUIElement {
-    fn deserialize<D>(_deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::de::Deserializer<'de>,
-    {
-        Ok(DetachableUIElement(None))
-    }
-}
-
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, Reflect)]
 pub struct EditorArea {
     pub groups: Vec<EditorGroup>,
-    // pub elem: DetachableUIElement,
 }
 impl EditorArea {
     pub fn get_expected_automation_id() -> &'static str {
@@ -105,20 +49,17 @@ impl EditorArea {
 pub struct EditorGroup {
     pub tabs: Vec<EditorTab>,
     pub content: Option<EditorContent>,
-    // pub elem: DetachableUIElement,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, Reflect)]
 pub struct EditorTab {
     pub title: String,
     pub active: bool,
-    // pub elem: DetachableUIElement,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, Reflect)]
 pub struct EditorContent {
     pub content: String,
-    // pub elem: DetachableUIElement,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, Reflect)]
@@ -183,26 +124,14 @@ impl TryFrom<String> for SideTabKind {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, Reflect)]
 pub enum SideTab {
-    Closed {
-        kind: SideTabKind,
-        // button: DetachableUIElement,
-    },
-    Open {
-        kind: SideTabKind,
-        // button: DetachableUIElement,
-        view: View,
-    },
+    Closed { kind: SideTabKind },
+    Open { kind: SideTabKind, view: View },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, Reflect)]
 pub enum View {
-    Explorer {
-        // workbench.view.explorer
-        // elem: DetachableUIElement,
-    },
-    Unknown {
-        // elem: DetachableUIElement,
-    },
+    Explorer {},
+    Unknown {},
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, Reflect)]
@@ -212,30 +141,34 @@ pub struct UISnapshot {
 
 impl Display for UISnapshot {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "UISnapshot: {:?}", self.app_windows)
+        write!(f, "!!! UISnapshot !!!\n")?;
+        for window in self.app_windows.iter() {
+            write!(f, "{}", window)?;
+        }
+        fmt::Result::Ok(())
     }
 }
 
 pub enum VSCodeState {
     Editor {
-        tabs: DetachableUIElement,
-        editor: DetachableUIElement,
+        tabs: UIElement,
+        editor: UIElement,
     },
     LeftTabOpen {
-        side_nav_tabs: DetachableUIElement,
-        side_nav_view: DetachableUIElement,
-        editor: DetachableUIElement,
+        side_nav_tabs: UIElement,
+        side_nav_view: UIElement,
+        editor: UIElement,
     },
     Unknown,
 }
 impl VSCodeState {
     pub fn get_side_nav_tabs_root_elem(&self) -> Result<&UIElement, AppResolveError> {
         match self {
-            VSCodeState::Editor { tabs, .. } => Ok(tabs.try_as_ref()?),
+            VSCodeState::Editor { tabs, .. } => Ok(tabs),
             VSCodeState::LeftTabOpen {
                 side_nav_tabs: tabs,
                 ..
-            } => Ok(tabs.try_as_ref()?),
+            } => Ok(tabs),
             VSCodeState::Unknown => Err(AppResolveError::BadStructure(
                 "Unknown VSCodeState".to_string(),
             )),
@@ -243,11 +176,11 @@ impl VSCodeState {
     }
     pub fn get_side_nav_view_root_elem(&self) -> Result<&UIElement, AppResolveError> {
         match self {
-            VSCodeState::Editor { tabs, .. } => Ok(tabs.try_as_ref()?),
+            VSCodeState::Editor { tabs, .. } => Ok(tabs),
             VSCodeState::LeftTabOpen {
                 side_nav_view: view,
                 ..
-            } => Ok(view.try_as_ref()?),
+            } => Ok(view),
             VSCodeState::Unknown => Err(AppResolveError::BadStructure(
                 "Unknown VSCodeState".to_string(),
             )),
@@ -255,8 +188,8 @@ impl VSCodeState {
     }
     pub fn get_editor_root_elem(&self) -> Result<&UIElement, AppResolveError> {
         match self {
-            VSCodeState::Editor { editor, .. } => Ok(editor.try_as_ref()?),
-            VSCodeState::LeftTabOpen { editor, .. } => Ok(editor.try_as_ref()?),
+            VSCodeState::Editor { editor, .. } => Ok(editor),
+            VSCodeState::LeftTabOpen { editor, .. } => Ok(editor),
             VSCodeState::Unknown => Err(AppResolveError::BadStructure(
                 "Unknown VSCodeState".to_string(),
             )),
@@ -293,7 +226,6 @@ impl TryFrom<VecDeque<UIElement>> for VSCodeState {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Reflect)]
 pub enum AppWindow {
     VSCode {
-        // root: DetachableUIElement,
         focused: bool,
         editor_area: EditorArea,
         side_nav: Vec<SideTab>,
@@ -303,25 +235,46 @@ pub enum AppWindow {
 impl Display for AppWindow {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            AppWindow::VSCode { .. } => {
-                write!(f, "Visual Studio Code: {:?}", self)
-                // match get_tree_string(elem) {
-                //     Ok(text) => write!(f, "Visual Studio Code: {}", text),
-                //     Err(e) => write!(f, "Visual Studio Code: {:?}", e),
-                // }
-            } // AppWindow::VSCodeTerminal(elem) => {
-              //     write!(f, "VSCodeTerminal: {:?}", elem.get_name())
-              // }
-              // AppWindow::VSCodeEditor(elem) => {
-              //     write!(
-              //         f,
-              //         "VSCodeEditor: {:?}\n{}",
-              //         elem.get_name(),
-              //         elem.get_property_value(UIProperty::LegacyIAccessibleValue)
-              //             .map(|v| v.to_string())
-              //             .unwrap_or_default()
-              //     )
-              // }
+            AppWindow::VSCode {
+                focused,
+                editor_area,
+                side_nav,
+            } => {
+                write!(
+                    f,
+                    ":D :D :D Visual Studio Code {} owo owo owo\n",
+                    if *focused { "(focused)" } else { "" }
+                )?;
+
+                write!(f, "Side tabs:\n")?;
+                for tab in side_nav.iter() {
+                    match tab {
+                        SideTab::Open { kind, view } => {
+                            write!(f, "- (open) {:?} {{{{\n{:?}\n||}}\n", kind, view)?;
+                        }
+                        SideTab::Closed { kind } => {
+                            write!(f, "- {:?}\n", kind)?;
+                        }
+                    }
+                }
+
+                write!(f, "Editor groups:\n")?;
+                for (i, group) in editor_area.groups.iter().enumerate() {
+                    write!(f, "Group {} tabs:\n", i+1)?;
+                    for tab in group.tabs.iter() {
+                        if tab.active {
+                            write!(f, "- (active) {}\n", tab.title)?;
+                        } else {
+                            write!(f, "- {}\n", tab.title)?;
+                        }
+                    }
+                    if let Some(ref content) = group.content {
+                        write!(f, "Group {} buffer:\n=======\n{}\n=======\n", i+1, content.content)?;
+                    }
+                }
+
+                fmt::Result::Ok(())
+            }
         }
     }
 }
@@ -331,7 +284,6 @@ pub enum AppResolveError {
     UI(uiautomation::Error),
     BadStructure(String),
     NoMatch,
-    Detached,
 }
 impl From<uiautomation::Error> for AppResolveError {
     fn from(e: uiautomation::Error) -> Self {

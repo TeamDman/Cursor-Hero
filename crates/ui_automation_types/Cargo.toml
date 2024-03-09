@@ -8,5 +8,4 @@ edition = "2021"
 [dependencies]
 bevy = { workspace = true }
 uiautomation = {workspace = true}
-chrono = {workspace = true}
 serde = { version = "1.0", features = ["derive"] }
