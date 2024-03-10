@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use cursor_hero_character_types::prelude::MainCharacter;
 use cursor_hero_environment_types::environment_types::EnvironmentTag;
+use cursor_hero_memory_types::prelude::get_persist_file;
+use cursor_hero_memory_types::prelude::Usage;
 use cursor_hero_observation_types::observation_types::SomethingObservableHappenedEvent;
 use cursor_hero_ui_automation::prelude::take_snapshot;
 use cursor_hero_ui_automation::prelude::UISnapshot;
@@ -77,27 +79,6 @@ fn handle_threadbound_messages(
     Ok(())
 }
 
-fn get_persist_file(current_path: &str, file_name: &str) -> Result<std::fs::File, std::io::Error> {
-    let mut file_path = PathBuf::new();
-
-    #[cfg(debug_assertions)]
-    {
-        let dir = Path::new(current_path).parent().ok_or(std::io::Error::new(
-            std::io::ErrorKind::NotFound,
-            "Parent not found",
-        ))?;
-        file_path.push(dir);
-    }
-
-    file_path.push(file_name);
-    let handle = OpenOptions::new()
-        .write(true)
-        .truncate(true)
-        .create(true)
-        .open(file_path)?;
-    Ok(handle)
-}
-
 fn handle_gamebound_messages(
     bridge: Res<Bridge>,
     mut observation_events: EventWriter<SomethingObservableHappenedEvent>,
@@ -119,7 +100,7 @@ fn handle_gamebound_messages(
             environment_id: Some(character_environment.environment_id),
         });
 
-        match get_persist_file(file!(), "results.txt") {
+        match get_persist_file(file!(), "results.txt", Usage::Persist) {
             Ok(mut file) => {
                 if let Err(e) = file.write_all(snapshot.to_string().as_bytes()) {
                     error!("Failed to write to file: {:?}", e);

@@ -2595,6 +2595,7 @@ name = "cursor_hero_ui_automation"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "cursor_hero_memory_types",
  "cursor_hero_ui_automation_types",
  "itertools 0.12.0",
  "uiautomation",
@@ -2617,6 +2618,7 @@ dependencies = [
  "crossbeam-channel",
  "cursor_hero_character_types",
  "cursor_hero_environment_types",
+ "cursor_hero_memory_types",
  "cursor_hero_observation_types",
  "cursor_hero_ui_automation",
  "cursor_hero_ui_watcher_types",

@@ -10,3 +10,6 @@ bevy = { workspace = true }
 uiautomation = {workspace = true}
 itertools = {workspace = true}
 cursor_hero_ui_automation_types = { workspace = true }
+
+[dev-dependencies]
+cursor_hero_memory_types = { workspace = true }
