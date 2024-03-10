@@ -45,7 +45,7 @@ If you have a DualShock controller, you will need something like [DS4Windows](ht
 - [KillianLucas/open-interpreter: A natural language interface for computers](https://github.com/KillianLucas/open-interpreter)
 
 
-### Windows
+### Windows UI Automation
 
 - [Accessibility tools - AccEvent (Accessible Event Watcher) - Win32 apps | Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/winauto/accessible-event-watcher)
 - [Accessibility tools - Inspect - Win32 apps | Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/winauto/inspect-objects)
@@ -57,6 +57,15 @@ If you have a DualShock controller, you will need something like [DS4Windows](ht
 - [c# - Getting icon of "modern" Windows app from a desktop application? - Stack Overflow](https://stackoverflow.com/questions/32122679/getting-icon-of-modern-windows-app-from-a-desktop-application)
 - [How does Microsoft's "inspect.exe" application keep its window on top? - Microsoft Q&A === WS_EX_TOPMOST, UAC Bypass UI](https://learn.microsoft.com/en-us/answers/questions/1105704/how-does-microsofts-inspect-exe-application-keep-i)
   - ["Automatic dismissal of the start menu" and other crazyness - Windows-classic-samples/Samples/DesktopAutomationDismiss at 27ffb0811ca761741502feaefdb591aebf592193 - microsoft/Windows-classic-samples (github.com)](https://github.com/microsoft/Windows-classic-samples/tree/27ffb0811ca761741502feaefdb591aebf592193/Samples/DesktopAutomationDismiss#build-the-sample)
+- [c# - UIAutomation won't retrieve children of an element - Stack Overflow](https://stackoverflow.com/questions/14187110/uiautomation-wont-retrieve-children-of-an-element)
+- [comEle = \_AutomationClient.instance().dll.GetNextSiblingElement(self.Element) Hangs - Issue #30 - yinkaisheng/Python-UIAutomation-for-Windows (github.com)](https://github.com/yinkaisheng/Python-UIAutomation-for-Windows/issues/30)
+- [microsoft/WinAppDriver: Windows Application Driver (github.com)](https://github.com/microsoft/WinAppDriver)
+- [How to force UI automation tree refresh](https://stackoverflow.com/q/64120894/11141271)
+  - mostly interested in the screen reader flag mentioned
+    ```
+    SystemParametersInfo( SPI_SETSCREENREADER, TRUE, NULL, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE);
+    PostMessage( HWND_BROADCAST, WM_WININICHANGE, SPI_SETSCREENREADER, 0);
+    ```
 
 ### RL
 
@@ -105,6 +114,12 @@ If you have a DualShock controller, you will need something like [DS4Windows](ht
 - [Kenney Fonts](https://kenney.nl/assets/kenney-fonts)
 - [Fira Mono - Google Fonts](https://fonts.google.com/specimen/Fira+Mono)
 - [Xelu's FREE Controller Prompts (thoseawesomeguys.com)](https://thoseawesomeguys.com/prompts/)
+
+### Bevy Plugins
+
+- [janhohenheim/foxtrot: The all-in-one Bevy 3D game template for desktop. (github.com)](https://github.com/janhohenheim/foxtrot)
+- [StarArawn/bevy\_ecs\_tilemap: A tilemap rendering crate for bevy which is more ECS friendly. (github.com)](https://github.com/StarArawn/bevy_ecs_tilemap)
+- [djeedai/bevy\_hanabi: 🎆 Hanabi --- a GPU particle system plugin for the Bevy game engine. (github.com)](https://github.com/djeedai/bevy_hanabi)
 
 ### Game inspiration
 

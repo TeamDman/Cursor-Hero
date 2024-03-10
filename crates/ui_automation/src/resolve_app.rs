@@ -1,5 +1,3 @@
-use bevy::math::IVec2;
-use bevy::math::Rect;
 use cursor_hero_ui_automation_types::ui_automation_types::AppResolveError;
 use cursor_hero_ui_automation_types::ui_automation_types::AppWindow;
 use cursor_hero_ui_automation_types::ui_automation_types::Drillable;
@@ -7,95 +5,22 @@ use cursor_hero_ui_automation_types::ui_automation_types::EditorArea;
 use cursor_hero_ui_automation_types::ui_automation_types::EditorContent;
 use cursor_hero_ui_automation_types::ui_automation_types::EditorGroup;
 use cursor_hero_ui_automation_types::ui_automation_types::EditorTab;
-use cursor_hero_ui_automation_types::ui_automation_types::ElementInfo;
-use cursor_hero_ui_automation_types::ui_automation_types::GatherAppsError;
 use cursor_hero_ui_automation_types::ui_automation_types::SideTab;
 use cursor_hero_ui_automation_types::ui_automation_types::SideTabKind;
 use cursor_hero_ui_automation_types::ui_automation_types::ToBevyIRect;
-use cursor_hero_ui_automation_types::ui_automation_types::UISnapshot;
 use cursor_hero_ui_automation_types::ui_automation_types::VSCodeState;
 use cursor_hero_ui_automation_types::ui_automation_types::View;
-use itertools::Itertools;
-use std::collections::VecDeque;
 use uiautomation::controls::ControlType;
 use uiautomation::types::ExpandCollapseState;
-use uiautomation::types::Point;
-use uiautomation::types::TreeScope;
 use uiautomation::types::UIProperty;
 use uiautomation::UIAutomation;
 use uiautomation::UIElement;
-use uiautomation::UITreeWalker;
 
 use crate::gather_children::gather_children;
 use crate::gather_children::GatherChildrenable;
 use crate::gather_children::StopBehaviour;
 
-pub fn find_element_at(pos: IVec2) -> Result<UIElement, uiautomation::Error> {
-    let automation = UIAutomation::new()?;
-    automation.element_from_point(Point::new(pos.x, pos.y))
-}
-
-pub fn gather_elements_at(pos: IVec2) -> Result<Vec<(UIElement, usize)>, uiautomation::Error> {
-    let automation = UIAutomation::new()?;
-    let walker = automation.create_tree_walker()?;
-    let start = automation.element_from_point(Point::new(pos.x, pos.y))?;
-    let mut rtn = vec![];
-    let mut next = VecDeque::new();
-    next.push_back((start, 0));
-    while let Some((elem, depth)) = next.pop_front() {
-        rtn.push((elem.clone(), depth));
-        if let Ok(child) = walker.get_first_child(&elem) {
-            next.push_back((child.clone(), depth + 1));
-            let mut next_sibling = child;
-            while let Ok(sibling) = walker.get_next_sibling(&next_sibling) {
-                next.push_back((sibling.clone(), depth + 1));
-                next_sibling = sibling;
-            }
-        }
-    }
-    Ok(rtn)
-}
-
-pub fn take_snapshot() -> Result<UISnapshot, GatherAppsError> {
-    let automation = UIAutomation::new()?;
-    let root = automation.get_root_element()?;
-    println!("Boutta gather top level children");
-    // let walker = automation.create_tree_walker()?;
-    // let found = gather_children(&walker, &root, &GatherChildrenStopBehaviour::EndOfSiblings);
-    let condition = &automation.create_true_condition()?;
-    let found = root.find_all(TreeScope::Children, condition)?;
-    println!("Found {} top level children", found.len());
-
-    let walker = automation.create_tree_walker()?;
-    let focused = automation.get_focused_element()?;
-    let focused_app = walker.normalize(&focused)?;
-
-    let mut apps = vec![];
-    let mut errors = vec![];
-    for elem in found {
-        let focused = elem.get_runtime_id() == focused_app.get_runtime_id();
-        match resolve_app(&elem, &automation, focused) {
-            Ok(app) => {
-                apps.push((elem, app));
-            }
-            Err(e) => errors.push(e),
-        }
-    }
-    let bad_errors = errors
-        .into_iter()
-        .filter(|e| !matches!(e, AppResolveError::NoMatch))
-        .collect_vec();
-    if !bad_errors.is_empty() {
-        return Err(GatherAppsError::ResolveFailed(bad_errors));
-    }
-
-    let snapshot = UISnapshot {
-        app_windows: apps.into_iter().map(|(_elem, app)| app).collect(),
-    };
-    Ok(snapshot)
-}
-
-fn resolve_app(
+pub(crate) fn resolve_app(
     elem: &UIElement,
     automation: &UIAutomation,
     focused: bool,
@@ -123,7 +48,9 @@ fn resolve_app(
             let side_nav = state
                 .get_side_nav_tabs_root_elem()?
                 .drill(&walker, vec![0, 0])?
-                .gather_children(&walker, &StopBehaviour::EndOfSiblings)
+                .gather_children(&walker, &StopBehaviour::LastChildEncountered);
+            println!("side_nav: {:?}", side_nav);
+            let side_nav = side_nav
                 .into_iter()
                 .filter(|elem| elem.get_control_type() == Ok(ControlType::TabItem))
                 .map(|elem| {
@@ -302,138 +229,5 @@ fn resolve_app(
             // Ok(vscode)
         }
         _ => Err(AppResolveError::NoMatch),
-    }
-}
-
-pub fn gather_shallow_element_info(
-    element: UIElement,
-) -> Result<ElementInfo, uiautomation::errors::Error> {
-    let name = element.get_name()?;
-    let bb = element.get_bounding_rectangle()?;
-    let class_name = element.get_classname()?;
-    let automation_id = element.get_automation_id()?;
-    let runtime_id = element.get_runtime_id()?;
-
-    let info = ElementInfo {
-        name,
-        bounding_rect: Rect::new(
-            bb.get_left() as f32,
-            bb.get_top() as f32,
-            bb.get_right() as f32,
-            bb.get_bottom() as f32,
-        ),
-        control_type: class_name.clone(),
-        class_name,
-        automation_id,
-        runtime_id,
-        children: None,
-    };
-    Ok(info)
-}
-
-pub fn gather_deep_element_info(
-    element: UIElement,
-) -> Result<ElementInfo, uiautomation::errors::Error> {
-    let automation = UIAutomation::new()?;
-    let walker = automation.create_tree_walker()?;
-    gather_deep_element_info_inner(element, &walker, &StopBehaviour::EndOfSiblings)
-}
-
-fn gather_deep_element_info_inner(
-    element: UIElement,
-    walker: &UITreeWalker,
-    stop_behaviour: &StopBehaviour,
-) -> Result<ElementInfo, uiautomation::errors::Error> {
-    let name = element.get_name()?;
-    let bb = element.get_bounding_rectangle()?;
-    let class_name = element.get_classname()?;
-    let automation_id = element.get_automation_id()?;
-    let runtime_id = element.get_runtime_id()?;
-    let mut children = vec![];
-
-    for child in gather_children(walker, &element, stop_behaviour) {
-        let child_info = gather_shallow_element_info(child)?;
-        children.push(child_info);
-    }
-
-    let info = ElementInfo {
-        name,
-        bounding_rect: Rect::new(
-            bb.get_left() as f32,
-            bb.get_top() as f32,
-            bb.get_right() as f32,
-            bb.get_bottom() as f32,
-        ),
-        control_type: class_name.clone(),
-        class_name,
-        automation_id,
-        runtime_id,
-        children: Some(children),
-    };
-    Ok(info)
-}
-
-// pub fn get_element_from_identifier(id: &str) -> Result<UIElement, uiautomation::Error> {
-//     let automation = UIAutomation::new()?;
-//     // find the elem.get_automation_id() that matches id
-//     let filter = automation.create_property_condition(
-//         uiautomation::types::UIProperty::AutomationId,
-//         uiautomation::variants::Variant::from(id),
-//         None,
-//     )?;
-//     let walker = automation.filter_tree_walker(filter)?;
-//     let root = automation.get_root_element()?;
-//     let elem = find_recursive(&walker, &root)?;
-
-// }
-
-// fn find_recursive(walker: &UITreeWalker, element: &UIElement) -> Result<UIElement, uiautomation::Error> {
-//     if element.get_automation_id()? == id {
-//         return Ok(element);
-//     }
-
-//     if let Ok(child) = walker.get_first_child(&element) {
-//         if let Ok(elem) = find_recursive(walker, &child) {
-//             return Ok(elem);
-//         }
-
-//         let mut next = child;
-//         while let Ok(sibling) = walker.get_next_sibling(&next) {
-//             if let Ok(elem) = find_recursive(walker, &sibling) {
-//                 return Ok(elem);
-//             }
-
-//             next = sibling;
-//         }
-//     }
-
-//     Err(uiautomation::Error::from_win32(0))
-// }
-
-#[cfg(test)]
-mod tests {
-    use crate::prelude::get_taskbar;
-
-    #[test]
-    fn test_get_taskbar() {
-        let taskbar = get_taskbar().unwrap();
-        assert!(taskbar.entries.len() > 0);
-        // print the entries
-        for entry in taskbar.entries {
-            println!("entry: {:?}", entry);
-        }
-    }
-
-    #[test]
-    fn test_gather_apps() {
-        // TODO: test to call this 10,000 times to see if we can reproduce the slow down over time issue.
-        // UI automation gets slower the longer the computer has gone without restarting.
-        let start = std::time::Instant::now();
-        let snapshot = super::take_snapshot().unwrap();
-        assert!(snapshot.app_windows.len() > 0);
-        println!("{}", snapshot);
-        let end = std::time::Instant::now();
-        println!("time: {:?}", end - start);
-        assert!(end - start < std::time::Duration::from_secs(1));
     }
 }

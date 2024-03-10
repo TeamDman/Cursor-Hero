@@ -1,5 +1,6 @@
 use bevy::log::LogPlugin;
 use bevy::prelude::*;
+use bevy::window::ExitCondition;
 use cursor_hero_memory_types::prelude::get_persist_file;
 use cursor_hero_memory_types::prelude::Usage;
 use cursor_hero_ui_automation::prelude::*;
@@ -14,15 +15,15 @@ fn main() {
 info,
 wgpu_core=warn,
 wgpu_hal=warn,
-bevy_ecs=info,
-cursor_hero=debug
-            "
+vscode_scraper=trace
+"
                 .replace('\n', "")
                 .trim()
                 .into(),
             })
             .set(WindowPlugin {
                 primary_window: None,
+                exit_condition: ExitCondition::DontExit,
                 ..default()
             })
             .build(),
@@ -47,6 +48,7 @@ fn write_vscode_ui_info(mut cooldown: Local<Option<Timer>>, time: Res<Time>) {
         return;
     }
     debug!("taking snapshot");
+    println!("!!!!!!!!!!!!!!! taking snapshot !!!!!!!!!!!!!!!");
     let snapshot = take_snapshot().unwrap();
     match get_persist_file(file!(), "vscode.txt", Usage::Persist) {
         Ok(mut file) => {
