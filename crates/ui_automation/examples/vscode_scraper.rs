@@ -1,43 +1,61 @@
-use std::io::Write;
-
-use bevy::app::App;
 use bevy::log::LogPlugin;
+use bevy::prelude::*;
 use cursor_hero_memory_types::prelude::get_persist_file;
 use cursor_hero_memory_types::prelude::Usage;
 use cursor_hero_ui_automation::prelude::*;
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+use std::io::Write;
+fn main() {
     let mut app = App::new();
-    app.add_plugins(LogPlugin {
-        level: bevy::log::Level::DEBUG,
-        filter: "
+    app.add_plugins(
+        DefaultPlugins
+            .set(LogPlugin {
+                level: bevy::log::Level::DEBUG,
+                filter: "
 info,
 wgpu_core=warn,
 wgpu_hal=warn,
 bevy_ecs=info,
-cursor_hero=debug,
-        "
-        .replace('\n', "")
-        .trim()
-        .into(),
-    });
+cursor_hero=debug
+            "
+                .replace('\n', "")
+                .trim()
+                .into(),
+            })
+            .set(WindowPlugin {
+                primary_window: None,
+                ..default()
+            })
+            .build(),
+    );
     app.add_systems(Update, write_vscode_ui_info);
     app.run();
 }
 
-fn write_vscode_ui_info(
-    mut cooldown: Local<Cooldown>,
-) {
-    let snapshot = take_snapshot()?;
-    // println!("{}", snapshot);
-
+fn write_vscode_ui_info(mut cooldown: Local<Option<Timer>>, time: Res<Time>) {
+    let should_tick = if let Some(cooldown) = cooldown.as_mut() {
+        if cooldown.tick(time.delta()).just_finished() {
+            cooldown.reset();
+            true
+        } else {
+            false
+        }
+    } else {
+        cooldown.replace(Timer::from_seconds(1.0, TimerMode::Repeating));
+        true
+    };
+    if !should_tick {
+        return;
+    }
+    debug!("taking snapshot");
+    let snapshot = take_snapshot().unwrap();
     match get_persist_file(file!(), "vscode.txt", Usage::Persist) {
         Ok(mut file) => {
             if let Err(e) = file.write_all(snapshot.to_string().as_bytes()) {
-                eprintln!("Failed to write to file: {:?}", e);
+                debug!("Failed to write to file: {:?}", e);
             }
         }
         Err(e) => {
-            eprintln!("Failed to open file: {:?}", e);
+            error!("Failed to open file: {:?}", e);
         }
     }
 }
