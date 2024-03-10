@@ -1,20 +1,11 @@
 use bevy::prelude::*;
 use cursor_hero_character_types::prelude::*;
 
+use cursor_hero_memory_types::prelude::*;
 use cursor_hero_toolbelt_types::toolbelt_types::Toolbelt;
-use cursor_hero_toolbelt_types::toolbelt_types::ToolbeltLoadout;
 use cursor_hero_toolbelt_types::toolbelt_types::ToolbeltPopulateEvent;
 use serde::Deserialize;
 use serde::Serialize;
-
-use crate::get_persist_file;
-use crate::read_from_disk;
-use crate::write_to_disk;
-use crate::PersistError;
-use crate::PersistSuccess;
-use crate::RestoreError;
-use crate::RestoreSuccess;
-use crate::Usage;
 
 pub struct MainCharacterMemoryPlugin;
 

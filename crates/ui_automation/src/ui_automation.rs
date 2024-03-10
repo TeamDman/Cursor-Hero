@@ -1,9 +1,7 @@
 use bevy::math::IVec2;
 use bevy::math::Rect;
-use cursor_hero_ui_automation_types::ui_automation_types::all_of;
 use cursor_hero_ui_automation_types::ui_automation_types::AppResolveError;
 use cursor_hero_ui_automation_types::ui_automation_types::AppWindow;
-use cursor_hero_ui_automation_types::ui_automation_types::DrillError;
 use cursor_hero_ui_automation_types::ui_automation_types::Drillable;
 use cursor_hero_ui_automation_types::ui_automation_types::EditorArea;
 use cursor_hero_ui_automation_types::ui_automation_types::EditorContent;
@@ -11,7 +9,6 @@ use cursor_hero_ui_automation_types::ui_automation_types::EditorGroup;
 use cursor_hero_ui_automation_types::ui_automation_types::EditorTab;
 use cursor_hero_ui_automation_types::ui_automation_types::ElementInfo;
 use cursor_hero_ui_automation_types::ui_automation_types::GatherAppsError;
-use cursor_hero_ui_automation_types::ui_automation_types::HexList;
 use cursor_hero_ui_automation_types::ui_automation_types::SideTab;
 use cursor_hero_ui_automation_types::ui_automation_types::SideTabKind;
 use cursor_hero_ui_automation_types::ui_automation_types::ToBevyIRect;
@@ -20,14 +17,11 @@ use cursor_hero_ui_automation_types::ui_automation_types::VSCodeState;
 use cursor_hero_ui_automation_types::ui_automation_types::View;
 use itertools::Itertools;
 use std::collections::VecDeque;
-use std::fmt;
-use std::io::Error;
 use uiautomation::controls::ControlType;
 use uiautomation::types::ExpandCollapseState;
 use uiautomation::types::Point;
 use uiautomation::types::TreeScope;
 use uiautomation::types::UIProperty;
-use uiautomation::variants::Variant;
 use uiautomation::UIAutomation;
 use uiautomation::UIElement;
 use uiautomation::UITreeWalker;
@@ -96,7 +90,7 @@ pub fn take_snapshot() -> Result<UISnapshot, GatherAppsError> {
     }
 
     let snapshot = UISnapshot {
-        app_windows: apps.into_iter().map(|(elem, app)| app).collect(),
+        app_windows: apps.into_iter().map(|(_elem, app)| app).collect(),
     };
     Ok(snapshot)
 }
@@ -148,13 +142,13 @@ fn resolve_app(
                                 if Some(id.as_str())
                                     == SideTabKind::Explorer.get_view_automation_id() =>
                             {
-                                View::Explorer { 
-                                    // elem: view.into() 
-                                }
+                                View::Explorer {}
+                                // elem: view.into()
                             }
-                            _ => View::Unknown { 
-                                // elem: view.into() 
-                            },
+                            _ => {
+                                View::Unknown {}
+                                // elem: view.into()
+                            }
                         };
 
                         Ok(SideTab::Open {

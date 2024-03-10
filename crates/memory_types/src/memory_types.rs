@@ -1,11 +1,3 @@
-#![feature(stmt_expr_attributes)]
-
-pub mod agent_observation_memory_plugin;
-mod main_camera_memory_plugin;
-mod main_character_memory_plugin;
-mod primary_window_memory_plugin;
-pub mod voice_to_text_memory_plugin;
-
 use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::Read;
@@ -13,25 +5,9 @@ use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 
-use bevy::prelude::*;
-
-pub struct MemoryPlugin;
-
-impl Plugin for MemoryPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_plugins((
-            main_character_memory_plugin::MainCharacterMemoryPlugin,
-            primary_window_memory_plugin::PrimaryWindowMemoryPlugin,
-            main_camera_memory_plugin::MainCameraMemoryPlugin,
-            voice_to_text_memory_plugin::VoiceToTextMemoryPlugin,
-            agent_observation_memory_plugin::AgentObservationMemoryPlugin,
-        ));
-    }
-}
-
 #[derive(Debug)]
 #[allow(dead_code)]
-enum PersistError {
+pub enum PersistError {
     Io(std::io::Error),
     WindowBounds(cursor_hero_winutils::win_window::WindowBoundsError),
     Query,
@@ -39,7 +15,7 @@ enum PersistError {
 }
 
 #[derive(Debug)]
-enum PersistSuccess {
+pub enum PersistSuccess {
     WritePerformed,
     Debounce,
     Cooldown,
@@ -48,23 +24,23 @@ enum PersistSuccess {
 
 #[derive(Debug)]
 #[allow(dead_code)]
-enum RestoreError {
+pub enum RestoreError {
     Io(std::io::Error),
     Json(serde_json::Error),
     Query,
 }
 
 #[derive(Debug)]
-enum RestoreSuccess {
+pub enum RestoreSuccess {
     Performed,
     NoAction,
 }
-enum Usage {
+pub enum Usage {
     Persist,
     Restore,
 }
 
-fn get_persist_file(
+pub fn get_persist_file(
     current_path: &str,
     file_name: &str,
     usage: Usage,
@@ -93,7 +69,7 @@ fn get_persist_file(
     Ok(file)
 }
 
-fn write_to_disk<T>(mut file: File, data: T) -> Result<PersistSuccess, PersistError>
+pub fn write_to_disk<T>(mut file: File, data: T) -> Result<PersistSuccess, PersistError>
 where
     T: serde::Serialize,
 {
@@ -103,7 +79,7 @@ where
     Ok(PersistSuccess::WritePerformed)
 }
 
-fn read_from_disk<T>(mut file: File) -> Result<T, RestoreError>
+pub fn read_from_disk<T>(mut file: File) -> Result<T, RestoreError>
 where
     T: serde::de::DeserializeOwned,
 {

@@ -2,19 +2,11 @@ use bevy::prelude::*;
 use bevy::utils::HashMap;
 use cursor_hero_character_types::prelude::*;
 
+use cursor_hero_memory_types::prelude::*;
 use cursor_hero_observation_types::observation_types::ObservationBuffer;
 use cursor_hero_observation_types::observation_types::SomethingObservableHappenedEvent;
 use serde::Deserialize;
 use serde::Serialize;
-
-use crate::get_persist_file;
-use crate::read_from_disk;
-use crate::write_to_disk;
-use crate::PersistError;
-use crate::PersistSuccess;
-use crate::RestoreError;
-use crate::RestoreSuccess;
-use crate::Usage;
 
 pub struct AgentObservationMemoryPlugin;
 

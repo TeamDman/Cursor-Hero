@@ -4,18 +4,10 @@ use bevy::window::RawHandleWrapper;
 use bevy::window::WindowMode;
 use bevy::window::WindowResolution;
 use bevy::winit::WinitWindows;
+use cursor_hero_memory_types::prelude::*;
 use cursor_hero_winutils::win_window::get_window_inner_bounds;
 use serde::Deserialize;
 use serde::Serialize;
-
-use crate::get_persist_file;
-use crate::read_from_disk;
-use crate::write_to_disk;
-use crate::PersistError;
-use crate::PersistSuccess;
-use crate::RestoreError;
-use crate::RestoreSuccess;
-use crate::Usage;
 
 pub struct PrimaryWindowMemoryPlugin;
 

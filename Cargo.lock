@@ -2117,6 +2117,41 @@ dependencies = [
 ]
 
 [[package]]
+name = "cursor_hero_memory"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "cursor_hero_camera",
+ "cursor_hero_character_types",
+ "cursor_hero_memory_types",
+ "cursor_hero_observation_types",
+ "cursor_hero_secret_types",
+ "cursor_hero_toolbelt_types",
+ "cursor_hero_voice_to_text_types",
+ "cursor_hero_winutils",
+ "raw-window-handle",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "cursor_hero_memory_types"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "cursor_hero_camera",
+ "cursor_hero_character_types",
+ "cursor_hero_observation_types",
+ "cursor_hero_secret_types",
+ "cursor_hero_toolbelt_types",
+ "cursor_hero_voice_to_text_types",
+ "cursor_hero_winutils",
+ "raw-window-handle",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "cursor_hero_metrics"
 version = "0.1.0"
 dependencies = [
@@ -2264,6 +2299,8 @@ dependencies = [
  "cursor_hero_input",
  "cursor_hero_level_bounds",
  "cursor_hero_math",
+ "cursor_hero_memory",
+ "cursor_hero_memory_types",
  "cursor_hero_metrics",
  "cursor_hero_movement_tool",
  "cursor_hero_movement_tool_types",
@@ -2276,7 +2313,6 @@ dependencies = [
  "cursor_hero_pointer",
  "cursor_hero_pointer_types",
  "cursor_hero_pressure_plate",
- "cursor_hero_restart_memory",
  "cursor_hero_screen",
  "cursor_hero_secret",
  "cursor_hero_secret_types",
@@ -2348,23 +2384,6 @@ dependencies = [
  "bevy",
  "bevy_xpbd_2d",
  "cursor_hero_data",
-]
-
-[[package]]
-name = "cursor_hero_restart_memory"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "cursor_hero_camera",
- "cursor_hero_character_types",
- "cursor_hero_observation_types",
- "cursor_hero_secret_types",
- "cursor_hero_toolbelt_types",
- "cursor_hero_voice_to_text_types",
- "cursor_hero_winutils",
- "raw-window-handle",
- "serde",
- "serde_json",
 ]
 
 [[package]]

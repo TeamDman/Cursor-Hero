@@ -427,7 +427,7 @@ fn spawn_brick(
     screen_access: &ScreensToImageParam,
     asset_server: &Res<AssetServer>,
 ) {
-    let Ok(image) = get_image(element_info.bounding_rect, &screen_access) else {
+    let Ok(image) = get_image(element_info.bounding_rect, screen_access) else {
         return;
     };
     let texture_handle = asset_server.add(image);
@@ -564,6 +564,7 @@ struct ElementUIData {
     frick: String,
 }
 
+#[allow(clippy::too_many_arguments)]
 fn ui_for_element_info(
     id: egui::Id,
     commands: &mut Commands,
@@ -571,7 +572,7 @@ fn ui_for_element_info(
     asset_server: &Res<AssetServer>,
     ui: &mut egui::Ui,
     element_info: &mut ElementInfo,
-    inspector: &mut InspectorUi,
+    _inspector: &mut InspectorUi,
     popout_pos: &Vec3,
 ) {
     egui::CollapsingHeader::new(format!(
@@ -619,7 +620,7 @@ fn ui_for_element_info(
                             asset_server,
                             ui,
                             child,
-                            inspector,
+                            _inspector,
                             popout_pos,
                         );
                     }

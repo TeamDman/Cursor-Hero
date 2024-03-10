@@ -141,7 +141,7 @@ pub struct UISnapshot {
 
 impl Display for UISnapshot {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "!!! UISnapshot !!!\n")?;
+        writeln!(f, "!!! UISnapshot !!!")?;
         for window in self.app_windows.iter() {
             write!(f, "{}", window)?;
         }
@@ -209,13 +209,13 @@ impl TryFrom<VecDeque<UIElement>> for VSCodeState {
     fn try_from(mut kids: VecDeque<UIElement>) -> Result<Self, Self::Error> {
         let state = match kids.len() {
             2 => VSCodeState::Editor {
-                tabs: kids.pop_front().ok_or(0u32)?.into(),
-                editor: kids.pop_front().ok_or(1u32)?.into(),
+                tabs: kids.pop_front().ok_or(0u32)?,
+                editor: kids.pop_front().ok_or(1u32)?,
             },
             3 => VSCodeState::LeftTabOpen {
-                side_nav_tabs: kids.pop_front().ok_or(0u32)?.into(),
-                side_nav_view: kids.pop_front().ok_or(1u32)?.into(),
-                editor: kids.pop_front().ok_or(2u32)?.into(),
+                side_nav_tabs: kids.pop_front().ok_or(0u32)?,
+                side_nav_view: kids.pop_front().ok_or(1u32)?,
+                editor: kids.pop_front().ok_or(2u32)?,
             },
             _ => VSCodeState::Unknown,
         };
@@ -240,36 +240,41 @@ impl Display for AppWindow {
                 editor_area,
                 side_nav,
             } => {
-                write!(
+                writeln!(
                     f,
-                    ":D :D :D Visual Studio Code {} owo owo owo\n",
+                    ":D :D :D Visual Studio Code {} owo owo owo",
                     if *focused { "(focused)" } else { "" }
                 )?;
 
-                write!(f, "Side tabs:\n")?;
+                writeln!(f, "Side tabs:")?;
                 for tab in side_nav.iter() {
                     match tab {
                         SideTab::Open { kind, view } => {
-                            write!(f, "- (open) {:?} {{{{\n{:?}\n||}}\n", kind, view)?;
+                            writeln!(f, "- (open) {:?} {{{{\n{:?}\n||}}", kind, view)?;
                         }
                         SideTab::Closed { kind } => {
-                            write!(f, "- {:?}\n", kind)?;
+                            writeln!(f, "- {:?}", kind)?;
                         }
                     }
                 }
 
-                write!(f, "Editor groups:\n")?;
+                writeln!(f, "Editor groups:")?;
                 for (i, group) in editor_area.groups.iter().enumerate() {
-                    write!(f, "Group {} tabs:\n", i+1)?;
+                    writeln!(f, "Group {} tabs:", i + 1)?;
                     for tab in group.tabs.iter() {
                         if tab.active {
-                            write!(f, "- (active) {}\n", tab.title)?;
+                            writeln!(f, "- (active) {}", tab.title)?;
                         } else {
-                            write!(f, "- {}\n", tab.title)?;
+                            writeln!(f, "- {}", tab.title)?;
                         }
                     }
                     if let Some(ref content) = group.content {
-                        write!(f, "Group {} buffer:\n=======\n{}\n=======\n", i+1, content.content)?;
+                        writeln!(
+                            f,
+                            "Group {} buffer:\n=======\n{}\n=======",
+                            i + 1,
+                            content.content
+                        )?;
                     }
                 }
 
@@ -352,26 +357,14 @@ pub fn all_of(
     automation: &UIAutomation,
     conditions: Vec<UICondition>,
 ) -> Result<UICondition, uiautomation::Error> {
-    enum FoldState {
-        Start,
-        First(UICondition),
-        Current(UICondition),
+    let mut iter = conditions.into_iter();
+    let mut current = automation.create_true_condition()?;
+
+    while let Some(cond) = iter.next() {
+        current = automation.create_and_condition(current, cond)?;
     }
-    let state = conditions
-        .into_iter()
-        .fold(Ok(FoldState::Start), |current, x| match current {
-            Ok(FoldState::Start) => Ok(FoldState::First(x)),
-            Ok(FoldState::First(c) | FoldState::Current(c)) => {
-                Ok(FoldState::Current(automation.create_and_condition(c, x)?))
-            }
-            Err(e) => Err(e),
-        });
-    match state {
-        Ok(FoldState::Start) => automation.create_true_condition(),
-        Ok(FoldState::First(c)) => Ok(c),
-        Ok(FoldState::Current(c)) => Ok(c),
-        Err(e) => Err(e),
-    }
+
+    Ok(current)
 }
 
 pub enum DrillError {

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
+use cursor_hero_character_types::prelude::MainCharacter;
 use cursor_hero_environment_types::environment_types::EnvironmentTag;
 use cursor_hero_observation_types::observation_types::SomethingObservableHappenedEvent;
-use cursor_hero_character_types::prelude::MainCharacter;
 use cursor_hero_ui_automation::prelude::take_snapshot;
 use cursor_hero_ui_automation::prelude::UISnapshot;
 use std::fs::OpenOptions;
@@ -105,7 +105,7 @@ fn handle_gamebound_messages(
 ) {
     let Ok(character) = character_query.get_single() else {
         warn!("Expected single main character, failed");
-        while let Ok(msg) = bridge.receiver.try_recv() { // drain the channel
+        while let Ok(_msg) = bridge.receiver.try_recv() { // drain the channel
         }
         return;
     };

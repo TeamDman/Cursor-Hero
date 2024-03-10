@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy::window::PrimaryWindow;
 use cursor_hero_window_position_types::window_position_types::WindowPositionCommand;
 
 pub struct WindowPositionCommandPlugin;

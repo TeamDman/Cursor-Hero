@@ -1,6 +1,4 @@
 use bevy::prelude::*;
-use bevy_inspector_egui::prelude::ReflectInspectorOptions;
-use bevy_inspector_egui::InspectorOptions;
 use bevy_xpbd_2d::math::*;
 use bevy_xpbd_2d::prelude::*;
 

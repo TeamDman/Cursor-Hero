@@ -27,7 +27,6 @@ use cursor_hero_physics_debug::physics_debug_plugin::PhysicsDebugPlugin;
 use cursor_hero_pointer::pointer_plugin::PointerPlugin;
 use cursor_hero_pointer_types::pointer_types_plugin::PointerTypesPlugin;
 use cursor_hero_pressure_plate::pressure_plate_plugin::PressurePlatePlugin;
-use cursor_hero_restart_memory::MemoryPlugin;
 use cursor_hero_screen::screen_plugin::ScreenPlugin;
 use cursor_hero_screen::screen_update_plugin::ScreenUpdatePlugin;
 use cursor_hero_sprint_tool::sprint_tool_plugin::SprintToolPlugin;
@@ -64,6 +63,8 @@ use cursor_hero_host_fs::prelude::*;
 use cursor_hero_host_fs_types::prelude::*;
 use cursor_hero_inference::inference_plugin::InferencePlugin;
 use cursor_hero_inference_types::inference_types_plugin::InferenceTypesPlugin;
+use cursor_hero_memory::prelude::*;
+use cursor_hero_memory_types::prelude::*;
 use cursor_hero_movement_tool::movement_tool_plugin::MovementToolPlugin;
 use cursor_hero_movement_tool_types::movement_tool_types_plugin::MovementToolTypesPlugin;
 use cursor_hero_observation::observation_plugin::ObservationPlugin;
@@ -91,6 +92,8 @@ pub struct MyPlugin;
 
 impl Plugin for MyPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(MemoryTypesPlugin);
+        app.add_plugins(MemoryPlugin);
         app.add_plugins(WindowSwapToolPlugin);
         app.add_plugins(WindowSwapToolTypesPlugin);
         app.add_plugins(HostFsTypesPlugin);
@@ -152,7 +155,6 @@ impl Plugin for MyPlugin {
         app.add_plugins(InspectWheelToolPlugin);
         app.add_plugins(LevelBoundsPlugin);
         app.add_plugins(MathPlugin);
-        app.add_plugins(MemoryPlugin);
         app.add_plugins(PhysicsDebugPlugin);
         app.add_plugins(PhysicsPlugin);
         app.add_plugins(PointerPlugin);
@@ -188,7 +190,7 @@ cursor_hero_voice_to_text::voice_to_text_ping_plugin=info,
 cursor_hero_voice_to_text::voice_to_text_worker_plugin=info,
 cursor_hero_glados_tts::glados_tts_status_worker_plugin=info,
 cursor_hero_tools::click_tool=info,
-cursor_hero_restart_memory=info
+cursor_hero_memory=info
             "
             .replace('\n', "")
             .trim()

@@ -16,7 +16,7 @@ pub fn switch_layout(
     for event in toolbelt_events.read() {
         let ToolbeltPopulateEvent { id, loadout } = event;
         if let Ok(mut toolbelt) = toolbelt_query.get_mut(*id) {
-            toolbelt.loadout = loadout.clone();
+            toolbelt.loadout = *loadout;
             toolbelt.layout = loadout.layout();
         }
     }

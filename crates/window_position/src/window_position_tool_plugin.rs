@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy::window::WindowMode;

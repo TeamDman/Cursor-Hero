@@ -7,6 +7,8 @@ edition = "2021"
 
 
 [dependencies]
+cursor_hero_memory = { workspace = true }
+cursor_hero_memory_types = { workspace = true }
 cursor_hero_window_swap_tool = { workspace = true }
 cursor_hero_window_swap_tool_types = { workspace = true }
 cursor_hero_host_fs = { workspace = true }
@@ -85,10 +87,6 @@ cursor_hero_tools = {workspace = true}
 cursor_hero_ui = {workspace = true}
 cursor_hero_icon = {workspace = true}
 cursor_hero_winutils = {workspace = true}
-cursor_hero_restart_memory = {workspace = true}
 bevy = {workspace = true}
 bevy_embedded_assets = { workspace = true }
 bevy-inspector-egui = { workspace = true }
-
-[dev-dependencies]
-cursor_hero_restart_memory = {workspace = true}

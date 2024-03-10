@@ -1,5 +1,5 @@
-pub mod {{crate_name}}_types_plugin;
-pub mod {{crate_name}}_types;
+mod {{crate_name}}_types_plugin;
+mod {{crate_name}}_types;
 
 pub mod prelude {
     pub use crate::{{crate_name}}_types::*;
