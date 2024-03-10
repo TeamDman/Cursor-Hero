@@ -49,10 +49,11 @@ mod tests {
 
     #[test]
     fn test_take_snapshot() {
+        //todo: put this in thread initialzed for COM like below
         let snapshot = take_snapshot().unwrap();
         assert!(snapshot.app_windows.len() > 0);
     }
-    
+
     #[test]
     fn test_take_snapshot_many() {
         let handle = std::thread::spawn(move || -> windows::core::Result<()> {
