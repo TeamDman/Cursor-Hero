@@ -49,7 +49,7 @@ pub(crate) fn resolve_app(
                 .get_side_nav_tabs_root_elem()?
                 .drill(&walker, vec![0, 0])?
                 .gather_children(&walker, &StopBehaviour::LastChildEncountered);
-            println!("side_nav: {:?}", side_nav);
+            // println!("side_nav: {:?}", side_nav);
             let side_nav = side_nav
                 .into_iter()
                 .filter(|elem| elem.get_control_type() == Ok(ControlType::TabItem))

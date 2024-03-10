@@ -80,16 +80,16 @@ pub fn gather_children(
     parent: &UIElement,
     stop_behaviour: &StopBehaviour,
 ) -> VecDeque<UIElement> {
-    println!("Gathering children of {:?}", parent);
+    // println!("Gathering children of {:?}", parent);
     let mut children = VecDeque::new();
     let mut metrics = Metrics::default();
 
-    println!("Constructing stop behaviour fn for {:?}", stop_behaviour);
+    // println!("Constructing stop behaviour fn for {:?}", stop_behaviour);
     metrics.begin("construct stop behaviour");
     let stop: Box<dyn GatherChildrenStopBehaviourFn> = match stop_behaviour {
         StopBehaviour::EndOfSiblings => Box::new(EndOfSiblings),
         StopBehaviour::LastChildEncountered => {
-            println!("Getting last child of {:?}", parent);
+            // println!("Getting last child of {:?}", parent);
             let last = walker.get_last_child(parent).unwrap(); // Handle error appropriately
             let runtime_id_of_last = last.get_runtime_id().unwrap(); // Handle error appropriately
             Box::new(LastChildEncountered { runtime_id_of_last })
@@ -98,13 +98,13 @@ pub fn gather_children(
         StopBehaviour::RootEndEncountered => Box::new(RootEndEncountered),
     };
     metrics.end("construct stop behaviour");
-    println!("Constructed stop behaviour {:?}", stop_behaviour);
+    // println!("Constructed stop behaviour {:?}", stop_behaviour);
 
-    println!("Finding first child");
+    // println!("Finding first child");
     metrics.begin("find first child");
     let first = walker.get_first_child(parent);
     metrics.end("find first child");
-    println!("Found first child");
+    // println!("Found first child");
 
     let Ok(first) = first else {
         return children;
@@ -113,24 +113,24 @@ pub fn gather_children(
     let mut next = first;
     let mut i = 0;
     loop {
-        println!("About to grab next sibling of {:?}", next);
+        // println!("About to grab next sibling of {:?}", next);
         metrics.begin(format!("get next sibling {}", i).as_str());
         let sibling = walker.get_next_sibling(&next);
         metrics.end(format!("get next sibling {}", i).as_str());
         i += 1;
 
         if let Ok(sibling) = sibling {
-            println!("Got sibling {:?}", sibling);
-            println!("Checking if should stop");
+            // println!("Got sibling {:?}", sibling);
+            // println!("Checking if should stop");
             if stop.should_stop(&sibling) {
-                println!("Should stop");
+                // println!("Should stop");
                 if stop_behaviour.include_last_child() {
-                    println!("Including last child");
+                    // println!("Including last child");
                     children.push_back(sibling.clone());
                 }
                 break;
             } else {
-                println!("Should not stop");
+                // println!("Should not stop");
                 children.push_back(sibling.clone());
                 next = sibling;
             }
@@ -138,7 +138,7 @@ pub fn gather_children(
             break;
         }
     }
-    println!("Gathered {} children", children.len());
-    println!("| {}", metrics.report().split(" | ").join("\n| "));
+    // println!("Gathered {} children", children.len());
+    // println!("| {}", metrics.report().split(" | ").join("\n| "));
     children
 }

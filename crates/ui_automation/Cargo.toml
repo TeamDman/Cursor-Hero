@@ -7,10 +7,14 @@ edition = "2021"
 
 [dependencies]
 bevy = { workspace = true }
-uiautomation = {workspace = true}
-itertools = {workspace = true}
+uiautomation = { workspace = true }
+itertools = { workspace = true }
 cursor_hero_ui_automation_types = { workspace = true }
 cursor_hero_metrics = { workspace = true }
+windows = { workspace = true, features = [
+    "Win32_Foundation",
+    "Win32_System_Com",
+] }
 
 [dev-dependencies]
 cursor_hero_memory_types = { workspace = true }

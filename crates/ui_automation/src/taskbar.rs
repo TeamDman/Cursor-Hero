@@ -31,3 +31,19 @@ pub fn get_taskbar() -> Result<Taskbar, uiautomation::Error> {
         .collect();
     Ok(Taskbar { entries })
 }
+
+
+#[cfg(test)]
+mod tests {
+    use crate::prelude::get_taskbar;
+
+    #[test]
+    fn test_get_taskbar() {
+        let taskbar = get_taskbar().unwrap();
+        assert!(taskbar.entries.len() > 0);
+        // print the entries
+        for entry in taskbar.entries {
+            println!("entry: {:?}", entry);
+        }
+    }
+}
