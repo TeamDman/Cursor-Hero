@@ -15,17 +15,28 @@ where
 }
 
 pub trait Message:
-    std::fmt::Debug + GetTypeRegistration + Event + Send + Sync + Clone + Reflect + TypePath + FromReflect + 'static
+    std::fmt::Debug
+    + GetTypeRegistration
+    + Event
+    + Send
+    + Sync
+    + Clone
+    + Reflect
+    + TypePath
+    + FromReflect
+    + 'static
 {
 }
+
+pub type ThreadboundMessageHandler<T, G> =
+    fn(msg: &T, reply_tx: &Sender<G>) -> Result<(), Box<dyn std::error::Error>>;
 
 #[derive(Resource, Reflect, Clone)]
 pub struct WorkerConfig<T, G> {
     pub name: String,
     pub sleep_duration: std::time::Duration,
     pub is_ui_automation_thread: bool,
-    pub handle_threadbound_message:
-        fn(msg: &T, reply_tx: &Sender<G>) -> Result<(), Box<dyn std::error::Error>>,
+    pub handle_threadbound_message: ThreadboundMessageHandler<T, G>,
     pub _phantom_t: PhantomData<T>,
     pub _phantom_g: PhantomData<G>,
 }

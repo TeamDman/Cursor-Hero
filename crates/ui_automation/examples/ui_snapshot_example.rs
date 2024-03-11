@@ -55,7 +55,10 @@ enum GameboundUISnapshotMessage {
 }
 impl Message for GameboundUISnapshotMessage {}
 
-fn handle_threadbound_message(msg: &ThreadboundUISnapshotMessage, reply_tx: &Sender<GameboundUISnapshotMessage>) -> Result<(), Box<dyn std::error::Error>> {
+fn handle_threadbound_message(
+    msg: &ThreadboundUISnapshotMessage,
+    reply_tx: &Sender<GameboundUISnapshotMessage>,
+) -> Result<(), Box<dyn std::error::Error>> {
     let ThreadboundUISnapshotMessage::TakeSnapshot = msg;
     debug!("taking snapshot");
     let snapshot = take_snapshot()?;
@@ -87,9 +90,7 @@ fn trigger(
     events.send(ThreadboundUISnapshotMessage::TakeSnapshot);
 }
 
-fn receive(
-    mut snapshot: EventReader<GameboundUISnapshotMessage>,
-) {
+fn receive(mut snapshot: EventReader<GameboundUISnapshotMessage>) {
     for msg in snapshot.read() {
         match msg {
             GameboundUISnapshotMessage::Snapshot(snapshot) => {

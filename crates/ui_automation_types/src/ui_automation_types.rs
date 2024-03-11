@@ -357,11 +357,11 @@ pub fn all_of(
     automation: &UIAutomation,
     conditions: Vec<UICondition>,
 ) -> Result<UICondition, uiautomation::Error> {
-    let mut iter = conditions.into_iter();
+    let iter = conditions.into_iter();
     let mut current = automation.create_true_condition()?;
 
-    while let Some(cond) = iter.next() {
-        current = automation.create_and_condition(current, cond)?;
+    for condition in iter {
+        current = automation.create_and_condition(current, condition)?;
     }
 
     Ok(current)

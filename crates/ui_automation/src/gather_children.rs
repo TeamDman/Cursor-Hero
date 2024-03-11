@@ -1,7 +1,6 @@
 use std::collections::VecDeque;
 
 use cursor_hero_metrics::Metrics;
-use itertools::Itertools;
 use uiautomation::UIElement;
 use uiautomation::UITreeWalker;
 

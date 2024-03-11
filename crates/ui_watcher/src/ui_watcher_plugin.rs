@@ -6,10 +6,7 @@ use cursor_hero_memory_types::prelude::Usage;
 use cursor_hero_observation_types::observation_types::SomethingObservableHappenedEvent;
 use cursor_hero_ui_automation::prelude::take_snapshot;
 use cursor_hero_ui_automation::prelude::UISnapshot;
-use std::fs::OpenOptions;
 use std::io::Write;
-use std::path::Path;
-use std::path::PathBuf;
 use std::thread;
 
 use crossbeam_channel::bounded;

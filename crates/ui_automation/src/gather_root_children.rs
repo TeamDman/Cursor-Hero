@@ -13,7 +13,7 @@ pub fn gather_root_children(
 ) -> Result<VecDeque<UIElement>, uiautomation::Error> {
     let root = automation.get_root_element()?;
     // println!("Boutta gather top level children");
-    let top_level_children = gather_children(&walker, &root, &StopBehaviour::RootEndEncountered);
+    let top_level_children = gather_children(walker, &root, &StopBehaviour::RootEndEncountered);
     // let condition = &automation.create_true_condition()?;
     // let found = root.find_all(TreeScope::Children, condition)?;
     // println!("Found {} top level children", top_level_children.len());

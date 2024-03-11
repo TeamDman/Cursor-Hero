@@ -46,62 +46,46 @@ fn create_worker_thread<T: Message, G: Message>(
     let handler = config.handle_threadbound_message;
     let sleep_duration = config.sleep_duration;
     let is_ui_automation_thread = config.is_ui_automation_thread;
-    thread::Builder::new()
-        .name(name.clone())
-        .spawn(move || {
-            if is_ui_automation_thread {
-                unsafe {
-                    // Initialize COM in MTA mode
-                    // https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/ui-automation-threading-issues
-                    // https://learn.microsoft.com/en-us/windows/win32/com/multithreaded-apartments
-                    if let Err(e) = CoInitializeEx(None, COINIT_MULTITHREADED) {
-                        error!("[{}] Failed to initialize COM: {:?}", name, e);
-                    }
-                    debug!("[{}] COM initialized in MTA mode.", name);
+    if let Err(e) = thread::Builder::new().name(name.clone()).spawn(move || {
+        if is_ui_automation_thread {
+            unsafe {
+                // Initialize COM in MTA mode
+                // https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/ui-automation-threading-issues
+                // https://learn.microsoft.com/en-us/windows/win32/com/multithreaded-apartments
+                if let Err(e) = CoInitializeEx(None, COINIT_MULTITHREADED) {
+                    error!("[{}] Failed to initialize COM: {:?}", name, e);
                 }
+                debug!("[{}] COM initialized in MTA mode.", name);
             }
+        }
 
-            // {
-            //     // Enable bevy logging in the thread
-            //     // source: https://discord.com/channels/691052431525675048/1070649194739679262/1070987678813782046
-
-            //     // We need to be able to inject this layer as our formatting layer
-            //     let fmt_layer = tracing_subscriber::fmt::Layer::default().with_thread_ids(true);
-
-            //     // The rest of this we just copy-paste directly from the LogPlugin
-            //     // Note this does not include some feature-gated logic
-            //     let default_filter = "warn,log_threadid=warn,bevy_ecs=error".to_string();
-            //     LogTracer::init().unwrap();
-            //     let filter_layer = EnvFilter::try_from_default_env()
-            //         .or_else(|_| EnvFilter::try_new(&default_filter))
-            //         .unwrap();
-            //     let subscriber = Registry::default().with(filter_layer);
-            //     let subscriber = subscriber.with(fmt_layer);
-            //     bevy::utils::tracing::subscriber::set_global_default(subscriber).unwrap();
-            // }
-
-            let rt = tokio::runtime::Runtime::new().unwrap();
-            rt.block_on(async {
-                loop {
-                    let msg = match thread_rx.recv() {
-                        Ok(msg) => msg,
-                        Err(e) => {
-                            error!("[{}] Threadbound channel recv failure {:?}, exiting: ", name, e);
-                            break;
-                        }
-                    };
-                    if let Err(e) = (handler)(&msg, &game_tx) {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        rt.block_on(async {
+            loop {
+                let msg = match thread_rx.recv() {
+                    Ok(msg) => msg,
+                    Err(e) => {
                         error!(
-                            "[{}] Failed to process thread message {:?}, got error {:?}",
-                            name, msg, e
+                            "[{}] Threadbound channel recv failure {:?}, exiting: ",
+                            name, e
                         );
+                        break;
                     }
-                    std::thread::sleep(sleep_duration);
+                };
+                if let Err(e) = (handler)(&msg, &game_tx) {
+                    error!(
+                        "[{}] Failed to process thread message {:?}, got error {:?}",
+                        name, msg, e
+                    );
                 }
-            });
-        })
-        .expect(format!("[{}] Failed to spawn thread", config.name).as_str());
-    info!("[{}] Thread created", config.name);
+                std::thread::sleep(sleep_duration);
+            }
+        });
+    }) {
+        error!("[{}] Failed to spawn thread: {:?}", config.name, e);
+    } else {
+        info!("[{}] Thread created", config.name);
+    }
 }
 
 fn bridge_requests<T: Message, G: Message>(

@@ -32,7 +32,6 @@ pub fn get_taskbar() -> Result<Taskbar, uiautomation::Error> {
     Ok(Taskbar { entries })
 }
 
-
 #[cfg(test)]
 mod tests {
     use crate::prelude::get_taskbar;
