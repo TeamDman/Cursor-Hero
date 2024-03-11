@@ -18,3 +18,4 @@ windows = { workspace = true, features = [
 
 [dev-dependencies]
 cursor_hero_memory_types = { workspace = true }
+cursor_hero_worker = { workspace = true }
