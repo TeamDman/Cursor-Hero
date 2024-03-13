@@ -1,3 +1,4 @@
+use crate::vscode_ui_types::*;
 use bevy::prelude::*;
 use serde::Deserialize;
 use serde::Serialize;
@@ -6,7 +7,6 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use uiautomation::core::UICondition;
 use uiautomation::UIAutomation;
-pub use crate::vscode_ui_types::*;
 
 pub trait HexList {
     fn to_hex_list(&self) -> String;
@@ -22,7 +22,6 @@ impl HexList for Vec<i32> {
         )
     }
 }
-
 
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, Reflect)]
 pub struct UISnapshot {

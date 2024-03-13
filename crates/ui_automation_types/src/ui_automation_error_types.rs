@@ -40,12 +40,9 @@ impl From<VSCodeResolveError> for AppResolveError {
                 AppResolveError::BadStructure("Unknown VSCode state".to_string())
             }
             VSCodeResolveError::UI(e) => AppResolveError::UI(e),
-            VSCodeResolveError::BadChildCount { tried_accessing } => {
-                AppResolveError::BadStructure(format!(
-                    "Bad child count: tried accessing: {}",
-                    tried_accessing
-                ))
-            }
+            VSCodeResolveError::BadChildCount { tried_accessing } => AppResolveError::BadStructure(
+                format!("Bad child count: tried accessing: {}", tried_accessing),
+            ),
         }
     }
 }

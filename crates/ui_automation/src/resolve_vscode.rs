@@ -29,7 +29,7 @@ pub(crate) fn resolve_vscode(
     let body = resolve_body(&body, &walker)?;
 
     let footer = temp.drill(&walker, vec![2, 0])?;
-    let footer = resolve_footer(&footer, &automation)?;
+    let footer = resolve_footer(&footer, automation)?;
     drop(temp);
 
     Ok(AppWindow::VSCode(VSCodeWindow {
@@ -44,16 +44,13 @@ fn resolve_body(
     body: &UIElement,
     walker: &UITreeWalker,
 ) -> Result<VSCodeWindowBody, AppResolveError> {
-    let state = VSCodeCrawlState::try_from(gather_children(
-        &walker,
-        &body,
-        &StopBehaviour::EndOfSiblings,
-    ))?;
+    let state =
+        VSCodeCrawlState::try_from(gather_children(walker, body, &StopBehaviour::EndOfSiblings))?;
 
     let side_nav = state
         .get_side_nav_tabs_root_elem()?
-        .drill(&walker, vec![0, 0])?
-        .gather_children(&walker, &StopBehaviour::LastChildEncountered);
+        .drill(walker, vec![0, 0])?
+        .gather_children(walker, &StopBehaviour::LastChildEncountered);
     // println!("side_nav: {:?}", side_nav);
     let side_nav = side_nav
         .into_iter()
@@ -68,7 +65,7 @@ fn resolve_body(
             if active {
                 let view = state
                     .get_side_nav_view_root_elem()?
-                    .drill(&walker, vec![1])?;
+                    .drill(walker, vec![1])?;
                 let view = match view.get_automation_id() {
                     Ok(id)
                         if Some(id.as_str()) == SideTabKind::Explorer.get_view_automation_id() =>
@@ -97,7 +94,7 @@ fn resolve_body(
                                 .unwrap_or(ExplorerItemKind::File);
                             let path = tree_item
                                 .drill(
-                                    &walker,
+                                    walker,
                                     match kind {
                                         ExplorerItemKind::File => vec![0, 1, 0],
                                         ExplorerItemKind::Directory { .. } => {
@@ -117,16 +114,16 @@ fn resolve_body(
                             })
                         }
                         let sticky = view
-                            .drill(&walker, vec![0, 1, 0, 0, 1, 0, 3])?
-                            .gather_children(&walker, &StopBehaviour::EndOfSiblings)
+                            .drill(walker, vec![0, 1, 0, 0, 1, 0, 3])?
+                            .gather_children(walker, &StopBehaviour::EndOfSiblings)
                             .into_iter()
-                            .filter_map(|tree_item| as_explorer_item(&walker, tree_item).ok())
+                            .filter_map(|tree_item| as_explorer_item(walker, tree_item).ok())
                             .collect();
                         let items = view
-                            .drill(&walker, vec![0, 1, 0, 0, 1, 0, 0])?
-                            .gather_children(&walker, &StopBehaviour::EndOfSiblings)
+                            .drill(walker, vec![0, 1, 0, 0, 1, 0, 0])?
+                            .gather_children(walker, &StopBehaviour::EndOfSiblings)
                             .into_iter()
-                            .filter_map(|tree_item| as_explorer_item(&walker, tree_item).ok())
+                            .filter_map(|tree_item| as_explorer_item(walker, tree_item).ok())
                             .collect();
                         View::Explorer { sticky, items }
                     }
@@ -153,7 +150,7 @@ fn resolve_body(
 
     let editor_area_elem = state
         .get_editor_root_elem()?
-        .drill(&walker, vec![0, 1, 0, 0])?;
+        .drill(walker, vec![0, 1, 0, 0])?;
     if editor_area_elem.get_automation_id()? != EditorArea::get_expected_automation_id() {
         return Err(AppResolveError::BadStructure(format!(
             "Editor area has wrong automation id: {}",
@@ -161,17 +158,17 @@ fn resolve_body(
         )));
     }
     let editor_groups = editor_area_elem
-        .drill(&walker, vec![0, 0, 0, 1])?
-        .gather_children(&walker, &StopBehaviour::EndOfSiblings)
+        .drill(walker, vec![0, 0, 0, 1])?
+        .gather_children(walker, &StopBehaviour::EndOfSiblings)
         .into_iter()
         .map(|group_elem| {
-            let group_tabs_holder = group_elem.drill(&walker, vec![0, 0, 0])?;
+            let group_tabs_holder = group_elem.drill(walker, vec![0, 0, 0])?;
             let selected: Option<String> = group_tabs_holder
                 .get_property_value(UIProperty::SelectionSelection)?
                 .try_into()
                 .ok();
             let group_tabs = group_tabs_holder
-                .gather_children(&walker, &StopBehaviour::EndOfSiblings)
+                .gather_children(walker, &StopBehaviour::EndOfSiblings)
                 .into_iter()
                 .map(|group_tab_elem| {
                     let title = group_tab_elem.get_name()?;
@@ -180,7 +177,7 @@ fn resolve_body(
                 })
                 .filter_map(|r: Result<EditorTab, AppResolveError>| r.ok())
                 .collect();
-            let content_elem = group_elem.drill(&walker, vec![1, 0, 0, 1])?;
+            let content_elem = group_elem.drill(walker, vec![1, 0, 0, 1])?;
             let content = content_elem
                 .get_property_value(UIProperty::LegacyIAccessibleValue)
                 .map(|variant| variant.to_string())

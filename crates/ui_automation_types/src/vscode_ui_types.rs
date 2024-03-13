@@ -148,7 +148,6 @@ pub struct VSCodeWindowBody {
     pub side_nav: Vec<SideTab>,
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, Reflect)]
 pub struct VSCodeWindowFooter {
     pub cursor_position: IVec2,
