@@ -148,8 +148,11 @@ pub struct VSCodeWindowBody {
     pub side_nav: Vec<SideTab>,
 }
 
+
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, Reflect)]
-pub struct VSCodeWindowFooter {}
+pub struct VSCodeWindowFooter {
+    pub cursor_position: IVec2,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, Reflect)]
 pub struct VSCodeWindow {
@@ -198,6 +201,8 @@ impl Display for VSCodeWindow {
                 )?;
             }
         }
+
+        writeln!(f, "Cursor position: {:?}", self.footer.cursor_position)?;
 
         fmt::Result::Ok(())
     }

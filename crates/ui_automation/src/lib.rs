@@ -7,6 +7,7 @@ mod resolve_app;
 mod take_snapshot;
 mod taskbar;
 mod ui_automation_plugin;
+mod resolve_vscode;
 
 pub mod prelude {
     pub use crate::elements_at_point::*;
