@@ -2611,6 +2611,7 @@ name = "cursor_hero_ui_automation_types"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "itertools 0.12.0",
  "serde",
  "uiautomation",
 ]

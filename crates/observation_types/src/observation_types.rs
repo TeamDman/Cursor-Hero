@@ -6,7 +6,7 @@ use std::time::Duration;
 use bevy::prelude::*;
 use chrono::DateTime;
 use chrono::Local;
-use cursor_hero_ui_automation_types::ui_automation_types::UISnapshot;
+use cursor_hero_ui_automation_types::prelude::UISnapshot;
 use serde::Deserialize;
 use serde::Serialize;
 #[derive(Component, Reflect, Default)]

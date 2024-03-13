@@ -1,20 +1,11 @@
-use cursor_hero_ui_automation_types::ui_automation_types::AppResolveError;
-use cursor_hero_ui_automation_types::ui_automation_types::AppWindow;
-use cursor_hero_ui_automation_types::ui_automation_types::Drillable;
-use cursor_hero_ui_automation_types::ui_automation_types::EditorArea;
-use cursor_hero_ui_automation_types::ui_automation_types::EditorContent;
-use cursor_hero_ui_automation_types::ui_automation_types::EditorGroup;
-use cursor_hero_ui_automation_types::ui_automation_types::EditorTab;
-use cursor_hero_ui_automation_types::ui_automation_types::SideTab;
-use cursor_hero_ui_automation_types::ui_automation_types::SideTabKind;
-use cursor_hero_ui_automation_types::ui_automation_types::ToBevyIRect;
-use cursor_hero_ui_automation_types::ui_automation_types::VSCodeState;
-use cursor_hero_ui_automation_types::ui_automation_types::View;
+use cursor_hero_ui_automation_types::prelude::*;
 use uiautomation::controls::ControlType;
+use uiautomation::patterns::UIExpandCollapsePattern;
 use uiautomation::types::ExpandCollapseState;
 use uiautomation::types::UIProperty;
 use uiautomation::UIAutomation;
 use uiautomation::UIElement;
+use uiautomation::UITreeWalker;
 
 use crate::gather_children::gather_children;
 use crate::gather_children::GatherChildrenable;
@@ -37,11 +28,15 @@ pub(crate) fn resolve_app(
         {
             let walker = automation.create_tree_walker()?;
             let root = elem;
-            let deep_root = root.drill(&walker, vec![0, 0, 0, 0, 0, 1, 1, 0, 1])?;
 
-            let state = VSCodeState::try_from(gather_children(
+            let temp = root.drill(&walker, vec![0, 0, 0, 0, 0, 1])?;
+            let body = temp.drill(&walker, vec![1, 0, 1])?;
+            let footer = temp.drill(&walker, vec![2, 0])?;
+            drop(temp);
+
+            let state = VSCodeCrawlState::try_from(gather_children(
                 &walker,
-                &deep_root,
+                &body,
                 &StopBehaviour::EndOfSiblings,
             ))?;
 
@@ -49,7 +44,7 @@ pub(crate) fn resolve_app(
                 .get_side_nav_tabs_root_elem()?
                 .drill(&walker, vec![0, 0])?
                 .gather_children(&walker, &StopBehaviour::LastChildEncountered);
-            // println!("side_nav: {:?}", side_nav);
+            println!("side_nav: {:?}", side_nav);
             let side_nav = side_nav
                 .into_iter()
                 .filter(|elem| elem.get_control_type() == Ok(ControlType::TabItem))
@@ -69,8 +64,69 @@ pub(crate) fn resolve_app(
                                 if Some(id.as_str())
                                     == SideTabKind::Explorer.get_view_automation_id() =>
                             {
-                                View::Explorer {}
-                                // elem: view.into()
+                                fn as_explorer_item(
+                                    walker: &UITreeWalker,
+                                    tree_item: UIElement,
+                                ) -> Result<ExplorerItem, AppResolveError>
+                                {
+                                    let label = tree_item.get_name()?;
+                                    let ui_position_in_set = tree_item
+                                        .get_property_value(UIProperty::PositionInSet)?
+                                        .try_into()?;
+                                    let ui_size_of_set = tree_item
+                                        .get_property_value(UIProperty::SizeOfSet)?
+                                        .try_into()?;
+                                    let ui_level = tree_item
+                                        .get_property_value(UIProperty::Level)?
+                                        .try_into()?;
+                                    let bounds =
+                                        tree_item.get_bounding_rectangle()?.to_bevy_irect();
+                                    let kind = tree_item
+                                        .get_pattern::<UIExpandCollapsePattern>()
+                                        .ok()
+                                        .map(|p| ExplorerItemKind::Directory {
+                                            expanded: p.get_state()
+                                                == Ok(ExpandCollapseState::Expanded),
+                                        })
+                                        .unwrap_or(ExplorerItemKind::File);
+                                    let path = tree_item
+                                        .drill(
+                                            &walker,
+                                            match kind {
+                                                ExplorerItemKind::File => vec![0, 1, 0],
+                                                ExplorerItemKind::Directory { .. } => {
+                                                    vec![0, 2, 0]
+                                                }
+                                            },
+                                        )?
+                                        .get_name()?;
+                                    Ok(ExplorerItem {
+                                        label,
+                                        path,
+                                        ui_position_in_set,
+                                        ui_size_of_set,
+                                        ui_level,
+                                        bounds,
+                                        kind,
+                                    })
+                                }
+                                let sticky = view
+                                    .drill(&walker, vec![0, 1, 0, 0, 1, 0, 3])?
+                                    .gather_children(&walker, &StopBehaviour::EndOfSiblings)
+                                    .into_iter()
+                                    .filter_map(|tree_item| {
+                                        as_explorer_item(&walker, tree_item).ok()
+                                    })
+                                    .collect();
+                                let items = view
+                                    .drill(&walker, vec![0, 1, 0, 0, 1, 0, 0])?
+                                    .gather_children(&walker, &StopBehaviour::EndOfSiblings)
+                                    .into_iter()
+                                    .filter_map(|tree_item| {
+                                        as_explorer_item(&walker, tree_item).ok()
+                                    })
+                                    .collect();
+                                View::Explorer { sticky, items }
                             }
                             _ => {
                                 View::Unknown {}
@@ -118,11 +174,7 @@ pub(crate) fn resolve_app(
                         .map(|group_tab_elem| {
                             let title = group_tab_elem.get_name()?;
                             let active = selected == Some(title.clone());
-                            Ok(EditorTab {
-                                title,
-                                // elem: group_tab_elem.into(),
-                                active,
-                            })
+                            Ok(EditorTab { title, active })
                         })
                         .filter_map(|r: Result<EditorTab, AppResolveError>| r.ok())
                         .collect();
@@ -132,13 +184,11 @@ pub(crate) fn resolve_app(
                         .map(|variant| variant.to_string())
                         .map(|text_content| EditorContent {
                             content: text_content,
-                            // elem: content_elem.into(),
                         })
                         .ok();
 
                     Ok(EditorGroup {
                         tabs: group_tabs,
-                        // elem: group_elem.into(),
                         content,
                     })
                 })
@@ -146,87 +196,17 @@ pub(crate) fn resolve_app(
                 .collect();
             let editor_area = EditorArea {
                 groups: editor_groups,
-                // elem: editor_area_elem.into(),
             };
 
-            Ok(AppWindow::VSCode {
-                // root: root.into(),
+            Ok(AppWindow::VSCode(VSCodeWindow {
                 focused,
-                editor_area,
-                side_nav,
-            })
-
-            // let editor_condition = automation.create_property_condition(
-            //     UIProperty::AutomationId,
-            //     Variant::from("workbench.parts.editor"),
-            //     None,
-            // )?;
-            // let editor = root.find_first(TreeScope::Descendants, &editor_condition)?;
-            // println!(
-            //     "Found editor with runtime id {}",
-            //     editor.get_runtime_id()?.to_hex_list()
-            // );
-            // let mut x = editor.clone();
-            // for _ in 0..5 {
-            //     x = walker.get_parent(&x)?;
-            // }
-
-            // // let tru = &automation.create_true_condition()?;
-            // // let mut x_kids = x.find_all(TreeScope::Children, )?;
-            // let mut x_kids =
-            //     gather_children(&walker, &x, &GatherChildrenStopBehaviour::EndOfSiblings);
-            // let n = x_kids.len();
-            // if !matches!(n, 2..=3) {
-            //     return Err(AppResolveError::BadStructure(format!(
-            //         "Editor area has wrong number of children: {}",
-            //         n
-            //     )));
-            // }
-            // let nav_elem = x_kids.remove(0);
-            // let buttons = nav_elem
-            //     .find_all(
-            //         TreeScope::Descendants,
-            //         &automation.create_property_condition(
-            //             UIProperty::ControlType,
-            //             (ControlType::TabItem as i32).into(),
-            //             None,
-            //         )?,
-            //     )?
-            //     .into_iter()
-            //     .map(|elem| {
-            //         let name = elem.get_name().unwrap_or_default();
-            //         let active = elem
-            //             .get_property_value(UIProperty::ExpandCollapseExpandCollapseState)
-            //             .map(|v| v.try_into() == Ok(ExpandCollapseState::Expanded as i32))
-            //             .unwrap_or_default();
-            //         TabButton { elem, name, active }
-            //     })
-            //     .collect();
-            // let nav = LeftNav {
-            //     buttons,
-            //     elem: nav_elem.into(),
-            // };
-            // let view = match n {
-            //     3 => {
-            //         let left_view_elem = x_kids.remove(0);
-            //         let left_view = View::Explorer {
-            //             elem: left_view_elem.into(),
-            //         };
-            //         Some(left_view)
-            //     }
-            //     _ => None,
-            // };
-            // let left_area = Tab { nav, view };
-
-            // let vscode = AppWindow::VSCode {
-            //     root,
-            //     editor_area: EditorArea {
-            //         groups: vec![],
-            //         elem: editor.into(),
-            //     },
-            //     tabs: left_area,
-            // };
-            // Ok(vscode)
+                header: VSCodeWindowHeader {},
+                body: VSCodeWindowBody {
+                    editor_area,
+                    side_nav,
+                },
+                footer: VSCodeWindowFooter {},
+            }))
         }
         _ => Err(AppResolveError::NoMatch),
     }

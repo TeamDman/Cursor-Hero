@@ -1,8 +1,6 @@
 use crate::gather_root_children::gather_root_children;
 use crate::resolve_app::resolve_app;
-use cursor_hero_ui_automation_types::ui_automation_types::AppResolveError;
-use cursor_hero_ui_automation_types::ui_automation_types::GatherAppsError;
-use cursor_hero_ui_automation_types::ui_automation_types::UISnapshot;
+use cursor_hero_ui_automation_types::prelude::*;
 use itertools::Itertools;
 use uiautomation::UIAutomation;
 

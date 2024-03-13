@@ -81,7 +81,7 @@ fn trigger(
             false
         }
     } else {
-        cooldown.replace(Timer::from_seconds(1.0, TimerMode::Repeating));
+        cooldown.replace(Timer::from_seconds(3.0, TimerMode::Repeating));
         true
     };
     if !should_tick {

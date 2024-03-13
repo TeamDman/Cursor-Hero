@@ -1,5 +1,5 @@
 use bevy::math::Rect;
-use cursor_hero_ui_automation_types::ui_automation_types::ElementInfo;
+use cursor_hero_ui_automation_types::prelude::ElementInfo;
 use uiautomation::UIAutomation;
 use uiautomation::UIElement;
 use uiautomation::UITreeWalker;
