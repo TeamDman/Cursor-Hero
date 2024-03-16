@@ -27,6 +27,8 @@ If you have a DualShock controller, you will need something like [DS4Windows](ht
 - [allenai/OLMo: Modeling, training, eval, and inference code for OLMo (github.com)](https://github.com/allenai/OLMo)
 - [hiyouga/LLaMA-Factory: Unify Efficient Fine-tuning of 100+ LLMs (github.com)](https://github.com/hiyouga/LLaMA-Factory)
 - [OpenAccess-AI-Collective/axolotl: Go ahead and axolotl questions (github.com)](https://github.com/OpenAccess-AI-Collective/axolotl)
+- [LLaVA/docs/Finetune\_Custom\_Data.md at main - haotian-liu/LLaVA (github.com)](https://github.com/haotian-liu/LLaVA/blob/main/docs/Finetune_Custom_Data.md)
+
 
 ### Vision
 
@@ -34,7 +36,7 @@ If you have a DualShock controller, you will need something like [DS4Windows](ht
 - [Set-of-Mark Visual Prompting for GPT-4V](https://github.com/microsoft/SoM)
 - [LLaVA](https://llava.hliu.cc/)
 - [YOLOv9](https://github.com/WongKinYiu/yolov9)
-- 
+- [Ty on X: "Open Interpreter 0.2.1 is out! -  5X launch speed -  Local OSS model for GUI control -  Native control over Apple Mail, Calendar, Contacts, SMS -  New LLM-first web browser (powered by @perplexity\_ai) -  Profiles, Docker, Jupyter export... ↓ https://t.co/XU4gibTXWk" / X (twitter.com)](https://twitter.com/FieroTy/status/1767328066290987470)
 
 ### RPA
 

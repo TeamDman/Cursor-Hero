@@ -1,0 +1,11 @@
+ The image shows a user interface, specifically the title bar of a VS Code window. In this view, you can see the following UI elements:
+
+1. Window title: There is no visible title in the window.
+2. File name: It appears to be an empty field where the current file name should be displayed.
+3. Location indicator: This shows the path of the currently open file or project.
+4. Run icon: The play button with a right-facing arrow, which is commonly used for starting a run configuration.
+5. Search icon: A magnifying glass icon, likely to start a search within the workspace.
+6. Terminal icon: An icon resembling a terminal window, indicating that you can open a terminal within VS Code.
+7. Go to File icon: This looks like a bookmark or a document icon, suggesting access to files within the project.
+8. Go to Run configuration icon: A right-pointing arrow that typically allows the user to go to a run configuration.
+9. Help icon: A question mark icon, which is used for getting help within VS Code. 

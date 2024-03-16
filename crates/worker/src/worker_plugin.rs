@@ -73,6 +73,11 @@ fn create_worker_thread<T: Message, G: Message>(
                     }
                 };
                 if let Err(e) = (handler)(&msg, &game_tx) {
+                    // eprintln cause bevy logging isn't guaranteed to display
+                    eprintln!(
+                        "[{}] Failed to process thread message {:?}, got error {:?}",
+                        name, msg, e
+                    );
                     error!(
                         "[{}] Failed to process thread message {:?}, got error {:?}",
                         name, msg, e

@@ -372,6 +372,7 @@ dependencies = [
 [[package]]
 name = "bevy-inspector-egui"
 version = "0.22.1"
+source = "git+https://github.com/TeamDman/bevy-inspector-egui.git?branch=cursor_hero#8c034c18581edaa4552c1bda36920328bcb3a05e"
 dependencies = [
  "bevy-inspector-egui-derive",
  "bevy_app",
@@ -399,6 +400,7 @@ dependencies = [
 [[package]]
 name = "bevy-inspector-egui-derive"
 version = "0.22.0"
+source = "git+https://github.com/TeamDman/bevy-inspector-egui.git?branch=cursor_hero#8c034c18581edaa4552c1bda36920328bcb3a05e"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2054,6 +2056,7 @@ dependencies = [
  "cursor_hero_tools",
  "cursor_hero_ui_automation",
  "cursor_hero_winutils",
+ "cursor_hero_worker",
  "image",
  "itertools 0.12.0",
  "leafwing-input-manager",

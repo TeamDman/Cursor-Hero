@@ -1,0 +1,9 @@
+ The image shows a user interface from Visual Studio Code (VSCode), which is a popular open-source code editor developed by Microsoft for Windows, Linux and macOS. The VSCode window displays the following elements:
+
+1. A menu bar at the top with options such as File, Edit, Selection, Go, Run, Terminal, Help, and an "X" to close the window.
+2. An extension list on the right-hand side showing various extensions that can be installed or updated within VSCode.
+3. A status bar at the bottom with indicators for running, terminal, debugging, and help.
+4. A text editor in the center of the window where code can be written and edited. The editor is currently empty and does not contain any code.
+5. A light-colored theme that is being used in VSCode, which can be adjusted to change the appearance of the editor.
+
+The overall design of VSCode suggests a modern, clean interface with a focus on functionality and ease of use for developers. 

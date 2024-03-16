@@ -1,0 +1,33 @@
+ The image shows a user interface of a computer operating system, specifically the File Explorer window from Windows. Here are the UI elements present in the image:
+
+1. Menu bar at the top with the following icons and text:
+   - File
+   - Edit
+   - Selection
+   - Go
+   - Terminal
+   - Run
+   - Help
+
+2. Ribbon menu for the 'Selection' tab which contains options like:
+   - Cut
+   - Copy
+   - Paste
+   - Delete
+
+3. The title bar of the File Explorer window, which is not fully visible in the image.
+
+4. A tree view structure on the left side of the window that represents the file system hierarchy, starting from the root directory.
+
+5. The right pane that shows a list or view of selected files, showing two items:
+   - Edit
+   - Terminal
+
+6. A status bar at the bottom which includes the following icons and text:
+   - Two folder icons followed by three file icons and the text "Edit", "Terminal", "Run".
+
+7. The right pane also has a 'Run' button with a small downward arrow, indicating that it can be expanded to show additional options.
+
+8. A blank area in the middle of the image where normally the file explorer would display the contents of the selected folder or the details of the selected files if any are selected.
+
+9. The bottom right corner has a 'Help' button with a question mark icon. 

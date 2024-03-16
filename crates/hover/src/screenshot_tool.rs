@@ -8,8 +8,6 @@ use bevy_inspector_egui::reflect_inspector::Context;
 use bevy_inspector_egui::reflect_inspector::InspectorUi;
 use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
-use crossbeam_channel::bounded;
-use crossbeam_channel::Receiver;
 use crossbeam_channel::Sender;
 use cursor_hero_bevy::prelude::NegativeYVec2;
 use cursor_hero_bevy::prelude::NegativeYVec3;
@@ -24,29 +22,65 @@ use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_tools::cube_tool::CubeToolInteractable;
 use cursor_hero_tools::prelude::*;
 use cursor_hero_ui_automation::prelude::find_element_at;
-use cursor_hero_ui_automation::prelude::gather_deep_element_info;
 use cursor_hero_ui_automation::prelude::gather_elements_at;
-use cursor_hero_ui_automation::prelude::gather_shallow_element_info;
+use cursor_hero_ui_automation::prelude::gather_element_info_starting_deep;
+use cursor_hero_ui_automation::prelude::ElementChildren;
 use cursor_hero_ui_automation::prelude::ElementInfo;
+use cursor_hero_worker::prelude::Message;
+use cursor_hero_worker::prelude::WorkerConfig;
+use cursor_hero_worker::prelude::WorkerPlugin;
 use leafwing_input_manager::prelude::*;
 use rand::thread_rng;
 use rand::Rng;
-use std::thread;
 
 pub struct ScreenshotToolPlugin;
 
 impl Plugin for ScreenshotToolPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(WorkerPlugin {
+            config: WorkerConfig::<ThreadboundMessage, GameboundMessage> {
+                name: "screenshot_tool".to_string(),
+                is_ui_automation_thread: true,
+                handle_threadbound_message: handle_threadbound_message,
+                ..default()
+            },
+        });
         app.register_type::<ScreenshotTool>();
         app.register_type::<ScreenshotBrick>();
         app.add_plugins(InputManagerPlugin::<ScreenshotToolAction>::default());
-        app.add_systems(Startup, spawn_worker_thread);
         app.add_systems(Update, toolbelt_events);
         app.add_systems(Update, handle_input);
         app.add_systems(Update, handle_replies);
         app.add_systems(Update, ui);
     }
 }
+
+#[derive(Debug, Reflect, Clone, Event)]
+enum ThreadboundMessage {
+    Capture { world_position: Vec3 },
+    CaptureBrick { world_position: Vec3 },
+    Print { world_position: Vec3 },
+    Fracture { world_position: Vec3 },
+}
+impl Message for ThreadboundMessage {}
+
+#[derive(Debug, Reflect, Clone, Event)]
+enum GameboundMessage {
+    Capture {
+        element_info: ElementInfo,
+        world_position: Vec3,
+    },
+    CaptureBrick {
+        element_info: ElementInfo,
+        world_position: Vec3,
+    },
+    Print(ElementInfo),
+    Fracture {
+        data: Vec<(ElementInfo, usize)>,
+        world_position: Vec3,
+    },
+}
+impl Message for GameboundMessage {}
 
 #[derive(Component, Reflect, Default)]
 struct ScreenshotTool;
@@ -58,33 +92,6 @@ enum ScreenshotToolAction {
     Print,
     Fracture,
 }
-
-#[derive(Component, Reflect)]
-struct ScreenshotBrick {
-    info: ElementInfo,
-}
-
-fn toolbelt_events(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut reader: EventReader<ToolbeltPopulateEvent>,
-) {
-    for event in reader.read() {
-        if event.loadout == ToolbeltLoadout::Inspector {
-            ToolSpawnConfig::<ScreenshotTool, ScreenshotToolAction>::new(
-                ScreenshotTool,
-                event.id,
-                event,
-            )
-            .with_src_path(file!().into())
-            .guess_name(file!())
-            .guess_image(file!(), &asset_server, "webp")
-            .with_description("Turn UI elements into information.")
-            .spawn(&mut commands);
-        }
-    }
-}
-
 impl ScreenshotToolAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
@@ -116,129 +123,30 @@ impl ToolAction for ScreenshotToolAction {
     }
 }
 
-#[derive(Debug)]
-enum ThreadboundMessage {
-    Capture { world_position: Vec3 },
-    CaptureBrick { world_position: Vec3 },
-    Print { world_position: Vec3 },
-    Fracture { world_position: Vec3 },
-}
-#[derive(Debug)]
-enum GameboundMessage {
-    Capture {
-        element_info: ElementInfo,
-        world_position: Vec3,
-    },
-    CaptureBrick {
-        element_info: ElementInfo,
-        world_position: Vec3,
-    },
-    Print(ElementInfo),
-    Fracture {
-        data: Vec<(ElementInfo, usize)>,
-        world_position: Vec3,
-    },
+#[derive(Component, Reflect)]
+struct ScreenshotBrick {
+    info: ElementInfo,
 }
 
-#[derive(Resource)]
-struct Bridge {
-    pub sender: Sender<ThreadboundMessage>,
-    pub receiver: Receiver<GameboundMessage>,
-}
-fn process_thread_message(
-    action: ThreadboundMessage,
-    reply_tx: &Sender<GameboundMessage>,
-) -> Result<(), Box<dyn std::error::Error>> {
-    match action {
-        ThreadboundMessage::Capture { world_position }
-        | ThreadboundMessage::CaptureBrick { world_position } => {
-            let mouse_position = world_position.xy().neg_y().as_ivec2();
-            debug!("Worker received click: {:?} {:?}", action, mouse_position);
-
-            let elem = find_element_at(mouse_position)?;
-            info!("{} - {}", elem.get_classname()?, elem.get_name()?);
-
-            let id = elem.get_automation_id()?;
-            info!("Automation ID: {}", id);
-            let element_info = match action {
-                ThreadboundMessage::Capture { .. } => gather_shallow_element_info(elem)?,
-                ThreadboundMessage::CaptureBrick { .. } => gather_deep_element_info(elem)?,
-                _ => unreachable!(),
-            };
-            let msg = match action {
-                ThreadboundMessage::Capture { world_position } => GameboundMessage::Capture {
-                    element_info,
-                    world_position,
-                },
-                ThreadboundMessage::CaptureBrick { world_position } => {
-                    GameboundMessage::CaptureBrick {
-                        element_info,
-                        world_position,
-                    }
-                }
-                _ => unreachable!(),
-            };
-            reply_tx.send(msg)?;
-        }
-        ThreadboundMessage::Print { world_position } => {
-            let mouse_position = world_position.xy().neg_y().as_ivec2();
-            debug!("Worker received click: {:?} {:?}", action, mouse_position);
-
-            let elem = find_element_at(mouse_position)?;
-            info!("{} - {}", elem.get_classname()?, elem.get_name()?);
-
-            // Can we click on elements with this?
-            // elem.send_keys(keys, interval) exists!
-
-            // Send the info
-            let id = elem.get_automation_id()?;
-            info!("Automation ID: {}", id);
-            let info = gather_shallow_element_info(elem)?;
-            reply_tx.send(GameboundMessage::Print(info))?;
-        }
-        ThreadboundMessage::Fracture { world_position } => {
-            let mouse_position = world_position.xy().neg_y().as_ivec2();
-            debug!("Worker received click: {:?} {:?}", action, mouse_position);
-
-            let found = gather_elements_at(mouse_position)?;
-            let data = found
-                .into_iter()
-                .filter_map(|(elem, depth)| {
-                    gather_shallow_element_info(elem)
-                        .ok()
-                        .map(|info| (info, depth))
-                })
-                .collect();
-            reply_tx.send(GameboundMessage::Fracture {
-                data,
-                world_position,
-            })?;
+fn toolbelt_events(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut reader: EventReader<ToolbeltPopulateEvent>,
+) {
+    for event in reader.read() {
+        if event.loadout == ToolbeltLoadout::Inspector {
+            ToolSpawnConfig::<ScreenshotTool, ScreenshotToolAction>::new(
+                ScreenshotTool,
+                event.id,
+                event,
+            )
+            .with_src_path(file!().into())
+            .guess_name(file!())
+            .guess_image(file!(), &asset_server, "webp")
+            .with_description("Turn UI elements into information.")
+            .spawn(&mut commands);
         }
     }
-
-    Ok(())
-}
-
-fn spawn_worker_thread(mut commands: Commands) {
-    let (tx, rx) = bounded::<_>(10);
-    let (reply_tx, reply_rx) = bounded::<_>(10); // New channel for replies
-
-    commands.insert_resource(Bridge {
-        sender: tx,
-        receiver: reply_rx,
-    });
-    thread::spawn(move || loop {
-        let action = match rx.recv() {
-            Ok(action) => action,
-            Err(e) => {
-                error!("Failed to receive thread message, exiting: {:?}", e);
-                break;
-            }
-        };
-        if let Err(e) = process_thread_message(action, &reply_tx) {
-            error!("Failed to process thread message: {:?}", e);
-        }
-    });
 }
 
 fn handle_input(
@@ -246,7 +154,7 @@ fn handle_input(
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<&Children, With<Character>>,
     pointers: Query<&GlobalTransform, With<Pointer>>,
-    bridge: ResMut<Bridge>,
+    mut bridge: EventWriter<ThreadboundMessage>,
     egui_context_query: Query<&EguiContext, With<PrimaryWindow>>,
 ) {
     for tool in tools.iter() {
@@ -289,47 +197,111 @@ fn handle_input(
             let msg = ThreadboundMessage::Capture {
                 world_position: pointer_translation,
             };
-            if let Err(e) = bridge.sender.send(msg) {
-                error!("Failed to send click: {:?}", e);
-            }
+            bridge.send(msg);
         }
         if tool_actions.just_pressed(ScreenshotToolAction::CaptureBrick) {
             info!("CaptureBrick");
             let msg = ThreadboundMessage::CaptureBrick {
                 world_position: pointer_translation,
             };
-            if let Err(e) = bridge.sender.send(msg) {
-                error!("Failed to send click: {:?}", e);
-            }
+            bridge.send(msg);
         }
         if tool_actions.just_pressed(ScreenshotToolAction::Print) {
             info!("Print");
             let msg = ThreadboundMessage::Print {
                 world_position: pointer_translation,
             };
-            if let Err(e) = bridge.sender.send(msg) {
-                error!("Failed to send click: {:?}", e);
-            }
+            bridge.send(msg);
         }
         if tool_actions.just_pressed(ScreenshotToolAction::Fracture) {
             info!("Fracture");
             let msg = ThreadboundMessage::Fracture {
                 world_position: pointer_translation,
             };
-            if let Err(e) = bridge.sender.send(msg) {
-                error!("Failed to send click: {:?}", e);
-            }
+            bridge.send(msg);
         }
     }
 }
 
+
+fn handle_threadbound_message(
+    msg: &ThreadboundMessage,
+    reply_tx: &Sender<GameboundMessage>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    match msg {
+        ThreadboundMessage::Capture { world_position }
+        | ThreadboundMessage::CaptureBrick { world_position } => {
+            let mouse_position = world_position.xy().neg_y().as_ivec2();
+            debug!("Worker received click: {:?} {:?}", msg, mouse_position);
+
+            let elem = find_element_at(mouse_position)?;
+            info!("{} - {}", elem.get_classname()?, elem.get_name()?);
+
+            let id = elem.get_automation_id()?;
+            info!("Automation ID: {}", id);
+            let element_info = gather_element_info_starting_deep(elem)?;
+            debug!("Element info: {:?}", element_info);
+            let msg = match msg {
+                ThreadboundMessage::Capture { world_position } => GameboundMessage::Capture {
+                    element_info,
+                    world_position: *world_position,
+                },
+                ThreadboundMessage::CaptureBrick { world_position } => {
+                    GameboundMessage::CaptureBrick {
+                        element_info,
+                        world_position: *world_position,
+                    }
+                }
+                _ => unreachable!(),
+            };
+            reply_tx.send(msg)?;
+        }
+        ThreadboundMessage::Print { world_position } => {
+            let mouse_position = world_position.xy().neg_y().as_ivec2();
+            debug!("Worker received click: {:?} {:?}", msg, mouse_position);
+
+            let elem = find_element_at(mouse_position)?;
+            info!("{} - {}", elem.get_classname()?, elem.get_name()?);
+
+            // Can we click on elements with this?
+            // elem.send_keys(keys, interval) exists!
+
+            // Send the info
+            let id = elem.get_automation_id()?;
+            info!("Automation ID: {}", id);
+            let info = gather_element_info_starting_deep(elem)?;
+            reply_tx.send(GameboundMessage::Print(info))?;
+        }
+        ThreadboundMessage::Fracture { world_position } => {
+            let mouse_position = world_position.xy().neg_y().as_ivec2();
+            debug!("Worker received click: {:?} {:?}", msg, mouse_position);
+
+            let found = gather_elements_at(mouse_position)?;
+            let data = found
+                .into_iter()
+                .filter_map(|(elem, depth)| {
+                    gather_element_info_starting_deep(elem)
+                        .ok()
+                        .map(|info| (info, depth))
+                })
+                .collect();
+            reply_tx.send(GameboundMessage::Fracture {
+                data,
+                world_position: *world_position,
+            })?;
+        }
+    }
+
+    Ok(())
+}
+
 fn handle_replies(
     mut commands: Commands,
-    bridge: Res<Bridge>,
+    mut bridge: EventReader<GameboundMessage>,
     screen_access: ScreensToImageParam,
     asset_server: Res<AssetServer>,
 ) {
-    while let Ok(msg) = bridge.receiver.try_recv() {
+    for msg in bridge.read() {
         match &msg {
             GameboundMessage::Capture {
                 element_info,
@@ -575,22 +547,28 @@ fn ui_for_element_info(
     _inspector: &mut InspectorUi,
     popout_pos: &Vec3,
 ) {
-    egui::CollapsingHeader::new(format!(
-        "{} | {}",
-        element_info.name, element_info.class_name
-    ))
-    .default_open(true)
-    .show(ui, |ui| {
-        if ui.button("Popout").clicked() {
-            spawn_brick(
-                commands,
-                element_info,
-                element_info.bounding_rect.size(),
-                *popout_pos,
-                screen_access,
-                asset_server,
-            )
-        }
+    egui::collapsing_header::CollapsingState::load_with_default_open(
+        ui.ctx(),
+        id,
+        element_info.children.as_ref().is_some_and(|c| c.expanded),
+    )
+    .show_header(ui, |ui| {
+        ui.toggle_value(
+            &mut element_info.selected,
+            format!("{} | {}", element_info.name, element_info.class_name),
+        );
+    })
+    .body(|ui| {
+        // if ui.button("Popout").clicked() {
+        //     spawn_brick(
+        //         commands,
+        //         element_info,
+        //         element_info.bounding_rect.size(),
+        //         *popout_pos,
+        //         screen_access,
+        //         asset_server,
+        //     )
+        // }
 
         // inspector.ui_for_reflect(element_info, ui);
         // let mut data = ElementUIData {
@@ -607,24 +585,38 @@ fn ui_for_element_info(
         // };
         // inspector.ui_for_reflect_readonly(&data, ui);
 
-        if let Some(children) = &mut element_info.children {
-            egui::CollapsingHeader::new("Children")
-                .id_source(id.with("children_header"))
-                .default_open(!children.is_empty())
-                .show(ui, |ui| {
-                    for child in children.iter_mut() {
-                        ui_for_element_info(
-                            id.with(child.runtime_id.clone()),
-                            commands,
-                            screen_access,
-                            asset_server,
-                            ui,
-                            child,
-                            _inspector,
-                            popout_pos,
-                        );
-                    }
-                });
+        // if let Some(children) = &mut element_info.children {
+        //     egui::CollapsingHeader::new("Children")
+        //         .id_source(id.with("children_header"))
+        //         .default_open(!children.is_empty())
+        //         .show(ui, |ui| {
+        //             for child in children.iter_mut() {
+        //                 ui_for_element_info(
+        //                     id.with(child.runtime_id.clone()),
+        //                     commands,
+        //                     screen_access,
+        //                     asset_server,
+        //                     ui,
+        //                     child,
+        //                     _inspector,
+        //                     popout_pos,
+        //                 );
+        //             }
+        //         });
+        // }
+        if let Some(ElementChildren { children, .. }) = &mut element_info.children {
+            for child in children.iter_mut() {
+                ui_for_element_info(
+                    id.with(child.runtime_id.clone()),
+                    commands,
+                    screen_access,
+                    asset_server,
+                    ui,
+                    child,
+                    _inspector,
+                    popout_pos,
+                );
+            }
         }
     });
 }

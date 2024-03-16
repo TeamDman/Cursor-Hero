@@ -1,0 +1,2 @@
+This is a screenshot of the title bar region of a VSCode window.
+What elements are present?

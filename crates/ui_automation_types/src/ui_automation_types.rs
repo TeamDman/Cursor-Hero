@@ -2,6 +2,7 @@ use crate::vscode_ui_types::*;
 use bevy::prelude::*;
 use serde::Deserialize;
 use serde::Serialize;
+use std::collections::VecDeque;
 use std::fmt;
 use std::fmt::Display;
 use std::fmt::Formatter;
@@ -80,12 +81,19 @@ impl ToBevyIRect for uiautomation::types::Rect {
 #[derive(Debug, Clone, Reflect)]
 // #[reflect(no_field_bounds)] //https://github.com/bevyengine/bevy/issues/8965
 pub struct ElementInfo {
+    pub selected: bool,
     pub name: String,
     pub bounding_rect: Rect,
     pub control_type: String,
     pub class_name: String,
     pub automation_id: String,
     pub runtime_id: Vec<i32>,
+    pub drill_id: Option<VecDeque<usize>>,
     #[reflect(ignore)]
-    pub children: Option<Vec<ElementInfo>>,
+    pub children: Option<ElementChildren>,
+}
+#[derive(Debug, Clone, Reflect)]
+pub struct ElementChildren {
+    pub children: Vec<ElementInfo>,
+    pub expanded: bool,
 }
