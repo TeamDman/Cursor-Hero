@@ -1,10 +1,8 @@
-use std::collections::VecDeque;
-
-use bevy::log::*;
 use bevy::math::Rect;
 use cursor_hero_ui_automation_types::prelude::ElementChildren;
 use cursor_hero_ui_automation_types::prelude::ElementInfo;
 use itertools::Itertools;
+use std::collections::VecDeque;
 use uiautomation::Error;
 use uiautomation::UIAutomation;
 use uiautomation::UIElement;
@@ -48,7 +46,7 @@ fn gather_tree(
     element: &UIElement,
     walker: &UITreeWalker,
     ancestors: &VecDeque<UIElement>,
-    depth: usize,
+    _depth: usize,
 ) -> Result<ElementInfo, Error> {
     let is_ancestor = |element: &UIElement| {
         ancestors
@@ -58,16 +56,14 @@ fn gather_tree(
     let on_ancestor = is_ancestor(element);
     let mut element_info = gather_single_element_info(element)?;
 
-    // TODO: remove depth param since on_ancestor shouldbe true for root elem
-    if on_ancestor || depth == 0 {
+    if on_ancestor {
         let children = element
             .gather_children(walker, &StopBehaviour::RootEndEncountered)
             .into_iter()
             .enumerate()
             .filter_map(|(i, child)| {
-                // TODO: remove on_ancestor check here
-                if on_ancestor || is_ancestor(&child) {
-                    gather_tree(&child, walker, ancestors, depth + 1).ok()
+                if is_ancestor(&child) {
+                    gather_tree(&child, walker, ancestors, _depth + 1).ok()
                 } else {
                     gather_single_element_info(&child).ok()
                 }
@@ -86,23 +82,6 @@ fn gather_tree(
 
     Ok(element_info)
 }
-
-// pub fn gather_element_info_starting_deep(
-//     element: UIElement,
-// ) -> Result<ElementInfo, uiautomation::Error> {
-//     debug!("Gathering element info starting deep.");
-//     let automation = UIAutomation::new()?;
-//     let walker = automation.create_tree_walker()?;
-
-//     debug!("Gathering element info for element: {:?}", element);
-//     let mut root_info = gather_element_info_upwards_recursive(element, &walker)?;
-
-//     // Start the `drill_id` update process here with an empty path
-//     debug!("Updating drill IDs.");
-//     update_drill_ids(&mut root_info, &VecDeque::new());
-
-//     Ok(root_info)
-// }
 
 fn update_drill_ids(parent_info: &mut ElementInfo, ancestor_path: &VecDeque<usize>) {
     if let Some(children) = &mut parent_info.children {
@@ -125,70 +104,6 @@ fn update_drill_ids(parent_info: &mut ElementInfo, ancestor_path: &VecDeque<usiz
         }
     }
 }
-
-// fn gather_element_info_upwards_recursive(
-//     element: UIElement,
-//     walker: &UITreeWalker,
-// ) -> Result<ElementInfo, uiautomation::Error> {
-//     let parent = match walker.get_parent(&element) {
-//         Ok(parent) => {
-//             debug!("Parent found: {:?}", parent);
-//             parent
-//         },
-//         Err(_) => {
-//             // Base case, return info without children
-//             debug!("No parent found, returning single element info.");
-//             return gather_single_element_info(&element)
-//         },
-//     };
-
-//     // Get parent info so we can attach children to it
-//     let mut parent_info = gather_element_info_upwards_recursive(parent, walker)?;
-//     debug!("Parent info: {:?}", parent_info);
-
-//     // Now, handle the current element and its siblings
-//     let siblings_info = gather_siblings_info(&element, walker);
-
-//     // Assuming `gather_siblings_info` also updates the children of the parent_info
-//     if parent_info.children.is_some() {
-//         return Err(uiautomation::Error::new(-1, "Parent info already has children!"));
-//     }
-
-//     parent_info.children = Some(ElementChildren {
-//         children: siblings_info,
-//         expanded: true,
-//     });
-
-//     Ok(parent_info)
-// }
-
-// fn gather_siblings_info(
-//     element: &UIElement,
-//     walker: &UITreeWalker,
-// ) -> Vec<ElementInfo> {
-//     // Implement logic similar to your current loop, but adjusted for recursion.
-//     // This should iterate over siblings, gather their info, and include the current element's info.
-//     let Ok(parent) = walker.get_parent(&element) else {
-//         return vec![];
-//     };
-
-//     let children = parent
-//         .gather_children(&walker, &StopBehaviour::RootEndEncountered)
-//         .into_iter()
-//         .enumerate()
-//         .map(|(i, child)| {
-//             let mut info = gather_single_element_info(&child)?;
-//             let mut drill_id = VecDeque::new();
-//             drill_id.push_back(i);
-//             // This correctly maps to the index within the UI element children.
-//             // Because of filtering, we can't use the index within ElementInfo.children to build the drill ID later.
-//             info.drill_id = Some(drill_id);
-//             Ok::<_, uiautomation::Error>(info)
-//         })
-//         .filter_map(|x| x.ok())
-//         .collect_vec();
-//     children
-// }
 
 pub fn gather_single_element_info(element: &UIElement) -> Result<ElementInfo, uiautomation::Error> {
     let name = element.get_name()?;

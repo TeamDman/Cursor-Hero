@@ -13,7 +13,6 @@ pub fn take_snapshot() -> Result<UISnapshot, GatherAppsError> {
     let focused = automation.get_focused_element()?;
     let focused_app = walker.normalize(&focused)?;
 
-
     let mut apps = vec![];
     let mut errors = vec![];
     for elem in top_level_children {

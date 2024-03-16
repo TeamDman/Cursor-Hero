@@ -41,7 +41,7 @@ impl Plugin for ScreenshotToolPlugin {
             config: WorkerConfig::<ThreadboundMessage, GameboundMessage> {
                 name: "screenshot_tool".to_string(),
                 is_ui_automation_thread: true,
-                handle_threadbound_message: handle_threadbound_message,
+                handle_threadbound_message,
                 ..default()
             },
         });
@@ -223,7 +223,6 @@ fn handle_input(
     }
 }
 
-
 fn handle_threadbound_message(
     msg: &ThreadboundMessage,
     reply_tx: &Sender<GameboundMessage>,
@@ -240,7 +239,7 @@ fn handle_threadbound_message(
             let id = elem.get_automation_id()?;
             info!("Automation ID: {}", id);
             let element_info = gather_incomplete_ui_tree_starting_deep(elem)?;
-            debug!("Element info: {:?}", element_info);
+            // debug!("Element info: {:?}", element_info);
             let msg = match msg {
                 ThreadboundMessage::Capture { world_position } => GameboundMessage::Capture {
                     element_info,
