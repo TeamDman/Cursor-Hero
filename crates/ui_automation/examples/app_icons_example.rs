@@ -83,6 +83,7 @@ fn get_process_full_name(process_id: u32) -> Result<String> {
         let process_handle: HANDLE = OpenProcess(PROCESS_QUERY_INFORMATION, false, process_id)?;
         let result = (|| {
             if process_handle.is_invalid() {
+                eprintln!("Failed to open process handle");
                 return Err(windows::core::Error::from_win32());
             }
 
@@ -109,20 +110,20 @@ fn get_process_full_name(process_id: u32) -> Result<String> {
 
 fn get_images_for_process(executable_path: &str) -> Result<Vec<RgbaImage>> {
     unsafe {
-        let mut large_icons: Vec<HICON> = Vec::new();
-        let mut small_icons: Vec<HICON> = Vec::new();
+        let mut large_icon = HICON::default();
+        let mut small_icon = HICON::default();
 
         let path_cstr = U16CString::from_str(executable_path)?;
         let path_pcwstr = PCWSTR(path_cstr.as_ptr());
         let total_icons = ExtractIconExW(
             path_pcwstr,
             0,
-            Some(large_icons.as_mut_ptr()),
-            Some(small_icons.as_mut_ptr()),
+            Some(&mut large_icon),
+            Some(&mut small_icon),
             1, // You might want to adjust this based on how many icons you expect to extract
         );
 
-        println!("large={:?}, small={:?}", large_icons, small_icons);
+        println!("got: {}, large={:?}, small={:?}", total_icons, large_icon, small_icon);
 
         if total_icons == 0 {
             return Ok(Vec::new()); // No icons extracted
@@ -130,19 +131,19 @@ fn get_images_for_process(executable_path: &str) -> Result<Vec<RgbaImage>> {
 
         let mut images = Vec::new();
 
-        // Assuming we are working with the first large icon for demonstration
-        if !large_icons.is_empty() {
-            let hicon = large_icons[0];
-            // Convert HICON to RgbaImage
-            // This will involve creating a compatible bitmap, drawing the icon on it, and then reading the pixel data
-            // For simplicity, this is left as a placeholder
-            // images.push(convert_hicon_to_rgba_image(hicon)?);
+        // // Assuming we are working with the first large icon for demonstration
+        // if !large_icons.is_empty() {
+        //     let hicon = large_icons[0];
+        //     // Convert HICON to RgbaImage
+        //     // This will involve creating a compatible bitmap, drawing the icon on it, and then reading the pixel data
+        //     // For simplicity, this is left as a placeholder
+        //     // images.push(convert_hicon_to_rgba_image(hicon)?);
 
-            // Remember to free the icon when done
-            if let Err(e) = DestroyIcon(hicon) {
-                eprintln!("Failed to destroy icon: {:?}", e);
-            }
-        }
+        //     // Remember to free the icon when done
+        //     if let Err(e) = DestroyIcon(hicon) {
+        //         eprintln!("Failed to destroy icon: {:?}", e);
+        //     }
+        // }
 
         Ok(images)
     }
@@ -174,8 +175,8 @@ fn main() -> Result<()> {
                 }
             };
 
-            // let icons = get_images_for_process(exe_path.as_str())?;
-            // println!("Icons for {}: {:?}", exe_path, icons.len());
+            let icons = get_images_for_process(exe_path.as_str())?;
+            println!("Icons for {}: {:?}", exe_path, icons.len());
 
             println!(
                 "Process ID: {:05}, Full Name: {}",
