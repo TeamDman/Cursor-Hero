@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy::reflect::GetTypeRegistration;
 pub use crossbeam_channel::Receiver;
 pub use crossbeam_channel::Sender;
 use std::marker::PhantomData;
@@ -16,14 +15,14 @@ where
 
 pub trait Message:
     std::fmt::Debug
-    + GetTypeRegistration
+    // + GetTypeRegistration
     + Event
     + Send
     + Sync
     + Clone
-    + Reflect
-    + TypePath
-    + FromReflect
+    // + Reflect
+    // + TypePath
+    // + FromReflect
     + 'static
 {
 }

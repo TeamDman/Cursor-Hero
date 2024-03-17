@@ -1,5 +1,6 @@
 use std::{rc::Rc, string::FromUtf16Error};
 
+use bevy::app::DynEq;
 use widestring::error::ContainsNul;
 use windows::Win32::Foundation::BOOL;
 
@@ -10,7 +11,21 @@ pub enum Error {
     FromUtf16Error,
     Described(Rc<Error>, String),
     ImageContainerNotBigEnough,
+    Other(Rc<dyn std::error::Error>),
 }
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Error::Windows(e) => write!(f, "Windows error: {}", e.message()),
+            Error::WideString(e) => write!(f, "Wide string error: {}", e),
+            Error::FromUtf16Error => write!(f, "FromUtf16Error"),
+            Error::Described(e, description) => write!(f, "{}: {}", e, description),
+            Error::ImageContainerNotBigEnough => write!(f, "Image container not big enough"),
+            Error::Other(e) => write!(f, "(other) {}", e),
+        }
+    }
+}
+impl std::error::Error for Error {}
 impl Error {
     pub fn from_win32() -> Self {
         Error::Windows(windows::core::Error::from_win32())

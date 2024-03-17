@@ -9,15 +9,19 @@ edition = "2021"
 cursor_hero_metrics = { workspace = true }
 bevy = { workspace = true }
 windows = { workspace = true, features = [
-    "Win32_Foundation",
-    "Win32_UI_WindowsAndMessaging",
-    "Win32_Graphics_Gdi",
-    "Win32_UI_Input_KeyboardAndMouse",
-    "Win32_System_Com",
-    "Win32_System_Ole",
-    "Win32_System_Variant",
     "Win32_Devices_HumanInterfaceDevice",
-    "Win32_System_LibraryLoader"
+    "Win32_Foundation",
+    "Win32_Graphics_Gdi",
+    "Win32_Security",
+    "Win32_System_Com",
+    "Win32_System_Diagnostics_ToolHelp",
+    "Win32_System_LibraryLoader",
+    "Win32_System_Ole",
+    "Win32_System_ProcessStatus",
+    "Win32_System_Threading",
+    "Win32_System_Variant",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_UI_WindowsAndMessaging",
     # "Win32_UI_Accessibility",
     # "Gaming_Input",
     # "Win32_Gaming",
@@ -34,3 +38,8 @@ itertools = {workspace = true}
 winreg = { workspace = true }
 crossbeam-channel = { workspace = true }
 cursor_hero_bevy = { workspace = true }
+
+[dev-dependencies]
+cursor_hero_memory_types = { workspace = true }
+cursor_hero_worker = { workspace = true }
+bevy-inspector-egui = { workspace = true }

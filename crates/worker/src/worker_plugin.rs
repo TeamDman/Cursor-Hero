@@ -19,8 +19,9 @@ where
     G: Message,
 {
     fn build(&self, app: &mut App) {
-        app.register_type::<T>();
-        app.register_type::<G>();
+        // TODO: conditionally register if T or G support it
+        // app.register_type::<T>();
+        // app.register_type::<G>();
         app.add_event::<T>();
         app.add_event::<G>();
         app.insert_resource(self.config.clone());

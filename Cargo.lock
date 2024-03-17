@@ -2744,9 +2744,12 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "bevy",
+ "bevy-inspector-egui",
  "crossbeam-channel",
  "cursor_hero_bevy",
+ "cursor_hero_memory_types",
  "cursor_hero_metrics",
+ "cursor_hero_worker",
  "enigo 0.2.0-rc2",
  "fxhash",
  "image",

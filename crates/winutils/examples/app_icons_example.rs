@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use bevy::utils::HashSet;
 use cursor_hero_winutils::win_errors::*;
 use cursor_hero_winutils::win_process::*;
@@ -38,6 +40,20 @@ fn main() -> Result<()> {
                 exe_name,
                 icons.len()
             );
+
+            if icons.is_empty() {
+                continue;
+            }
+
+            // write the image to target/app_icons/{exe_name}/{icon_index}.png
+            let mut path = std::path::PathBuf::from("target/app_icons");
+            path.push(exe_name);
+            std::fs::create_dir_all(&path).map_err(|e| Error::Other(Rc::new(e)))?;
+            for (i, icon) in icons.iter().enumerate() {
+                let mut icon_path = path.clone();
+                icon_path.push(format!("{}.png", i));
+                icon.save(icon_path).map_err(|e| Error::Other(Rc::new(e)))?;
+            }
         }
     }
     Ok(())
