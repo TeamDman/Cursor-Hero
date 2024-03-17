@@ -30,6 +30,7 @@ fxhash = {workspace = true}
 widestring = {workspace = true}
 enigo = {workspace = true}
 once_cell = {workspace = true}
+itertools = {workspace = true}
 winreg = { workspace = true }
 crossbeam-channel = { workspace = true }
 cursor_hero_bevy = { workspace = true }

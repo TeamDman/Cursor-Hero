@@ -493,12 +493,13 @@ fn ui(
         egui::Window::new(brick_name.chars().take(64).collect::<String>())
             .id(id)
             .fixed_pos(Pos2::new(egui_pos.x, egui_pos.y))
-            .default_width(600.0)
+            .default_width(1200.0)
             // .resizable(true)
             .show(ctx, |ui| {
                 egui::SidePanel::left(id.with("tree"))
                     .resizable(true)
                     .width_range(100.0..=4000.0)
+                    .default_width(600.0)
                     .show_inside(ui, |ui| {
                         ui.vertical_centered(|ui| {
                             ui.heading("UI Tree");

@@ -72,7 +72,7 @@ If you have a DualShock controller, you will need something like [DS4Windows](ht
 - [Understanding Threading Issues - Win32 apps | Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/winauto/uiauto-threading)
 - [UI Automation Threading Issues - .NET Framework | Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/ui-automation-threading-issues)
 - [c# - System.Windows.Automation is extremely slow - Stack Overflow](https://stackoverflow.com/questions/41768046/system-windows-automation-is-extremely-slow)
-
+- `[Convert]::ToInt32("0x80070012", 16)` then ctrl+F win32::Foundation to find the error code
 ### RL
 
 - [stillonearth/bevy_rl](https://github.com/stillonearth/bevy_rl/blob/main/src/render.rs)
