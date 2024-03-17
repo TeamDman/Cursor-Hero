@@ -36,3 +36,21 @@ impl From<FromUtf16Error> for Error {
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
+
+pub trait WithDescription<T> {
+    fn with_description(self, description: String) -> Result<T>;
+}
+impl<T> WithDescription<T> for windows::core::Result<T> {
+    fn with_description(self, description: String) -> Result<T> {
+        self.map_err(|e| Error::Windows(e).with_description(description))
+    }
+}
+
+pub trait OkWithDescription<T> {
+    fn ok_with_description(self, description: String) -> Result<T>;
+}
+impl OkWithDescription<()> for BOOL {
+    fn ok_with_description(self, description: String) -> Result<()> {
+        self.ok().map_err(|e| Error::Windows(e).with_description(description))
+    }
+}
