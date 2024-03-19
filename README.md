@@ -52,13 +52,7 @@ If you have a DualShock controller, you will need something like [DS4Windows](ht
 - [Accessibility tools - AccEvent (Accessible Event Watcher) - Win32 apps | Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/winauto/accessible-event-watcher)
 - [Accessibility tools - Inspect - Win32 apps | Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/winauto/inspect-objects)
 - [Accessibility Insights](https://accessibilityinsights.io/)
-- [Process Monitor - Sysinternals | Microsoft Learn](https://learn.microsoft.com/en-us/sysinternals/downloads/procmon)
 - [Navigation events for WebView2 apps - Microsoft Edge Developer documentation | Microsoft Learn](https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/navigation-events)
-- [(1) Building 25+ years of SysInternals: Exploring ZoomIt | BRK200H - YouTube](https://www.youtube.com/watch?v=W2bNgFrj3Iw)
-
-- [c# - Getting icon of "modern" Windows app from a desktop application? - Stack Overflow](https://stackoverflow.com/questions/32122679/getting-icon-of-modern-windows-app-from-a-desktop-application)
-- [How does Microsoft's "inspect.exe" application keep its window on top? - Microsoft Q&A === WS_EX_TOPMOST, UAC Bypass UI](https://learn.microsoft.com/en-us/answers/questions/1105704/how-does-microsofts-inspect-exe-application-keep-i)
-  - ["Automatic dismissal of the start menu" and other crazyness - Windows-classic-samples/Samples/DesktopAutomationDismiss at 27ffb0811ca761741502feaefdb591aebf592193 - microsoft/Windows-classic-samples (github.com)](https://github.com/microsoft/Windows-classic-samples/tree/27ffb0811ca761741502feaefdb591aebf592193/Samples/DesktopAutomationDismiss#build-the-sample)
 - [c# - UIAutomation won't retrieve children of an element - Stack Overflow](https://stackoverflow.com/questions/14187110/uiautomation-wont-retrieve-children-of-an-element)
 - [comEle = \_AutomationClient.instance().dll.GetNextSiblingElement(self.Element) Hangs - Issue #30 - yinkaisheng/Python-UIAutomation-for-Windows (github.com)](https://github.com/yinkaisheng/Python-UIAutomation-for-Windows/issues/30)
 - [microsoft/WinAppDriver: Windows Application Driver (github.com)](https://github.com/microsoft/WinAppDriver)
@@ -72,7 +66,17 @@ If you have a DualShock controller, you will need something like [DS4Windows](ht
 - [Understanding Threading Issues - Win32 apps | Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/winauto/uiauto-threading)
 - [UI Automation Threading Issues - .NET Framework | Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/ui-automation-threading-issues)
 - [c# - System.Windows.Automation is extremely slow - Stack Overflow](https://stackoverflow.com/questions/41768046/system-windows-automation-is-extremely-slow)
+
+### Win32
+
+- [How does Microsoft's "inspect.exe" application keep its window on top? - Microsoft Q&A === WS_EX_TOPMOST, UAC Bypass UI](https://learn.microsoft.com/en-us/answers/questions/1105704/how-does-microsofts-inspect-exe-application-keep-i)
+  - ["Automatic dismissal of the start menu" and other crazyness - Windows-classic-samples/Samples/DesktopAutomationDismiss at 27ffb0811ca761741502feaefdb591aebf592193 - microsoft/Windows-classic-samples (github.com)](https://github.com/microsoft/Windows-classic-samples/tree/27ffb0811ca761741502feaefdb591aebf592193/Samples/DesktopAutomationDismiss#build-the-sample)
 - `[Convert]::ToInt32("0x80070012", 16)` then ctrl+F win32::Foundation to find the error code
+- [Process Hacker / Code / \[r6350\] /2.x/trunk (sourceforge.net)](https://sourceforge.net/p/processhacker/code/HEAD/tree/2.x/trunk/)
+- [Process Monitor - Sysinternals | Microsoft Learn](https://learn.microsoft.com/en-us/sysinternals/downloads/procmon)
+- [(1) Building 25+ years of SysInternals: Exploring ZoomIt | BRK200H - YouTube](https://www.youtube.com/watch?v=W2bNgFrj3Iw)
+- [c# - Getting icon of "modern" Windows app from a desktop application? - Stack Overflow](https://stackoverflow.com/questions/32122679/getting-icon-of-modern-windows-app-from-a-desktop-application)
+
 ### RL
 
 - [stillonearth/bevy_rl](https://github.com/stillonearth/bevy_rl/blob/main/src/render.rs)

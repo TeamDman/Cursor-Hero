@@ -2758,6 +2758,7 @@ dependencies = [
  "uiautomation",
  "widestring",
  "windows 0.52.0",
+ "winit",
  "winreg 0.52.0",
 ]
 

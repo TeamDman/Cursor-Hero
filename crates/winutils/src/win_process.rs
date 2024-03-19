@@ -145,11 +145,6 @@ pub fn get_images_for_process(executable_path: &str) -> Result<Vec<RgbaImage>> {
             })
             .collect_vec();
 
-        // Convert HICONs to RgbaImage
-        // This will involve creating a compatible bitmap, drawing the icon on it, and then reading the pixel data
-        // For simplicity, this is left as a placeholder
-        // images.push(convert_hicon_to_rgba_image(hicon)?);
-
         large_icons
             .iter()
             .chain(small_icons.iter())
