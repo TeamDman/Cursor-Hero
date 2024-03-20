@@ -1,4 +1,5 @@
-use std::{rc::Rc, string::FromUtf16Error};
+use std::rc::Rc;
+use std::string::FromUtf16Error;
 use widestring::error::ContainsNul;
 use windows::Win32::Foundation::BOOL;
 
@@ -64,6 +65,7 @@ pub trait OkWithDescription<T> {
 }
 impl OkWithDescription<()> for BOOL {
     fn ok_with_description(self, description: String) -> Result<()> {
-        self.ok().map_err(|e| Error::Windows(e).with_description(description))
+        self.ok()
+            .map_err(|e| Error::Windows(e).with_description(description))
     }
 }

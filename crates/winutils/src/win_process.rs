@@ -39,15 +39,15 @@ impl Iterator for ProcessIterator {
             self.process.dwSize = std::mem::size_of::<PROCESSENTRY32W>() as u32;
             if !self.first_done {
                 self.first_done = true;
-                return match Process32FirstW(self.snapshot, &mut self.process) {
+                match Process32FirstW(self.snapshot, &mut self.process) {
                     Ok(()) => Some(self.process),
                     Err(e) => {
                         eprintln!("Failed to get first process: {:?}", e);
                         None
                     }
-                };
+                }
             } else {
-                return match Process32NextW(self.snapshot, &mut self.process) {
+                match Process32NextW(self.snapshot, &mut self.process) {
                     Ok(()) => Some(self.process),
                     Err(e) => {
                         if e.message() == "There are no more files." {
@@ -56,7 +56,7 @@ impl Iterator for ProcessIterator {
                         eprintln!("Failed to get next process: {:?}", e);
                         None
                     }
-                };
+                }
             }
         }
     }

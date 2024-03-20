@@ -8,7 +8,7 @@ use std::arch::x86_64::_mm_shuffle_epi8;
 use std::arch::x86_64::_mm_storeu_si128;
 
 /// Convert BGRA to RGBA
-/// 
+///
 /// Uses SIMD to go fast
 pub fn bgra_to_rgba(data: &mut [u8]) {
     // The shuffle mask for converting BGRA -> RGBA

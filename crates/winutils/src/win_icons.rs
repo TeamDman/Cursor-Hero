@@ -1,4 +1,5 @@
 use crate::win_errors::*;
+use bevy::prelude::default;
 use cursor_hero_math::prelude::bgra_to_rgba;
 use image::ImageBuffer;
 use image::RgbaImage;
@@ -45,8 +46,7 @@ pub fn get_images_from_exe(executable_path: &str) -> Result<Vec<RgbaImage>> {
         let images = large_icons
             .iter()
             .chain(small_icons.iter())
-            // .map(|icon| convert_hicon_to_rgba_image(icon))
-            .map(|icon| convert_hicon_to_rgba_image(icon))
+            .map(convert_hicon_to_rgba_image)
             .filter_map(|r| match r {
                 Ok(img) => Some(img),
                 Err(e) => {
@@ -68,12 +68,12 @@ pub fn get_images_from_exe(executable_path: &str) -> Result<Vec<RgbaImage>> {
     }
 }
 
-// https://stackoverflow.com/a/23390460/11141271 -- How to extract 128x128 icon bitmap data from EXE in python
-// https://stackoverflow.com/a/22885412/11141271 -- Save HICON as a png (Java reference)
 pub fn convert_hicon_to_rgba_image(hicon: &HICON) -> Result<RgbaImage> {
     unsafe {
-        let mut icon_info = ICONINFOEXW::default();
-        icon_info.cbSize = std::mem::size_of::<ICONINFOEXW>() as u32;
+        let mut icon_info = ICONINFOEXW {
+            cbSize: std::mem::size_of::<ICONINFOEXW>() as u32,
+            ..default()
+        };
 
         if !GetIconInfoExW(*hicon, &mut icon_info).as_bool() {
             return Err(Error::from_win32().with_description(format!(
@@ -91,8 +91,6 @@ pub fn convert_hicon_to_rgba_image(hicon: &HICON) -> Result<RgbaImage> {
             bmiHeader: BITMAPINFOHEADER {
                 biSize: std::mem::size_of::<BITMAPINFOHEADER>() as u32,
                 biWidth: icon_info.xHotspot as i32 * 2,
-                // https://discord.com/channels/1071140253181673492/1219071553929740328/1219359761389064273
-                // Rafael: ImageBuffer::from_raw expects top-down bitmap, so your biHeight in the BITMAPINFOHEADER should be negative.
                 biHeight: -(icon_info.yHotspot as i32 * 2),
                 biPlanes: 1,
                 biBitCount: 32,
@@ -133,7 +131,7 @@ pub fn convert_hicon_to_rgba_image(hicon: &HICON) -> Result<RgbaImage> {
 
         let image = ImageBuffer::from_raw(icon_info.xHotspot * 2, icon_info.yHotspot * 2, buffer)
             .ok_or_else(|| Error::ImageContainerNotBigEnough)?;
-        return Ok(image);
+        Ok(image)
     }
 }
 
@@ -173,10 +171,6 @@ mod tests {
                     pixel[3] as i32,
                 );
                 rgb_count += pixel;
-                // if pixel[3] != 0 {
-                //     non_transparent_pixel_present = true;
-                //     break;
-                // }
             }
             if rgb_count != IVec4::ZERO {
                 passed[i] = true;
