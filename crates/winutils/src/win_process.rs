@@ -1,9 +1,4 @@
 use crate::win_errors::*;
-use crate::win_icons::convert_hicon_to_rgba_image;
-use image::RgbaImage;
-use itertools::Itertools;
-use widestring::U16CString;
-use windows::core::PCWSTR;
 use windows::core::PWSTR;
 use windows::Win32::Foundation::CloseHandle;
 use windows::Win32::Foundation::HANDLE;
@@ -16,9 +11,7 @@ use windows::Win32::System::Threading::OpenProcess;
 use windows::Win32::System::Threading::QueryFullProcessImageNameW;
 use windows::Win32::System::Threading::PROCESS_NAME_FORMAT;
 use windows::Win32::System::Threading::PROCESS_QUERY_INFORMATION;
-use windows::Win32::UI::Shell::ExtractIconExW;
-use windows::Win32::UI::WindowsAndMessaging::DestroyIcon;
-use windows::Win32::UI::WindowsAndMessaging::HICON;
+
 pub struct ProcessIterator {
     snapshot: HANDLE,
     process: PROCESSENTRY32W,
@@ -106,53 +99,5 @@ pub fn get_process_full_name(process_id: u32) -> Result<String> {
             eprintln!("Failed to close process handle: {:?}", e);
         }
         Ok(result?)
-    }
-}
-
-pub fn get_images_for_process(executable_path: &str) -> Result<Vec<RgbaImage>> {
-    unsafe {
-        let path_cstr = U16CString::from_str(executable_path)?;
-        let path_pcwstr = PCWSTR(path_cstr.as_ptr());
-        let num_icons_total = ExtractIconExW(path_pcwstr, -1, None, None, 0);
-        if num_icons_total == 0 {
-            return Ok(Vec::new()); // No icons extracted
-        }
-
-        let mut large_icons = vec![HICON::default(); num_icons_total as usize];
-        let mut small_icons = vec![HICON::default(); num_icons_total as usize];
-        let num_icons_fetched = ExtractIconExW(
-            path_pcwstr,
-            0,
-            Some(large_icons.as_mut_ptr()),
-            Some(small_icons.as_mut_ptr()),
-            num_icons_total,
-        );
-
-        if num_icons_fetched == 0 {
-            return Ok(Vec::new()); // No icons extracted
-        }
-
-        let images = large_icons
-            .iter()
-            .chain(small_icons.iter())
-            .map(|icon| convert_hicon_to_rgba_image(icon))
-            .filter_map(|r| match r {
-                Ok(img) => Some(img),
-                Err(e) => {
-                    eprintln!("Failed to convert HICON to RgbaImage: {:?}", e);
-                    None
-                }
-            })
-            .collect_vec();
-
-        large_icons
-            .iter()
-            .chain(small_icons.iter())
-            .filter(|icon| !icon.is_invalid())
-            .map(|icon| DestroyIcon(*icon))
-            .filter_map(|r| r.err())
-            .for_each(|e| eprintln!("Failed to destroy icon: {:?}", e));
-
-        Ok(images)
     }
 }

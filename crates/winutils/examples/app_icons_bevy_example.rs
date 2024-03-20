@@ -4,6 +4,7 @@ use bevy::prelude::*;
 use bevy::utils::HashMap;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use cursor_hero_winutils::win_errors::*;
+use cursor_hero_winutils::win_icons::get_images_from_exe;
 use cursor_hero_winutils::win_process::*;
 use cursor_hero_worker::prelude::*;
 use image::DynamicImage;
@@ -90,7 +91,7 @@ fn handle_threadbound_message(
             if result.contains_key(&exe_path) {
                 continue;
             }
-            let icons = get_images_for_process(exe_path.as_str())?;
+            let icons = get_images_from_exe(exe_path.as_str())?;
             result.insert(exe_path, icons);
         }
     }

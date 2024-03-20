@@ -1,35 +1,81 @@
 use crate::win_errors::*;
+use cursor_hero_math::prelude::bgra_to_rgba;
 use image::ImageBuffer;
 use image::RgbaImage;
-use windows::Win32::Graphics::Gdi::CreateCompatibleBitmap;
+use itertools::Itertools;
+use widestring::U16CString;
+use windows::core::PCWSTR;
 use windows::Win32::Graphics::Gdi::CreateCompatibleDC;
 use windows::Win32::Graphics::Gdi::DeleteDC;
 use windows::Win32::Graphics::Gdi::DeleteObject;
 use windows::Win32::Graphics::Gdi::GetDIBits;
-use windows::Win32::Graphics::Gdi::GetObjectW;
 use windows::Win32::Graphics::Gdi::SelectObject;
-use windows::Win32::Graphics::Gdi::BITMAP;
 use windows::Win32::Graphics::Gdi::BITMAPINFO;
 use windows::Win32::Graphics::Gdi::BITMAPINFOHEADER;
 use windows::Win32::Graphics::Gdi::DIB_RGB_COLORS;
-use windows::Win32::Graphics::Gdi::RGBQUAD;
-use windows::Win32::UI::WindowsAndMessaging::DrawIconEx;
+use windows::Win32::UI::Shell::ExtractIconExW;
+use windows::Win32::UI::WindowsAndMessaging::DestroyIcon;
 use windows::Win32::UI::WindowsAndMessaging::GetIconInfoExW;
-use windows::Win32::UI::WindowsAndMessaging::DI_NORMAL;
 use windows::Win32::UI::WindowsAndMessaging::HICON;
 use windows::Win32::UI::WindowsAndMessaging::ICONINFOEXW;
 
+pub fn get_images_from_exe(executable_path: &str) -> Result<Vec<RgbaImage>> {
+    unsafe {
+        let path_cstr = U16CString::from_str(executable_path)?;
+        let path_pcwstr = PCWSTR(path_cstr.as_ptr());
+        let num_icons_total = ExtractIconExW(path_pcwstr, -1, None, None, 0);
+        if num_icons_total == 0 {
+            return Ok(Vec::new()); // No icons extracted
+        }
+
+        let mut large_icons = vec![HICON::default(); num_icons_total as usize];
+        let mut small_icons = vec![HICON::default(); num_icons_total as usize];
+        let num_icons_fetched = ExtractIconExW(
+            path_pcwstr,
+            0,
+            Some(large_icons.as_mut_ptr()),
+            Some(small_icons.as_mut_ptr()),
+            num_icons_total,
+        );
+
+        if num_icons_fetched == 0 {
+            return Ok(Vec::new()); // No icons extracted
+        }
+
+        let images = large_icons
+            .iter()
+            .chain(small_icons.iter())
+            // .map(|icon| convert_hicon_to_rgba_image(icon))
+            .map(|icon| convert_hicon_to_rgba_image(icon))
+            .filter_map(|r| match r {
+                Ok(img) => Some(img),
+                Err(e) => {
+                    eprintln!("Failed to convert HICON to RgbaImage: {:?}", e);
+                    None
+                }
+            })
+            .collect_vec();
+
+        large_icons
+            .iter()
+            .chain(small_icons.iter())
+            .filter(|icon| !icon.is_invalid())
+            .map(|icon| DestroyIcon(*icon))
+            .filter_map(|r| r.err())
+            .for_each(|e| eprintln!("Failed to destroy icon: {:?}", e));
+
+        Ok(images)
+    }
+}
+
+// https://stackoverflow.com/a/23390460/11141271 -- How to extract 128x128 icon bitmap data from EXE in python
+// https://stackoverflow.com/a/22885412/11141271 -- Save HICON as a png (Java reference)
 pub fn convert_hicon_to_rgba_image(hicon: &HICON) -> Result<RgbaImage> {
     unsafe {
         let mut icon_info = ICONINFOEXW::default();
-        icon_info.cbSize = std::mem::size_of::<ICONINFOEXW>() as u32; // thank you valve https://github.com/ValveSoftware/wine/blob/941279cf95abce8c59ad350e6345734c9a75f0f2/dlls/winemac.drv/mouse.c#L775
-        GetIconInfoExW(*hicon, &mut icon_info).ok_with_description(format!(
-            "icon_info := hicon • GetIconInfoExW: {} {}:{}",
-            file!(),
-            line!(),
-            column!()
-        ))?;
-        if icon_info.hbmColor.is_invalid() {
+        icon_info.cbSize = std::mem::size_of::<ICONINFOEXW>() as u32;
+
+        if !GetIconInfoExW(*hicon, &mut icon_info).as_bool() {
             return Err(Error::from_win32().with_description(format!(
                 "icon • GetIconInfoExW: {} {}:{}",
                 file!(),
@@ -37,71 +83,35 @@ pub fn convert_hicon_to_rgba_image(hicon: &HICON) -> Result<RgbaImage> {
                 column!()
             )));
         }
-
-        let mut bmp = BITMAP::default();
-        let bytes_stored = GetObjectW(
-            icon_info.hbmColor,
-            std::mem::size_of::<BITMAP>() as i32,
-            Some(&mut bmp as *mut _ as _),
-        );
-        if bytes_stored == 0 {
-            return Err(Error::from_win32().with_description(format!(
-                "icon_info::hbmColor • GetObjectW: {} {}:{}",
-                file!(),
-                line!(),
-                column!()
-            )));
-        }
-
-        // Create a compatible device context
         let hdc_screen = CreateCompatibleDC(None);
         let hdc_mem = CreateCompatibleDC(hdc_screen);
+        let hbm_old = SelectObject(hdc_mem, icon_info.hbmColor);
 
-        // Create a compatible bitmap
-        let hbitmap = CreateCompatibleBitmap(hdc_screen, bmp.bmWidth, bmp.bmHeight);
-        let hbm_old = SelectObject(hdc_mem, hbitmap);
-
-        // Draw the icon onto the memory device context
-        DrawIconEx(
-            hdc_mem,
-            0,
-            0,
-            *hicon,
-            bmp.bmWidth,
-            bmp.bmHeight,
-            0,
-            None,
-            DI_NORMAL,
-        )
-        .with_description(format!(
-            "hdc_mem, hicon • DrawIconEx: {} {}:{}",
-            file!(),
-            line!(),
-            column!()
-        ))?;
-
-        let mut bitmap_info = BITMAPINFO {
+        let mut bmp_info = BITMAPINFO {
             bmiHeader: BITMAPINFOHEADER {
                 biSize: std::mem::size_of::<BITMAPINFOHEADER>() as u32,
-                biWidth: bmp.bmWidth,
-                biHeight: bmp.bmHeight,
+                biWidth: icon_info.xHotspot as i32 * 2,
+                // https://discord.com/channels/1071140253181673492/1219071553929740328/1219359761389064273
+                // Rafael: ImageBuffer::from_raw expects top-down bitmap, so your biHeight in the BITMAPINFOHEADER should be negative.
+                biHeight: -(icon_info.yHotspot as i32 * 2),
                 biPlanes: 1,
                 biBitCount: 32,
                 biCompression: DIB_RGB_COLORS.0,
                 ..Default::default()
             },
-            bmiColors: [RGBQUAD::default(); 1],
+            ..Default::default()
         };
 
-        // Allocate a buffer and get the bitmap bits
-        let mut buffer = vec![0u8; bmp.bmWidth as usize * bmp.bmHeight as usize * 4];
+        let mut buffer: Vec<u8> =
+            vec![0; (icon_info.xHotspot * 2 * icon_info.yHotspot * 2 * 4) as usize];
+
         if GetDIBits(
             hdc_mem,
-            hbitmap,
+            icon_info.hbmColor,
             0,
-            bmp.bmHeight as u32,
+            icon_info.yHotspot * 2,
             Some(buffer.as_mut_ptr() as *mut _),
-            &mut bitmap_info,
+            &mut bmp_info,
             DIB_RGB_COLORS,
         ) == 0
         {
@@ -112,34 +122,30 @@ pub fn convert_hicon_to_rgba_image(hicon: &HICON) -> Result<RgbaImage> {
                 column!()
             )));
         }
-
         // Clean up
         SelectObject(hdc_mem, hbm_old);
-        DeleteObject(hbitmap).ok()?;
-        DeleteDC(hdc_mem).ok()?;
-        DeleteDC(hdc_screen).ok()?;
-        DeleteObject(icon_info.hbmColor).ok()?;
-        DeleteObject(icon_info.hbmMask).ok()?;
+        DeleteDC(hdc_mem);
+        DeleteDC(hdc_screen);
+        DeleteObject(icon_info.hbmColor);
+        DeleteObject(icon_info.hbmMask);
 
-        // Create an image from the buffer
-        ImageBuffer::from_raw(bmp.bmWidth as u32, bmp.bmHeight as u32, buffer)
-            .map(RgbaImage::from)
-            .ok_or_else(|| Error::ImageContainerNotBigEnough)
+        bgra_to_rgba(buffer.as_mut_slice());
+
+        let image = ImageBuffer::from_raw(icon_info.xHotspot * 2, icon_info.yHotspot * 2, buffer)
+            .ok_or_else(|| Error::ImageContainerNotBigEnough)?;
+        return Ok(image);
     }
 }
 
 #[cfg(test)]
 mod tests {
     use bevy::math::IVec4;
-
-    use crate::win_process::get_images_for_process;
-
     use std::path::PathBuf;
 
     #[test]
     fn test_convert_hicon_to_rgba_image() {
         let exe_path = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe";
-        let icons = get_images_for_process(exe_path).unwrap();
+        let icons = super::get_images_from_exe(exe_path).unwrap();
 
         // Ensure the expected amount is present
         assert_eq!(icons.len(), 30);

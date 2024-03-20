@@ -38,6 +38,7 @@ itertools = {workspace = true}
 winreg = { workspace = true }
 crossbeam-channel = { workspace = true }
 cursor_hero_bevy = { workspace = true }
+cursor_hero_math = { workspace = true }
 winit = { workspace = true } # TODO: remove me
 
 [dev-dependencies]

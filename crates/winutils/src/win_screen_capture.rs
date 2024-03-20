@@ -26,6 +26,7 @@ use cursor_hero_bevy::prelude::LeftI;
 use cursor_hero_bevy::prelude::TopI;
 use cursor_hero_bevy::prelude::TopLeftI;
 use cursor_hero_bevy::prelude::TranslateIVec2;
+use cursor_hero_math::prelude::bgra_to_rgba;
 // use display_info::DisplayInfo;
 // use fxhash::hash32;
 use image::RgbaImage;
@@ -261,7 +262,7 @@ impl MonitorRegionCapturer {
             bmiHeader: BITMAPINFOHEADER {
                 biSize: mem::size_of::<BITMAPINFOHEADER>() as u32,
                 biWidth: self.capture_region.width(),
-                biHeight: self.capture_region.height(), // Here you can pass a negative number, but don't know why it will throw an error
+                biHeight: -self.capture_region.height(),
                 biPlanes: 1,
                 biBitCount: 32,
                 biCompression: 0,
@@ -274,14 +275,14 @@ impl MonitorRegionCapturer {
             bmiColors: [RGBQUAD::default(); 1],
         };
 
-        let data =
+        let mut data =
             vec![0u8; (self.capture_region.width() * self.capture_region.height()) as usize * 4];
         let buf_prt = data.as_ptr() as *mut _;
 
         if let Some(metrics) = metrics {
             metrics.begin("getdibits");
         }
-        let is_success = unsafe {
+        let err = unsafe {
             GetDIBits(
                 self.device_context,
                 self.bitmap,
@@ -296,7 +297,7 @@ impl MonitorRegionCapturer {
             metrics.end("getdibits");
         }
 
-        if is_success {
+        if err {
             return Err(anyhow!("Get RGBA data failed"));
         }
 
@@ -318,38 +319,10 @@ impl MonitorRegionCapturer {
             metrics.end("getobject");
         }
 
-        // Rotate the image; the image data is inverted.
-        if let Some(metrics) = metrics {
-            metrics.begin("reverse");
-        }
-        let mut data = data
-            .chunks(self.capture_region.width() as usize * 4)
-            .map(|x| x.to_vec())
-            .collect::<Vec<Vec<u8>>>();
-        data.reverse();
-        let mut data = data.concat();
-        if let Some(metrics) = metrics {
-            metrics.end("reverse");
-        }
-
-        // The shuffle mask for converting BGRA -> RGBA
         if let Some(metrics) = metrics {
             metrics.begin("shuffle");
         }
-        let mask: __m128i = unsafe {
-            _mm_setr_epi8(
-                2, 1, 0, 3, // First pixel
-                6, 5, 4, 7, // Second pixel
-                10, 9, 8, 11, // Third pixel
-                14, 13, 12, 15, // Fourth pixel
-            )
-        };
-        // For each 16-byte chunk in your data
-        for chunk in data.chunks_exact_mut(16) {
-            let mut vector = unsafe { _mm_loadu_si128(chunk.as_ptr() as *const __m128i) };
-            vector = unsafe { _mm_shuffle_epi8(vector, mask) };
-            unsafe { _mm_storeu_si128(chunk.as_mut_ptr() as *mut __m128i, vector) };
-        }
+        bgra_to_rgba(data.as_mut_slice());
         if let Some(metrics) = metrics {
             metrics.end("shuffle");
         }

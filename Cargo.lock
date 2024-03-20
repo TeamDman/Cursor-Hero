@@ -2747,6 +2747,7 @@ dependencies = [
  "bevy-inspector-egui",
  "crossbeam-channel",
  "cursor_hero_bevy",
+ "cursor_hero_math",
  "cursor_hero_memory_types",
  "cursor_hero_metrics",
  "cursor_hero_worker",
