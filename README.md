@@ -2,140 +2,63 @@
 
 [![Visitors](https://api.visitorbadge.io/api/visitors?path=github.com%2FTeamDman%2FCursor-Hero&countColor=%23263759)](https://visitorbadge.io/status?path=github.com%2FTeamDman%2FCursor-Hero)
 
-The plan: enhance LLM cooperation by leveraging Windows UI Automation.
-
-**Video demo**
+## Video demo
 
 [![yt thumbnail](https://img.youtube.com/vi/t1PYks0UTL8/0.jpg)](https://youtu.be/t1PYks0UTL8)
 
+## Regarding DualShock controllers
 
-If you have a DualShock controller, you will need something like [DS4Windows](https://ds4windows.dev/).
+Try [DS4Windows](https://ds4windows.dev/).
 
 ## Integrations
 
-- [TeamDman/voice2text: A python program that types what you say if you're holding the hotkey (github.com)](https://github.com/teamdman/voice2text)
-- [ollama/ollama: Get up and running with Llama 2, Mistral, and other large language models. (github.com)](https://github.com/ollama/ollama)
+- [TeamDman/voice2text: Local speech recognition](https://github.com/teamdman/voice2text)
+- [ollama/ollama: Local LLM inference](https://github.com/ollama/ollama)
+- [R2D2FISH/glados-tts: GLaDOS speech synthesis](https://github.com/TeamDman/glados-tts.git)
 
-## Research Notes
+## Project description
 
-### Inference
+Cursor Hero is a thing built using Rust and the Bevy game engine.
 
-- [LM Studio](https://lmstudio.ai/)
+Cursor Hero, when launched, presents you with a character that has a pointer. You can move the character and pointer independently using the mouse and keyboard, or using both sticks on a gamepad.
 
-### Fine Tuning
+In the game world, you can see a scale representation of your monitors. I have three monitors, so when I launch the game I see the left, center, and right monitor, usually containing VSCode, Discord, and the Cursor Hero window itself.
 
-- [allenai/OLMo: Modeling, training, eval, and inference code for OLMo (github.com)](https://github.com/allenai/OLMo)
-- [hiyouga/LLaMA-Factory: Unify Efficient Fine-tuning of 100+ LLMs (github.com)](https://github.com/hiyouga/LLaMA-Factory)
-- [OpenAccess-AI-Collective/axolotl: Go ahead and axolotl questions (github.com)](https://github.com/OpenAccess-AI-Collective/axolotl)
-- [LLaVA/docs/Finetune\_Custom\_Data.md at main - haotian-liu/LLaVA (github.com)](https://github.com/haotian-liu/LLaVA/blob/main/docs/Finetune_Custom_Data.md)
+Cursor Hero uses the `windows` crate to integrate tightly with the Windows operating system. It reads and writes the host cursor position, with integrations with the game to do things like position the host mouse "cursor" over the in-game "pointer", or updating the cursor so that it matches the game world position of the pointer, letting the player interact with the OS using the game representation of the screens.
 
+This includes integrating with Windows UI automation to grab the locations of UI elements, copying the texture of the screen onto bricks in the game world that are physics objects.
 
-### Vision
+UI information is attached to the bricks, using `bevy-egui` to render UI elements with screen coordinates updated to correspond with world-coordinates of the bricks.
 
-- [PTA-Text: A Text Only Click Model - Prompt image, it tells you where it would click](https://huggingface.co/AskUI/pta-text-0.1) ([demo](https://huggingface.co/spaces/AskUI/pta-text-v0.1))
-- [Set-of-Mark Visual Prompting for GPT-4V](https://github.com/microsoft/SoM)
-- [LLaVA](https://llava.hliu.cc/)
-- [YOLOv9](https://github.com/WongKinYiu/yolov9)
-- [Ty on X: "Open Interpreter 0.2.1 is out! -  5X launch speed -  Local OSS model for GUI control -  Native control over Apple Mail, Calendar, Contacts, SMS -  New LLM-first web browser (powered by @perplexity\_ai) -  Profiles, Docker, Jupyter export... ↓ https://t.co/XU4gibTXWk" / X (twitter.com)](https://twitter.com/FieroTy/status/1767328066290987470)
+Using `egui`, the tree hierarchy of the UI is shown for the bricks created by clicking on UI elements in the screen texture. The tree could potentially grow to something like inspect.exe, where the properties of the UI element can be explored. Currently, the tree folding and selectable labels is working, but the properties panel on the right is not yet implemented.
 
-### RPA
+In addition to showing the host environment, a game environment is also constructed. The game environment contains a virtual agent and a mimicry of the host OS. The mimicry extends to include a copy of the desktop background, a taskbar that pulls the colour from the OS preferences, and a start menu button that toggles visibility of an empty panel.
 
-- [OpenAdaptAI/OpenAdapt: AI-First Process Automation with Large Multimodal Models (LMMs)](https://github.com/OpenAdaptAI/OpenAdapt)
-- [askui/askui: "What can be said can be solved-"](https://docs.askui.com/docs/api/Element-Descriptions/text)
-- [ddupont808/GPT-4V-Act: AI agent using GPT-4V(ision) capable of using a mouse/keyboard to interact with web UI](https://www.reddit.com/r/MachineLearning/comments/17cy0j7/d_p_web_browsing_uibased_ai_agent_gpt4vact/?share_id=w5kHMEziP5LdHm_2NrlUc&rdt=49921)
-- [TobiasNorlund/UI-Act: An AI agent for interacting with a computer using the graphical user interface](https://www.reddit.com/r/MachineLearning/comments/1765v6i/d_p_uibased_ai_agents_uiact/)
-- [KillianLucas/open-interpreter: A natural language interface for computers](https://github.com/KillianLucas/open-interpreter)
+The virtual agent walks in circles. It has an observation buffer which other systems can publish events for something happening, and the buffer will conditionally append such events which are used in the construction of prompts for a local LLM ran using `ollama`.
 
+In response to player chat messages, or in response to a period of inactivity, the agent will prompt the LLM in a chat format. With the response, it publishes its own chat message, and it invokes the `glados-tts` to speak the response to the player.
 
-### Windows UI Automation
+This agent behaviour, combined with integration to `voice2text`, allows the human to converse to the agent entirely locally using `whisper-x` to speak with the addition of a push-to-talk button and a toggle-active-listening button.
 
-- [Accessibility tools - AccEvent (Accessible Event Watcher) - Win32 apps | Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/winauto/accessible-event-watcher)
-- [Accessibility tools - Inspect - Win32 apps | Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/winauto/inspect-objects)
-- [Accessibility Insights](https://accessibilityinsights.io/)
-- [Navigation events for WebView2 apps - Microsoft Edge Developer documentation | Microsoft Learn](https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/navigation-events)
-- [c# - UIAutomation won't retrieve children of an element - Stack Overflow](https://stackoverflow.com/questions/14187110/uiautomation-wont-retrieve-children-of-an-element)
-- [comEle = \_AutomationClient.instance().dll.GetNextSiblingElement(self.Element) Hangs - Issue #30 - yinkaisheng/Python-UIAutomation-for-Windows (github.com)](https://github.com/yinkaisheng/Python-UIAutomation-for-Windows/issues/30)
-- [microsoft/WinAppDriver: Windows Application Driver (github.com)](https://github.com/microsoft/WinAppDriver)
-- [How to force UI automation tree refresh](https://stackoverflow.com/q/64120894/11141271)
-  - mostly interested in the screen reader flag mentioned
-    ```
-    SystemParametersInfo( SPI_SETSCREENREADER, TRUE, NULL, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE);
-    PostMessage( HWND_BROADCAST, WM_WININICHANGE, SPI_SETSCREENREADER, 0);
-    ```
-- [UI Automation Fundamentals - .NET Framework | Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/ui-automation-fundamentals)
-- [Understanding Threading Issues - Win32 apps | Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/winauto/uiauto-threading)
-- [UI Automation Threading Issues - .NET Framework | Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/ui-automation-threading-issues)
-- [c# - System.Windows.Automation is extremely slow - Stack Overflow](https://stackoverflow.com/questions/41768046/system-windows-automation-is-extremely-slow)
+Given that the host cursor is being updated by the game pointer when in gamepad input mode, the game takes care to listen for raw mouse input events to determine when the player is trying to use mouse and keyboard input mode, avoiding holding the pointer captive since traditional input detection is not suitable. After all, if the pointer is programmatically controlled by the game, "mouse moved events" become less reliable when aiming for physical movement detection.
 
-### Win32
+Again using the `windows` crate, the game is able to identify running processes and programmatically detect the exe path and extract the icons of the process from it.
+Opportunity exists to detect dynamic icons from process windows as well.
 
-- [How does Microsoft's "inspect.exe" application keep its window on top? - Microsoft Q&A === WS_EX_TOPMOST, UAC Bypass UI](https://learn.microsoft.com/en-us/answers/questions/1105704/how-does-microsofts-inspect-exe-application-keep-i)
-  - ["Automatic dismissal of the start menu" and other crazyness - Windows-classic-samples/Samples/DesktopAutomationDismiss at 27ffb0811ca761741502feaefdb591aebf592193 - microsoft/Windows-classic-samples (github.com)](https://github.com/microsoft/Windows-classic-samples/tree/27ffb0811ca761741502feaefdb591aebf592193/Samples/DesktopAutomationDismiss#build-the-sample)
-- `[Convert]::ToInt32("0x80070012", 16)` then ctrl+F win32::Foundation to find the error code
-- [Process Hacker / Code / \[r6350\] /2.x/trunk (sourceforge.net)](https://sourceforge.net/p/processhacker/code/HEAD/tree/2.x/trunk/)
-- [Process Monitor - Sysinternals | Microsoft Learn](https://learn.microsoft.com/en-us/sysinternals/downloads/procmon)
-- [(1) Building 25+ years of SysInternals: Exploring ZoomIt | BRK200H - YouTube](https://www.youtube.com/watch?v=W2bNgFrj3Iw)
-- [c# - Getting icon of "modern" Windows app from a desktop application? - Stack Overflow](https://stackoverflow.com/questions/32122679/getting-icon-of-modern-windows-app-from-a-desktop-application)
+The game has a radial menu for enabling/disabling "tools", some of which start disabled and upon enabling will clear and repopulate the tools in the toolbelt with a different loadout.
 
-### RL
+The tool system has been used to show a radial menu of programs in the taskbar, using UI automation to grab the texture at the rect of each item to be displayed radially.
 
-- [stillonearth/bevy_rl](https://github.com/stillonearth/bevy_rl/blob/main/src/render.rs)
-- [Saving RenderTarget image data to a file #5603](https://github.com/bevyengine/bevy/discussions/5603)
-- [paulkre/bevy_image_export: Bevy plugin for rendering image sequences](https://github.com/paulkre/bevy_image_export)
+There is a tool loadout that lets you snap the game window to any corner or fullscreen of any monitors detected.
 
+The default tool loadout starts you in click mode, letting you move your character and its pointer, with the ability to send click events to the OS, and to send click events to game objects using the ECS fundamentals. 
 
-### Prompting
+The game has its own model system for the UI hierarchy, with support for detecting the details of running VSCode windows, including tabs on the left, open tab, contents of the explorer tab if open, editor groups open and involved tabs and file contents, current cursor line and position displayed in the bottom corner.
 
-- [guidance-ai/guidance: A guidance language for controlling large language models.](https://github.com/guidance-ai/guidance)
-- [Eladlev/AutoPrompt: A framework for prompt tuning using Intent-based Prompt Calibration (github.com)](https://github.com/Eladlev/AutoPrompt)
+## Where do we go from here
 
-### RAG, Tools and Actions
+I am continuously exploring many different trajectories for this project.
 
-- [ACT-1: Transformer for Actions](https://www.adept.ai/blog/act-1)
-- [LlamaIndex 🦙 v0.10.6](https://docs.llamaindex.ai/en/stable/)
+See [`./todo.md`](./todo.md) for brainstorming on potential features to add.
 
-### Sandboxing
-
-- [copy/v86: x86 PC emulator and x86-to-wasm JIT, running in the browser](https://github.com/copy/v86) ([demo](https://copy.sh/v86/))
-
-### Speech to Text
-
-- [openai/whisper-large-v2: Hugging Face](https://huggingface.co/openai/whisper-large-v2)
-- [m-bain/whisperX: Automatic Speech Recognition with Word-level Timestamps (& Diarization)](https://github.com/m-bain/whisperX)
-- [SYSTRAN/faster-whisper: Faster Whisper transcription with CTranslate2](https://github.com/SYSTRAN/faster-whisper)
-- [collabora/WhisperLive: A nearly-live implementation of OpenAI's Whisper](https://github.com/collabora/WhisperLive)
-- [gaborvecsei/whisper-live-transcription: Live-Transcription (STT) with Whisper PoC (github.com)](https://github.com/gaborvecsei/whisper-live-transcription)
-- [FL33TW00D/whisper-turbo: Cross-Platform, GPU Accelerated Whisper 🏎️ (github.com)](https://github.com/FL33TW00D/whisper-turbo)
-
-### Multiplayer
-
-- [Veilid: open-source, peer-to-peer, mobile-ﬁrst, networked application framework.](https://veilid.com/)
-
-### Impl
-
-- [beartype](https://beartype.readthedocs.io/en/latest/)
-- [facebookresearch/torchdim: Named tensors with first-class dimensions for PyTorch](https://github.com/facebookresearch/torchdim)
-- [Are we learning yet? A work-in-progress to catalog the state of machine learning in Rust](https://www.arewelearningyet.com/)
-- [PyO3/pyo3: Rust bindings for the Python interpreter](https://github.com/PyO3/pyo3)
-
-### Assets
-
-- [Euphoric Heavy Regular](https://fontsgeek.com/fonts/Euphoric-Heavy-Regular)
-- [Kenney Fonts](https://kenney.nl/assets/kenney-fonts)
-- [Fira Mono - Google Fonts](https://fonts.google.com/specimen/Fira+Mono)
-- [Xelu's FREE Controller Prompts (thoseawesomeguys.com)](https://thoseawesomeguys.com/prompts/)
-
-### Bevy Plugins
-
-- [janhohenheim/foxtrot: The all-in-one Bevy 3D game template for desktop. (github.com)](https://github.com/janhohenheim/foxtrot)
-- [StarArawn/bevy\_ecs\_tilemap: A tilemap rendering crate for bevy which is more ECS friendly. (github.com)](https://github.com/StarArawn/bevy_ecs_tilemap)
-- [djeedai/bevy\_hanabi: 🎆 Hanabi --- a GPU particle system plugin for the Bevy game engine. (github.com)](https://github.com/djeedai/bevy_hanabi)
-
-### Game inspiration
-
-- [The Last Clockwinder](https://store.steampowered.com/app/1755100/The_Last_Clockwinder/)
-
-### Issues 👀
-
-- [Transparent example not working - Issue #2502 - rust-windowing/winit (github.com)](https://github.com/rust-windowing/winit/issues/2502)
-- 
+See [`./research_notes.md`](./research_notes.md) for links to internet resources that could be helpful.

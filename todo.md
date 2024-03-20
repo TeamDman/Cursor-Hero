@@ -2,11 +2,10 @@
 
 ## Active
 
-- left click on screenshot brick to toggle egui visibility
-<!-- - move "click tool" to its own crates
-  - ensure element z-index considered when executing click handlers -->
-  <!-- why is z-index important? If something is important, don't have multiple click handlers in the same spot doofus. -->
-- agent click toggle inspector
+UI tree egui improvements.
+- "Copy drill ID" button
+- UI element picture-in-picture
+- "Copy rust expression" which uses reflection to get the rust code to lift a property into a new variable
 
 
 ## Up Next
@@ -15,6 +14,20 @@
 
 ## Grab Bag
 
+- Game environment representation of VSCode window
+- Game environment representation of a kanban board, move todo list to it. Mapping to GitHub project board?
+- Game environment representation of todo list, make it structured
+- Game environment representation of Task Manager
+- Game environment representation of qBitTorrent
+- Game environment representation of VPN
+- Game environment representation of Edge
+- Game environment representation of Windows Explorer; notes and files searchable? brick-per-file representation in game world
+- Game environment representation of mpv
+- Game environment representation of SyncPlay
+- Game environment representation of Discord
+- Game environment representation of Windows Terminal
+- move click tool to its own crate pair
+- click toggle inspector for game objects
 - rename plugin refactoring action - rename file snake case, rename plugin pascal case
 - fix r3 position cursor at title bar
 - emoji text in world and in egui test
