@@ -15,8 +15,10 @@ use windows::Win32::Graphics::Gdi::BITMAPINFO;
 use windows::Win32::Graphics::Gdi::BITMAPINFOHEADER;
 use windows::Win32::Graphics::Gdi::DIB_RGB_COLORS;
 use windows::Win32::UI::Shell::ExtractIconExW;
+use windows::Win32::UI::WindowsAndMessaging::CopyIcon;
 use windows::Win32::UI::WindowsAndMessaging::DestroyIcon;
 use windows::Win32::UI::WindowsAndMessaging::GetIconInfoExW;
+use windows::Win32::UI::WindowsAndMessaging::HCURSOR;
 use windows::Win32::UI::WindowsAndMessaging::HICON;
 use windows::Win32::UI::WindowsAndMessaging::ICONINFOEXW;
 
@@ -131,6 +133,22 @@ pub fn convert_hicon_to_rgba_image(hicon: &HICON) -> Result<RgbaImage> {
 
         let image = ImageBuffer::from_raw(icon_info.xHotspot * 2, icon_info.yHotspot * 2, buffer)
             .ok_or_else(|| Error::ImageContainerNotBigEnough)?;
+        Ok(image)
+    }
+}
+
+
+pub fn convert_hcursor_to_rgba_image(hcursor: &HCURSOR) -> Result<RgbaImage> {
+    unsafe {
+        // Convert HCURSOR to HICON
+        let hicon = CopyIcon(*hcursor)?;
+
+        // Use the existing convert_hicon_to_rgba_image function
+        let image = convert_hicon_to_rgba_image(&hicon)?;
+
+        // Destroy the HICON (since it was copied)
+        DestroyIcon(hicon)?;
+
         Ok(image)
     }
 }
