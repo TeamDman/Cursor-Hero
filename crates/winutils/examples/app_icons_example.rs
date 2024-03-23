@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use bevy::utils::HashSet;
 use cursor_hero_winutils::win_errors::*;
+use cursor_hero_winutils::win_icons::get_images_from_exe;
 use cursor_hero_winutils::win_process::*;
 use windows::core::PWSTR;
 use windows::Win32::Foundation::E_ACCESSDENIED;
@@ -33,7 +34,7 @@ fn main() -> Result<()> {
                 continue;
             }
             done.insert(exe_path.clone());
-            let icons = get_images_for_process(exe_path.as_str())?;
+            let icons = get_images_from_exe(exe_path.as_str())?;
             println!(
                 "Process ID: {:05}, name: {}, icon count: {}",
                 process.th32ProcessID,

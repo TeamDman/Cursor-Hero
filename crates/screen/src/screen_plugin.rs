@@ -35,16 +35,21 @@ pub struct HostScreen;
 pub struct ScreenParent;
 
 fn spawn_screens_in_new_environments(
-    mut environment_reader: EventReader<PopulateEnvironmentEvent>,
+    mut populate_events: EventReader<PopulateEnvironmentEvent>,
     mut commands: Commands,
     mut textures: ResMut<Assets<Image>>,
     mut level_bounds_events: EventWriter<LevelBoundsEvent>,
+    environment_query: Query<(Option<&HostEnvironment>,Option<&GameEnvironment>)>,
 ) {
-    for environment_event in environment_reader.read() {
-        match environment_event {
-            PopulateEnvironmentEvent::Host { environment_id } => {
+    for event in populate_events.read() {
+        let environment_id = event.environment_id;
+        let Ok((is_host, is_game)) = environment_query.get(event.environment_id) else {
+            continue;
+        };
+        match (is_host, is_game) {
+            (Some(_), _) => {
                 info!("Populating host environment with screens");
-                commands.entity(*environment_id).with_children(|parent| {
+                commands.entity(environment_id).with_children(|parent| {
                     let mut screen_parent_commands = parent.spawn((
                         SpatialBundle::default(),
                         ScreenParent,
@@ -99,14 +104,14 @@ fn spawn_screens_in_new_environments(
                     info!("Broadcasting {} level bounds events", level_bounds.len());
                     for area in level_bounds {
                         level_bounds_events.send(LevelBoundsEvent::AddPlayArea {
-                            environment_id: *environment_id,
+                            environment_id,
                             area: area.as_rect(),
                         });
                     }
                 });
             }
-            PopulateEnvironmentEvent::Game { environment_id } => {
-                commands.entity(*environment_id).with_children(|parent| {
+            (_, Some(_)) => {
+                commands.entity(environment_id).with_children(|parent| {
                     info!("Populating game environment with screens");
                     let mut screen_parent_commands = parent.spawn((
                         SpatialBundle::default(),
@@ -145,11 +150,14 @@ fn spawn_screens_in_new_environments(
                     info!("Broadcasting {} level bounds events", level_bounds.len());
                     for area in level_bounds {
                         level_bounds_events.send(LevelBoundsEvent::AddPlayArea {
-                            environment_id: *environment_id,
+                            environment_id: environment_id,
                             area: area.as_rect(),
                         });
                     }
                 });
+            },
+            (None, None) => {
+                error!("Environment {:?} is not a host or game environment", environment_id);
             }
         }
     }

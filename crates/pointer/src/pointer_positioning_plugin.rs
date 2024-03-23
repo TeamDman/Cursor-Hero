@@ -44,7 +44,7 @@ fn update_pointer(
             &mut Position,
             &ActionState<PointerAction>,
             &mut Pointer,
-            Option<&EnvironmentTag>,
+            Option<&EnvironmentTracker>,
             &Parent,
         ),
         (Without<Character>, With<Pointer>),

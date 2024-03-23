@@ -16,15 +16,20 @@ pub struct Wallpaper;
 fn spawn_wallpaper(
     mut commands: Commands,
     mut environment_events: EventReader<PopulateEnvironmentEvent>,
+    environment_query: Query<&GameEnvironment>,
     asset_server: Res<AssetServer>,
 ) {
     for event in environment_events.read() {
-        if let PopulateEnvironmentEvent::Game { environment_id } = event {
-            info!(
-                "Spawning wallpaper for game environment {:?}",
-                environment_id
-            );
-            commands.entity(*environment_id).with_children(|parent| {
+        if !environment_query.contains(event.environment_id) {
+            continue;
+        }
+        info!(
+            "Spawning wallpaper for game environment {:?}",
+            event.environment_id
+        );
+        commands
+            .entity(event.environment_id)
+            .with_children(|parent| {
                 parent.spawn((
                     SpriteBundle {
                         sprite: Sprite {
@@ -39,6 +44,5 @@ fn spawn_wallpaper(
                     Name::new("Wallpaper"),
                 ));
             });
-        }
     }
 }

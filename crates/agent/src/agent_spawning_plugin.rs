@@ -21,14 +21,15 @@ impl Plugin for AgentSpawningPlugin {
 fn spawn_agent(
     mut commands: Commands,
     mut environment_events: EventReader<PopulateEnvironmentEvent>,
+    environment_query: Query<&GameEnvironment>,
     asset_server: Res<AssetServer>,
 ) {
     for event in environment_events.read() {
-        let PopulateEnvironmentEvent::Game { environment_id } = event else {
+        if !environment_query.contains(event.environment_id) {
             continue;
-        };
-        info!("Spawning agent for game environment {:?}", environment_id);
-        commands.entity(*environment_id).with_children(|parent| {
+        }
+        info!("Spawning agent for game environment {:?}", event.environment_id);
+        commands.entity(event.environment_id).with_children(|parent| {
             let spawn_position = Vec2::new(1920.0, 1080.0).neg_y() / 2.0;
             parent.spawn((
                 SpriteBundle {

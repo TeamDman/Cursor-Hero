@@ -15,15 +15,17 @@ impl Plugin for EnvironmentPlugin {
     }
 }
 
-fn send_create_host_event(mut events: EventWriter<CreateEnvironmentEvent>) {
-    events.send(CreateEnvironmentEvent::Host {
+fn send_create_host_event(mut events: EventWriter<CreateEnvironmentRequestEvent>) {
+    events.send(CreateEnvironmentRequestEvent {
+        kind: EnvironmentKind::Host,
         origin: Vec2::new(0.0, 0.0),
         name: "Host Environment".to_string(),
     });
 }
 
-fn send_create_game_event(mut events: EventWriter<CreateEnvironmentEvent>) {
-    events.send(CreateEnvironmentEvent::Game {
+fn send_create_game_event(mut events: EventWriter<CreateEnvironmentRequestEvent>) {
+    events.send(CreateEnvironmentRequestEvent {
+        kind: EnvironmentKind::Game,
         origin: Vec2::new(0.0, -3000.0),
         name: "Game Environment".to_string(),
     });
@@ -31,56 +33,40 @@ fn send_create_game_event(mut events: EventWriter<CreateEnvironmentEvent>) {
 
 #[allow(clippy::type_complexity)]
 fn send_populate_events(
-    environment_query: Query<
-        (Entity, Option<&GameEnvironment>, Option<&HostEnvironment>),
-        Added<Environment>,
-    >,
+    environment_query: Query<Entity, Added<EnvironmentKind>>,
     mut populate_events: EventWriter<PopulateEnvironmentEvent>,
 ) {
     for environment in environment_query.iter() {
-        let (environment_id, is_game, is_host) = environment;
-        if is_game.is_some() {
-            let event = PopulateEnvironmentEvent::Game { environment_id };
-            debug!("Sending populate event: {:?}", event);
-            populate_events.send(event);
-        }
-        if is_host.is_some() {
-            let event = PopulateEnvironmentEvent::Host { environment_id };
-            debug!("Sending populate event: {:?}", event);
-            populate_events.send(event);
-        }
+        let environment_id = environment;
+        let event = PopulateEnvironmentEvent { environment_id };
+        debug!("Sending populate event: {:?}", event);
+        populate_events.send(event);
     }
 }
 
 fn handle_create_events(
     mut commands: Commands,
-    mut create_events: EventReader<CreateEnvironmentEvent>,
+    mut create_events: EventReader<CreateEnvironmentRequestEvent>,
 ) {
     for event in create_events.read() {
-        match event {
-            CreateEnvironmentEvent::Host { origin, name } => {
-                info!("Creating host environment at {:?}", origin);
-                commands.spawn((
-                    SpatialBundle {
-                        transform: Transform::from_translation(origin.extend(0.0)),
-                        ..default()
-                    },
-                    Environment,
-                    HostEnvironment,
-                    Name::new(name.clone()),
-                ));
+        info!("Creating host environment at {:?}", event.origin);
+        let mut c = commands.spawn((
+            SpatialBundle {
+                transform: Transform::from_translation(event.origin.extend(0.0)),
+                ..default()
+            },
+            event.kind,
+            Name::new(event.name.clone()),
+        ));
+        match event.kind {
+            EnvironmentKind::Host => {
+                c.insert(HostEnvironment);
             }
-            CreateEnvironmentEvent::Game { origin, name } => {
-                info!("Creating game environment at {:?}", origin);
-                commands.spawn((
-                    SpatialBundle {
-                        transform: Transform::from_translation(origin.extend(0.0)),
-                        ..default()
-                    },
-                    Environment,
-                    GameEnvironment,
-                    Name::new(name.clone()),
-                ));
+            EnvironmentKind::Game => {
+                c.insert(GameEnvironment);
+            }
+            EnvironmentKind::HostUIWatcher => {
+                c.insert(HostUIWatcherEnvironment);
             }
         }
     }

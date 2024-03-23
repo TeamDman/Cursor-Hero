@@ -20,14 +20,16 @@ impl Plugin for VoiceToTextButtonPlugin {
 fn populate_new_host_environments(
     mut commands: Commands,
     mut environment_events: EventReader<PopulateEnvironmentEvent>,
+    environment_query: Query<(), With<HostEnvironment>>,
     asset_server: Res<AssetServer>,
 ) {
     for event in environment_events.read() {
-        let PopulateEnvironmentEvent::Host { environment_id } = event else {
+        if !environment_query.contains(event.environment_id) {
             continue;
-        };
+        }
+        let environment_id = event.environment_id;
         info!("Adding button to new host environment {:?}", environment_id);
-        commands.entity(*environment_id).with_children(|parent| {
+        commands.entity(environment_id).with_children(|parent| {
             parent
                 .spawn((
                     VoiceToTextStatusButton::default(),

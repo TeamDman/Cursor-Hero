@@ -21,91 +21,97 @@ impl Plugin for GladosTtsButtonPlugin {
 fn populate_new_host_environments(
     mut commands: Commands,
     mut environment_events: EventReader<PopulateEnvironmentEvent>,
+    environment_query: Query<&HostEnvironment>,
     asset_server: Res<AssetServer>,
 ) {
     for event in environment_events.read() {
-        let PopulateEnvironmentEvent::Host { environment_id } = event else {
+        if !environment_query.contains(event.environment_id) {
             continue;
-        };
-        info!("Adding button to new host environment {:?}", environment_id);
-        commands.entity(*environment_id).with_children(|parent| {
-            parent
-                .spawn((
-                    GladosTtsStatusButton::default(),
-                    Name::new("GLaDOS TTS Button"),
-                    SpriteBundle {
-                        sprite: Sprite {
-                            custom_size: Some(Vec2::new(200.0, 100.0)),
-                            color: Color::PURPLE,
+        }
+        info!(
+            "Adding button to new host environment {:?}",
+            event.environment_id
+        );
+        commands
+            .entity(event.environment_id)
+            .with_children(|parent| {
+                parent
+                    .spawn((
+                        GladosTtsStatusButton::default(),
+                        Name::new("GLaDOS TTS Button"),
+                        SpriteBundle {
+                            sprite: Sprite {
+                                custom_size: Some(Vec2::new(200.0, 100.0)),
+                                color: Color::PURPLE,
+                                ..default()
+                            },
+                            transform: Transform::from_translation(Vec3::new(
+                                1920.0 / 2.0 - 600.0,
+                                -1080.0 - 200.0,
+                                0.0,
+                            )),
                             ..default()
                         },
-                        transform: Transform::from_translation(Vec3::new(
-                            1920.0 / 2.0 - 600.0,
-                            -1080.0 - 200.0,
-                            0.0,
-                        )),
-                        ..default()
-                    },
-                    Clickable,
-                    Hoverable,
-                    RigidBody::Static,
-                    Sensor,
-                    Collider::cuboid(200.0, 100.0),
-                ))
-                .with_children(|parent| {
-                    parent.spawn((Text2dBundle {
-                        text: Text::from_section(
-                            "GLaDOS TTS Server Control".to_string(),
-                            TextStyle {
-                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                font_size: 32.0,
-                                color: Color::WHITE,
+                        Clickable,
+                        Hoverable,
+                        RigidBody::Static,
+                        Sensor,
+                        Collider::cuboid(200.0, 100.0),
+                    ))
+                    .with_children(|parent| {
+                        parent.spawn((Text2dBundle {
+                            text: Text::from_section(
+                                "GLaDOS TTS Server Control".to_string(),
+                                TextStyle {
+                                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                    font_size: 32.0,
+                                    color: Color::WHITE,
+                                },
+                            )
+                            .with_alignment(TextAlignment::Center),
+                            transform: Transform::from_xyz(0.0, 70.0, 1.0),
+                            ..default()
+                        },));
+                    });
+                parent
+                    .spawn((
+                        GladosTtsVscodeButton::default(),
+                        Name::new("GLaDOS TTS VSCode Button"),
+                        SpriteBundle {
+                            sprite: Sprite {
+                                custom_size: Some(Vec2::new(200.0, 100.0)),
+                                color: Color::rgb(0.0, 0.6, 0.8),
+                                ..default()
                             },
-                        )
-                        .with_alignment(TextAlignment::Center),
-                        transform: Transform::from_xyz(0.0, 70.0, 1.0),
-                        ..default()
-                    },));
-                });
-            parent
-                .spawn((
-                    GladosTtsVscodeButton::default(),
-                    Name::new("GLaDOS TTS VSCode Button"),
-                    SpriteBundle {
-                        sprite: Sprite {
-                            custom_size: Some(Vec2::new(200.0, 100.0)),
-                            color: Color::rgb(0.0, 0.6, 0.8),
+                            transform: Transform::from_translation(Vec3::new(
+                                1920.0 / 2.0 - 600.0,
+                                -1080.0 - 350.0,
+                                0.0,
+                            )),
                             ..default()
                         },
-                        transform: Transform::from_translation(Vec3::new(
-                            1920.0 / 2.0 - 600.0,
-                            -1080.0 - 350.0,
-                            0.0,
-                        )),
-                        ..default()
-                    },
-                    Clickable,
-                    Hoverable,
-                    RigidBody::Static,
-                    Sensor,
-                    Collider::cuboid(200.0, 100.0),
-                ))
-                .with_children(|parent| {
-                    parent.spawn((Text2dBundle {
-                        text: Text::from_section(
-                            "open in vscode".to_string(),
-                            TextStyle {
-                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                font_size: 32.0,
-                                color: Color::WHITE,
-                            },
-                        )
-                        .with_alignment(TextAlignment::Center),
-                        transform: Transform::from_xyz(0.0, 0.0, 1.0),
-                        ..default()
-                    },));
-                });
-        });
+                        Clickable,
+                        Hoverable,
+                        RigidBody::Static,
+                        Sensor,
+                        Collider::cuboid(200.0, 100.0),
+                    ))
+                    .with_children(|parent| {
+                        parent.spawn((Text2dBundle {
+                            text: Text::from_section(
+                                "open in vscode".to_string(),
+                                TextStyle {
+                                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                    font_size: 32.0,
+                                    color: Color::WHITE,
+                                },
+                            )
+                            .with_alignment(TextAlignment::Center),
+                            transform: Transform::from_xyz(0.0, 0.0, 1.0),
+                            ..default()
+                        },));
+                    });
+            });
     }
 }
 

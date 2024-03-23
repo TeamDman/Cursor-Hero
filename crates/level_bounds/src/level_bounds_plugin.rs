@@ -14,6 +14,7 @@ impl Plugin for LevelBoundsPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<LevelBounds>();
         app.register_type::<LevelBoundsHolder>();
+        app.register_type::<LevelBoundsParentRef>();
         app.add_event::<LevelBoundsEvent>();
         app.add_systems(Update, enforce);
         app.add_systems(
@@ -48,45 +49,45 @@ pub struct LevelBounds;
 fn handle_populate_environment_events(
     mut commands: Commands,
     mut events: EventReader<PopulateEnvironmentEvent>,
+    environment_query: Query<(), Or<(With<HostEnvironment>, With<GameEnvironment>)>>,
 ) {
     for event in events.read() {
-        match event {
-            PopulateEnvironmentEvent::Host { environment_id }
-            | PopulateEnvironmentEvent::Game { environment_id } => {
-                info!(
-                    "Populating environment {:?} with level bounds parent",
-                    event
-                );
-                let mut level_bounds_holder_id = None;
-                commands.entity(*environment_id).with_children(|parent| {
-                    level_bounds_holder_id = Some(
-                        parent
-                            .spawn((
-                                SpatialBundle::default(),
-                                LevelBoundsHolder,
-                                Name::new("Level Bounds"),
-                            ))
-                            .id(),
-                    );
-                });
-                let Some(level_bounds_holder_id) = level_bounds_holder_id else {
-                    warn!(
-                        "Failed to create level bounds holder for environment {:?}",
-                        event
-                    );
-                    continue;
-                };
-                commands
-                    .entity(*environment_id)
-                    .insert(LevelBoundsParentRef(level_bounds_holder_id));
-            }
+        if !environment_query.contains(event.environment_id) {
+            continue;
         }
+
+        info!(
+            "Populating environment {:?} with level bounds parent",
+            event
+        );
+        let mut level_bounds_holder_id = None;
+        commands.entity(event.environment_id).with_children(|parent| {
+            level_bounds_holder_id = Some(
+                parent
+                    .spawn((
+                        SpatialBundle::default(),
+                        LevelBoundsHolder,
+                        Name::new("Level Bounds"),
+                    ))
+                    .id(),
+            );
+        });
+        let Some(level_bounds_holder_id) = level_bounds_holder_id else {
+            warn!(
+                "Failed to create level bounds holder for environment {:?}",
+                event
+            );
+            continue;
+        };
+        commands
+            .entity(event.environment_id)
+            .insert(LevelBoundsParentRef(level_bounds_holder_id));
     }
 }
 
 pub fn handle_level_bounds_events(
     mut events: EventReader<LevelBoundsEvent>,
-    environment_query: Query<&LevelBoundsParentRef, With<Environment>>,
+    environment_query: Query<&LevelBoundsParentRef, With<EnvironmentKind>>,
     mut commands: Commands,
     mut deferred: Local<Vec<LevelBoundsEvent>>,
 ) {
@@ -97,12 +98,12 @@ pub fn handle_level_bounds_events(
                 environment_id,
                 area,
             } => {
-                info!(
-                    "Adding play area with size {:?} to level bounds for environment {:?}",
-                    area.size(),
-                    environment_id
-                );
                 if let Ok(level_bounds_parent_ref) = environment_query.get(*environment_id) {
+                    info!(
+                        "Adding play area with size {:?} to level bounds for environment {:?}",
+                        area.size(),
+                        environment_id
+                    );
                     commands
                         .entity(level_bounds_parent_ref.get())
                         .with_children(|parent| {

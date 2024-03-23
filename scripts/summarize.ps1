@@ -5,28 +5,29 @@ if ((Get-Location).Path.EndsWith("scripts")) {
     Push-Location $(Get-Location)
 }
 try {
-    $content = "
-``````README.md
-$(Get-Content README.md -Raw)
-``````
-===
-``````scripts/summarize.ps1
-$(Get-Content "scripts/summarize.ps1" -Raw)
-``````
-===
-``````git log --pretty=format:`"%s`" -n 25
-$(git log --pretty=format:"%s" -n 25)
-``````
-===
-``````todo.md
-$(Get-Content todo.md -Raw)
-``````
-===
+    $choices = git ls-files --exclude-standard --others --cached `
+        <# exclude images #> `
+        | Where-Object { $_.EndsWith(".rs") -or $_.EndsWith(".toml") -or $_.EndsWith("md") }
 
-Please let me know your thoughts.
+    $files = @()
+    while ($true) {
+        $chosen = $choices | fzf --multi --bind "ctrl-a:select-all,ctrl-d:deselect-all,ctrl-t:toggle-all"
+        if ($null -eq $chosen) {
+            break
+        }
+        $files += $chosen
+    }
+    $content = $files | ForEach-Object { 
+        $content = Get-Content $_ -Raw
+        return "
+#REGION $($_)
+$content
+#ENDREGION
 "
-
-    $content
+    }
+    | Out-String
+    $content | Set-Clipboard
+    Write-Host '$content | Set-Clipboard'
 } finally {
     Pop-Location
 }

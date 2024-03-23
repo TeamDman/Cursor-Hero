@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use cursor_hero_character_types::prelude::MainCharacter;
-use cursor_hero_environment_types::environment_types::EnvironmentTag;
+use cursor_hero_environment_types::environment_types::EnvironmentTracker;
 use cursor_hero_memory_types::prelude::get_persist_file;
 use cursor_hero_memory_types::prelude::Usage;
 use cursor_hero_observation_types::observation_types::SomethingObservableHappenedEvent;
@@ -80,7 +80,7 @@ fn handle_threadbound_messages(
 fn handle_gamebound_messages(
     bridge: Res<Bridge>,
     mut observation_events: EventWriter<SomethingObservableHappenedEvent>,
-    character_query: Query<&EnvironmentTag, With<MainCharacter>>,
+    character_query: Query<&EnvironmentTracker, With<MainCharacter>>,
 ) {
     let Ok(character) = character_query.get_single() else {
         warn!("Expected single main character, failed");

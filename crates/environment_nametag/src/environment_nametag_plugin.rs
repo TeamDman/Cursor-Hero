@@ -21,48 +21,38 @@ impl Plugin for EnvironmentNametagPlugin {
 fn spawn_nametags_in_new_environments(
     mut environment_reader: EventReader<PopulateEnvironmentEvent>,
     mut commands: Commands,
-    environment_query: Query<&Name, With<Environment>>,
+    environment_query: Query<&Name, Or<(With<HostEnvironment>, With<GameEnvironment>)>>,
     asset_server: Res<AssetServer>,
 ) {
-    for environment_event in environment_reader.read() {
-        match environment_event {
-            PopulateEnvironmentEvent::Host { environment_id }
-            | PopulateEnvironmentEvent::Game { environment_id } => {
-                let Ok(environment_name) = environment_query.get(*environment_id) else {
-                    warn!(
-                        "Could not find environment name for environment {:?}",
-                        environment_id
-                    );
-                    continue;
-                };
-                info!(
-                    "Spawning nametags for environment {:?} ({})",
-                    environment_id, environment_name
-                );
-                commands.entity(*environment_id).with_children(|parent| {
-                    parent.spawn((
-                        Text2dBundle {
-                            text: Text::from_section(
-                                environment_name.to_string(),
-                                TextStyle {
-                                    font_size: 72.0,
-                                    font: asset_server.load(
-                                        "fonts/kenney_kenney-fonts/Fonts/Kenney Future Narrow.ttf",
-                                    ),
-                                    color: Color::WHITE,
-                                },
-                            )
-                            .with_alignment(TextAlignment::Center),
-                            transform: Transform::from_xyz(0.0, 200.0, 1.0)
-                                .with_scale(Vec3::splat(4.0)),
-                            ..default()
+    for event in environment_reader.read() {
+        let Ok(environment_name) = environment_query.get(event.environment_id) else {
+            continue;
+        };
+        let environment_id = event.environment_id;
+        info!(
+            "Spawning nametags for environment {:?} ({})",
+            environment_id, environment_name
+        );
+        commands.entity(environment_id).with_children(|parent| {
+            parent.spawn((
+                Text2dBundle {
+                    text: Text::from_section(
+                        environment_name.to_string(),
+                        TextStyle {
+                            font_size: 72.0,
+                            font: asset_server
+                                .load("fonts/kenney_kenney-fonts/Fonts/Kenney Future Narrow.ttf"),
+                            color: Color::WHITE,
                         },
-                        Nametag,
-                        Name::new("Nametag"),
-                    ));
-                });
-            }
-        }
+                    )
+                    .with_alignment(TextAlignment::Center),
+                    transform: Transform::from_xyz(0.0, 200.0, 1.0).with_scale(Vec3::splat(4.0)),
+                    ..default()
+                },
+                Nametag,
+                Name::new("Nametag"),
+            ));
+        });
     }
 }
 
@@ -86,7 +76,7 @@ fn recalc_new_screen_nametags(
 
 fn handle_nametag_update_event(
     mut nametag_events: EventReader<NametagEvent>,
-    environment_query: Query<&Children, With<Environment>>,
+    environment_query: Query<&Children, With<EnvironmentKind>>,
     mut nametag_query: Query<(&mut Text, &mut Transform), With<Nametag>>,
 ) {
     for nametag_event in nametag_events.read() {
@@ -113,7 +103,7 @@ fn handle_nametag_update_event(
 #[allow(clippy::type_complexity)]
 fn handle_nametag_recalculate_position_event(
     mut nametag_events: EventReader<NametagEvent>,
-    environment_query: Query<&Children, With<Environment>>,
+    environment_query: Query<&Children, With<EnvironmentKind>>,
     mut nametag_query: Query<(&mut Text, &mut Transform), (With<Nametag>, Without<Screen>)>,
     screen_parent_query: Query<&Children, With<ScreenParent>>,
     screen_query: Query<(&Sprite, &GlobalTransform), (With<Screen>, Without<Nametag>)>,
