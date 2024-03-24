@@ -58,6 +58,7 @@
 - [Process Monitor - Sysinternals | Microsoft Learn](https://learn.microsoft.com/en-us/sysinternals/downloads/procmon)
 - [(1) Building 25+ years of SysInternals: Exploring ZoomIt | BRK200H - YouTube](https://www.youtube.com/watch?v=W2bNgFrj3Iw)
 - [c# - Getting icon of "modern" Windows app from a desktop application? - Stack Overflow](https://stackoverflow.com/questions/32122679/getting-icon-of-modern-windows-app-from-a-desktop-application)
+- [DLL Export Viewer - view exported functions list in Windows DLL (nirsoft.net)](https://www.nirsoft.net/utils/dll_export_viewer.html)
 
 ## RL
 
@@ -75,7 +76,8 @@
 
 - [ACT-1: Transformer for Actions](https://www.adept.ai/blog/act-1)
 - [LlamaIndex 🦙 v0.10.6](https://docs.llamaindex.ai/en/stable/)
-
+- [Supercharge Your RAG with Contextualized Late Interactions (youtube.com)](https://www.youtube.com/watch?v=xTzUn3G9YA0)
+  - [bclavie/RAGatouille](https://github.com/bclavie/RAGatouille)
 ## Sandboxing
 
 - [copy/v86: x86 PC emulator and x86-to-wasm JIT, running in the browser](https://github.com/copy/v86) ([demo](https://copy.sh/v86/))
@@ -120,3 +122,14 @@
 ## Issues 👀
 
 - [Transparent example not working - Issue #2502 - rust-windowing/winit (github.com)](https://github.com/rust-windowing/winit/issues/2502)
+
+## SDF
+
+- [SDF arbitary 2D polygon (shadertoy.com)](https://www.shadertoy.com/view/WdSGRd)
+- [Arbitrary Polygons, Blur/Border (shadertoy.com)](https://www.shadertoy.com/view/ctBXDK)
+
+## Video making
+
+- [Quickstart | Motion Canvas](https://motioncanvas.io/docs/quickstart/)
+  - [examples/examples at master - motion-canvas/examples (github.com)](https://github.com/motion-canvas/examples/tree/master/examples)
+  - [reviewing your motion canvas animations ![](https://img.youtube.com/vi/lY6D9x9qCt4/0.jpg)](https://www.youtube.com/watch?v=lY6D9x9qCt4)

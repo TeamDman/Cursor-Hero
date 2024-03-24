@@ -16,6 +16,9 @@ pub enum PointerLogBehaviour {
     ErrorsAndPositionUpdates,
 }
 
+#[derive(Component, Debug, Reflect)]
+pub struct MainPointer;
+
 #[derive(Component, InspectorOptions, Debug, Reflect)]
 #[reflect(InspectorOptions)]
 pub struct Pointer {

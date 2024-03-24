@@ -1,3 +1,4 @@
+use cursor_hero_input::active_input_state_plugin::InputMethod;
 use bevy::input::common_conditions::input_toggle_active;
 use bevy::prelude::*;
 
@@ -6,6 +7,7 @@ use bevy::audio::SpatialScale;
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::log::LogPlugin;
 use bevy_embedded_assets::EmbeddedAssetPlugin;
+use bevy_inspector_egui::quick::StateInspectorPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use cursor_hero_agent::agent_plugin::AgentPlugin;
 use cursor_hero_camera::camera_plugin::CameraPlugin;
@@ -246,6 +248,9 @@ cursor_hero_memory=info
         // must be after the default plugins
         app.add_plugins(
             WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)),
+        );
+        app.add_plugins(
+            StateInspectorPlugin::<InputMethod>::default().run_if(input_toggle_active(false, KeyCode::Grave)),
         );
         app.add_plugins(FrameTimeDiagnosticsPlugin);
     }

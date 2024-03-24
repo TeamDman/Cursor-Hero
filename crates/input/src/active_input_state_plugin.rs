@@ -1,70 +1,101 @@
 use bevy::input::gamepad::GamepadEvent;
 use bevy::input::keyboard::KeyboardInput;
 use bevy::prelude::*;
+use cursor_hero_host_event_types::prelude::HostEvent;
+use cursor_hero_pointer_types::pointer_action_types::PointerAction;
+use cursor_hero_pointer_types::pointer_types::MainPointer;
+use cursor_hero_pointer_types::pointer_types::Pointer;
+use leafwing_input_manager::action_state::ActionState;
 
 pub struct ActiveInputStatePlugin;
 
 impl Plugin for ActiveInputStatePlugin {
     fn build(&self, app: &mut App) {
-        app.add_state::<ActiveInput>();
-        app.insert_resource(ActiveInput::MouseAndKeyboard);
-        app.add_systems(
-            Update,
-            (
-                activate_gamepad.run_if(in_state(ActiveInput::MouseAndKeyboard)),
-                activate_mkb.run_if(in_state(ActiveInput::Gamepad)),
-            ),
-        );
+        app.add_state::<InputMethod>();
+        app.insert_resource(InputMethod::MouseAndKeyboard);
+        app.add_systems(Update, update_input_method);
     }
 }
 
 #[derive(Resource, Reflect, Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 #[reflect(Resource)]
-pub enum ActiveInput {
+pub enum InputMethod {
     #[default]
     MouseAndKeyboard,
+    Keyboard,
     Gamepad,
 }
 
-/// Switch the gamepad when any button is pressed or any axis input used
-fn activate_gamepad(
-    mut gamepad_evr: EventReader<GamepadEvent>,
-    mut next_state: ResMut<NextState<ActiveInput>>,
-    mut active_input: ResMut<ActiveInput>,
-) {
-    let mut debounce = false;
-    for ev in gamepad_evr.read() {
-        match ev {
-            GamepadEvent::Button(_) => {
-                if !debounce {
-                    info!("Switching to gamepad input because of {:?}", ev);
-                    next_state.set(ActiveInput::Gamepad);
-                    *active_input = ActiveInput::Gamepad;
-                    debounce = true;
-                }
-            }
-            GamepadEvent::Axis(ax) => {
-                if ax.value != 0.0 && !debounce {
-                    info!("Switching to gamepad input because of {:?}", ev);
-                    next_state.set(ActiveInput::Gamepad);
-                    *active_input = ActiveInput::Gamepad;
-                    debounce = true;
-                }
-            }
-            _ => (),
-        }
-    }
-}
 
-/// Switch to mouse and keyboard input when any keyboard button is pressed
-fn activate_mkb(
-    mut next_state: ResMut<NextState<ActiveInput>>,
-    mut kb_reader: EventReader<KeyboardInput>,
-    mut active_input: ResMut<ActiveInput>,
+fn update_input_method(
+    current_state: Res<State<InputMethod>>,
+    mut next_state: ResMut<NextState<InputMethod>>,
+    mut gamepad_events: EventReader<GamepadEvent>,
+    mut host_events: EventReader<HostEvent>,
+    mut keyboard_events: EventReader<KeyboardInput>,
+    pointer_actions: Query<&ActionState<PointerAction>, With<MainPointer>>,
 ) {
-    if kb_reader.read().count() > 0 {
-        info!("Switching to mouse and keyboard input");
-        next_state.set(ActiveInput::MouseAndKeyboard);
-        *active_input = ActiveInput::MouseAndKeyboard;
+    let current_input_method = *current_state.get();
+    let keyboard_used = keyboard_events.read().count() > 0;
+    let gamepad_used = gamepad_events
+        .read()
+        .filter(|e| match e {
+            GamepadEvent::Button(_) => true,
+            GamepadEvent::Axis(ax) => ax.value != 0.0,
+            _ => false,
+        })
+        .count()
+        > 0;
+    let mouse_used = host_events
+        .read()
+        .filter(|e| **e == HostEvent::MousePhysicallyMoved)
+        .count()
+        > 0;
+    let pointer_moved = pointer_actions.iter().any(|a| {
+        a.axis_pair(PointerAction::Move)
+            .map(|xy| !xy.x().is_nan() && !xy.y().is_nan() && xy.xy() != Vec2::ZERO)
+            .unwrap_or(false)
+    });
+
+    
+    #[derive(Debug)]
+    struct DecisionInfo {
+        current_input_method: InputMethod,
+        keyboard_used: bool,
+        gamepad_used: bool,
+        mouse_used: bool,
+        pointer_moved: bool,
+    }
+    let decision_info = DecisionInfo {
+        current_input_method,
+        keyboard_used,
+        gamepad_used,
+        mouse_used,
+        pointer_moved,
+    };
+    let proposed_state = match decision_info {
+        DecisionInfo {
+            gamepad_used: true, ..
+        } => InputMethod::Gamepad,
+        DecisionInfo {
+            current_input_method: InputMethod::MouseAndKeyboard,
+            pointer_moved: true,
+            ..
+        } => InputMethod::Keyboard,
+        DecisionInfo {
+            mouse_used: true, ..
+        }
+        | DecisionInfo {
+            current_input_method: InputMethod::Gamepad,
+            keyboard_used: true,
+            ..
+        } => InputMethod::MouseAndKeyboard,
+        DecisionInfo {
+            current_input_method,
+            ..
+        } => current_input_method,
+    };
+    if proposed_state != current_input_method {
+        next_state.set(proposed_state);
     }
 }

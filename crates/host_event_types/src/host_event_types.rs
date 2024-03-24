@@ -1,10 +1,6 @@
-// use bevy::prelude::*;
+use bevy::prelude::*;
 
-// #[derive(Component, Debug, Reflect)]
-// pub struct MyComponent;
-
-// #[derive(Event, Debug, Reflect)]
-// pub enum MyEvent {
-//     Guh,
-//     Uh
-// }
+#[derive(Event, Debug, Reflect, Eq, PartialEq)]
+pub enum HostEvent {
+    MousePhysicallyMoved,
+}

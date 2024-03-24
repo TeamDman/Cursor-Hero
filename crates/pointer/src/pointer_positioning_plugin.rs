@@ -6,7 +6,7 @@ use cursor_hero_bevy::prelude::NegativeYVec2;
 use cursor_hero_camera::camera_plugin::MainCamera;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_environment_types::prelude::*;
-use cursor_hero_input::active_input_state_plugin::ActiveInput;
+use cursor_hero_input::active_input_state_plugin::InputMethod;
 use cursor_hero_pointer_types::pointer_behaviour_types::PointerMovementBehaviour;
 use cursor_hero_pointer_types::prelude::*;
 use cursor_hero_winutils::win_mouse::set_cursor_position;
@@ -29,11 +29,22 @@ impl Plugin for PointerPositioningPlugin {
     }
 }
 
-/// What a chonker.
-/// I'm pretty proud of how clean this is compared to how it used to be.
-/// https://github.com/TeamDman/Cursor-Hero/commit/28c7e40ba9d8f77175d43ddd786ac4cf690de3b6#diff-8186c0229ca354003aa4c771e5c89c82d85fd38c4530f3726ae39220a99eb1e3
-/// It used to be a bunch of tags where the pointer and cursor were manipulated in many different systems.
-/// Now, with the behaviour enum, all situations are explicit, obvious, and will warn when unanticipated situations arise.
+#[derive(Default, Debug)]
+struct PointerUpdate {
+    local_target: Option<Vec2>,
+    global_target: Option<Vec2>,
+    host_target: Option<IVec2>,
+}
+
+#[derive(Debug)]
+struct DecisionInfo {
+    current_behaviour: PointerMovementBehaviour,
+    is_main_character: bool,
+    in_host_environment: bool,
+    stick_in_use: bool,
+    active_input_method: InputMethod,
+}
+
 #[allow(clippy::type_complexity)]
 #[allow(clippy::too_many_arguments)]
 fn update_pointer(
@@ -58,13 +69,12 @@ fn update_pointer(
         (With<MainCamera>, Without<Character>, Without<Pointer>),
     >,
     window_query: Query<(&Window, &RawHandleWrapper), With<PrimaryWindow>>,
-    input_method: Res<ActiveInput>,
+    input_method: Res<InputMethod>,
     environment_query: Query<(), With<HostEnvironment>>,
     mut last_known_cursor_position: Local<Option<Vec2>>,
-    mut last_sent: Local<(Option<Vec2>, Option<Vec2>, Option<IVec2>)>,
+    mut previous_update: Local<PointerUpdate>,
 ) {
     for pointer in pointer_query.iter_mut() {
-        // get pointer
         let (
             mut pointer_transform,
             pointer_global_transform,
@@ -74,93 +84,103 @@ fn update_pointer(
             pointer_environment,
             pointer_parent,
         ) = pointer;
-        let stick = pointer_actions.pressed(PointerAction::Move);
-        let in_host_environment = match pointer_environment {
-            Some(pointer_environment) => {
-                match environment_query.get(pointer_environment.environment_id) {
-                    Ok(_) => true,
-                    Err(_) => {
-                        // not found because the current environment doesn't exist or is not a host environment
-                        false
-                    }
-                }
-            }
-            None => false,
-        };
 
-        // get character
+        let stick_in_use = pointer_actions.pressed(PointerAction::Move);
+        let in_host_environment = pointer_environment
+            .map(|e| environment_query.contains(e.environment_id))
+            .unwrap_or(false);
+
         let Ok(character) = character_query.get_mut(pointer_parent.get()) else {
             warn!("No character found");
             continue;
         };
         let (character_global_transform, is_main_character) = character;
 
-        // get camera
         let Ok(camera) = camera_query.get_single() else {
             warn!("No camera found");
             return;
         };
         let (camera, camera_global_transform) = camera;
 
-        // get window
         let Ok(window) = window_query.get_single() else {
             warn!("No window found");
             return;
         };
         let (window, window_handle) = window;
 
-        // determine movement behaviour
-        let next_behaviour = match (
-            pointer.movement_behaviour,
-            is_main_character.is_some(),
+        let decision_info = DecisionInfo {
+            current_behaviour: pointer.movement_behaviour,
+            is_main_character: is_main_character.is_some(),
             in_host_environment,
-            stick,
-            *input_method,
-        ) {
-            // main character, in host environment, stick in use
-            (_, true, true, true, _) => PointerMovementBehaviour::CursorFollowsPointerGameCoords,
-            // main character, in host environment, stick not in use, gamepad
-            (_, true, true, false, ActiveInput::Gamepad) => {
-                PointerMovementBehaviour::CursorFollowsPointerGameCoords
+            stick_in_use,
+            active_input_method: *input_method,
+        };
+
+        let next_behaviour = match decision_info {
+            DecisionInfo {
+                is_main_character: true,
+                in_host_environment: true,
+                stick_in_use: true,
+                ..
             }
-            // main character, in any environment, stick not in use
-            (_, true, _, false, ActiveInput::MouseAndKeyboard) => {
-                PointerMovementBehaviour::CursorOverWindowSetsPointer
+            | DecisionInfo {
+                is_main_character: true,
+                in_host_environment: true,
+                active_input_method: InputMethod::Gamepad,
+                ..
             }
-            // main character, not in host environment, stick not in use
-            (current, true, false, false, _) => current,
-            // main character, not in host environment, stick in use
-            (_, true, false, true, _) => PointerMovementBehaviour::PointerSetsCursorOverWindow,
-            // none stays none
-            (PointerMovementBehaviour::None, _, _, _, _) => PointerMovementBehaviour::None,
-            (current, a, b, c, d) => {
-                warn!("Unhandled case: current={} main_character={} in_host_environment={} stick={} input_method={:?}", current, a, b, c, d);
-                current
+            | DecisionInfo {
+                is_main_character: true,
+                in_host_environment: true,
+                active_input_method: InputMethod::Keyboard,
+                ..
+            } => PointerMovementBehaviour::SetHostCursorFromPointerWorldCoords,
+            DecisionInfo {
+                is_main_character: true,
+                stick_in_use: false,
+                active_input_method: InputMethod::MouseAndKeyboard,
+                ..
+            } => PointerMovementBehaviour::SetPointerFromHostCursorWindowCoords,
+            DecisionInfo {
+                is_main_character: true,
+                in_host_environment: false,
+                stick_in_use: true,
+                ..
+            } => PointerMovementBehaviour::SetHostCursorFromWindowCoords,
+            DecisionInfo {
+                is_main_character: true,
+                in_host_environment: false,
+                stick_in_use: false,
+                ..
+            } => decision_info.current_behaviour,
+            DecisionInfo {
+                current_behaviour: PointerMovementBehaviour::None,
+                ..
+            } => PointerMovementBehaviour::None,
+            _ => {
+                warn!("Unhandled case: {:?}", decision_info);
+                decision_info.current_behaviour
             }
         };
+
         if next_behaviour != pointer.movement_behaviour {
             info!(
-                "Switching to {:?} | current={} main_character={} in_host_environment={} stick={} input_method={:?}",
-                next_behaviour,
-                pointer.movement_behaviour,
-                is_main_character.is_some(),
-                in_host_environment,
-                stick,
-                *input_method
+                "Switching to {:?} given {:?}",
+                next_behaviour, decision_info
             );
             pointer.movement_behaviour = next_behaviour;
         }
 
-        let (local_target, global_target, host_target) = match pointer.movement_behaviour {
+        let this_update = match pointer.movement_behaviour {
             PointerMovementBehaviour::None => {
                 // sync physics to render
-                (
-                    None,
-                    Some(pointer_global_transform.translation().xy()),
-                    None,
-                )
+                PointerUpdate {
+                    local_target: None,
+                    global_target: Some(pointer_global_transform.translation().xy()),
+                    host_target: None,
+                }
             }
-            PointerMovementBehaviour::CursorOverWindowSetsPointer => {
+            PointerMovementBehaviour::SetPointerFromHostCursorWindowCoords => {
                 // usual mode for mouse and keyboard input
                 match window.cursor_position().or(*last_known_cursor_position) {
                     Some(host_cursor_xy) => {
@@ -176,38 +196,45 @@ fn update_pointer(
                         };
                         let local_target =
                             global_target - character_global_transform.translation().xy();
-
-                        (Some(local_target), Some(global_target), None)
+                        PointerUpdate {
+                            local_target: Some(local_target),
+                            global_target: Some(global_target),
+                            host_target: None,
+                        }
                     }
                     None => {
                         if pointer.log_behaviour == PointerLogBehaviour::ErrorsAndPositionUpdates {
                             warn!("No cursor position found");
                         }
-                        (None, None, None)
+                        PointerUpdate::default()
                     }
                 }
             }
-            PointerMovementBehaviour::CursorFollowsPointerGameCoords => {
+            PointerMovementBehaviour::SetHostCursorFromPointerWorldCoords => {
                 // host follows pointer, render and physics are the same
-                if stick {
+                if stick_in_use {
                     match pointer_actions.axis_pair(PointerAction::Move) {
                         Some(axis_pair) => {
                             let look = axis_pair.xy();
                             if look.x.is_nan() || look.y.is_nan() {
                                 warn!("{} | look vector is unusable", pointer.movement_behaviour);
-                                (None, None, None)
+                                PointerUpdate::default()
                             } else {
                                 let character_translation =
                                     character_global_transform.translation();
                                 let local_target = look * pointer.reach;
                                 let global_target = character_translation.xy() + local_target;
                                 let host_target = global_target.neg_y().as_ivec2();
-                                (Some(local_target), Some(global_target), Some(host_target))
+                                PointerUpdate {
+                                    local_target: Some(local_target),
+                                    global_target: Some(global_target),
+                                    host_target: Some(host_target),
+                                }
                             }
                         }
                         None => {
                             warn!("{}, No axis pair found?", pointer.movement_behaviour);
-                            (None, None, None)
+                            PointerUpdate::default()
                         }
                     }
                 } else {
@@ -216,11 +243,15 @@ fn update_pointer(
                     let local_target = Vec2::ZERO;
                     let global_target = character_translation.xy();
                     let host_target = character_translation.xy().neg_y().as_ivec2();
-                    (Some(local_target), Some(global_target), Some(host_target))
+                    PointerUpdate {
+                        local_target: Some(local_target),
+                        global_target: Some(global_target),
+                        host_target: Some(host_target),
+                    }
                 }
             }
-            PointerMovementBehaviour::PointerSetsCursorOverWindow => {
-                if stick {
+            PointerMovementBehaviour::SetHostCursorFromWindowCoords => {
+                if stick_in_use {
                     // stick in use
                     // the host cursor will go over the pointer's window position
                     match pointer_actions.axis_pair(PointerAction::Move) {
@@ -230,7 +261,7 @@ fn update_pointer(
                             // the look vector could be unusable
                             if look.x.is_nan() || look.y.is_nan() {
                                 warn!("{} | look vector is unusable", pointer.movement_behaviour);
-                                (None, None, None)
+                                PointerUpdate::default()
                             } else {
                                 // the spot you want to be is the character position + stick direction
                                 let character_translation =
@@ -264,12 +295,16 @@ fn update_pointer(
                                         host_target
                                     });
 
-                                (Some(local_target), Some(global_target.xy()), host_target)
+                                PointerUpdate {
+                                    local_target: Some(local_target.xy()),
+                                    global_target: Some(global_target.xy()),
+                                    host_target,
+                                }
                             }
                         }
                         None => {
                             warn!("{} | No axis pair found?", pointer.movement_behaviour);
-                            (None, None, None)
+                            PointerUpdate::default()
                         }
                     }
                 } else {
@@ -304,15 +339,19 @@ fn update_pointer(
                             host_target
                         });
 
-                    (Some(local_target), Some(global_target), host_target)
+                    PointerUpdate {
+                        local_target: Some(local_target),
+                        global_target: Some(global_target),
+                        host_target,
+                    }
                 }
             }
         };
 
         // Update render body
         let mut render_updated = false;
-        if local_target != (*last_sent).0
-            && let Some(local_target) = local_target
+        if this_update.local_target != previous_update.local_target
+            && let Some(local_target) = this_update.local_target
         {
             let target_distance = local_target - pointer_transform.translation.xy();
             if target_distance != Vec2::ZERO {
@@ -320,7 +359,7 @@ fn update_pointer(
                 if pointer.log_behaviour == PointerLogBehaviour::ErrorsAndPositionUpdates {
                     debug!(
                         "{} stick={:?} | target_distance={:?}, updating render body to local_target={:?}",
-                        pointer.movement_behaviour, stick, target_distance, local_target
+                        pointer.movement_behaviour, stick_in_use, target_distance, local_target
                     );
                 }
                 pointer_transform.translation.x = local_target.x;
@@ -331,8 +370,8 @@ fn update_pointer(
 
         // Update physics body
         if !render_updated
-            && global_target != last_sent.1
-            && let Some(global_target) = global_target
+            && this_update.global_target != previous_update.global_target
+            && let Some(global_target) = this_update.global_target
         {
             let target_distance = global_target - pointer_position.xy();
             if target_distance != Vec2::ZERO {
@@ -340,7 +379,7 @@ fn update_pointer(
                 if pointer.log_behaviour == PointerLogBehaviour::ErrorsAndPositionUpdates {
                     debug!(
                         "{} stick={:?} | target_distance={:?}, updating physics body to global_target={:?}",
-                        pointer.movement_behaviour, stick, target_distance, global_target
+                        pointer.movement_behaviour, stick_in_use, target_distance, global_target
                     );
                 }
                 // prevent feedback loop
@@ -352,38 +391,8 @@ fn update_pointer(
             }
         }
 
-        // // Update positions
-        // if (local_target != (*last_sent).0 || global_target != last_sent.1)
-        //     && let Some(local_target) = local_target
-        //     && let Some(global_target) = global_target
-        // {
-        //     let target_distance = local_target - pointer_transform.translation.xy();
-        //     if target_distance == Vec2::ZERO {
-        //         // Already at destination, keep physics in sync with unchanged render body
-        //         if pointer.log_behaviour == PointerLogBehaviour::ErrorsAndPositionUpdates {
-        //             debug!(
-        //                 "{} stick={:?} | keeping physics in sync, global_target={:?}",
-        //                 pointer.movement_behaviour, stick, global_target
-        //             );
-        //         }
-        //         let pointer_position = pointer_position.bypass_change_detection();
-        //         pointer_position.x = global_target.x;
-        //         pointer_position.y = global_target.y;
-        //     } else {
-        //         // Not at destination, update render body (which physics will follow)
-        //         if pointer.log_behaviour == PointerLogBehaviour::ErrorsAndPositionUpdates {
-        //             debug!(
-        //                 "{} stick={:?} | target_distance={:?}, updating render body to local_target={:?}",
-        //                 pointer.movement_behaviour, stick, target_distance, local_target
-        //             );
-        //         }
-        //         pointer_transform.translation.x = local_target.x;
-        //         pointer_transform.translation.y = local_target.y;
-        //     }
-        // }
-
-        if host_target != last_sent.2
-            && let Some(host_target) = host_target
+        if this_update.host_target != previous_update.host_target
+            && let Some(host_target) = this_update.host_target
         {
             match set_cursor_position(host_target) {
                 Ok(_) => {
@@ -403,6 +412,6 @@ fn update_pointer(
             }
         }
 
-        *last_sent = (local_target, global_target, host_target);
+        *previous_update = this_update;
     }
 }

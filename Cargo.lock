@@ -2007,7 +2007,6 @@ dependencies = [
  "bevy",
  "crossbeam-channel",
  "cursor_hero_host_event_types",
- "cursor_hero_input",
  "cursor_hero_winutils",
  "raw-window-handle",
 ]
@@ -2100,6 +2099,9 @@ name = "cursor_hero_input"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "cursor_hero_host_event_types",
+ "cursor_hero_pointer_types",
+ "leafwing-input-manager",
 ]
 
 [[package]]

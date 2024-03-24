@@ -3,7 +3,7 @@ use leafwing_input_manager::prelude::*;
 
 use bevy_inspector_egui::prelude::ReflectInspectorOptions;
 use bevy_inspector_egui::InspectorOptions;
-use cursor_hero_input::active_input_state_plugin::ActiveInput;
+use cursor_hero_input::active_input_state_plugin::InputMethod;
 use cursor_hero_toolbelt_types::prelude::*;
 
 #[derive(Component, Reflect, Debug, InspectorOptions)]
@@ -12,9 +12,9 @@ pub struct WindowSwapTool;
 
 impl Default for WindowSwapTool {
     fn default() -> Self {
-        match ActiveInput::default() {
-            ActiveInput::MouseAndKeyboard => Self::default_mnk(),
-            ActiveInput::Gamepad => Self::default_gamepad(),
+        match InputMethod::default() {
+            InputMethod::MouseAndKeyboard | InputMethod::Keyboard => Self::default_mnk(),
+            InputMethod::Gamepad => Self::default_gamepad(),
         }
     }
 }
