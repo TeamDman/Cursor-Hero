@@ -109,6 +109,8 @@ pub fn gather_single_element_info(element: &UIElement) -> Result<ElementInfo, ui
     let name = element.get_name()?;
     let bb = element.get_bounding_rectangle()?;
     let class_name = element.get_classname()?;
+    let control_type = element.get_control_type()?.into();
+    let localized_control_type = element.get_localized_control_type()?;
     let automation_id = element.get_automation_id()?;
     let runtime_id = element.get_runtime_id()?;
 
@@ -121,7 +123,8 @@ pub fn gather_single_element_info(element: &UIElement) -> Result<ElementInfo, ui
             bb.get_right() as f32,
             bb.get_bottom() as f32,
         ),
-        control_type: class_name.clone(),
+        control_type,
+        localized_control_type,
         class_name,
         automation_id,
         runtime_id,
