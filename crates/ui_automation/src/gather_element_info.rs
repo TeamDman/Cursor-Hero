@@ -1,5 +1,5 @@
 use bevy::math::Rect;
-use cursor_hero_ui_automation_types::prelude::ElementChildren;
+use cursor_hero_ui_automation_types::prelude::DrillId;
 use cursor_hero_ui_automation_types::prelude::ElementInfo;
 use itertools::Itertools;
 use std::collections::VecDeque;
@@ -68,16 +68,13 @@ fn gather_tree(
                     gather_single_element_info(&child).ok()
                 }
                 .map(|mut child_info| {
-                    child_info.drill_id = Some(vec![i].into_iter().collect());
+                    child_info.drill_id = DrillId::Child(vec![i].into_iter().collect());
                     child_info
                 })
             })
             .collect_vec();
 
-        element_info.children = Some(ElementChildren {
-            children,
-            expanded: true,
-        });
+        element_info.children = Some(children);
     }
 
     Ok(element_info)
@@ -85,9 +82,9 @@ fn gather_tree(
 
 fn update_drill_ids(parent_info: &mut ElementInfo, ancestor_path: &VecDeque<usize>) {
     if let Some(children) = &mut parent_info.children {
-        for child_info in &mut children.children {
+        for child_info in children.iter_mut() {
             // Check if the child has a base drill_id set
-            if let Some(base_drill_id) = &child_info.drill_id {
+            if let DrillId::Child(base_drill_id) = &child_info.drill_id {
                 let mut new_path = ancestor_path.clone();
 
                 // The last entry in base_drill_id represents the child's position in its immediate parent
@@ -95,7 +92,7 @@ fn update_drill_ids(parent_info: &mut ElementInfo, ancestor_path: &VecDeque<usiz
                     new_path.push_back(child_position); // Use the position from the base drill_id
 
                     // Update the child's drill_id by concatenating the ancestor_path with its own position
-                    child_info.drill_id = Some(new_path.clone());
+                    child_info.drill_id = DrillId::Child(new_path.clone());
                 }
 
                 // Recursively update this child's children
@@ -115,7 +112,6 @@ pub fn gather_single_element_info(element: &UIElement) -> Result<ElementInfo, ui
     let runtime_id = element.get_runtime_id()?;
 
     let info = ElementInfo {
-        selected: false,
         name,
         bounding_rect: Rect::new(
             bb.get_left() as f32,
@@ -129,7 +125,7 @@ pub fn gather_single_element_info(element: &UIElement) -> Result<ElementInfo, ui
         automation_id,
         runtime_id,
         children: None,
-        drill_id: None,
+        drill_id: DrillId::Unknown,
     };
     Ok(info)
 }

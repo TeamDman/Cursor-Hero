@@ -215,10 +215,15 @@ impl From<uiautomation::controls::ControlType> for ControlType {
     }
 }
 
+#[derive(Debug, Eq, PartialEq, Clone, Reflect)]
+pub enum DrillId {
+    Root,
+    Child(VecDeque<usize>),
+    Unknown,
+}
 #[derive(Debug, Clone, Reflect, PartialEq)]
 // #[reflect(no_field_bounds)] //https://github.com/bevyengine/bevy/issues/8965
 pub struct ElementInfo {
-    pub selected: bool,
     pub name: String,
     pub bounding_rect: Rect,
     pub control_type: ControlType,
@@ -226,44 +231,89 @@ pub struct ElementInfo {
     pub class_name: String,
     pub automation_id: String,
     pub runtime_id: Vec<i32>,
-    pub drill_id: Option<VecDeque<usize>>,
+    pub drill_id: DrillId,
     #[reflect(ignore)]
-    pub children: Option<ElementChildren>,
+    pub children: Option<Vec<ElementInfo>>,
+}
+impl Default for ElementInfo {
+    fn default() -> Self {
+        ElementInfo {
+            name: "".to_string(),
+            bounding_rect: Rect::new(0.0, 0.0, 0.0, 0.0),
+            control_type: ControlType::Pane,
+            localized_control_type: "".to_string(),
+            class_name: "".to_string(),
+            automation_id: "".to_string(),
+            runtime_id: vec![],
+            drill_id: DrillId::Unknown,
+            children: None,
+        }
+    }
 }
 impl ElementInfo {
-    
-    pub fn lookup_drill_id(&self, drill_id: Option<&VecDeque<usize>>) -> Option<&ElementInfo> {
+    pub fn lookup_drill_id(&self, drill_id: DrillId) -> Option<&ElementInfo> {
         self.lookup_drill_id_inner(drill_id, 0)
     }
-    pub fn lookup_drill_id_inner(&self, drill_id: Option<&VecDeque<usize>>, skip: usize) -> Option<&ElementInfo> {
+    fn lookup_drill_id_inner(&self, drill_id: DrillId, skip: usize) -> Option<&ElementInfo> {
         // println!("Looking in {} for {:?} ({:?})", self.name, drill_id.map(|x| x.iter().skip(skip).collect::<Vec<&usize>>()), drill_id);
-        let Some(drill_id) = drill_id else {
-            // println!("drill_id is none, returning self");
+        if self.drill_id == drill_id {
             return Some(self);
+        }
+        let DrillId::Child(drill_id) = drill_id else {
+            return None;
         };
         if drill_id.is_empty() {
-            // println!("drill_id is empty, returning self");
-            return Some(self);
+            return None;
         }
-        if let Some(children) = &self.children {
-            // println!("found children {:?}", children.children.iter().map(|x| x.drill_id.clone()).collect_vec());
-            for child in &children.children {
-                if let Some(child_drill_id) = &child.drill_id {
-                    if child_drill_id.back() == drill_id.iter().skip(skip).next() {
-                        if skip == drill_id.len() - 1 {
-                            // println!("found full match");
-                            return Some(child);
-                        } else {
-                            // println!("found partial match");
-                            return child.lookup_drill_id_inner(Some(&drill_id.clone()), skip + 1);
-                        }
-                    }
+        let Some(children) = &self.children else {
+            return None;
+        };
+        // println!("found children {:?}", children.children.iter().map(|x| x.drill_id.clone()).collect_vec());
+        for child in children {
+            let DrillId::Child(child_drill_id) = &child.drill_id else {
+                continue;
+            };
+            if child_drill_id.back() == drill_id.iter().skip(skip).next() {
+                if skip == drill_id.len() - 1 {
+                    return Some(child);
+                } else {
+                    return child.lookup_drill_id_inner(DrillId::Child(drill_id.clone()), skip + 1);
                 }
             }
-        } else {
-            // println!("no children");
         }
-        // println!("no match");
+        None
+    }
+    pub fn lookup_drill_id_mut(&mut self, drill_id: DrillId) -> Option<&mut ElementInfo> {
+        self.lookup_drill_id_mut_inner(drill_id, 0)
+    }
+    
+    fn lookup_drill_id_mut_inner(&mut self, drill_id: DrillId, skip: usize) -> Option<&mut ElementInfo> {
+        // println!("Looking in {} for {:?} ({:?})", self.name, drill_id.map(|x| x.iter().skip(skip).collect::<Vec<&usize>>()), drill_id);
+        if self.drill_id == drill_id {
+            return Some(self);
+        }
+        let DrillId::Child(drill_id) = drill_id else {
+            return None;
+        };
+        if drill_id.is_empty() {
+            return None;
+        }
+        let Some(ref mut children) = self.children else {
+            return None;
+        };
+        // println!("found children {:?}", children.children.iter().map(|x| x.drill_id.clone()).collect_vec());
+        for child in children.iter_mut() {
+            let DrillId::Child(child_drill_id) = &child.drill_id else {
+                continue;
+            };
+            if child_drill_id.back() == drill_id.iter().skip(skip).next() {
+                if skip == drill_id.len() - 1 {
+                    return Some(child);
+                } else {
+                    return child.lookup_drill_id_mut_inner(DrillId::Child(drill_id.clone()), skip + 1);
+                }
+            }
+        }
         None
     }
 }
@@ -275,7 +325,6 @@ mod tests {
         use super::*;
         fn new_elem(name: &str, drill_id: Vec<usize>) -> ElementInfo {
             ElementInfo {
-                selected: false,
                 name: name.to_string(),
                 bounding_rect: Rect::new(0.0, 0.0, 100.0, 100.0),
                 control_type: ControlType::Button,
@@ -283,62 +332,36 @@ mod tests {
                 class_name: "Button".to_string(),
                 automation_id: "Button".to_string(),
                 runtime_id: vec![],
-                drill_id: Some(drill_id.into_iter().collect()),
+                drill_id: match drill_id.is_empty() {
+                    true => DrillId::Root,
+                    false => DrillId::Child(drill_id.into()),
+                },
                 children: None,
             }
         }
         let mut root = new_elem("root", vec![]);
-        root.drill_id = None;
 
         let mut a = new_elem("a", vec![0]);
         let a_a = new_elem("a_a", vec![0, 0]);
         let a_b = new_elem("a_b", vec![0, 1]);
-        a.children = Some(ElementChildren {
-            children: vec![a_a.clone(), a_b.clone()],
-            expanded: false,
-        });
+        a.children = Some(vec![a_a.clone(), a_b.clone()]);
 
         let mut b = new_elem("b", vec![1]);
         let mut b_a = new_elem("b_a", vec![1, 0]);
         let b_a_a = new_elem("b_a_a", vec![1, 0, 0]);
         let b_a_b = new_elem("b_a_b", vec![1, 0, 1]);
-        b_a.children = Some(ElementChildren {
-            children: vec![b_a_a.clone(), b_a_b.clone()],
-            expanded: false,
-        });
+        b_a.children = Some(vec![b_a_a.clone(), b_a_b.clone()]);
         let b_b = new_elem("b_b", vec![1, 1]);
-        b.children = Some(ElementChildren {
-            children: vec![b_a.clone(), b_b.clone()],
-            expanded: false,
-        });
+        b.children = Some(vec![b_a.clone(), b_b.clone()]);
 
-        root.children = Some(ElementChildren {
-            children: vec![a.clone(), b.clone()],
-            expanded: false,
-        });
-        
-        let items = vec![
-            &root,
-            &a,
-            &a_a,
-            &a_b,
-            &b,
-            &b_a,
-            &b_a_a,
-            &b_a_b,
-            &b_b,
-        ];
+        root.children = Some(vec![a.clone(), b.clone()]);
+
+        let items = vec![&root, &a, &a_a, &a_b, &b, &b_a, &b_a_a, &b_a_b, &b_b];
         for item in items {
             println!("Looking for {}", item.name);
-            let found = root.lookup_drill_id(item.drill_id.as_ref());
+            let found = root.lookup_drill_id(item.drill_id.clone());
             assert_eq!(found, Some(item));
             println!();
         }
     }
-}
-
-#[derive(Debug, Clone, Reflect, PartialEq)]
-pub struct ElementChildren {
-    pub children: Vec<ElementInfo>,
-    pub expanded: bool,
 }

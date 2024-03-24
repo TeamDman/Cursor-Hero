@@ -24,7 +24,7 @@ use cursor_hero_tools::prelude::*;
 use cursor_hero_ui_automation::prelude::find_element_at;
 use cursor_hero_ui_automation::prelude::gather_elements_at;
 use cursor_hero_ui_automation::prelude::gather_incomplete_ui_tree_starting_deep;
-use cursor_hero_ui_automation::prelude::ElementChildren;
+use cursor_hero_ui_automation::prelude::DrillId;
 use cursor_hero_ui_automation::prelude::ElementInfo;
 use cursor_hero_worker::prelude::Message;
 use cursor_hero_worker::prelude::WorkerConfig;
@@ -123,9 +123,16 @@ impl ToolAction for ScreenshotToolAction {
     }
 }
 
+#[derive(Reflect, Default)]
+struct ScreenshotBrickEguiState {
+    selected: Option<DrillId>,
+    expanded: Vec<DrillId>,
+}
+
 #[derive(Component, Reflect)]
 struct ScreenshotBrick {
     info: ElementInfo,
+    egui_state: ScreenshotBrickEguiState,
 }
 
 fn toolbelt_events(
@@ -428,6 +435,10 @@ fn spawn_brick(
         TrackEnvironmentTag,
         ScreenshotBrick {
             info: element_info.clone(),
+            egui_state: ScreenshotBrickEguiState {
+                selected: None,
+                expanded: vec![],
+            },
         },
         Collider::cuboid(size.x, size.y),
         MovementDamping::default(),
@@ -505,16 +516,24 @@ fn ui(
                             ui.heading("UI Tree");
                         });
                         egui::ScrollArea::both().show(ui, |ui| {
+                            let id = id.with(brick.info.runtime_id.clone());
+                            
+                            let mut temp_egui_state = std::mem::take(&mut brick.egui_state);
+                            let mut temp_info = std::mem::take(&mut brick.info);
                             ui_for_element_info(
-                                id.with(brick.info.runtime_id.clone()),
+                                &mut temp_egui_state,
+                                id,
                                 &mut commands,
                                 &screen_access,
                                 &asset_server,
                                 ui,
-                                &mut brick.info,
+                                &mut temp_info,
                                 &mut inspector,
                                 &popout_pos,
                             );
+                            brick.egui_state = temp_egui_state;
+                            brick.info = temp_info;
+
                             ui.allocate_space(ui.available_size());
                         });
                     });
@@ -525,6 +544,13 @@ fn ui(
 
                 egui::CentralPanel::default().show_inside(ui, |ui| {
                     ui.heading("AHOY!");
+                    let id = brick.egui_state.selected.clone();
+                    if let Some(id) = id
+                        && let Some(x) = brick.info.lookup_drill_id_mut(id)
+                    {
+                        inspector.ui_for_reflect(x, ui);
+                    }
+                    // inspector.ui_for_reflect_readonly(&data, ui);
                 });
             });
     }
@@ -538,6 +564,7 @@ struct ElementUIData {
 
 #[allow(clippy::too_many_arguments)]
 fn ui_for_element_info(
+    state: &mut ScreenshotBrickEguiState,
     id: egui::Id,
     commands: &mut Commands,
     screen_access: &ScreensToImageParam,
@@ -550,13 +577,27 @@ fn ui_for_element_info(
     egui::collapsing_header::CollapsingState::load_with_default_open(
         ui.ctx(),
         id,
-        element_info.children.as_ref().is_some_and(|c| c.expanded),
+        true,
+        // element_info.children.as_ref().is_some_and(|c| c.expanded),
     )
     .show_header(ui, |ui| {
-        ui.toggle_value(
-            &mut element_info.selected,
-            format!("{} | {}", element_info.name, element_info.class_name),
-        );
+        let mut selected = state.selected == Some(element_info.drill_id.clone());
+        if ui
+            .toggle_value(
+                &mut selected,
+                format!(
+                    "{:?} | {}",
+                    element_info.name, element_info.localized_control_type
+                ),
+            )
+            .changed()
+        {
+            state.selected = if selected {
+                Some(element_info.drill_id.clone())
+            } else {
+                None
+            };
+        };
     })
     .body(|ui| {
         // if ui.button("Popout").clicked() {
@@ -570,43 +611,10 @@ fn ui_for_element_info(
         //     )
         // }
 
-        // inspector.ui_for_reflect(element_info, ui);
-        // let mut data = ElementUIData {
-        //     runtime_id: format!(
-        //         "[{}]",
-        //         element_info
-        //             .runtime_id
-        //             .iter()
-        //             .map(|x| format!("{:x}", x).to_string())
-        //             .collect_vec()
-        //             .join(",")
-        //     ),
-        //     frick: "Here's something longer, gimme enough space please.".to_string(),
-        // };
-        // inspector.ui_for_reflect_readonly(&data, ui);
-
-        // if let Some(children) = &mut element_info.children {
-        //     egui::CollapsingHeader::new("Children")
-        //         .id_source(id.with("children_header"))
-        //         .default_open(!children.is_empty())
-        //         .show(ui, |ui| {
-        //             for child in children.iter_mut() {
-        //                 ui_for_element_info(
-        //                     id.with(child.runtime_id.clone()),
-        //                     commands,
-        //                     screen_access,
-        //                     asset_server,
-        //                     ui,
-        //                     child,
-        //                     _inspector,
-        //                     popout_pos,
-        //                 );
-        //             }
-        //         });
-        // }
-        if let Some(ElementChildren { children, .. }) = &mut element_info.children {
+        if let Some(children) = &mut element_info.children {
             for child in children.iter_mut() {
                 ui_for_element_info(
+                    state,
                     id.with(child.runtime_id.clone()),
                     commands,
                     screen_access,
