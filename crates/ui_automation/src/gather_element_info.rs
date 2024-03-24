@@ -23,6 +23,7 @@ pub fn gather_incomplete_ui_tree_starting_deep(
         .ok_or(Error::new(-1, "No root element found"))?
         .clone();
     let mut root_info = gather_tree(&root_element, &walker, &ancestors, 0)?;
+    root_info.drill_id = DrillId::Root;
 
     update_drill_ids(&mut root_info, &VecDeque::new());
 

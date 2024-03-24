@@ -409,6 +409,19 @@ fn spawn_brick(
         return;
     };
     let texture_handle = asset_server.add(image);
+    let mut expanded = vec![element_info.drill_id.clone()];
+    let mut visit_next = vec![element_info];
+    // we want to expand all descendents which have Some children
+    while let Some(info) = visit_next.pop() {
+        if let Some(children) = &info.children {
+            for child in children.iter() {
+                visit_next.push(child);
+                if child.children.is_some() {
+                    expanded.push(child.drill_id.clone());
+                }
+            }
+        }
+    }
     commands.spawn((
         SpriteBundle {
             transform: Transform::from_translation(pos),
@@ -436,8 +449,8 @@ fn spawn_brick(
         ScreenshotBrick {
             info: element_info.clone(),
             egui_state: ScreenshotBrickEguiState {
-                selected: None,
-                expanded: vec![],
+                selected: Some(element_info.drill_id.clone()),
+                expanded,
             },
         },
         Collider::cuboid(size.x, size.y),
@@ -517,7 +530,7 @@ fn ui(
                         });
                         egui::ScrollArea::both().show(ui, |ui| {
                             let id = id.with(brick.info.runtime_id.clone());
-                            
+
                             let mut temp_egui_state = std::mem::take(&mut brick.egui_state);
                             let mut temp_info = std::mem::take(&mut brick.info);
                             ui_for_element_info(
@@ -577,8 +590,7 @@ fn ui_for_element_info(
     egui::collapsing_header::CollapsingState::load_with_default_open(
         ui.ctx(),
         id,
-        true,
-        // element_info.children.as_ref().is_some_and(|c| c.expanded),
+        state.expanded.contains(&element_info.drill_id),
     )
     .show_header(ui, |ui| {
         let mut selected = state.selected == Some(element_info.drill_id.clone());
