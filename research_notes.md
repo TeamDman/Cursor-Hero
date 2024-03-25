@@ -133,3 +133,12 @@
 - [Quickstart | Motion Canvas](https://motioncanvas.io/docs/quickstart/)
   - [examples/examples at master - motion-canvas/examples (github.com)](https://github.com/motion-canvas/examples/tree/master/examples)
   - [reviewing your motion canvas animations ![](https://img.youtube.com/vi/lY6D9x9qCt4/0.jpg)](https://www.youtube.com/watch?v=lY6D9x9qCt4)
+
+## Art
+
+- [Aseprite - Animated sprite editor & pixel art tool](https://www.aseprite.org/)
+
+## UI
+
+- [linebender/vello: An experimental GPU compute-centric 2D renderer. (github.com)](https://github.com/linebender/vello)
+  - [loopystudios/bevy\_vello: An integration to render with Vello in Bevy game engine. (github.com)](https://github.com/loopystudios/bevy_vello)

@@ -316,6 +316,16 @@ impl ElementInfo {
         }
         None
     }
+    pub fn get_descendents(&self) -> Vec<&ElementInfo> {
+        let mut descendents = vec![];
+        if let Some(children) = &self.children {
+            for child in children {
+                descendents.push(child);
+                descendents.extend(child.get_descendents());
+            }
+        }
+        descendents
+    }
 }
 // test lookup_drill_id
 #[cfg(test)]

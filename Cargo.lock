@@ -2602,6 +2602,8 @@ name = "cursor_hero_ui_automation"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "bevy-inspector-egui",
+ "bevy_egui",
  "cursor_hero_memory_types",
  "cursor_hero_metrics",
  "cursor_hero_ui_automation_types",

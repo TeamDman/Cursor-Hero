@@ -29,6 +29,7 @@ use cursor_hero_ui_automation::prelude::ElementInfo;
 use cursor_hero_worker::prelude::Message;
 use cursor_hero_worker::prelude::WorkerConfig;
 use cursor_hero_worker::prelude::WorkerPlugin;
+use itertools::Itertools;
 use leafwing_input_manager::prelude::*;
 use rand::thread_rng;
 use rand::Rng;
@@ -67,11 +68,13 @@ impl Message for ThreadboundMessage {}
 #[derive(Debug, Reflect, Clone, Event)]
 enum GameboundMessage {
     Capture {
-        element_info: ElementInfo,
+        ui_tree: ElementInfo,
+        hovered_element: ElementInfo,
         world_position: Vec3,
     },
     CaptureBrick {
-        element_info: ElementInfo,
+        ui_tree: ElementInfo,
+        hovered_element: ElementInfo,
         world_position: Vec3,
     },
     Print(ElementInfo),
@@ -95,8 +98,8 @@ enum ScreenshotToolAction {
 impl ScreenshotToolAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
-            Self::Capture => GamepadButtonType::South.into(),
-            Self::CaptureBrick => GamepadButtonType::RightTrigger.into(),
+            Self::Capture => GamepadButtonType::RightTrigger.into(),
+            Self::CaptureBrick => GamepadButtonType::South.into(),
             Self::Print => GamepadButtonType::North.into(),
             Self::Fracture => GamepadButtonType::Select.into(),
         }
@@ -104,8 +107,8 @@ impl ScreenshotToolAction {
 
     fn default_mkb_binding(&self) -> UserInput {
         match self {
-            Self::Capture => MouseButton::Middle.into(),
-            Self::CaptureBrick => MouseButton::Left.into(),
+            Self::Capture => MouseButton::Left.into(),
+            Self::CaptureBrick => MouseButton::Middle.into(),
             Self::Print => MouseButton::Right.into(),
             Self::Fracture => KeyCode::G.into(),
         }
@@ -131,7 +134,8 @@ struct ScreenshotBrickEguiState {
 
 #[derive(Component, Reflect)]
 struct ScreenshotBrick {
-    info: ElementInfo,
+    ui_tree: ElementInfo,
+    hero_element: ElementInfo,
     egui_state: ScreenshotBrickEguiState,
 }
 
@@ -245,16 +249,18 @@ fn handle_threadbound_message(
 
             let id = elem.get_automation_id()?;
             info!("Automation ID: {}", id);
-            let element_info = gather_incomplete_ui_tree_starting_deep(elem)?;
+            let gathered = gather_incomplete_ui_tree_starting_deep(elem)?;
             // debug!("Element info: {:?}", element_info);
             let msg = match msg {
                 ThreadboundMessage::Capture { world_position } => GameboundMessage::Capture {
-                    element_info,
+                    ui_tree: gathered.ui_tree,
+                    hovered_element: gathered.start_info,
                     world_position: *world_position,
                 },
                 ThreadboundMessage::CaptureBrick { world_position } => {
                     GameboundMessage::CaptureBrick {
-                        element_info,
+                        ui_tree: gathered.ui_tree,
+                        hovered_element: gathered.start_info,
                         world_position: *world_position,
                     }
                 }
@@ -267,7 +273,7 @@ fn handle_threadbound_message(
             debug!("Worker received click: {:?} {:?}", msg, mouse_position);
 
             let elem = find_element_at(mouse_position)?;
-            info!("{} - {}", elem.get_classname()?, elem.get_name()?);
+            info!("{:?}", elem);
 
             // Can we click on elements with this?
             // elem.send_keys(keys, interval) exists!
@@ -275,8 +281,8 @@ fn handle_threadbound_message(
             // Send the info
             let id = elem.get_automation_id()?;
             info!("Automation ID: {}", id);
-            let info = gather_incomplete_ui_tree_starting_deep(elem)?;
-            reply_tx.send(GameboundMessage::Print(info))?;
+            let gathered = gather_incomplete_ui_tree_starting_deep(elem)?;
+            reply_tx.send(GameboundMessage::Print(gathered.ui_tree))?;
         }
         ThreadboundMessage::Fracture { world_position } => {
             let mouse_position = world_position.xy().neg_y().as_ivec2();
@@ -288,7 +294,7 @@ fn handle_threadbound_message(
                 .filter_map(|(elem, depth)| {
                     gather_incomplete_ui_tree_starting_deep(elem)
                         .ok()
-                        .map(|info| (info, depth))
+                        .map(|info| (info.start_info, depth))
                 })
                 .collect();
             reply_tx.send(GameboundMessage::Fracture {
@@ -310,29 +316,35 @@ fn handle_replies(
     for msg in bridge.read() {
         match &msg {
             GameboundMessage::Capture {
-                element_info,
+                ui_tree,
+                hovered_element,
                 world_position,
             }
             | GameboundMessage::CaptureBrick {
-                element_info,
+                ui_tree,
+                hovered_element,
                 world_position,
             } => {
-                let (size, pos) = match msg {
+                let (size, pos, texture_region) = match msg {
                     GameboundMessage::Capture { .. } => (
-                        element_info.bounding_rect.size(),
-                        element_info.bounding_rect.center().extend(20.0).neg_y(),
+                        hovered_element.bounding_rect.size(),
+                        hovered_element.bounding_rect.center().extend(20.0).neg_y(),
+                        hovered_element.bounding_rect,
                     ),
                     GameboundMessage::CaptureBrick { .. } => (
-                        element_info.bounding_rect.size().normalize() * 60.0,
+                        hovered_element.bounding_rect.size().normalize() * 60.0,
                         *world_position,
+                        hovered_element.bounding_rect,
                     ),
                     _ => unreachable!(),
                 };
                 spawn_brick(
                     &mut commands,
-                    element_info,
+                    ui_tree,
+                    hovered_element,
                     size,
                     pos,
+                    texture_region,
                     &screen_access,
                     &asset_server,
                 );
@@ -399,29 +411,25 @@ fn handle_replies(
 
 fn spawn_brick(
     commands: &mut Commands,
-    element_info: &ElementInfo,
+    ui_tree: &ElementInfo,
+    hero_element: &ElementInfo,
     size: Vec2,
     pos: Vec3,
+    texture_region: Rect,
     screen_access: &ScreensToImageParam,
     asset_server: &Res<AssetServer>,
 ) {
-    let Ok(image) = get_image(element_info.bounding_rect, screen_access) else {
+    let Ok(image) = get_image(texture_region, screen_access) else {
         return;
     };
     let texture_handle = asset_server.add(image);
-    let mut expanded = vec![element_info.drill_id.clone()];
-    let mut visit_next = vec![element_info];
-    // we want to expand all descendents which have Some children
-    while let Some(info) = visit_next.pop() {
-        if let Some(children) = &info.children {
-            for child in children.iter() {
-                visit_next.push(child);
-                if child.children.is_some() {
-                    expanded.push(child.drill_id.clone());
-                }
-            }
-        }
-    }
+    let expanded = ui_tree
+        .get_descendents()
+        .iter()
+        .chain([ui_tree].iter())
+        .filter(|x| x.children.is_some())
+        .map(|x| x.drill_id.clone())
+        .collect();
     commands.spawn((
         SpriteBundle {
             transform: Transform::from_translation(pos),
@@ -447,15 +455,16 @@ fn spawn_brick(
         RigidBody::Dynamic,
         TrackEnvironmentTag,
         ScreenshotBrick {
-            info: element_info.clone(),
+            ui_tree: ui_tree.clone(),
+            hero_element: hero_element.clone(),
             egui_state: ScreenshotBrickEguiState {
-                selected: Some(element_info.drill_id.clone()),
+                selected: Some(hero_element.drill_id.clone()),
                 expanded,
             },
         },
         Collider::cuboid(size.x, size.y),
         MovementDamping::default(),
-        Name::new(format!("Element - {}", element_info.name)),
+        Name::new(format!("Element - {}", hero_element.name)),
     ));
 }
 
@@ -529,10 +538,10 @@ fn ui(
                             ui.heading("UI Tree");
                         });
                         egui::ScrollArea::both().show(ui, |ui| {
-                            let id = id.with(brick.info.runtime_id.clone());
+                            let id = id.with(brick.ui_tree.runtime_id.clone());
 
                             let mut temp_egui_state = std::mem::take(&mut brick.egui_state);
-                            let mut temp_info = std::mem::take(&mut brick.info);
+                            let mut temp_info = std::mem::take(&mut brick.ui_tree);
                             ui_for_element_info(
                                 &mut temp_egui_state,
                                 id,
@@ -545,7 +554,7 @@ fn ui(
                                 &popout_pos,
                             );
                             brick.egui_state = temp_egui_state;
-                            brick.info = temp_info;
+                            brick.ui_tree = temp_info;
 
                             ui.allocate_space(ui.available_size());
                         });
@@ -559,7 +568,7 @@ fn ui(
                     ui.heading("AHOY!");
                     let id = brick.egui_state.selected.clone();
                     if let Some(id) = id
-                        && let Some(x) = brick.info.lookup_drill_id_mut(id)
+                        && let Some(x) = brick.ui_tree.lookup_drill_id_mut(id)
                     {
                         inspector.ui_for_reflect(x, ui);
                     }
