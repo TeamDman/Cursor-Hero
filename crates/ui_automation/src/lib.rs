@@ -17,5 +17,6 @@ pub mod prelude {
     pub use crate::take_snapshot::*;
     pub use crate::taskbar::*;
     pub use crate::ui_automation_plugin::*;
+    pub use crate::gather_children::*;
     pub use cursor_hero_ui_automation_types::prelude::*;
 }

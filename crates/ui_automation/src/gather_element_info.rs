@@ -30,7 +30,7 @@ pub fn gather_incomplete_ui_tree_starting_deep(
     let mut root_info = gather_tree(&root_element, &walker, &ancestors, 0)?;
     root_info.drill_id = DrillId::Root;
 
-    update_drill_ids(&mut root_info, &VecDeque::new());
+    update_drill_ids(root_info.children.as_mut(), &DrillId::Root);
 
     let start_info = root_info
         .get_descendents()
@@ -115,23 +115,30 @@ fn gather_tree(
     Ok(element_info)
 }
 
-fn update_drill_ids(parent_info: &mut ElementInfo, ancestor_path: &VecDeque<usize>) {
-    if let Some(children) = &mut parent_info.children {
+pub fn update_drill_ids(children: Option<&mut Vec<ElementInfo>>, ancestor_path: &DrillId) {
+    if let Some(children) = children {
         for child_info in children.iter_mut() {
             // Check if the child has a base drill_id set
             if let DrillId::Child(base_drill_id) = &child_info.drill_id {
                 let mut new_path = ancestor_path.clone();
-
-                // The last entry in base_drill_id represents the child's position in its immediate parent
                 if let Some(&child_position) = base_drill_id.back() {
-                    new_path.push_back(child_position); // Use the position from the base drill_id
+                    new_path = match new_path {
+                        DrillId::Root | DrillId::Unknown => {
+                            DrillId::Child(vec![child_position].into())
+                        }
+                        DrillId::Child(ref mut path) => {
+                            let mut new_path = path.clone();
+                            new_path.push_back(child_position);
+                            DrillId::Child(new_path)
+                        }
+                    };
 
                     // Update the child's drill_id by concatenating the ancestor_path with its own position
-                    child_info.drill_id = DrillId::Child(new_path.clone());
+                    child_info.drill_id = new_path.clone();
                 }
 
                 // Recursively update this child's children
-                update_drill_ids(child_info, &new_path);
+                update_drill_ids(child_info.children.as_mut(), &new_path);
             }
         }
     }

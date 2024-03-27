@@ -2,6 +2,9 @@ use std::collections::VecDeque;
 use uiautomation::UIElement;
 use uiautomation::UITreeWalker;
 
+use crate::prelude::DrillId;
+
+#[derive(Debug)]
 pub enum DrillError {
     UI(uiautomation::Error),
     EmptyPath,
@@ -12,24 +15,55 @@ pub enum DrillError {
         error: uiautomation::Error,
     },
 }
+impl std::error::Error for DrillError {}
+impl std::fmt::Display for DrillError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            DrillError::UI(e) => write!(f, "UIAutomation error: {}", e),
+            DrillError::EmptyPath => write!(f, "Empty path"),
+            DrillError::BadPath => write!(f, "Bad path"),
+            DrillError::OutOfBounds { given, max, error } => write!(
+                f,
+                "Out of bounds: given {}, max {}, error: {}",
+                given, max, error
+            ),
+        }
+    }
+}
 impl From<uiautomation::Error> for DrillError {
     fn from(e: uiautomation::Error) -> Self {
         DrillError::UI(e)
     }
 }
 pub trait Drillable {
-    fn drill(&self, walker: &UITreeWalker, path: Vec<i32>) -> Result<UIElement, DrillError>;
+    fn drill<T: Into<DrillId>>(
+        &self,
+        walker: &UITreeWalker,
+        path: T,
+    ) -> Result<UIElement, DrillError>;
 }
 impl Drillable for UIElement {
-    fn drill(&self, walker: &UITreeWalker, path: Vec<i32>) -> Result<UIElement, DrillError> {
-        let mut path = path
-            .into_iter()
-            .map(|x| x as u32)
-            .collect::<VecDeque<u32>>();
-        if path.iter().any(|x| (*x as i32) < 0) {
-            return Err(DrillError::BadPath);
+    fn drill<T: Into<DrillId>>(
+        &self,
+        walker: &UITreeWalker,
+        path: T,
+    ) -> Result<UIElement, DrillError> {
+        let drill_id: DrillId = path.into();
+        match drill_id {
+            DrillId::Child(path) => {
+                let mut path = path
+                    .into_iter()
+                    .map(|x| x as u32)
+                    .collect::<VecDeque<u32>>();
+                if path.iter().any(|x| (*x as i32) < 0) {
+                    return Err(DrillError::BadPath);
+                }
+                drill_inner(self, walker, &mut path)
+            }
+            DrillId::Root | DrillId::Unknown => {
+                return Err(DrillError::BadPath);
+            }
         }
-        drill_inner(self, walker, &mut path)
     }
 }
 fn drill_inner(

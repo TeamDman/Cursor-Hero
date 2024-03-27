@@ -219,12 +219,34 @@ impl From<uiautomation::controls::ControlType> for ControlType {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Reflect, Default)]
+pub type RuntimeId = Vec<i32>;
+
+#[derive(Debug, Eq, PartialEq, Clone, Reflect, Default, Hash)]
 pub enum DrillId {
     Root,
     Child(VecDeque<usize>),
     #[default]
     Unknown,
+}
+impl From<Vec<usize>> for DrillId {
+    fn from(value: Vec<usize>) -> Self {
+        DrillId::Child(value.into())
+    }
+}
+impl From<VecDeque<usize>> for DrillId {
+    fn from(value: VecDeque<usize>) -> Self {
+        DrillId::Child(value)
+    }
+}
+impl From<Vec<i32>> for DrillId {
+    fn from(value: Vec<i32>) -> Self {
+        DrillId::Child(value.into_iter().map(|x| x as usize).collect())
+    }
+}
+impl From<VecDeque<i32>> for DrillId {
+    fn from(value: VecDeque<i32>) -> Self {
+        DrillId::Child(value.into_iter().map(|x| x as usize).collect())
+    }
 }
 impl std::fmt::Display for DrillId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
