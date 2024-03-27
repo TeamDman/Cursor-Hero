@@ -4,11 +4,14 @@ use bevy::log::LogPlugin;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy_egui::egui;
+use bevy_egui::egui::Align2;
 use bevy_egui::EguiContexts;
 use bevy_egui::EguiSet;
+use bevy_inspector_egui::bevy_inspector;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_inspector_egui::reflect_inspector::Context;
 use bevy_inspector_egui::reflect_inspector::InspectorUi;
+use cursor_hero_memory::primary_window_memory_plugin::PrimaryWindowMemoryPlugin;
 use cursor_hero_ui_automation::prelude::*;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
 use cursor_hero_worker::prelude::Message;
@@ -45,6 +48,7 @@ cursor_hero_worker=debug,
     app.add_plugins(
         WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)),
     );
+    app.add_plugins(PrimaryWindowMemoryPlugin);
     app.insert_resource(ClearColor(Color::rgb(0.992, 0.714, 0.69)));
     app.add_systems(Startup, spawn_camera);
     app.add_systems(Update, trigger);
@@ -69,6 +73,7 @@ impl Message for ThreadboundUISnapshotMessage {}
 enum GameboundUISnapshotMessage {
     Hovered {
         ui_tree: ElementInfo,
+        start: ElementInfo,
         hovered: ElementInfo,
     },
 }
@@ -78,10 +83,13 @@ impl Message for GameboundUISnapshotMessage {}
 #[reflect(Resource)]
 struct UIData {
     pub start: ElementInfo,
+    pub hovered: ElementInfo,
     pub ui_tree: ElementInfo,
     pub selected: Option<DrillId>,
     pub expanded: Vec<DrillId>,
     pub fresh: bool,
+    pub in_flight: bool,
+    pub paused: bool,
 }
 
 fn handle_threadbound_message(
@@ -92,10 +100,12 @@ fn handle_threadbound_message(
     debug!("taking snapshot");
     let cursor_pos = get_cursor_position()?;
     let hovered = find_element_at(cursor_pos)?;
+    let hovered_info = gather_single_element_info(&hovered)?;
     let gathered = gather_incomplete_ui_tree_starting_deep(hovered)?;
     if let Err(e) = reply_tx.send(GameboundUISnapshotMessage::Hovered {
         ui_tree: gathered.ui_tree,
-        hovered: gathered.start_info,
+        start: gathered.start_info,
+        hovered: hovered_info,
     }) {
         error!("Failed to send snapshot: {:?}", e);
     }
@@ -103,6 +113,7 @@ fn handle_threadbound_message(
 }
 
 fn trigger(
+    mut data: ResMut<UIData>,
     mut cooldown: Local<Option<Timer>>,
     time: Res<Time>,
     mut events: EventWriter<ThreadboundUISnapshotMessage>,
@@ -114,7 +125,7 @@ fn trigger(
     if window.cursor_position().is_some() {
         return;
     }
-    let should_tick = if let Some(cooldown) = cooldown.as_mut() {
+    let cooldown_over = if let Some(cooldown) = cooldown.as_mut() {
         if cooldown.tick(time.delta()).just_finished() {
             cooldown.reset();
             true
@@ -122,22 +133,39 @@ fn trigger(
             false
         }
     } else {
-        cooldown.replace(Timer::from_seconds(3.0, TimerMode::Repeating));
+        cooldown.replace(Timer::from_seconds(0.5, TimerMode::Repeating));
         true
     };
-    if !should_tick {
+    if !cooldown_over {
         return;
     }
+
+    if data.paused {
+        return;
+    }
+
+    if data.in_flight {
+        warn!("Too fast!");
+        return;
+    }
+
     events.send(ThreadboundUISnapshotMessage::CaptureHovered);
+    data.in_flight = true;
 }
 
 fn receive(mut snapshot: EventReader<GameboundUISnapshotMessage>, mut ui_data: ResMut<UIData>) {
     for msg in snapshot.read() {
         match msg {
-            GameboundUISnapshotMessage::Hovered { ui_tree, hovered } => {
+            GameboundUISnapshotMessage::Hovered {
+                ui_tree,
+                start,
+                hovered,
+            } => {
+                ui_data.in_flight = false;
                 ui_data.ui_tree = ui_tree.clone();
-                ui_data.start = hovered.clone();
-                ui_data.selected = Some(hovered.drill_id.clone());
+                ui_data.start = start.clone();
+                ui_data.hovered = hovered.clone();
+                ui_data.selected = Some(start.drill_id.clone());
                 ui_data.expanded = ui_tree
                     .get_descendents()
                     .iter()
@@ -167,10 +195,14 @@ fn gui(
     let type_registry = type_registry.0.clone();
     let type_registry = type_registry.read();
     let mut inspector = InspectorUi::for_bevy(&type_registry, &mut cx);
-    let id = egui::Id::new("Hovered");
-    egui::Window::new("Hovered")
+
+    let id = egui::Id::new("Inspector");
+    egui::Window::new("Inspector")
+        .title_bar(false)
         .id(id)
+        .default_pos((5.0, 5.0))
         .default_width(1200.0)
+        .default_height(1000.0)
         .show(ctx, |ui| {
             egui::SidePanel::left(id.with("tree"))
                 .resizable(true)
@@ -193,15 +225,36 @@ fn gui(
                 .show_inside(ui, |_| ());
 
             egui::CentralPanel::default().show_inside(ui, |ui| {
-                ui.heading("AHOY!");
+                ui.vertical_centered(|ui| {
+                    ui.heading("Properties");
+                });
                 let id = ui_data.selected.clone();
                 if let Some(id) = id
                     && let Some(x) = ui_data.ui_tree.lookup_drill_id_mut(id)
                 {
-                    inspector.ui_for_reflect(x, ui);
+                    inspector.ui_for_reflect_readonly(x, ui);
+                    ui.separator();
+                    ui.label("drill_id");
+                    let drill_id = x.drill_id.to_string();
+                    inspector.ui_for_reflect_readonly(&drill_id, ui);
+                    if ui.button("copy").clicked() {
+                        ui.output_mut(|out| {
+                            out.copied_text = drill_id.clone();
+                        });
+                        info!("Copied drill_id {} to clipboard", drill_id);
+                    }
                 }
                 // inspector.ui_for_reflect_readonly(&data, ui);
             });
+        });
+
+    let id = egui::Id::new("Paused");
+    egui::Window::new("Paused")
+        .id(id)
+        .title_bar(false)
+        .anchor(Align2::RIGHT_TOP, (5.0, 5.0))
+        .show(ctx, |ui| {
+            ui.checkbox(&mut ui_data.paused, "Paused");
         });
     ui_data.fresh = false;
 }
@@ -210,22 +263,25 @@ fn gui(
 fn ui_for_element_info(
     id: egui::Id,
     ui: &mut egui::Ui,
-    ui_data: &mut UIData,
+    data: &mut UIData,
     element_info: &ElementInfo,
     _inspector: &mut InspectorUi,
 ) {
-    let default_open = ui_data.expanded.contains(&element_info.drill_id);
+    let default_open = data.expanded.contains(&element_info.drill_id);
     let mut expando = egui::collapsing_header::CollapsingState::load_with_default_open(
         ui.ctx(),
         id,
         default_open,
     );
-    if ui_data.fresh {
+    if data.fresh {
         expando.set_open(default_open);
     }
     expando
         .show_header(ui, |ui| {
-            let mut selected = ui_data.selected == Some(element_info.drill_id.clone());
+            let mut selected = data.selected == Some(element_info.drill_id.clone());
+            if selected && data.fresh {
+                ui.scroll_to_cursor(Some(egui::Align::Center));
+            }
             if ui
                 .toggle_value(
                     &mut selected,
@@ -236,7 +292,7 @@ fn ui_for_element_info(
                 )
                 .changed()
             {
-                ui_data.selected = if selected {
+                data.selected = if selected {
                     Some(element_info.drill_id.clone())
                 } else {
                     None
@@ -249,7 +305,7 @@ fn ui_for_element_info(
                     ui_for_element_info(
                         id.with(child.runtime_id.clone()),
                         ui,
-                        ui_data,
+                        data,
                         child,
                         _inspector,
                     );

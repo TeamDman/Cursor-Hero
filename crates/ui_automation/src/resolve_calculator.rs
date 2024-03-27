@@ -15,28 +15,21 @@ use crate::gather_children::gather_children;
 use crate::gather_children::GatherChildrenable;
 use crate::gather_children::StopBehaviour;
 
-pub(crate) fn resolve_vscode(
+pub(crate) fn resolve_calculator(
     elem: &UIElement,
     automation: &UIAutomation,
     focused: bool,
 ) -> Result<AppWindow, AppResolveError> {
-    let walker = automation.create_tree_walker()?;
-    let root = elem;
+    // let walker = automation.create_tree_walker()?;
+    // let root = elem;
 
-    let temp = root.drill(&walker, vec![0, 0, 0, 0, 0, 1])?;
+    // let temp = root.drill(&walker, vec![0, 0, 0, 0, 0, 1])?;
 
-    let body = temp.drill(&walker, vec![1, 0, 1])?;
-    let body = resolve_body(&body, &walker)?;
+    // let body = temp.drill(&walker, vec![1, 0, 1])?;
+    // let body = resolve_body(&body, &walker)?;
 
-    let footer = temp.drill(&walker, vec![2, 0])?;
-    let footer = resolve_footer(&footer, automation)?;
-    drop(temp);
-
-    Ok(AppWindow::VSCode(VSCodeWindow {
-        focused,
-        header: VSCodeWindowHeader {},
-        body,
-        footer,
+    Ok(AppWindow::Calculator(Calculator {
+        memory: CalculatorMemory { buffer: 0.0 },
     }))
 }
 

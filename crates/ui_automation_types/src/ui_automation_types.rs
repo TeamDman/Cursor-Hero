@@ -1,3 +1,4 @@
+use crate::prelude::Calculator;
 use crate::vscode_ui_types::*;
 use bevy::prelude::*;
 use serde::Deserialize;
@@ -8,6 +9,7 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use uiautomation::core::UICondition;
 use uiautomation::UIAutomation;
+
 
 pub trait HexList {
     fn to_hex_list(&self) -> String;
@@ -24,7 +26,7 @@ impl HexList for Vec<i32> {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, Reflect)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Reflect)]
 pub struct UISnapshot {
     pub app_windows: Vec<AppWindow>,
 }
@@ -39,15 +41,17 @@ impl Display for UISnapshot {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Reflect)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Reflect)]
 pub enum AppWindow {
     VSCode(VSCodeWindow),
+    Calculator(Calculator),
 }
 
 impl Display for AppWindow {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             AppWindow::VSCode(window) => write!(f, "{}", window),
+            AppWindow::Calculator(window) => write!(f, "{}", window), 
         }
     }
 }
@@ -215,12 +219,31 @@ impl From<uiautomation::controls::ControlType> for ControlType {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Reflect)]
+#[derive(Debug, Eq, PartialEq, Clone, Reflect, Default)]
 pub enum DrillId {
     Root,
     Child(VecDeque<usize>),
+    #[default]
     Unknown,
 }
+impl std::fmt::Display for DrillId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            DrillId::Root => write!(f, "Root"),
+            DrillId::Child(drill_id) => write!(
+                f,
+                "{}",
+                drill_id
+                    .iter()
+                    .map(|x| x.to_string())
+                    .collect::<Vec<String>>()
+                    .join(",")
+            ),
+            DrillId::Unknown => write!(f, "Unknown"),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Reflect, PartialEq)]
 // #[reflect(no_field_bounds)] //https://github.com/bevyengine/bevy/issues/8965
 pub struct ElementInfo {
@@ -230,7 +253,9 @@ pub struct ElementInfo {
     pub localized_control_type: String,
     pub class_name: String,
     pub automation_id: String,
+    #[reflect(ignore)]
     pub runtime_id: Vec<i32>,
+    #[reflect(ignore)]
     pub drill_id: DrillId,
     #[reflect(ignore)]
     pub children: Option<Vec<ElementInfo>>,

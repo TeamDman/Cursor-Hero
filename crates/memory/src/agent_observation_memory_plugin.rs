@@ -49,7 +49,7 @@ impl Default for MainCharacterMemoryConfig {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Eq, Default)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
 struct DiskData {
     observations_by_observer_name: HashMap<String, ObservationBuffer>,
 }

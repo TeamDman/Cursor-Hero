@@ -55,7 +55,7 @@ impl PartialOrd for WhatsNew {
     }
 }
 
-#[derive(Component, Reflect, Default, Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Component, Reflect, Default, Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct ObservationBuffer {
     pub observations: Vec<ObservationBufferEntry>,
     pub log_level: ObservationLogLevel, // TODO: investigate always logging but updating the log filter instead of not logging based on level
@@ -68,7 +68,7 @@ pub enum ObservationLogLevel {
     All,
 }
 
-#[derive(Component, Reflect, Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
+#[derive(Component, Reflect, Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct ObservationBufferEntry {
     #[reflect(ignore)]
     pub datetime: DateTime<Local>,
@@ -80,7 +80,7 @@ pub enum ObservationBufferEvent {
     Updated { buffer_id: Entity },
 }
 
-#[derive(Event, Debug, Clone, Reflect, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Event, Debug, Clone, Reflect, Serialize, Deserialize, PartialEq)]
 pub enum SomethingObservableHappenedEvent {
     Chat {
         environment_id: Option<Entity>,

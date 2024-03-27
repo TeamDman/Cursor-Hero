@@ -25,6 +25,7 @@ image = { workspace = true }
 
 [dev-dependencies]
 cursor_hero_memory_types = { workspace = true }
+cursor_hero_memory = { workspace = true }
 cursor_hero_worker = { workspace = true }
 bevy_egui = {workspace = true}
 bevy-inspector-egui = { workspace = true }

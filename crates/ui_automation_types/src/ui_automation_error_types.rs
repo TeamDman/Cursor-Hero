@@ -6,6 +6,7 @@ use std::fmt;
 pub enum AppResolveError {
     UI(uiautomation::Error),
     BadStructure(String),
+    BadVSCodeStructure(String),
     NoMatch,
 }
 impl From<uiautomation::Error> for AppResolveError {
@@ -34,13 +35,13 @@ impl From<VSCodeResolveError> for AppResolveError {
     fn from(e: VSCodeResolveError) -> Self {
         match e {
             VSCodeResolveError::UnknownSideTabKind(s) => {
-                AppResolveError::BadStructure(format!("Unknown VSCode side tab kind: {}", s))
+                AppResolveError::BadVSCodeStructure(format!("Unknown VSCode side tab kind: {}", s))
             }
             VSCodeResolveError::UnknownState => {
-                AppResolveError::BadStructure("Unknown VSCode state".to_string())
+                AppResolveError::BadVSCodeStructure("Unknown VSCode state".to_string())
             }
             VSCodeResolveError::UI(e) => AppResolveError::UI(e),
-            VSCodeResolveError::BadChildCount { tried_accessing } => AppResolveError::BadStructure(
+            VSCodeResolveError::BadChildCount { tried_accessing } => AppResolveError::BadVSCodeStructure(
                 format!("Bad child count: tried accessing: {}", tried_accessing),
             ),
         }

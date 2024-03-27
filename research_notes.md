@@ -48,6 +48,12 @@
 - [Understanding Threading Issues - Win32 apps | Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/winauto/uiauto-threading)
 - [UI Automation Threading Issues - .NET Framework | Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/ui-automation-threading-issues)
 - [c# - System.Windows.Automation is extremely slow - Stack Overflow](https://stackoverflow.com/questions/41768046/system-windows-automation-is-extremely-slow)
+- [msdn-code-gallery-microsoft/Official Windows Platform Sample/UI Automation document content client sample at master - microsoftarchive/msdn-code-gallery-microsoft (github.com)](https://github.com/microsoftarchive/msdn-code-gallery-microsoft/tree/master/Official%20Windows%20Platform%20Sample/UI%20Automation%20document%20content%20client%20sample)
+  - [Browse code samples | Microsoft Learn](https://learn.microsoft.com/en-us/samples/browse/)
+- caching
+  - [UIAutomation not catching all elements - Microsoft Q&A](https://learn.microsoft.com/en-us/answers/questions/545180/uiautomation-not-catching-all-elements)
+  - [Caching UI Automation Properties and Control Patterns - Win32 apps | Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/winauto/uiauto-cachingforclients)
+  - [IUIAutomationElement::FindAllBuildCache (uiautomationclient.h) - Win32 apps | Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/api/uiautomationclient/nf-uiautomationclient-iuiautomationelement-findallbuildcache)
 
 ## Win32
 

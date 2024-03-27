@@ -26,7 +26,9 @@ pub fn take_snapshot() -> Result<UISnapshot, GatherAppsError> {
     }
     let bad_errors = errors
         .into_iter()
+        // NoMatch errors aren't enough to fail the whole snapshot
         .filter(|e| !matches!(e, AppResolveError::NoMatch))
+        .filter(|e| !matches!(e, AppResolveError::BadVSCodeStructure(_)))
         .collect_vec();
     if !bad_errors.is_empty() {
         return Err(GatherAppsError::ResolveFailed(bad_errors));
