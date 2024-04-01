@@ -60,6 +60,7 @@ struct DiskData {
 
 fn persist(
     mut config: ResMut<VoiceToTextMemoryConfig>,
+    memory_config: Res<MemoryConfig>,
     mut debounce: Local<Option<DiskData>>,
     time: Res<Time>,
     voice_status: Res<VoiceToTextStatus>,
@@ -78,7 +79,7 @@ fn persist(
     };
     let data = DiskData { api_key };
     if debounce.is_none() || debounce.as_ref().unwrap() != &data {
-        let file = get_persist_file(file!(), PERSIST_FILE_NAME, Usage::Persist)
+        let file = get_persist_file(memory_config.as_ref(), PERSIST_FILE_NAME, Usage::Persist)
             .map_err(PersistError::Io)?;
         write_to_disk(file, data.clone())?;
         *debounce = Some(data);
@@ -90,6 +91,7 @@ fn persist(
 
 fn restore(
     config: Res<VoiceToTextMemoryConfig>,
+    memory_config: Res<MemoryConfig>,
     mut current_status: ResMut<VoiceToTextStatus>,
     mut status_events: EventWriter<VoiceToTextStatusEvent>,
     mut attempted_at: Local<Option<Instant>>,
@@ -103,7 +105,7 @@ fn restore(
     ) {
         return Ok(RestoreSuccess::NoAction);
     }
-    let file = match get_persist_file(file!(), PERSIST_FILE_NAME, Usage::Restore) {
+    let file = match get_persist_file(memory_config.as_ref(), PERSIST_FILE_NAME, Usage::Restore) {
         Ok(file) => Ok(file),
         Err(e) => {
             if let Some(attempt) = *attempted_at {

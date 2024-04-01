@@ -62,6 +62,7 @@ struct DiskData {
 
 fn persist(
     mut config: ResMut<PrimaryWindowMemoryConfig>,
+    memory_config: Res<MemoryConfig>,
     time: Res<Time>,
     window_query: Query<(Entity, &RawHandleWrapper, &Window), With<PrimaryWindow>>,
     winit_windows: NonSend<WinitWindows>,
@@ -108,7 +109,7 @@ fn persist(
         if minimized {
             return Ok(PersistSuccess::NoAction);
         }
-        let file = get_persist_file(file!(), PERSIST_FILE_NAME, Usage::Persist)
+        let file = get_persist_file(memory_config.as_ref(), PERSIST_FILE_NAME, Usage::Persist)
             .map_err(PersistError::Io)?;
         write_to_disk(file, data)?;
         *debounce = Some(data);
@@ -119,17 +120,24 @@ fn persist(
 }
 
 fn restore(
+    memory_config: Res<MemoryConfig>,
     mut window_query: Query<&mut Window, Added<PrimaryWindow>>,
 ) -> Result<RestoreSuccess, RestoreError> {
     let Ok(mut window) = window_query.get_single_mut() else {
         return Ok(RestoreSuccess::NoAction);
     };
-    let file =
-        get_persist_file(file!(), PERSIST_FILE_NAME, Usage::Restore).map_err(RestoreError::Io)?;
-    let data = read_from_disk::<DiskData>(file)?;
+    restore_window(memory_config.as_ref(), &mut window)
+}
+
+pub fn restore_window(
+    memory_config: &MemoryConfig,
+    window: &mut Window,
+) -> Result<RestoreSuccess, RestoreError> {
+    let file = get_persist_file(memory_config, PERSIST_FILE_NAME, Usage::Restore)
+        .map_err(RestoreError::Io)?;
+    let data: DiskData = read_from_disk(file)?;
     window.resolution = WindowResolution::from(data.resolution);
     window.position = WindowPosition::At(data.position);
     window.mode = data.mode;
-
     Ok(RestoreSuccess::Performed)
 }

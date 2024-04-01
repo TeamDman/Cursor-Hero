@@ -59,6 +59,7 @@ struct DiskData {
 
 fn persist(
     mut config: ResMut<MainCharacterMemoryConfig>,
+    memory_config: Res<MemoryConfig>,
     mut debounce: Local<Option<DiskData>>,
     time: Res<Time>,
     character_query: Query<(&Transform, &Children), With<MainCharacter>>,
@@ -93,7 +94,7 @@ fn persist(
         toolbelt,
     };
     if debounce.is_none() || debounce.as_ref().unwrap() != &data {
-        let file = get_persist_file(file!(), PERSIST_FILE_NAME, Usage::Persist)
+        let file = get_persist_file(memory_config.as_ref(), PERSIST_FILE_NAME, Usage::Persist)
             .map_err(PersistError::Io)?;
         write_to_disk(file, data)?;
         *debounce = Some(data);
@@ -104,6 +105,7 @@ fn persist(
 }
 
 fn restore(
+    memory_config: Res<MemoryConfig>,
     mut character_query: Query<(&mut Transform, &Children), Added<MainCharacter>>,
     mut toolbelt_query: Query<&mut Toolbelt>,
     mut commands: Commands,
@@ -131,7 +133,7 @@ fn restore(
         .map_err(|_| RestoreError::Query)?;
 
     let file =
-        get_persist_file(file!(), PERSIST_FILE_NAME, Usage::Restore).map_err(RestoreError::Io)?;
+        get_persist_file(memory_config.as_ref(),PERSIST_FILE_NAME, Usage::Restore).map_err(RestoreError::Io)?;
     let data: DiskData = read_from_disk(file)?;
 
     info!(

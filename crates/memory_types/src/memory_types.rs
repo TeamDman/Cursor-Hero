@@ -2,8 +2,34 @@ use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::Read;
 use std::io::Write;
-use std::path::Path;
 use std::path::PathBuf;
+use bevy::prelude::*;
+
+#[derive(Resource, Reflect, Clone)]
+pub struct MemoryConfig {
+    pub save_dir: String,
+}
+
+#[derive(Reflect, Default)]
+pub struct MemoryPluginBuildConfig {
+    pub main_character_memory_enabled: bool,
+    pub primary_window_memory_enabled: bool,
+    pub main_camera_memory_enabled: bool,
+    pub voice_to_text_memory_enabled: bool,
+    pub agent_observation_memory_enabled: bool,
+}
+
+impl MemoryPluginBuildConfig {
+    pub fn all_enabled() -> Self {
+        Self {
+            main_character_memory_enabled: true,
+            primary_window_memory_enabled: true,
+            main_camera_memory_enabled: true,
+            voice_to_text_memory_enabled: true,
+            agent_observation_memory_enabled: true,
+        }
+    }
+}
 
 #[derive(Debug)]
 #[allow(dead_code)]
@@ -35,27 +61,22 @@ pub enum RestoreSuccess {
     Performed,
     NoAction,
 }
+
+#[derive(Eq, PartialEq)]
 pub enum Usage {
     Persist,
     Restore,
 }
 
 pub fn get_persist_file(
-    current_path: &str,
+    config: &MemoryConfig,
     file_name: &str,
     usage: Usage,
 ) -> Result<std::fs::File, std::io::Error> {
-    let mut file_path = PathBuf::new();
-
-    #[cfg(debug_assertions)]
-    {
-        let dir = Path::new(current_path).parent().ok_or(std::io::Error::new(
-            std::io::ErrorKind::NotFound,
-            "Parent not found",
-        ))?;
-        file_path.push(dir);
+    let mut file_path = PathBuf::from(config.save_dir.clone());
+    if usage == Usage::Persist && !file_path.exists() {
+        std::fs::create_dir_all(&file_path)?;
     }
-
     file_path.push(file_name);
 
     let file = match usage {

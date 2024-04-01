@@ -56,6 +56,7 @@ struct DiskData {
 
 fn persist(
     mut config: ResMut<MainCharacterMemoryConfig>,
+    memory_config: Res<MemoryConfig>,
     mut debounce: Local<Option<DiskData>>,
     time: Res<Time>,
     agent_query: Query<(&Name, &ObservationBuffer), With<AgentCharacter>>,
@@ -71,7 +72,7 @@ fn persist(
     }
 
     if debounce.is_none() || debounce.as_ref().unwrap() != &data {
-        let file = get_persist_file(file!(), PERSIST_FILE_NAME, Usage::Persist)
+        let file = get_persist_file(memory_config.as_ref(), PERSIST_FILE_NAME, Usage::Persist)
             .map_err(PersistError::Io)?;
         write_to_disk(file, data.clone())?;
         *debounce = Some(data);
@@ -82,6 +83,7 @@ fn persist(
 }
 
 fn restore(
+    memory_config: Res<MemoryConfig>,
     mut agent_query: Query<(Entity, &Name, &mut ObservationBuffer), Added<AgentCharacter>>,
     mut observation_events: EventWriter<SomethingObservableHappenedEvent>,
 ) -> Result<RestoreSuccess, RestoreError> {
@@ -90,7 +92,7 @@ fn restore(
     }
 
     let file =
-        get_persist_file(file!(), PERSIST_FILE_NAME, Usage::Restore).map_err(RestoreError::Io)?;
+        get_persist_file(memory_config.as_ref(), PERSIST_FILE_NAME, Usage::Restore).map_err(RestoreError::Io)?;
     let mut data: DiskData = read_from_disk(file)?;
     info!(
         "Restoring agent memories, found {} entries",
