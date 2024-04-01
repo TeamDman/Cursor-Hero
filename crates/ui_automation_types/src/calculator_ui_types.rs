@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 
 #[derive(Debug, Reflect, Default, Clone, Serialize, Deserialize, PartialEq)]
 pub struct CalculatorState {

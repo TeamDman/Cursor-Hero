@@ -1,22 +1,16 @@
+use crate::gather_children::GatherChildrenable;
+use crate::gather_children::StopBehaviour;
 use anyhow::Context;
-use anyhow::Error;
 use anyhow::Result;
 use bevy::math::IVec2;
 use cursor_hero_ui_automation_types::prelude::*;
 use itertools::Itertools;
-use uiautomation::controls::ControlType;
-use uiautomation::patterns::UIExpandCollapsePattern;
-use uiautomation::types::ExpandCollapseState;
 use uiautomation::types::TreeScope;
 use uiautomation::types::UIProperty;
 use uiautomation::variants::Variant;
 use uiautomation::UIAutomation;
 use uiautomation::UIElement;
 use uiautomation::UITreeWalker;
-
-use crate::gather_children::gather_children;
-use crate::gather_children::GatherChildrenable;
-use crate::gather_children::StopBehaviour;
 
 pub(crate) fn resolve_vscode(
     elem: &UIElement,
@@ -36,7 +30,7 @@ pub(crate) fn resolve_vscode(
     let body = match resolve_body(&body, &walker) {
         Ok(body) => body,
         Err(e) => {
-            return Err(Error::from(e).context("resolving body"));
+            return Err(e.context("resolving body"));
         }
     };
 
@@ -64,11 +58,14 @@ fn resolve_body(body: &UIElement, walker: &UITreeWalker) -> Result<VSCodeWindowB
         .into());
     }
     let editor_groups = workbench_parts_editor
-        .drill(walker, vec![0, 0, 0, 1]).context("drilling to find editor groups")?
+        .drill(walker, vec![0, 0, 0, 1])
+        .context("drilling to find editor groups")?
         .gather_children(walker, &StopBehaviour::EndOfSiblings)
         .into_iter()
         .map(|group_elem| {
-            let tab_container = group_elem.drill(walker, vec![0, 0, 0]).context("drilling to find editor groups tab container")?;
+            let tab_container = group_elem
+                .drill(walker, vec![0, 0, 0])
+                .context("drilling to find editor groups tab container")?;
             let selected: Option<String> = tab_container
                 .get_property_value(UIProperty::SelectionSelection)?
                 .try_into()
@@ -83,7 +80,9 @@ fn resolve_body(body: &UIElement, walker: &UITreeWalker) -> Result<VSCodeWindowB
                 })
                 .filter_map(|r: Result<EditorTab>| r.ok())
                 .collect();
-            let content_elem = group_elem.drill(walker, vec![1, 0, 0, 1]).context("drilling to find group content")?;
+            let content_elem = group_elem
+                .drill(walker, vec![1, 0, 0, 1])
+                .context("drilling to find group content")?;
             let content = content_elem
                 .get_property_value(UIProperty::LegacyIAccessibleValue)
                 .map(|variant| variant.to_string())

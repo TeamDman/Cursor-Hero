@@ -3,14 +3,13 @@ use crate::vscode_ui_types::*;
 use bevy::prelude::*;
 use serde::Deserialize;
 use serde::Serialize;
-use uiautomation::UIElement;
 use std::collections::VecDeque;
 use std::fmt;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use uiautomation::core::UICondition;
 use uiautomation::UIAutomation;
-
+use uiautomation::UIElement;
 
 pub trait HexList {
     fn to_hex_list(&self) -> String;
@@ -63,7 +62,7 @@ impl Display for AppWindow {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             AppWindow::VSCode(window) => write!(f, "{}", window),
-            AppWindow::Calculator(window) => write!(f, "{}", window), 
+            AppWindow::Calculator(window) => write!(f, "{}", window),
             AppWindow::Unknown => write!(f, "Unknown"),
         }
     }
@@ -232,13 +231,8 @@ impl From<uiautomation::controls::ControlType> for ControlType {
     }
 }
 
-#[derive(Eq, PartialEq, Clone, Reflect, Hash)]
+#[derive(Eq, PartialEq, Clone, Reflect, Hash, Default)]
 pub struct RuntimeId(pub Vec<i32>);
-impl Default for RuntimeId {
-    fn default() -> Self {
-        RuntimeId(vec![])
-    }
-}
 impl std::fmt::Display for RuntimeId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
@@ -254,11 +248,7 @@ impl std::fmt::Display for RuntimeId {
 }
 impl std::fmt::Debug for RuntimeId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            self.to_string()
-        )
+        write!(f, "{}", self)
     }
 }
 
@@ -376,15 +366,12 @@ impl ElementInfo {
         if drill_id.is_empty() {
             return None;
         }
-        let Some(children) = &self.children else {
-            return None;
-        };
         // println!("found children {:?}", children.children.iter().map(|x| x.drill_id.clone()).collect_vec());
-        for child in children {
+        for child in self.children.as_ref()? {
             let DrillId::Child(child_drill_id) = &child.drill_id else {
                 continue;
             };
-            if child_drill_id.back() == drill_id.iter().skip(skip).next() {
+            if child_drill_id.back() == drill_id.get(skip + 1) {
                 if skip == drill_id.len() - 1 {
                     return Some(child);
                 } else {
@@ -397,8 +384,12 @@ impl ElementInfo {
     pub fn lookup_drill_id_mut(&mut self, drill_id: DrillId) -> Option<&mut ElementInfo> {
         self.lookup_drill_id_mut_inner(drill_id, 0)
     }
-    
-    fn lookup_drill_id_mut_inner(&mut self, drill_id: DrillId, skip: usize) -> Option<&mut ElementInfo> {
+
+    fn lookup_drill_id_mut_inner(
+        &mut self,
+        drill_id: DrillId,
+        skip: usize,
+    ) -> Option<&mut ElementInfo> {
         // println!("Looking in {} for {:?} ({:?})", self.name, drill_id.map(|x| x.iter().skip(skip).collect::<Vec<&usize>>()), drill_id);
         if self.drill_id == drill_id {
             return Some(self);
@@ -409,19 +400,17 @@ impl ElementInfo {
         if drill_id.is_empty() {
             return None;
         }
-        let Some(ref mut children) = self.children else {
-            return None;
-        };
-        // println!("found children {:?}", children.children.iter().map(|x| x.drill_id.clone()).collect_vec());
-        for child in children.iter_mut() {
+
+        for child in self.children.as_deref_mut()?.iter_mut() {
             let DrillId::Child(child_drill_id) = &child.drill_id else {
                 continue;
             };
-            if child_drill_id.back() == drill_id.iter().skip(skip).next() {
+            if child_drill_id.back() == drill_id.get(skip + 1) {
                 if skip == drill_id.len() - 1 {
                     return Some(child);
                 } else {
-                    return child.lookup_drill_id_mut_inner(DrillId::Child(drill_id.clone()), skip + 1);
+                    return child
+                        .lookup_drill_id_mut_inner(DrillId::Child(drill_id.clone()), skip + 1);
                 }
             }
         }

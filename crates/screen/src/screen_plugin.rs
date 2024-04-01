@@ -39,7 +39,7 @@ fn spawn_screens_in_new_environments(
     mut commands: Commands,
     mut textures: ResMut<Assets<Image>>,
     mut level_bounds_events: EventWriter<LevelBoundsEvent>,
-    environment_query: Query<(Option<&HostEnvironment>,Option<&GameEnvironment>)>,
+    environment_query: Query<(Option<&HostEnvironment>, Option<&GameEnvironment>)>,
 ) {
     for event in populate_events.read() {
         let environment_id = event.environment_id;
@@ -150,14 +150,17 @@ fn spawn_screens_in_new_environments(
                     info!("Broadcasting {} level bounds events", level_bounds.len());
                     for area in level_bounds {
                         level_bounds_events.send(LevelBoundsEvent::AddPlayArea {
-                            environment_id: environment_id,
+                            environment_id,
                             area: area.as_rect(),
                         });
                     }
                 });
-            },
+            }
             (None, None) => {
-                error!("Environment {:?} is not a host or game environment", environment_id);
+                error!(
+                    "Environment {:?} is not a host or game environment",
+                    environment_id
+                );
             }
         }
     }

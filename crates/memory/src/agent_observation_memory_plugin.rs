@@ -91,8 +91,8 @@ fn restore(
         return Ok(RestoreSuccess::NoAction);
     }
 
-    let file =
-        get_persist_file(memory_config.as_ref(), PERSIST_FILE_NAME, Usage::Restore).map_err(RestoreError::Io)?;
+    let file = get_persist_file(memory_config.as_ref(), PERSIST_FILE_NAME, Usage::Restore)
+        .map_err(RestoreError::Io)?;
     let mut data: DiskData = read_from_disk(file)?;
     info!(
         "Restoring agent memories, found {} entries",

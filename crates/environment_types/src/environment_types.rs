@@ -19,19 +19,17 @@ pub struct HostUIWatcherEnvironment;
 #[derive(Component, Debug, Reflect)]
 pub struct GameEnvironment;
 
-
 #[derive(Component, Default, Reflect)]
 pub struct Nametag;
 
 #[derive(Component, Debug, Reflect)]
 pub struct TrackEnvironmentTag;
 
-
 #[derive(Event, Debug, Reflect)]
 pub struct CreateEnvironmentRequestEvent {
     pub name: String,
     pub origin: Vec2,
-    pub kind: EnvironmentKind
+    pub kind: EnvironmentKind,
 }
 
 #[derive(Event, Debug, Reflect)]

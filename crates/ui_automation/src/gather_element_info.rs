@@ -36,11 +36,9 @@ pub fn gather_incomplete_ui_tree_starting_deep(
     let start_info = root_info
         .get_descendents()
         .into_iter()
-        .find(|info| {
-            match start_element.get_runtime_id() {
-                Ok(id) => info.runtime_id.0 == id,
-                Err(_) => false,
-            }
+        .find(|info| match start_element.get_runtime_id() {
+            Ok(id) => info.runtime_id.0 == id,
+            Err(_) => false,
         })
         .cloned();
     let Some(start_info) = start_info else {
@@ -161,12 +159,7 @@ pub fn gather_single_element_info(element: &UIElement) -> Result<ElementInfo, ui
 
     let info = ElementInfo {
         name,
-        bounding_rect: IRect::new(
-            bb.get_left(),
-            bb.get_top(),
-            bb.get_right(),
-            bb.get_bottom(),
-        ),
+        bounding_rect: IRect::new(bb.get_left(), bb.get_top(), bb.get_right(), bb.get_bottom()),
         control_type,
         localized_control_type,
         class_name,

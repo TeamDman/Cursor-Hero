@@ -39,10 +39,8 @@ pub fn get_all_cursor_icons() -> Result<Vec<RgbaImage>> {
     ] {
         let hcursor = unsafe { LoadCursorW(None, cursor_id)? };
         if hcursor.is_invalid() {
-            return Err(Error::from_win32().with_description(format!(
-                "Failed to load cursor with ID {:?}",
-                cursor_id.0
-            )));
+            return Err(Error::from_win32()
+                .with_description(format!("Failed to load cursor with ID {:?}", cursor_id.0)));
         }
         let image = convert_hcursor_to_rgba_image(&hcursor)?;
         icons.push(image);

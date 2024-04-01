@@ -10,6 +10,8 @@ use cursor_hero_memory_types::prelude::MemoryPluginBuildConfig;
 use cursor_hero_memory_types::prelude::MemoryTypesPlugin;
 use cursor_hero_ui_automation::prelude::UiAutomationPlugin;
 use cursor_hero_ui_automation::prelude::UiAutomationTypesPlugin;
+use cursor_hero_ui_watcher::ui_watcher_plugin::UiWatcherPlugin;
+use cursor_hero_ui_watcher_types::ui_watcher_types_plugin::UiWatcherTypesPlugin;
 use cursor_hero_version::version_plugin::Version;
 pub struct InspectLaunchModePlugin;
 
@@ -27,6 +29,9 @@ impl Plugin for InspectLaunchModePlugin {
                 ..default()
             },
         });
+
+        app.add_plugins(UiWatcherTypesPlugin);
+        app.add_plugins(UiWatcherPlugin);
         app.add_plugins(UiAutomationTypesPlugin);
         app.add_plugins(UiAutomationPlugin);
         app.add_plugins(CameraPlugin);

@@ -1,9 +1,9 @@
+use anyhow::Error;
+use anyhow::Result;
 use bevy::prelude::*;
 pub use crossbeam_channel::Receiver;
 pub use crossbeam_channel::Sender;
 use std::marker::PhantomData;
-use anyhow::Result;
-use anyhow::Error;
 
 #[derive(Resource)]
 pub struct Bridge<T, G>
@@ -29,8 +29,7 @@ pub trait Message:
 {
 }
 
-pub type ThreadboundMessageHandler<T, G> =
-    fn(msg: &T, reply_tx: &Sender<G>) -> Result<()>;
+pub type ThreadboundMessageHandler<T, G> = fn(msg: &T, reply_tx: &Sender<G>) -> Result<()>;
 
 pub type ThreadboundMessageErrorHandler<T, G> =
     fn(msg: &T, reply_tx: &Sender<G>, error: &Error) -> Result<()>;

@@ -1,6 +1,6 @@
-use cursor_hero_input::active_input_state_plugin::InputMethod;
 use bevy::input::common_conditions::input_toggle_active;
 use bevy::prelude::*;
+use cursor_hero_input::active_input_state_plugin::InputMethod;
 
 use bevy::audio::AudioPlugin;
 use bevy::audio::SpatialScale;
@@ -83,8 +83,6 @@ use cursor_hero_taskbar_types::prelude::TaskbarTypesPlugin;
 use cursor_hero_text_asset::prelude::*;
 use cursor_hero_text_asset_types::prelude::*;
 use cursor_hero_ui_automation::prelude::*;
-use cursor_hero_ui_watcher::prelude::*;
-use cursor_hero_ui_watcher_types::prelude::*;
 use cursor_hero_voice_to_text::prelude::*;
 use cursor_hero_voice_to_text_types::prelude::*;
 use cursor_hero_window_position::prelude::*;
@@ -115,8 +113,6 @@ impl Plugin for DefaultLaunchModePlugin {
         app.add_plugins(BrickPlugin);
         app.add_plugins(FullscreenToolPlugin);
         app.add_plugins(FullscreenToolTypesPlugin);
-        app.add_plugins(UiWatcherTypesPlugin);
-        app.add_plugins(UiWatcherPlugin);
         app.add_plugins(FloatyNametagTypesPlugin);
         app.add_plugins(FloatyNametagPlugin);
         app.add_plugins(HostEventTypesPlugin);
@@ -260,7 +256,8 @@ cursor_hero_memory=info
             WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)),
         );
         app.add_plugins(
-            StateInspectorPlugin::<InputMethod>::default().run_if(input_toggle_active(false, KeyCode::Grave)),
+            StateInspectorPlugin::<InputMethod>::default()
+                .run_if(input_toggle_active(false, KeyCode::Grave)),
         );
         app.add_plugins(FrameTimeDiagnosticsPlugin);
     }

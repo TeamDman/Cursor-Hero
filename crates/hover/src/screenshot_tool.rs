@@ -11,7 +11,6 @@ use bevy_xpbd_2d::components::RigidBody;
 use crossbeam_channel::Sender;
 use cursor_hero_bevy::prelude::NegativeYIVec3;
 use cursor_hero_bevy::prelude::NegativeYVec2;
-use cursor_hero_bevy::prelude::NegativeYVec3;
 use cursor_hero_camera::camera_plugin::MainCamera;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_environment_types::prelude::TrackEnvironmentTag;
@@ -27,11 +26,10 @@ use cursor_hero_ui_automation::prelude::gather_elements_at;
 use cursor_hero_ui_automation::prelude::gather_incomplete_ui_tree_starting_deep;
 use cursor_hero_ui_automation::prelude::DrillId;
 use cursor_hero_ui_automation::prelude::ElementInfo;
+use cursor_hero_worker::prelude::anyhow::Result;
 use cursor_hero_worker::prelude::Message;
 use cursor_hero_worker::prelude::WorkerConfig;
 use cursor_hero_worker::prelude::WorkerPlugin;
-use cursor_hero_worker::prelude::anyhow::Result;
-use itertools::Itertools;
 use leafwing_input_manager::prelude::*;
 use rand::thread_rng;
 use rand::Rng;
@@ -330,7 +328,12 @@ fn handle_replies(
                 let (size, pos, texture_region) = match msg {
                     GameboundMessage::Capture { .. } => (
                         hovered_element.bounding_rect.size().as_vec2(),
-                        hovered_element.bounding_rect.center().extend(20).neg_y().as_vec3(),
+                        hovered_element
+                            .bounding_rect
+                            .center()
+                            .extend(20)
+                            .neg_y()
+                            .as_vec3(),
                         hovered_element.bounding_rect,
                     ),
                     GameboundMessage::CaptureBrick { .. } => (
@@ -386,7 +389,8 @@ fn handle_replies(
                     // let texture_handle = asset_server.add(image);
 
                     // spawn the element image
-                    let mut elem_center_pos = info.bounding_rect.center().as_vec2().extend(*depth as f32);
+                    let mut elem_center_pos =
+                        info.bounding_rect.center().as_vec2().extend(*depth as f32);
                     elem_center_pos.y *= -1.0;
                     commands.spawn((
                         SpriteBundle {
@@ -401,7 +405,10 @@ fn handle_replies(
                         },
                         CubeToolInteractable,
                         RigidBody::Dynamic,
-                        Collider::cuboid(info.bounding_rect.width() as f32, info.bounding_rect.height() as f32),
+                        Collider::cuboid(
+                            info.bounding_rect.width() as f32,
+                            info.bounding_rect.height() as f32,
+                        ),
                         MovementDamping::default(),
                         Name::new(format!("Element - {}", info.name)),
                     ));
@@ -411,6 +418,7 @@ fn handle_replies(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn spawn_brick(
     commands: &mut Commands,
     ui_tree: &ElementInfo,
@@ -590,13 +598,13 @@ struct ElementUIData {
 fn ui_for_element_info(
     state: &mut ScreenshotBrickEguiState,
     id: egui::Id,
-    commands: &mut Commands,
-    screen_access: &ScreensToImageParam,
-    asset_server: &Res<AssetServer>,
+    _commands: &mut Commands,
+    _screen_access: &ScreensToImageParam,
+    _asset_server: &Res<AssetServer>,
     ui: &mut egui::Ui,
     element_info: &mut ElementInfo,
     _inspector: &mut InspectorUi,
-    popout_pos: &Vec3,
+    _popout_pos: &Vec3,
 ) {
     egui::collapsing_header::CollapsingState::load_with_default_open(
         ui.ctx(),
@@ -639,13 +647,13 @@ fn ui_for_element_info(
                 ui_for_element_info(
                     state,
                     id.with(child.runtime_id.clone()),
-                    commands,
-                    screen_access,
-                    asset_server,
+                    _commands,
+                    _screen_access,
+                    _asset_server,
                     ui,
                     child,
                     _inspector,
-                    popout_pos,
+                    _popout_pos,
                 );
             }
         }

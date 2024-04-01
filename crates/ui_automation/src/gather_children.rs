@@ -94,16 +94,19 @@ pub fn gather_children(
                 Ok(last) => last,
                 Err(_) => {
                     eprintln!("Failed to get last child of {:?}", parent);
-                    return children
-                },
+                    return children;
+                }
             };
             let runtime_id_of_last = last.get_runtime_id();
             let runtime_id_of_last = match runtime_id_of_last {
                 Ok(runtime_id_of_last) => runtime_id_of_last,
                 Err(_) => {
-                    eprintln!("Failed to get runtime id of last child {:?} of {:?}", last, parent);
-                    return children
-                },
+                    eprintln!(
+                        "Failed to get runtime id of last child {:?} of {:?}",
+                        last, parent
+                    );
+                    return children;
+                }
             };
             Box::new(LastChildEncountered { runtime_id_of_last })
         }

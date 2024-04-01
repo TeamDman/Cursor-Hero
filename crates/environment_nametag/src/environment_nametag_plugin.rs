@@ -18,6 +18,7 @@ impl Plugin for EnvironmentNametagPlugin {
     }
 }
 
+#[allow(clippy::type_complexity)]
 fn spawn_nametags_in_new_environments(
     mut environment_reader: EventReader<PopulateEnvironmentEvent>,
     mut commands: Commands,

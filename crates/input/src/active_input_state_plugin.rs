@@ -25,7 +25,6 @@ pub enum InputMethod {
     Gamepad,
 }
 
-
 fn update_input_method(
     current_state: Res<State<InputMethod>>,
     mut next_state: ResMut<NextState<InputMethod>>,
@@ -56,7 +55,6 @@ fn update_input_method(
             .unwrap_or(false)
     });
 
-    
     #[derive(Debug)]
     struct DecisionInfo {
         current_input_method: InputMethod,

@@ -3,8 +3,8 @@ use uiautomation::controls::ControlType;
 use uiautomation::UIAutomation;
 use uiautomation::UIElement;
 
-use anyhow::Result;
 use anyhow::Context;
+use anyhow::Result;
 
 use crate::resolve_calculator::resolve_calculator;
 use crate::resolve_vscode::resolve_vscode;

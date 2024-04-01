@@ -84,8 +84,8 @@ fn restore(
     let Ok(mut camera_transform) = camera_query.get_single_mut() else {
         return Ok(RestoreSuccess::NoAction);
     };
-    let file =
-        get_persist_file(memory_config.as_ref(), PERSIST_FILE_NAME, Usage::Restore).map_err(RestoreError::Io)?;
+    let file = get_persist_file(memory_config.as_ref(), PERSIST_FILE_NAME, Usage::Restore)
+        .map_err(RestoreError::Io)?;
     let data: DiskData = read_from_disk(file)?;
     info!("Restoring main camera scale to {:?}", data.scale);
     camera_transform.scale = data.scale;

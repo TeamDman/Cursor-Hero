@@ -132,8 +132,8 @@ fn restore(
         .get_mut(toolbelt_id)
         .map_err(|_| RestoreError::Query)?;
 
-    let file =
-        get_persist_file(memory_config.as_ref(),PERSIST_FILE_NAME, Usage::Restore).map_err(RestoreError::Io)?;
+    let file = get_persist_file(memory_config.as_ref(), PERSIST_FILE_NAME, Usage::Restore)
+        .map_err(RestoreError::Io)?;
     let data: DiskData = read_from_disk(file)?;
 
     info!(

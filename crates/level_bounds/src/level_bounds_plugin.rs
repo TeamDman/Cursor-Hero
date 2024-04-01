@@ -46,6 +46,7 @@ impl LevelBoundsParentRef {
 #[derive(Component, Reflect)]
 pub struct LevelBounds;
 
+#[allow(clippy::type_complexity)]
 fn handle_populate_environment_events(
     mut commands: Commands,
     mut events: EventReader<PopulateEnvironmentEvent>,
@@ -61,17 +62,19 @@ fn handle_populate_environment_events(
             event
         );
         let mut level_bounds_holder_id = None;
-        commands.entity(event.environment_id).with_children(|parent| {
-            level_bounds_holder_id = Some(
-                parent
-                    .spawn((
-                        SpatialBundle::default(),
-                        LevelBoundsHolder,
-                        Name::new("Level Bounds"),
-                    ))
-                    .id(),
-            );
-        });
+        commands
+            .entity(event.environment_id)
+            .with_children(|parent| {
+                level_bounds_holder_id = Some(
+                    parent
+                        .spawn((
+                            SpatialBundle::default(),
+                            LevelBoundsHolder,
+                            Name::new("Level Bounds"),
+                        ))
+                        .id(),
+                );
+            });
         let Some(level_bounds_holder_id) = level_bounds_holder_id else {
             warn!(
                 "Failed to create level bounds holder for environment {:?}",

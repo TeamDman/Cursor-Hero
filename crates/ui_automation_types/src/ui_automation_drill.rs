@@ -1,9 +1,9 @@
+use crate::prelude::DrillId;
+use anyhow::Context;
+use anyhow::Result;
 use std::collections::VecDeque;
 use uiautomation::UIElement;
 use uiautomation::UITreeWalker;
-use anyhow::Result;
-use anyhow::Context;
-use crate::prelude::DrillId;
 
 #[derive(Debug)]
 pub enum DrillError {
@@ -37,18 +37,10 @@ impl From<uiautomation::Error> for DrillError {
     }
 }
 pub trait Drillable {
-    fn drill<T: Into<DrillId>>(
-        &self,
-        walker: &UITreeWalker,
-        path: T,
-    ) -> Result<UIElement>;
+    fn drill<T: Into<DrillId>>(&self, walker: &UITreeWalker, path: T) -> Result<UIElement>;
 }
 impl Drillable for UIElement {
-    fn drill<T: Into<DrillId>>(
-        &self,
-        walker: &UITreeWalker,
-        path: T,
-    ) -> Result<UIElement> {
+    fn drill<T: Into<DrillId>>(&self, walker: &UITreeWalker, path: T) -> Result<UIElement> {
         let drill_id: DrillId = path.into();
         match drill_id {
             DrillId::Child(path) => {
@@ -61,9 +53,7 @@ impl Drillable for UIElement {
                 }
                 drill_inner(self, walker, &mut path)
             }
-            DrillId::Root | DrillId::Unknown => {
-                return Err(DrillError::BadPath.into());
-            }
+            DrillId::Root | DrillId::Unknown => Err(DrillError::BadPath.into()),
         }
     }
 }
@@ -76,7 +66,9 @@ fn drill_inner(
         Some(x) => x,
         None => return Err(DrillError::EmptyPath.into()),
     };
-    let mut child = walker.get_first_child(start).context("get first child of start")?;
+    let mut child = walker
+        .get_first_child(start)
+        .context("get first child of start")?;
     let mut i = 0;
     while i < target_index {
         i += 1;
@@ -87,7 +79,8 @@ fn drill_inner(
                     given: i,
                     max: target_index,
                     error: e,
-                }.into())
+                }
+                .into())
             }
         };
     }

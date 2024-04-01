@@ -137,7 +137,6 @@ pub fn convert_hicon_to_rgba_image(hicon: &HICON) -> Result<RgbaImage> {
     }
 }
 
-
 pub fn convert_hcursor_to_rgba_image(hcursor: &HCURSOR) -> Result<RgbaImage> {
     unsafe {
         // Convert HCURSOR to HICON

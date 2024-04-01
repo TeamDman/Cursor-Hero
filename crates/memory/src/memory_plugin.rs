@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use cursor_hero_memory_types::prelude::{MemoryConfig, MemoryPluginBuildConfig};
+use cursor_hero_memory_types::prelude::MemoryConfig;
+use cursor_hero_memory_types::prelude::MemoryPluginBuildConfig;
 
 use crate::agent_observation_memory_plugin::AgentObservationMemoryPlugin;
 use crate::main_camera_memory_plugin::MainCameraMemoryPlugin;

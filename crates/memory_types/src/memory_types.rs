@@ -1,9 +1,9 @@
+use bevy::prelude::*;
 use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::Read;
 use std::io::Write;
 use std::path::PathBuf;
-use bevy::prelude::*;
 
 #[derive(Resource, Reflect, Clone)]
 pub struct MemoryConfig {

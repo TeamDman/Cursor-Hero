@@ -235,10 +235,7 @@ fn show_hovered_rect(
     {
         if let Some(info) = &hovered.screen_element {
             let bounds = info.bounding_rect.as_rect();
-            sprite.custom_size = Some(Vec2::new(
-                bounds.width(),
-                bounds.height(),
-            ));
+            sprite.custom_size = Some(Vec2::new(bounds.width(), bounds.height()));
             transform.translation = Vec3::new(
                 bounds.min.x + bounds.width() / 2.,
                 -bounds.min.y - bounds.height() / 2.,
@@ -258,10 +255,7 @@ fn show_hovered_rect(
                     0.,
                 ),
                 sprite: Sprite {
-                    custom_size: Some(Vec2::new(
-                        bounds.width(),
-                        bounds.height(),
-                    )),
+                    custom_size: Some(Vec2::new(bounds.width(), bounds.height())),
                     color: Color::rgba(0.141, 0.675, 0.949, 0.05),
                     ..default()
                 },
@@ -276,10 +270,7 @@ fn show_hovered_rect(
     if let Ok((entity, mut sprite, mut transform, mut element)) = game_indicator.get_single_mut() {
         if let Some(info) = &hovered.game_element {
             let bounds = info.bounding_rect.as_rect();
-            sprite.custom_size = Some(Vec2::new(
-                bounds.width(),
-                bounds.height(),
-            ));
+            sprite.custom_size = Some(Vec2::new(bounds.width(), bounds.height()));
             transform.translation = Vec3::new(
                 bounds.min.x + bounds.width() / 2.,
                 -bounds.min.y - bounds.height() / 2.,
@@ -299,10 +290,7 @@ fn show_hovered_rect(
                     0.,
                 ),
                 sprite: Sprite {
-                    custom_size: Some(Vec2::new(
-                        bounds.width(),
-                        bounds.height(),
-                    )),
+                    custom_size: Some(Vec2::new(bounds.width(), bounds.height())),
                     color: Color::rgba(0.641, 0.275, 0.649, 0.05),
                     ..default()
                 },

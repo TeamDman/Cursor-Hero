@@ -28,36 +28,41 @@ fn spawn_agent(
         if !environment_query.contains(event.environment_id) {
             continue;
         }
-        info!("Spawning agent for game environment {:?}", event.environment_id);
-        commands.entity(event.environment_id).with_children(|parent| {
-            let spawn_position = Vec2::new(1920.0, 1080.0).neg_y() / 2.0;
-            parent.spawn((
-                SpriteBundle {
-                    sprite: Sprite {
-                        custom_size: Some(Vec2::new(64.0, 64.0)),
+        info!(
+            "Spawning agent for game environment {:?}",
+            event.environment_id
+        );
+        commands
+            .entity(event.environment_id)
+            .with_children(|parent| {
+                let spawn_position = Vec2::new(1920.0, 1080.0).neg_y() / 2.0;
+                parent.spawn((
+                    SpriteBundle {
+                        sprite: Sprite {
+                            custom_size: Some(Vec2::new(64.0, 64.0)),
+                            ..default()
+                        },
+                        texture: asset_server.load(AgentAppearance::Default.get_texture_path()),
+                        transform: Transform::from_translation(spawn_position.extend(80.0)),
                         ..default()
                     },
-                    texture: asset_server.load(AgentAppearance::Default.get_texture_path()),
-                    transform: Transform::from_translation(spawn_position.extend(80.0)),
-                    ..default()
-                },
-                Character,
-                AgentCharacter,
-                Name::new("Character - (Agent) Ithia Tig"),
-                FloatyName {
-                    text: "Ithia Tig".to_string(),
-                    vertical_offset: 40.0,
-                    appearance: NametagAppearance::Character,
-                },
-                Agent,
-                RigidBody::Dynamic,
-                ObservationBuffer {
-                    log_level: ObservationLogLevel::All,
-                    ..default()
-                },
-                Collider::capsule(25.0, 12.5),
-                MovementDamping { factor: 0.90 },
-            ));
-        });
+                    Character,
+                    AgentCharacter,
+                    Name::new("Character - (Agent) Ithia Tig"),
+                    FloatyName {
+                        text: "Ithia Tig".to_string(),
+                        vertical_offset: 40.0,
+                        appearance: NametagAppearance::Character,
+                    },
+                    Agent,
+                    RigidBody::Dynamic,
+                    ObservationBuffer {
+                        log_level: ObservationLogLevel::All,
+                        ..default()
+                    },
+                    Collider::capsule(25.0, 12.5),
+                    MovementDamping { factor: 0.90 },
+                ));
+            });
     }
 }

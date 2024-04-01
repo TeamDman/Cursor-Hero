@@ -1,10 +1,8 @@
 use crate::gather_root_children::gather_root_children;
 use crate::resolve_app::resolve_app;
-use cursor_hero_ui_automation_types::prelude::*;
-use itertools::Itertools;
-use uiautomation::UIAutomation;
 use anyhow::Result;
-use anyhow::Context;
+use cursor_hero_ui_automation_types::prelude::*;
+use uiautomation::UIAutomation;
 
 pub fn take_snapshot() -> Result<UISnapshot> {
     let automation = UIAutomation::new()?;
@@ -20,7 +18,7 @@ pub fn take_snapshot() -> Result<UISnapshot> {
         let focused = elem.get_runtime_id() == focused_app.get_runtime_id();
         let resolved = resolve_app(&elem, &automation, focused)?;
         if resolved != AppWindow::Unknown {
-            apps.push((elem,resolved));
+            apps.push((elem, resolved));
         }
     }
 
