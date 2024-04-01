@@ -55,7 +55,7 @@ fn toolbelt_events(
                     continue;
                 };
                 for entry in taskbar.entries {
-                    let Ok(image) = get_image(entry.bounds.as_rect(), &access) else {
+                    let Ok(image) = get_image(entry.bounds, &access) else {
                         warn!("Failed to get image for {:?}", &entry);
                         continue;
                     };

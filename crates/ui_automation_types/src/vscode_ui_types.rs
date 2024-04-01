@@ -2,45 +2,35 @@ use bevy::prelude::*;
 use itertools::Itertools;
 use serde::Deserialize;
 use serde::Serialize;
-use std::collections::VecDeque;
 use std::fmt;
 use std::fmt::Display;
 use std::fmt::Formatter;
-use uiautomation::UIElement;
 
+use crate::prelude::ElementInfo;
+
+#[derive(Debug)]
 pub enum VSCodeResolveError {
-    BadChildCount { tried_accessing: u32 },
     UI(uiautomation::Error),
     UnknownSideTabKind(String),
-    UnknownState,
+    UnknownState { kids: Vec<ElementInfo> },
 }
-impl From<u32> for VSCodeResolveError {
-    fn from(tried_accessing: u32) -> Self {
-        VSCodeResolveError::BadChildCount { tried_accessing }
+impl std::error::Error for VSCodeResolveError {}
+impl std::fmt::Display for VSCodeResolveError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            VSCodeResolveError::UI(e) => write!(f, "UIAutomation error: {}", e),
+            VSCodeResolveError::UnknownSideTabKind(s) => {
+                write!(f, "Unknown side tab kind: {}", s)
+            }
+            VSCodeResolveError::UnknownState { kids } => {
+                write!(f, "Unknown state with {} children: {:?}", kids.len(), kids)
+            }
+        }
     }
 }
-
 impl From<uiautomation::Error> for VSCodeResolveError {
     fn from(e: uiautomation::Error) -> Self {
         VSCodeResolveError::UI(e)
-    }
-}
-impl TryFrom<VecDeque<UIElement>> for VSCodeCrawlState {
-    type Error = VSCodeResolveError;
-    fn try_from(mut kids: VecDeque<UIElement>) -> Result<Self, Self::Error> {
-        let state = match kids.len() {
-            2 => VSCodeCrawlState::LeftTabClosed {
-                tabs: kids.pop_front().ok_or(0u32)?,
-                editor: kids.pop_front().ok_or(1u32)?,
-            },
-            3 => VSCodeCrawlState::LeftTabOpen {
-                side_nav_tabs: kids.pop_front().ok_or(0u32)?,
-                side_nav_view: kids.pop_front().ok_or(1u32)?,
-                editor: kids.pop_front().ok_or(2u32)?,
-            },
-            _ => VSCodeCrawlState::Unknown,
-        };
-        Ok(state)
     }
 }
 
@@ -97,55 +87,13 @@ impl Display for View {
     }
 }
 
-pub enum VSCodeCrawlState {
-    LeftTabClosed {
-        tabs: UIElement,
-        editor: UIElement,
-    },
-    LeftTabOpen {
-        side_nav_tabs: UIElement,
-        side_nav_view: UIElement,
-        editor: UIElement,
-    },
-    Unknown,
-}
-impl VSCodeCrawlState {
-    pub fn get_side_nav_tabs_root_elem(&self) -> Result<&UIElement, VSCodeResolveError> {
-        match self {
-            VSCodeCrawlState::LeftTabClosed { tabs, .. } => Ok(tabs),
-            VSCodeCrawlState::LeftTabOpen {
-                side_nav_tabs: tabs,
-                ..
-            } => Ok(tabs),
-            VSCodeCrawlState::Unknown => Err(VSCodeResolveError::UnknownState),
-        }
-    }
-    pub fn get_side_nav_view_root_elem(&self) -> Result<&UIElement, VSCodeResolveError> {
-        match self {
-            VSCodeCrawlState::LeftTabClosed { tabs, .. } => Ok(tabs),
-            VSCodeCrawlState::LeftTabOpen {
-                side_nav_view: view,
-                ..
-            } => Ok(view),
-            VSCodeCrawlState::Unknown => Err(VSCodeResolveError::UnknownState),
-        }
-    }
-    pub fn get_editor_root_elem(&self) -> Result<&UIElement, VSCodeResolveError> {
-        match self {
-            VSCodeCrawlState::LeftTabClosed { editor, .. } => Ok(editor),
-            VSCodeCrawlState::LeftTabOpen { editor, .. } => Ok(editor),
-            VSCodeCrawlState::Unknown => Err(VSCodeResolveError::UnknownState),
-        }
-    }
-}
-
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, Reflect)]
 pub struct VSCodeWindowHeader {}
 
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, Reflect)]
 pub struct VSCodeWindowBody {
     pub editor_area: EditorArea,
-    pub side_nav: Vec<SideTab>,
+    pub right_tab: SideTab,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, Reflect)]
@@ -165,21 +113,21 @@ impl Display for VSCodeWindow {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         writeln!(
             f,
-            ":D :D :D Visual Studio Code {} owo owo owo",
-            if self.focused { "(focused)" } else { "" }
+            "Visual Studio Code{}",
+            if self.focused { " (focused)" } else { "" }
         )?;
 
-        writeln!(f, "Side tabs:")?;
-        for tab in self.body.side_nav.iter() {
-            match tab {
-                SideTab::Open { kind, view } => {
-                    writeln!(f, "- (open) {:?} {{{{\n{}}}}}", kind, view)?;
-                }
-                SideTab::Closed { kind } => {
-                    writeln!(f, "- {:?}", kind)?;
-                }
-            }
-        }
+        // writeln!(f, "Side tabs:")?;
+        // for tab in self.body.side_nav.iter() {
+        //     match tab {
+        //         SideTab::Open { kind, view } => {
+        //             writeln!(f, "- (open) {:?} {{{{\n{}}}}}", kind, view)?;
+        //         }
+        //         SideTab::Closed { kind } => {
+        //             writeln!(f, "- {:?}", kind)?;
+        //         }
+        //     }
+        // }
 
         writeln!(f, "Editor groups:")?;
         for (i, group) in self.body.editor_area.groups.iter().enumerate() {

@@ -1,7 +1,8 @@
 use std::collections::VecDeque;
 use uiautomation::UIElement;
 use uiautomation::UITreeWalker;
-
+use anyhow::Result;
+use anyhow::Context;
 use crate::prelude::DrillId;
 
 #[derive(Debug)]
@@ -40,14 +41,14 @@ pub trait Drillable {
         &self,
         walker: &UITreeWalker,
         path: T,
-    ) -> Result<UIElement, DrillError>;
+    ) -> Result<UIElement>;
 }
 impl Drillable for UIElement {
     fn drill<T: Into<DrillId>>(
         &self,
         walker: &UITreeWalker,
         path: T,
-    ) -> Result<UIElement, DrillError> {
+    ) -> Result<UIElement> {
         let drill_id: DrillId = path.into();
         match drill_id {
             DrillId::Child(path) => {
@@ -56,12 +57,12 @@ impl Drillable for UIElement {
                     .map(|x| x as u32)
                     .collect::<VecDeque<u32>>();
                 if path.iter().any(|x| (*x as i32) < 0) {
-                    return Err(DrillError::BadPath);
+                    return Err(DrillError::BadPath.into());
                 }
                 drill_inner(self, walker, &mut path)
             }
             DrillId::Root | DrillId::Unknown => {
-                return Err(DrillError::BadPath);
+                return Err(DrillError::BadPath.into());
             }
         }
     }
@@ -70,12 +71,12 @@ fn drill_inner(
     start: &UIElement,
     walker: &UITreeWalker,
     path: &mut VecDeque<u32>,
-) -> Result<UIElement, DrillError> {
+) -> Result<UIElement> {
     let target_index = match path.pop_front() {
         Some(x) => x,
-        None => return Err(DrillError::EmptyPath),
+        None => return Err(DrillError::EmptyPath.into()),
     };
-    let mut child = walker.get_first_child(start)?;
+    let mut child = walker.get_first_child(start).context("get first child of start")?;
     let mut i = 0;
     while i < target_index {
         i += 1;
@@ -86,7 +87,7 @@ fn drill_inner(
                     given: i,
                     max: target_index,
                     error: e,
-                })
+                }.into())
             }
         };
     }

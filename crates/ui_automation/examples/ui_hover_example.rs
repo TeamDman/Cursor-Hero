@@ -1,6 +1,7 @@
 #![feature(let_chains, trivial_bounds)]
-use std::collections::VecDeque;
-
+use anyhow::Context;
+use anyhow::Error;
+use anyhow::Result;
 use bevy::input::common_conditions::input_toggle_active;
 use bevy::log::LogPlugin;
 use bevy::prelude::*;
@@ -11,7 +12,6 @@ use bevy_egui::egui::Align2;
 use bevy_egui::EguiContexts;
 use bevy_egui::EguiSet;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use bevy_inspector_egui::reflect_inspector::Context;
 use bevy_inspector_egui::reflect_inspector::InspectorUi;
 use cursor_hero_memory::primary_window_memory_plugin::PrimaryWindowMemoryPlugin;
 use cursor_hero_ui_automation::prelude::*;
@@ -46,6 +46,7 @@ cursor_hero_worker=debug,
             name: "ui_hover".to_string(),
             is_ui_automation_thread: true,
             handle_threadbound_message: handle_threadbound_message,
+            handle_threadbound_message_error_handler: handle_threadbound_message_error_handler,
             ..default()
         },
     });
@@ -90,6 +91,7 @@ enum GameboundUISnapshotMessage {
         runtime_id: RuntimeId,
         children: Vec<ElementInfo>,
     },
+    Error,
 }
 impl Message for GameboundUISnapshotMessage {}
 
@@ -115,10 +117,18 @@ struct UIData {
     pub fetching: HashMap<(DrillId, RuntimeId), FetchingState>,
 }
 
+fn handle_threadbound_message_error_handler(
+    _msg: &ThreadboundUISnapshotMessage,
+    reply_tx: &Sender<GameboundUISnapshotMessage>,
+    _error: &Error,
+) -> Result<()> {
+    reply_tx.send(GameboundUISnapshotMessage::Error)?;
+    Ok(())
+}
 fn handle_threadbound_message(
     msg: &ThreadboundUISnapshotMessage,
     reply_tx: &Sender<GameboundUISnapshotMessage>,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<()> {
     match msg {
         ThreadboundUISnapshotMessage::CaptureHovered => {
             debug!("taking snapshot");
@@ -139,10 +149,10 @@ fn handle_threadbound_message(
             runtime_id,
         } => {
             debug!("fetching children for {:?}", drill_id);
-            let automation = UIAutomation::new()?;
-            let walker = automation.create_tree_walker()?;
-            let root = automation.get_root_element()?;
-            let found = root.drill(&walker, drill_id.clone())?;
+            let automation = UIAutomation::new().context("creating automation")?;
+            let walker = automation.create_tree_walker().context("creating walker")?;
+            let root = automation.get_root_element().context("getting root")?;
+            let found = root.drill(&walker, drill_id.clone()).context("drilling")?;
             let mut children = found
                 .gather_children(&walker, &StopBehaviour::EndOfSiblings)
                 .into_iter()
@@ -229,6 +239,9 @@ fn periodic_snapshot(
 fn receive(mut snapshot: EventReader<GameboundUISnapshotMessage>, mut ui_data: ResMut<UIData>) {
     for msg in snapshot.read() {
         match msg {
+            GameboundUISnapshotMessage::Error => {
+                ui_data.in_flight = false;
+            }
             GameboundUISnapshotMessage::Hovered {
                 ui_tree,
                 start,
@@ -272,7 +285,7 @@ fn gui(
 ) {
     let ctx = contexts.ctx_mut();
 
-    let mut cx = Context {
+    let mut cx = bevy_inspector_egui::reflect_inspector::Context {
         world: None,
         queue: None,
     };
@@ -329,6 +342,15 @@ fn gui(
                         });
                         info!("Copied drill_id {} to clipboard", drill_id);
                     }
+                    ui.label("runtime_id");
+                    let runtime_id = x.runtime_id.to_string();
+                    inspector.ui_for_reflect_readonly(&runtime_id, ui);
+                    if ui.button("copy").clicked() {
+                        ui.output_mut(|out| {
+                            out.copied_text = runtime_id.clone();
+                        });
+                        info!("Copied runtime_id {} to clipboard", runtime_id);
+                    }
                 }
                 // inspector.ui_for_reflect_readonly(&data, ui);
             });
@@ -384,16 +406,20 @@ fn ui_for_element_info(
             if selected && data.fresh {
                 ui.scroll_to_cursor(Some(egui::Align::Center));
             }
-            if ui
-                .toggle_value(
-                    &mut selected,
-                    format!(
-                        "{:?} | {}",
-                        element_info.name, element_info.localized_control_type
-                    ),
+            let label = if element_info.automation_id.is_empty() {
+                format!(
+                    "{:?} | {}",
+                    element_info.name, element_info.localized_control_type
                 )
-                .changed()
-            {
+            } else {
+                format!(
+                    "{:?} | {} | {}",
+                    element_info.name,
+                    element_info.localized_control_type,
+                    element_info.automation_id
+                )
+            };
+            if ui.toggle_value(&mut selected, label).changed() {
                 data.selected = if selected {
                     Some(element_info.drill_id.clone())
                 } else {

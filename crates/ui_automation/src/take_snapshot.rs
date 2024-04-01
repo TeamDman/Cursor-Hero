@@ -3,8 +3,10 @@ use crate::resolve_app::resolve_app;
 use cursor_hero_ui_automation_types::prelude::*;
 use itertools::Itertools;
 use uiautomation::UIAutomation;
+use anyhow::Result;
+use anyhow::Context;
 
-pub fn take_snapshot() -> Result<UISnapshot, GatherAppsError> {
+pub fn take_snapshot() -> Result<UISnapshot> {
     let automation = UIAutomation::new()?;
     let walker = automation.create_tree_walker()?;
     // let walker = automation.get_raw_view_walker()?;
@@ -14,24 +16,12 @@ pub fn take_snapshot() -> Result<UISnapshot, GatherAppsError> {
     let focused_app = walker.normalize(&focused)?;
 
     let mut apps = vec![];
-    let mut errors = vec![];
     for elem in top_level_children {
         let focused = elem.get_runtime_id() == focused_app.get_runtime_id();
-        match resolve_app(&elem, &automation, focused) {
-            Ok(app) => {
-                apps.push((elem, app));
-            }
-            Err(e) => errors.push(e),
+        let resolved = resolve_app(&elem, &automation, focused)?;
+        if resolved != AppWindow::Unknown {
+            apps.push((elem,resolved));
         }
-    }
-    let bad_errors = errors
-        .into_iter()
-        // NoMatch errors aren't enough to fail the whole snapshot
-        .filter(|e| !matches!(e, AppResolveError::NoMatch))
-        .filter(|e| !matches!(e, AppResolveError::BadVSCodeStructure(_)))
-        .collect_vec();
-    if !bad_errors.is_empty() {
-        return Err(GatherAppsError::ResolveFailed(bad_errors));
     }
 
     let snapshot = UISnapshot {

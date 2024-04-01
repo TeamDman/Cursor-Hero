@@ -16,7 +16,7 @@ pub struct ScreensToImageParam<'w, 's> {
 }
 
 pub fn get_image(
-    bounds: Rect,
+    bounds: IRect,
     screen_access: &ScreensToImageParam,
 ) -> Result<Image, GetImageError> {
     if bounds.is_empty() {
@@ -42,7 +42,7 @@ pub fn get_image(
 
                 // find the overlap
                 // debug!("screen_rect: {:?}", screen_rect);
-                let intersection = screen_rect.intersect(bounds);
+                let intersection = screen_rect.intersect(bounds.as_rect());
                 // debug!("intersection rect: {:?}", intersection);
 
                 // convert to monitor coordinates
@@ -58,8 +58,8 @@ pub fn get_image(
                     // );
 
                     // Calculate where to start placing pixels in the element's texture
-                    let texture_start_x = (intersection.min.x - bounds.min.x) as u32;
-                    let texture_start_y = (intersection.min.y - bounds.min.y) as u32;
+                    let texture_start_x = (intersection.min.x - bounds.min.x as f32) as u32;
+                    let texture_start_y = (intersection.min.y - bounds.min.y as f32) as u32;
                     // debug!("Texture start: {} {}", texture_start_x, texture_start_y);
                     // Copy the overlapping part of the screen texture to the element's texture.
                     for y in tex_grab_rect.min.y as usize..tex_grab_rect.max.y as usize {

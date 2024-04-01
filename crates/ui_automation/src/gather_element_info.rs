@@ -1,6 +1,7 @@
-use bevy::math::Rect;
+use bevy::math::IRect;
 use cursor_hero_ui_automation_types::prelude::DrillId;
 use cursor_hero_ui_automation_types::prelude::ElementInfo;
+use cursor_hero_ui_automation_types::prelude::RuntimeId;
 use itertools::Itertools;
 use std::collections::VecDeque;
 use uiautomation::Error;
@@ -35,7 +36,12 @@ pub fn gather_incomplete_ui_tree_starting_deep(
     let start_info = root_info
         .get_descendents()
         .into_iter()
-        .find(|info| Ok(&info.runtime_id) == start_element.get_runtime_id().as_ref())
+        .find(|info| {
+            match start_element.get_runtime_id() {
+                Ok(id) => info.runtime_id.0 == id,
+                Err(_) => false,
+            }
+        })
         .cloned();
     let Some(start_info) = start_info else {
         return Err(Error::new(
@@ -151,15 +157,15 @@ pub fn gather_single_element_info(element: &UIElement) -> Result<ElementInfo, ui
     let control_type = element.get_control_type()?.into();
     let localized_control_type = element.get_localized_control_type()?;
     let automation_id = element.get_automation_id()?;
-    let runtime_id = element.get_runtime_id()?;
+    let runtime_id = RuntimeId(element.get_runtime_id()?);
 
     let info = ElementInfo {
         name,
-        bounding_rect: Rect::new(
-            bb.get_left() as f32,
-            bb.get_top() as f32,
-            bb.get_right() as f32,
-            bb.get_bottom() as f32,
+        bounding_rect: IRect::new(
+            bb.get_left(),
+            bb.get_top(),
+            bb.get_right(),
+            bb.get_bottom(),
         ),
         control_type,
         localized_control_type,

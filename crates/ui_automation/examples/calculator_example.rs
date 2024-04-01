@@ -1,17 +1,12 @@
 #![feature(let_chains)]
+use anyhow::Result;
 use bevy::input::common_conditions::input_toggle_active;
 use bevy::log::LogPlugin;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
-use bevy_egui::egui;
-use bevy_egui::EguiContexts;
-use bevy_egui::EguiSet;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use bevy_inspector_egui::reflect_inspector::Context;
-use bevy_inspector_egui::reflect_inspector::InspectorUi;
 use cursor_hero_memory::primary_window_memory_plugin::PrimaryWindowMemoryPlugin;
 use cursor_hero_ui_automation::prelude::*;
-use cursor_hero_winutils::win_mouse::get_cursor_position;
 use cursor_hero_worker::prelude::Message;
 use cursor_hero_worker::prelude::Sender;
 use cursor_hero_worker::prelude::WorkerConfig;
@@ -79,7 +74,7 @@ impl Message for GameboundUISnapshotMessage {}
 fn handle_threadbound_message(
     msg: &ThreadboundUISnapshotMessage,
     reply_tx: &Sender<GameboundUISnapshotMessage>,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<()> {
     let ThreadboundUISnapshotMessage::RequestUISnapshot = msg;
     debug!("getting state of host calculators");
     let snapshot = take_snapshot()?;
@@ -133,7 +128,7 @@ fn step_2_of_making_the_calculators_in_the_game_match_the_calculator_apps_runnin
 ) {
     for msg in snapshot.read() {
         let GameboundUISnapshotMessage::UISnapshot(snapshot) = msg;
-        debug!("Received snapshot: {:?}", snapshot);
+        // debug!("Received snapshot: {:?}", snapshot);
         for app in snapshot.app_windows.iter() {
             let AppWindow::Calculator(calculator) = app else {
                 continue;

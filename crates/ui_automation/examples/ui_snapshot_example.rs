@@ -58,7 +58,7 @@ impl Message for GameboundUISnapshotMessage {}
 fn handle_threadbound_message(
     msg: &ThreadboundUISnapshotMessage,
     reply_tx: &Sender<GameboundUISnapshotMessage>,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> anyhow::Result<()> {
     let ThreadboundUISnapshotMessage::TakeSnapshot = msg;
     debug!("taking snapshot");
     let snapshot = take_snapshot()?;
@@ -95,7 +95,7 @@ fn receive(mut snapshot: EventReader<GameboundUISnapshotMessage>) {
         match msg {
             GameboundUISnapshotMessage::Snapshot(snapshot) => {
                 debug!("received snapshot, writing to file");
-                match get_persist_file(file!(), "ui_snapshot.txt", Usage::Persist) {
+                match get_persist_file(memory_config.as_ref(),file!(), "ui_snapshot.txt", Usage::Persist) {
                     Ok(mut file) => {
                         if let Err(e) = file.write_all(snapshot.to_string().as_bytes()) {
                             debug!("Failed to write to file: {:?}", e);

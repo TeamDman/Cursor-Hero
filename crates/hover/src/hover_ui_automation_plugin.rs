@@ -234,13 +234,14 @@ fn show_hovered_rect(
     if let Ok((entity, mut sprite, mut transform, mut element)) = screen_indicator.get_single_mut()
     {
         if let Some(info) = &hovered.screen_element {
+            let bounds = info.bounding_rect.as_rect();
             sprite.custom_size = Some(Vec2::new(
-                info.bounding_rect.width(),
-                info.bounding_rect.height(),
+                bounds.width(),
+                bounds.height(),
             ));
             transform.translation = Vec3::new(
-                info.bounding_rect.min.x + info.bounding_rect.width() / 2.,
-                -info.bounding_rect.min.y - info.bounding_rect.height() / 2.,
+                bounds.min.x + bounds.width() / 2.,
+                -bounds.min.y - bounds.height() / 2.,
                 0.,
             );
             element.info = info.clone();
@@ -248,17 +249,18 @@ fn show_hovered_rect(
             commands.entity(entity).despawn_recursive();
         }
     } else if let Some(info) = &hovered.screen_element {
+        let bounds = info.bounding_rect.as_rect();
         commands.spawn((
             SpriteBundle {
                 transform: Transform::from_xyz(
-                    info.bounding_rect.min.x + info.bounding_rect.width() / 2.,
-                    -info.bounding_rect.min.y - info.bounding_rect.height() / 2.,
+                    bounds.min.x + bounds.width() / 2.,
+                    -bounds.min.y - bounds.height() / 2.,
                     0.,
                 ),
                 sprite: Sprite {
                     custom_size: Some(Vec2::new(
-                        info.bounding_rect.width(),
-                        info.bounding_rect.height(),
+                        bounds.width(),
+                        bounds.height(),
                     )),
                     color: Color::rgba(0.141, 0.675, 0.949, 0.05),
                     ..default()
@@ -273,13 +275,14 @@ fn show_hovered_rect(
 
     if let Ok((entity, mut sprite, mut transform, mut element)) = game_indicator.get_single_mut() {
         if let Some(info) = &hovered.game_element {
+            let bounds = info.bounding_rect.as_rect();
             sprite.custom_size = Some(Vec2::new(
-                info.bounding_rect.width(),
-                info.bounding_rect.height(),
+                bounds.width(),
+                bounds.height(),
             ));
             transform.translation = Vec3::new(
-                info.bounding_rect.min.x + info.bounding_rect.width() / 2.,
-                -info.bounding_rect.min.y - info.bounding_rect.height() / 2.,
+                bounds.min.x + bounds.width() / 2.,
+                -bounds.min.y - bounds.height() / 2.,
                 0.,
             );
             element.info = info.clone();
@@ -287,17 +290,18 @@ fn show_hovered_rect(
             commands.entity(entity).despawn_recursive();
         }
     } else if let Some(info) = &hovered.game_element {
+        let bounds = info.bounding_rect.as_rect();
         commands.spawn((
             SpriteBundle {
                 transform: Transform::from_xyz(
-                    info.bounding_rect.min.x + info.bounding_rect.width() / 2.,
-                    -info.bounding_rect.min.y - info.bounding_rect.height() / 2.,
+                    bounds.min.x + bounds.width() / 2.,
+                    -bounds.min.y - bounds.height() / 2.,
                     0.,
                 ),
                 sprite: Sprite {
                     custom_size: Some(Vec2::new(
-                        info.bounding_rect.width(),
-                        info.bounding_rect.height(),
+                        bounds.width(),
+                        bounds.height(),
                     )),
                     color: Color::rgba(0.641, 0.275, 0.649, 0.05),
                     ..default()

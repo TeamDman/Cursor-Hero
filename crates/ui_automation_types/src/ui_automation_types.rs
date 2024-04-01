@@ -1,8 +1,9 @@
-use crate::prelude::Calculator;
+use crate::prelude::CalculatorState;
 use crate::vscode_ui_types::*;
 use bevy::prelude::*;
 use serde::Deserialize;
 use serde::Serialize;
+use uiautomation::UIElement;
 use std::collections::VecDeque;
 use std::fmt;
 use std::fmt::Display;
@@ -33,9 +34,9 @@ pub struct UISnapshot {
 
 impl Display for UISnapshot {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        writeln!(f, "!!! UISnapshot !!!")?;
+        writeln!(f, "# UI Snapshot\n")?;
         for window in self.app_windows.iter() {
-            write!(f, "{}", window)?;
+            writeln!(f, "## {}\n\n{}\n", window.variant_name(), window)?;
         }
         fmt::Result::Ok(())
     }
@@ -44,7 +45,18 @@ impl Display for UISnapshot {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Reflect)]
 pub enum AppWindow {
     VSCode(VSCodeWindow),
-    Calculator(Calculator),
+    Calculator(CalculatorState),
+    Unknown,
+}
+
+impl AppWindow {
+    pub fn variant_name(&self) -> String {
+        match self {
+            AppWindow::VSCode(_) => "VSCode".to_string(),
+            AppWindow::Calculator(_) => "Calculator".to_string(),
+            AppWindow::Unknown => "Unknown".to_string(),
+        }
+    }
 }
 
 impl Display for AppWindow {
@@ -52,6 +64,7 @@ impl Display for AppWindow {
         match self {
             AppWindow::VSCode(window) => write!(f, "{}", window),
             AppWindow::Calculator(window) => write!(f, "{}", window), 
+            AppWindow::Unknown => write!(f, "Unknown"),
         }
     }
 }
@@ -219,7 +232,35 @@ impl From<uiautomation::controls::ControlType> for ControlType {
     }
 }
 
-pub type RuntimeId = Vec<i32>;
+#[derive(Eq, PartialEq, Clone, Reflect, Hash)]
+pub struct RuntimeId(pub Vec<i32>);
+impl Default for RuntimeId {
+    fn default() -> Self {
+        RuntimeId(vec![])
+    }
+}
+impl std::fmt::Display for RuntimeId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            self.0
+                .iter()
+                .map(|x| format!("{:X}", x).to_string())
+                .collect::<Vec<String>>()
+                .join(",")
+        )
+    }
+}
+impl std::fmt::Debug for RuntimeId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            self.to_string()
+        )
+    }
+}
 
 #[derive(Debug, Eq, PartialEq, Clone, Reflect, Default, Hash)]
 pub enum DrillId {
@@ -270,13 +311,13 @@ impl std::fmt::Display for DrillId {
 // #[reflect(no_field_bounds)] //https://github.com/bevyengine/bevy/issues/8965
 pub struct ElementInfo {
     pub name: String,
-    pub bounding_rect: Rect,
+    pub bounding_rect: IRect,
     pub control_type: ControlType,
     pub localized_control_type: String,
     pub class_name: String,
     pub automation_id: String,
     #[reflect(ignore)]
-    pub runtime_id: Vec<i32>,
+    pub runtime_id: RuntimeId,
     #[reflect(ignore)]
     pub drill_id: DrillId,
     #[reflect(ignore)]
@@ -285,16 +326,39 @@ pub struct ElementInfo {
 impl Default for ElementInfo {
     fn default() -> Self {
         ElementInfo {
-            name: "".to_string(),
-            bounding_rect: Rect::new(0.0, 0.0, 0.0, 0.0),
+            name: "UNKNOWN ELEMENT INFO".to_string(),
+            bounding_rect: IRect::new(0, 0, 0, 0),
             control_type: ControlType::Pane,
             localized_control_type: "".to_string(),
             class_name: "".to_string(),
             automation_id: "".to_string(),
-            runtime_id: vec![],
+            runtime_id: RuntimeId::default(),
             drill_id: DrillId::Unknown,
             children: None,
         }
+    }
+}
+impl TryFrom<UIElement> for ElementInfo {
+    type Error = uiautomation::Error;
+    fn try_from(value: UIElement) -> Result<Self, Self::Error> {
+        let name = value.get_name()?;
+        let bounding_rect = value.get_bounding_rectangle()?.to_bevy_irect();
+        let control_type = value.get_control_type()?;
+        let localized_control_type = value.get_localized_control_type()?;
+        let class_name = value.get_classname()?;
+        let automation_id = value.get_automation_id()?;
+        let runtime_id = value.get_runtime_id()?;
+        Ok(ElementInfo {
+            name,
+            bounding_rect,
+            control_type: control_type.into(),
+            localized_control_type,
+            class_name,
+            automation_id,
+            runtime_id: RuntimeId(runtime_id),
+            drill_id: DrillId::Unknown,
+            children: None,
+        })
     }
 }
 impl ElementInfo {
@@ -383,12 +447,12 @@ mod tests {
         fn new_elem(name: &str, drill_id: Vec<usize>) -> ElementInfo {
             ElementInfo {
                 name: name.to_string(),
-                bounding_rect: Rect::new(0.0, 0.0, 100.0, 100.0),
+                bounding_rect: IRect::new(0, 0, 100, 100),
                 control_type: ControlType::Button,
                 localized_control_type: "Button".to_string(),
                 class_name: "Button".to_string(),
                 automation_id: "Button".to_string(),
-                runtime_id: vec![],
+                runtime_id: RuntimeId::default(),
                 drill_id: match drill_id.is_empty() {
                     true => DrillId::Root,
                     false => DrillId::Child(drill_id.into()),

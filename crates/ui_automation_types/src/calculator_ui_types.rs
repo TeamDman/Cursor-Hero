@@ -1,15 +1,18 @@
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Component, Debug, Reflect, Default, Clone, Serialize, Deserialize, PartialEq)]
-pub struct Calculator {
-    pub memory: CalculatorMemory,
+#[derive(Debug, Reflect, Default, Clone, Serialize, Deserialize, PartialEq)]
+pub struct CalculatorState {
+    pub expression: String,
+    pub display: String,
 }
-impl std::fmt::Display for Calculator {
+impl std::fmt::Display for CalculatorState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Calculator (value={})", self.memory.buffer)
+        write!(f, "Calculator ({}{})", self.expression, self.display)
     }
 }
+#[derive(Component, Debug, Reflect, Default, Clone, Serialize, Deserialize, PartialEq)]
+pub struct Calculator;
 
 #[derive(Component, Debug, Reflect, Default)]
 pub struct NumberDisplayPanel;
@@ -30,7 +33,7 @@ pub struct CalculatorMemory {
 
 #[derive(Event, Debug, Reflect, Default)]
 pub struct SpawnCalculatorRequest {
-    calculator: Calculator,
+    calculator: CalculatorState,
 }
 #[derive(Event, Debug, Reflect)]
 pub struct CalculatorRequestDefaultPositioningRequest {

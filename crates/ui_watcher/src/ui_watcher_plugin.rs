@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use cursor_hero_character_types::prelude::MainCharacter;
 use cursor_hero_environment_types::environment_types::EnvironmentTracker;
 use cursor_hero_memory_types::prelude::get_persist_file;
+use cursor_hero_memory_types::prelude::MemoryConfig;
 use cursor_hero_memory_types::prelude::Usage;
 use cursor_hero_observation_types::observation_types::SomethingObservableHappenedEvent;
 use cursor_hero_ui_automation::prelude::take_snapshot;
@@ -98,7 +99,13 @@ fn handle_gamebound_messages(
             environment_id: Some(character_environment.environment_id),
         });
 
-        match get_persist_file(file!(), "results.txt", Usage::Persist) {
+        match get_persist_file(
+            &MemoryConfig {
+                save_dir: "Cursor Hero Memory (ui watcher)".to_string(),
+            },
+            "results.txt",
+            Usage::Persist,
+        ) {
             Ok(mut file) => {
                 if let Err(e) = file.write_all(snapshot.to_string().as_bytes()) {
                     error!("Failed to write to file: {:?}", e);

@@ -9,6 +9,7 @@ use bevy_inspector_egui::reflect_inspector::InspectorUi;
 use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
 use crossbeam_channel::Sender;
+use cursor_hero_bevy::prelude::NegativeYIVec3;
 use cursor_hero_bevy::prelude::NegativeYVec2;
 use cursor_hero_bevy::prelude::NegativeYVec3;
 use cursor_hero_camera::camera_plugin::MainCamera;
@@ -29,6 +30,7 @@ use cursor_hero_ui_automation::prelude::ElementInfo;
 use cursor_hero_worker::prelude::Message;
 use cursor_hero_worker::prelude::WorkerConfig;
 use cursor_hero_worker::prelude::WorkerPlugin;
+use cursor_hero_worker::prelude::anyhow::Result;
 use itertools::Itertools;
 use leafwing_input_manager::prelude::*;
 use rand::thread_rng;
@@ -237,7 +239,7 @@ fn handle_input(
 fn handle_threadbound_message(
     msg: &ThreadboundMessage,
     reply_tx: &Sender<GameboundMessage>,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<()> {
     match msg {
         ThreadboundMessage::Capture { world_position }
         | ThreadboundMessage::CaptureBrick { world_position } => {
@@ -327,12 +329,12 @@ fn handle_replies(
             } => {
                 let (size, pos, texture_region) = match msg {
                     GameboundMessage::Capture { .. } => (
-                        hovered_element.bounding_rect.size(),
-                        hovered_element.bounding_rect.center().extend(20.0).neg_y(),
+                        hovered_element.bounding_rect.size().as_vec2(),
+                        hovered_element.bounding_rect.center().extend(20).neg_y().as_vec3(),
                         hovered_element.bounding_rect,
                     ),
                     GameboundMessage::CaptureBrick { .. } => (
-                        hovered_element.bounding_rect.size().normalize() * 60.0,
+                        hovered_element.bounding_rect.size().as_vec2().normalize() * 60.0,
                         *world_position,
                         hovered_element.bounding_rect,
                     ),
@@ -384,13 +386,13 @@ fn handle_replies(
                     // let texture_handle = asset_server.add(image);
 
                     // spawn the element image
-                    let mut elem_center_pos = info.bounding_rect.center().extend(*depth as f32);
+                    let mut elem_center_pos = info.bounding_rect.center().as_vec2().extend(*depth as f32);
                     elem_center_pos.y *= -1.0;
                     commands.spawn((
                         SpriteBundle {
                             transform: Transform::from_translation(elem_center_pos),
                             sprite: Sprite {
-                                custom_size: Some(info.bounding_rect.size()),
+                                custom_size: Some(info.bounding_rect.size().as_vec2()),
                                 color: Color::hsl(thread_rng().gen_range(0.0..360.0), 0.5, 0.5),
                                 ..default()
                             },
@@ -399,7 +401,7 @@ fn handle_replies(
                         },
                         CubeToolInteractable,
                         RigidBody::Dynamic,
-                        Collider::cuboid(info.bounding_rect.width(), info.bounding_rect.height()),
+                        Collider::cuboid(info.bounding_rect.width() as f32, info.bounding_rect.height() as f32),
                         MovementDamping::default(),
                         Name::new(format!("Element - {}", info.name)),
                     ));
@@ -415,7 +417,7 @@ fn spawn_brick(
     hero_element: &ElementInfo,
     size: Vec2,
     pos: Vec3,
-    texture_region: Rect,
+    texture_region: IRect,
     screen_access: &ScreensToImageParam,
     asset_server: &Res<AssetServer>,
 ) {

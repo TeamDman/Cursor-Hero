@@ -6,8 +6,6 @@ use std::fmt;
 pub enum AppResolveError {
     UI(uiautomation::Error),
     BadStructure(String),
-    BadVSCodeStructure(String),
-    NoMatch,
 }
 impl From<uiautomation::Error> for AppResolveError {
     fn from(e: uiautomation::Error) -> Self {
@@ -35,15 +33,12 @@ impl From<VSCodeResolveError> for AppResolveError {
     fn from(e: VSCodeResolveError) -> Self {
         match e {
             VSCodeResolveError::UnknownSideTabKind(s) => {
-                AppResolveError::BadVSCodeStructure(format!("Unknown VSCode side tab kind: {}", s))
+                AppResolveError::BadStructure(format!("Unknown VSCode side tab kind: {}", s))
             }
-            VSCodeResolveError::UnknownState => {
-                AppResolveError::BadVSCodeStructure("Unknown VSCode state".to_string())
+            VSCodeResolveError::UnknownState { kids } => {
+                AppResolveError::BadStructure(format!("Unknown VSCode state, kids: {:?}", kids))
             }
             VSCodeResolveError::UI(e) => AppResolveError::UI(e),
-            VSCodeResolveError::BadChildCount { tried_accessing } => AppResolveError::BadVSCodeStructure(
-                format!("Bad child count: tried accessing: {}", tried_accessing),
-            ),
         }
     }
 }
@@ -60,7 +55,7 @@ impl std::error::Error for AppResolveError {}
 pub enum GatherAppsError {
     UI(uiautomation::Error),
     NoneMatch,
-    ResolveFailed(Vec<AppResolveError>),
+    ResolveFailed(Vec<anyhow::Error>),
 }
 impl From<uiautomation::Error> for GatherAppsError {
     fn from(e: uiautomation::Error) -> Self {

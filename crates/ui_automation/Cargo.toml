@@ -22,6 +22,7 @@ windows = { workspace = true, features = [
     "Win32_UI_WindowsAndMessaging",
 ] }
 image = { workspace = true }
+anyhow = {workspace = true}
 
 [dev-dependencies]
 cursor_hero_memory_types = { workspace = true }
