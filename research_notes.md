@@ -84,6 +84,7 @@
 - [LlamaIndex 🦙 v0.10.6](https://docs.llamaindex.ai/en/stable/)
 - [Supercharge Your RAG with Contextualized Late Interactions (youtube.com)](https://www.youtube.com/watch?v=xTzUn3G9YA0)
   - [bclavie/RAGatouille](https://github.com/bclavie/RAGatouille)
+
 ## Sandboxing
 
 - [copy/v86: x86 PC emulator and x86-to-wasm JIT, running in the browser](https://github.com/copy/v86) ([demo](https://copy.sh/v86/))
@@ -115,11 +116,12 @@
 - [Fira Mono - Google Fonts](https://fonts.google.com/specimen/Fira+Mono)
 - [Xelu's FREE Controller Prompts (thoseawesomeguys.com)](https://thoseawesomeguys.com/prompts/)
 
-## Bevy Plugins
+## Bevy stuff
 
 - [janhohenheim/foxtrot: The all-in-one Bevy 3D game template for desktop. (github.com)](https://github.com/janhohenheim/foxtrot)
 - [StarArawn/bevy\_ecs\_tilemap: A tilemap rendering crate for bevy which is more ECS friendly. (github.com)](https://github.com/StarArawn/bevy_ecs_tilemap)
 - [djeedai/bevy\_hanabi: 🎆 Hanabi --- a GPU particle system plugin for the Bevy game engine. (github.com)](https://github.com/djeedai/bevy_hanabi)
+- [Added Audio Input Support by bushrat011899 - Pull Request #10072 - bevyengine/bevy (github.com)](https://github.com/bevyengine/bevy/pull/10072)
 
 ## Game inspiration
 

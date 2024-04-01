@@ -45,6 +45,7 @@ fn create_worker_thread<T: Message, G: Message>(
 
     let name = config.name.clone();
     let handler = config.handle_threadbound_message;
+    let handler_error_handler = config.handle_threadbound_message_error_handler;
     let sleep_duration = config.sleep_duration;
     let is_ui_automation_thread = config.is_ui_automation_thread;
     if let Err(e) = thread::Builder::new().name(name.clone()).spawn(move || {
@@ -83,6 +84,12 @@ fn create_worker_thread<T: Message, G: Message>(
                         "[{}] Failed to process thread message {:?}, got error {:?}",
                         name, msg, e
                     );
+                    if let Err(ee) = (handler_error_handler)(&msg, &game_tx, &e) {
+                        error!(
+                            "[{}] BAD NEWS! Failed while processing error handler for message {:?} that produced error {:?}, got new error {:?}",
+                            name, msg, e, ee
+                        );
+                    }
                 }
                 std::thread::sleep(sleep_duration);
             }

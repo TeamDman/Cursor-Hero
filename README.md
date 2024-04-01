@@ -16,6 +16,12 @@ Try [DS4Windows](https://ds4windows.dev/).
 - [ollama/ollama: Local LLM inference](https://github.com/ollama/ollama)
 - [R2D2FISH/glados-tts: GLaDOS speech synthesis](https://github.com/TeamDman/glados-tts.git)
 
+## Diagnosing problems
+
+```pwsh
+$env:RUST_BACKTRACE="1"
+```
+
 ## Project description
 
 Cursor Hero is a thing built using Rust and the Bevy game engine.

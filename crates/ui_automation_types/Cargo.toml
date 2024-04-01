@@ -11,3 +11,4 @@ uiautomation = {workspace = true}
 serde = { version = "1.0", features = ["derive"] }
 itertools = { workspace = true }
 bevy-inspector-egui = { workspace = true }
+anyhow = {workspace = true}
