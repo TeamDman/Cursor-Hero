@@ -213,29 +213,33 @@ fn resolve_body(body: &UIElement, walker: &UITreeWalker) -> Result<VSCodeWindowB
     })
 }
 
-fn resolve_footer(
-    footer: &UIElement,
-    automation: &UIAutomation,
-) -> Result<VSCodeWindowFooter, AppResolveError> {
-    let condition = automation.create_property_condition(
-        UIProperty::AutomationId,
-        Variant::from("status.editor.selection"),
-        None,
-    )?;
-    let cursor_position_elem = footer.find_first(TreeScope::Children, &condition)?;
-    let text = cursor_position_elem.get_name()?;
+fn resolve_footer(footer: &UIElement, automation: &UIAutomation) -> Result<VSCodeWindowFooter> {
+    let condition = automation
+        .create_property_condition(
+            UIProperty::AutomationId,
+            Variant::from("status.editor.selection"),
+            None,
+        )
+        .context("creating condition")?;
+    let cursor_position_elem = footer
+        .find_first(TreeScope::Children, &condition)
+        .context("finding first")?;
+    let text = cursor_position_elem.get_name().context("getting name")?;
     // "Ln 218, Col 5"
     let cursor_position = text
         .split(", ")
         .map(|part| part.split(' ').last().and_then(|s| s.parse::<usize>().ok()))
         .collect_vec();
     let cursor_position = match cursor_position.as_slice() {
-        [Some(line), Some(column)] => IVec2::new(*column as i32, *line as i32),
+        [Some(line), Some(column)] | [Some(line), Some(column), _] => {
+            IVec2::new(*column as i32, *line as i32)
+        }
         _ => {
             return Err(AppResolveError::BadStructure(format!(
                 "Bad cursor position {:?}",
                 cursor_position
             )))
+            .context("bad text cursor position composition");
         }
     };
     Ok(VSCodeWindowFooter { cursor_position })

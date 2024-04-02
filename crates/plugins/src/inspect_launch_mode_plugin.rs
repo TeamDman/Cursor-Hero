@@ -60,9 +60,8 @@ impl Plugin for InspectLaunchModePlugin {
 info,
 wgpu_core=warn,
 wgpu_hal=warn,
-ui_hover_example=trace,
-cursor_hero_worker=debug,
 "
+// cursor_hero=debug,
                     .replace('\n', "")
                     .trim()
                     .into(),

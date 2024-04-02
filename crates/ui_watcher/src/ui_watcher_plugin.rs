@@ -104,6 +104,8 @@ fn handle_gamebound_messages(
             Ok(mut file) => {
                 if let Err(e) = file.write_all(snapshot.to_string().as_bytes()) {
                     error!("Failed to write to file: {:?}", e);
+                } else {
+                    info!("Wrote snapshot to file {:?}", file);
                 }
             }
             Err(e) => {
