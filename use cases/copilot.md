@@ -1,1 +1,0 @@
-When having multiple cursors from using a snippet and copilot provides a suggestion and you hit tab it only inserts the suggestion at the first cursor. Need to recognize copilot ghost suggestions and type them out instead of hitting tab.

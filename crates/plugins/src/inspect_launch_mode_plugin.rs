@@ -8,6 +8,7 @@ use cursor_hero_memory::primary_window_memory_plugin::restore_window;
 use cursor_hero_memory_types::prelude::MemoryConfig;
 use cursor_hero_memory_types::prelude::MemoryPluginBuildConfig;
 use cursor_hero_memory_types::prelude::MemoryTypesPlugin;
+use cursor_hero_observation_types::observation_types_plugin::ObservationTypesPlugin;
 use cursor_hero_ui_automation::prelude::UiAutomationPlugin;
 use cursor_hero_ui_automation::prelude::UiAutomationTypesPlugin;
 use cursor_hero_ui_watcher::ui_watcher_plugin::UiWatcherPlugin;
@@ -29,7 +30,7 @@ impl Plugin for InspectLaunchModePlugin {
                 ..default()
             },
         });
-
+        app.add_plugins(ObservationTypesPlugin);
         app.add_plugins(UiWatcherTypesPlugin);
         app.add_plugins(UiWatcherPlugin);
         app.add_plugins(UiAutomationTypesPlugin);

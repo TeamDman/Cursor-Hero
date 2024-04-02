@@ -78,30 +78,26 @@ fn handle_threadbound_messages(
 }
 
 fn handle_gamebound_messages(
+    memory_config: Res<MemoryConfig>,
     bridge: Res<Bridge>,
     mut observation_events: EventWriter<SomethingObservableHappenedEvent>,
     character_query: Query<&EnvironmentTracker, With<MainCharacter>>,
 ) {
-    let Ok(character) = character_query.get_single() else {
-        warn!("Expected single main character, failed");
-        while let Ok(_msg) = bridge.receiver.try_recv() { // drain the channel
-        }
+    if bridge.receiver.is_empty() {
         return;
-    };
-    let character_environment = character;
+    }
+    let environment_id = character_query.get_single().ok().map(|c| c.environment_id);
     while let Ok(msg) = bridge.receiver.try_recv() {
         let (msg_kind, GameboundMessage::Snapshot(snapshot)) = ("Snapshot", msg);
         debug!("Received message {}:\n{}", msg_kind, snapshot);
 
         observation_events.send(SomethingObservableHappenedEvent::UISnapshot {
             snapshot: snapshot.clone(),
-            environment_id: Some(character_environment.environment_id),
+            environment_id,
         });
 
         match get_persist_file(
-            &MemoryConfig {
-                save_dir: "Cursor Hero Memory (ui watcher)".to_string(),
-            },
+            memory_config.as_ref(),
             "results.txt",
             Usage::Persist,
         ) {
