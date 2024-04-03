@@ -1,0 +1,10 @@
+[package]
+name = "cursor_hero_ui_hover"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bevy = { workspace = true }
+cursor_hero_ui_hover_types = { workspace = true }

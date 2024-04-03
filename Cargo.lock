@@ -2336,6 +2336,8 @@ dependencies = [
  "cursor_hero_ui",
  "cursor_hero_ui_automation",
  "cursor_hero_ui_automation_types",
+ "cursor_hero_ui_hover",
+ "cursor_hero_ui_hover_types",
  "cursor_hero_ui_inspector",
  "cursor_hero_ui_inspector_types",
  "cursor_hero_ui_watcher",
@@ -2629,6 +2631,21 @@ dependencies = [
  "itertools 0.12.0",
  "serde",
  "uiautomation",
+]
+
+[[package]]
+name = "cursor_hero_ui_hover"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "cursor_hero_ui_hover_types",
+]
+
+[[package]]
+name = "cursor_hero_ui_hover_types"
+version = "0.1.0"
+dependencies = [
+ "bevy",
 ]
 
 [[package]]

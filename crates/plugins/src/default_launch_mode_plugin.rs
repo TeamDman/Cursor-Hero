@@ -90,10 +90,14 @@ use cursor_hero_window_swap_tool::prelude::*;
 use cursor_hero_window_swap_tool_types::prelude::*;
 use cursor_hero_ui_inspector::prelude::*;
 use cursor_hero_ui_inspector_types::prelude::*;
+use cursor_hero_ui_hover::prelude::*;
+use cursor_hero_ui_hover_types::prelude::*;
 pub struct DefaultLaunchModePlugin;
 
 impl Plugin for DefaultLaunchModePlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(UiHoverTypesPlugin);
+        app.add_plugins(UiHoverPlugin);
         app.add_plugins(UIInspectorTypesPlugin);
         app.add_plugins(UIInspectorPlugin);
         app.add_plugins(MemoryTypesPlugin);
