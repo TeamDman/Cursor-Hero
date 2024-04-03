@@ -6,7 +6,7 @@ use std::time::Duration;
 use bevy::prelude::*;
 use chrono::DateTime;
 use chrono::Local;
-use cursor_hero_ui_automation_types::prelude::UISnapshot;
+use cursor_hero_ui_automation_types::prelude::UiSnapshot;
 use serde::Deserialize;
 use serde::Serialize;
 #[derive(Component, Reflect, Default)]
@@ -93,7 +93,7 @@ pub enum SomethingObservableHappenedEvent {
     },
     UISnapshot {
         environment_id: Option<Entity>,
-        snapshot: UISnapshot,
+        snapshot: UiSnapshot,
     },
     // BrickEnteredEnvironment {
 

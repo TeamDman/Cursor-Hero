@@ -4,14 +4,10 @@ use cursor_hero_worker::prelude::anyhow::Context;
 use cursor_hero_worker::prelude::anyhow::Error;
 use cursor_hero_worker::prelude::anyhow::Result;
 use bevy::input::common_conditions::input_toggle_active;
-use bevy::log::LogPlugin;
-use bevy::utils::HashMap;
 use bevy::window::PrimaryWindow;
 use bevy_egui::egui;
 use bevy_egui::egui::Align2;
 use bevy_egui::EguiContexts;
-use bevy_egui::EguiSet;
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_inspector_egui::reflect_inspector::InspectorUi;
 use cursor_hero_ui_automation::prelude::*;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
@@ -23,9 +19,9 @@ use itertools::Itertools;
 use uiautomation::UIAutomation;
 use cursor_hero_ui_inspector_types::prelude::FetchingState;
 
-pub struct UIInspectorPlugin;
+pub struct UiInspectorPlugin;
 
-impl Plugin for UIInspectorPlugin {
+impl Plugin for UiInspectorPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(WorkerPlugin {
             config: WorkerConfig::<ThreadboundUISnapshotMessage, GameboundUISnapshotMessage> {

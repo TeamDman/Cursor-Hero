@@ -6,7 +6,7 @@ use cursor_hero_memory_types::prelude::MemoryConfig;
 use cursor_hero_memory_types::prelude::Usage;
 use cursor_hero_observation_types::observation_types::SomethingObservableHappenedEvent;
 use cursor_hero_ui_automation::prelude::take_snapshot;
-use cursor_hero_ui_automation::prelude::UISnapshot;
+use cursor_hero_ui_automation::prelude::UiSnapshot;
 use std::io::Write;
 use std::thread;
 
@@ -30,7 +30,7 @@ enum ThreadboundMessage {
 
 #[derive(Debug)]
 enum GameboundMessage {
-    Snapshot(UISnapshot),
+    Snapshot(UiSnapshot),
 }
 
 #[derive(Resource)]

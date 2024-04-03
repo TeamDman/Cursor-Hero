@@ -99,7 +99,7 @@ impl Plugin for DefaultLaunchModePlugin {
         app.add_plugins(UiHoverTypesPlugin);
         app.add_plugins(UiHoverPlugin);
         app.add_plugins(UIInspectorTypesPlugin);
-        app.add_plugins(UIInspectorPlugin);
+        app.add_plugins(UiInspectorPlugin);
         app.add_plugins(MemoryTypesPlugin);
         let memory_config = MemoryConfig {
             save_dir: "Cursor Hero Memory".to_string(),

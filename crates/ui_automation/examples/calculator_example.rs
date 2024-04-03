@@ -67,7 +67,7 @@ impl Message for ThreadboundUISnapshotMessage {}
 
 #[derive(Debug, Reflect, Clone, Event)]
 enum GameboundUISnapshotMessage {
-    UISnapshot(UISnapshot),
+    UISnapshot(UiSnapshot),
 }
 impl Message for GameboundUISnapshotMessage {}
 

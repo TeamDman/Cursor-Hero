@@ -4,7 +4,7 @@ use anyhow::Result;
 use cursor_hero_ui_automation_types::prelude::*;
 use uiautomation::UIAutomation;
 
-pub fn take_snapshot() -> Result<UISnapshot> {
+pub fn take_snapshot() -> Result<UiSnapshot> {
     let automation = UIAutomation::new()?;
     let walker = automation.create_tree_walker()?;
     // let walker = automation.get_raw_view_walker()?;
@@ -22,7 +22,7 @@ pub fn take_snapshot() -> Result<UISnapshot> {
         }
     }
 
-    let snapshot = UISnapshot {
+    let snapshot = UiSnapshot {
         app_windows: apps.into_iter().map(|(_elem, app)| app).collect(),
     };
     Ok(snapshot)

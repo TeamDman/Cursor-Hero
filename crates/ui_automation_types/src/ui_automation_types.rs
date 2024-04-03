@@ -27,11 +27,11 @@ impl HexList for Vec<i32> {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Reflect)]
-pub struct UISnapshot {
+pub struct UiSnapshot {
     pub app_windows: Vec<AppWindow>,
 }
 
-impl Display for UISnapshot {
+impl Display for UiSnapshot {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         writeln!(f, "# UI Snapshot\n")?;
         for window in self.app_windows.iter() {
