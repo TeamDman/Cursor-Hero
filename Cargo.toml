@@ -65,7 +65,7 @@ cursor_hero_character_types = { path = "./crates/character_types" }
 cursor_hero_agent_types = { path = "./crates/agent_types" }
 cursor_hero_physics_debug = { path = "./crates/physics_debug" }
 cursor_hero_math = { path = "./crates/math" }
-cursor_hero_cursor_types = { path = "./crates/pointer_types" }
+cursor_hero_cursor_types = { path = "./crates/cursor_types" }
 cursor_hero_toolbelt_types = { path = "./crates/toolbelt_types" }
 cursor_hero_sprint_tool_types = { path = "./crates/sprint_tool_types" }
 cursor_hero_sprint_tool = { path = "./crates/sprint_tool" }
@@ -77,7 +77,6 @@ cursor_hero_environment = { path = "./crates/environment" }
 cursor_hero_xelu_prompts = { path = "./crates/xelu_prompts" }
 cursor_hero_pause_tool = { path = "./crates/pause_tool" }
 cursor_hero_wallpaper = { path = "./crates/wallpaper" }
-cursor_hero_cursor_mirror = { path = "./crates/cursor_mirror" }
 cursor_hero_hover = { path = "./crates/hover" }
 cursor_hero_pressure_plate = { path = "./crates/pressure_plate" }
 cursor_hero_level_bounds = { path = "./crates/level_bounds" }
@@ -89,7 +88,7 @@ cursor_hero_data = { path = "./crates/data" }
 cursor_hero_metrics = { path = "./crates/metrics" }
 cursor_hero_click_drag_character_movement = { path = "./crates/click_drag_character_movement" }
 cursor_hero_physics = { path = "./crates/physics" }
-cursor_hero_cursor = { path = "./crates/pointer" }
+cursor_hero_cursor = { path = "./crates/cursor" }
 cursor_hero_screen = { path = "./crates/screen" }
 cursor_hero_toolbelt = { path = "./crates/toolbelt" }
 cursor_hero_tools = { path = "./crates/tools" }

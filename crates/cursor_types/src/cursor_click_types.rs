@@ -4,13 +4,13 @@ use bevy::prelude::*;
 pub struct Clickable;
 
 #[derive(Reflect, Debug)]
-pub struct PointerPress {
-    pub pointer_id: Entity,
+pub struct CursorPress {
+    pub cursor_id: Entity,
     pub way: Way,
 }
 #[derive(Component, Reflect, Debug)]
 pub struct Pressed {
-    pub presses: Vec<PointerPress>,
+    pub presses: Vec<CursorPress>,
 }
 
 #[derive(Reflect, Debug, Hash, PartialEq, Eq, Copy, Clone)]
@@ -34,22 +34,22 @@ pub enum Way {
 pub enum ClickEvent {
     Pressed {
         target_id: Entity,
-        pointer_id: Entity,
+        cursor_id: Entity,
         way: Way,
     },
     Released {
         target_id: Entity,
-        pointer_id: Entity,
+        cursor_id: Entity,
         way: Way,
     },
     Clicked {
         target_id: Entity,
-        pointer_id: Entity,
+        cursor_id: Entity,
         way: Way,
     },
 }
 #[derive(Event, Debug, Reflect)]
 pub enum ToolClickEvent {
-    Pressed { pointer_id: Entity, way: Way },
-    Released { pointer_id: Entity, way: Way },
+    Pressed { cursor_id: Entity, way: Way },
+    Released { cursor_id: Entity, way: Way },
 }

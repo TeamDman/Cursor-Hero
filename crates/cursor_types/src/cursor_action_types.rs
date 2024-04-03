@@ -2,20 +2,20 @@ use bevy::prelude::*;
 use leafwing_input_manager::prelude::*;
 use leafwing_input_manager::user_input::InputKind;
 
-pub struct PointerActionPlugin;
+pub struct CursorActionPlugin;
 
-impl Plugin for PointerActionPlugin {
+impl Plugin for CursorActionPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(InputManagerPlugin::<PointerAction>::default());
+        app.add_plugins(InputManagerPlugin::<CursorAction>::default());
     }
 }
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
-pub enum PointerAction {
+pub enum CursorAction {
     Move,
 }
 
-impl PointerAction {
+impl CursorAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
             Self::Move => UserInput::Single(InputKind::DualAxis(DualAxis::right_stick())),
@@ -28,10 +28,10 @@ impl PointerAction {
         }
     }
 
-    pub fn default_input_map() -> InputMap<PointerAction> {
+    pub fn default_input_map() -> InputMap<CursorAction> {
         let mut input_map = InputMap::default();
 
-        for variant in PointerAction::variants() {
+        for variant in CursorAction::variants() {
             input_map.insert(variant.default_mkb_binding(), variant);
             input_map.insert(variant.default_gamepad_binding(), variant);
         }

@@ -14,7 +14,7 @@ pub fn insert_hover_frame(
     for event in reader.read() {
         if let HoverEvent::Start {
             target_id,
-            pointer_id: _,
+            cursor_id: _,
         } = event
         {
             // Ensure the entity hasn't despawned since the event was sent
@@ -55,7 +55,7 @@ pub fn remove_hover_frame(
     for event in reader.read() {
         if let HoverEvent::End {
             target_id,
-            pointer_id: _,
+            cursor_id: _,
         } = event
         {
             if let Ok(tool_children) = tool_query.get(*target_id) {

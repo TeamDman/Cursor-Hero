@@ -23,3 +23,4 @@ bevy_xpbd_2d = { workspace = true }
 bevy_egui = {workspace = true}
 bevy-inspector-egui = { workspace = true}
 raw-window-handle = {workspace = true }
+cursor_hero_worker = { workspace = true }

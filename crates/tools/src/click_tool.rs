@@ -180,7 +180,7 @@ fn handle_input(
     tools: Query<(&ActionState<ClickToolAction>, &Parent), (With<ActiveTool>, With<ClickTool>)>,
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<&Children, With<Character>>,
-    pointers: Query<(Entity, &GlobalTransform), With<Pointer>>,
+    cursors: Query<(Entity, &GlobalTransform), With<Cursor>>,
     bridge: ResMut<ClickBridge>,
     asset_server: Res<AssetServer>,
     mut tool_click_event_writer: EventWriter<ToolClickEvent>,
@@ -208,18 +208,18 @@ fn handle_input(
         };
         let character_children = character;
 
-        let Some(pointer) = character_children
+        let Some(cursor) = character_children
             .iter()
-            .filter_map(|x| pointers.get(*x).ok())
+            .filter_map(|x| cursors.get(*x).ok())
             .next()
         else {
-            //TODO: warn if more than one pointer found
-            warn!("Character {:?} missing a pointer?", toolbelt_parent.get());
+            //TODO: warn if more than one cursor found
+            warn!("Character {:?} missing a cursor?", toolbelt_parent.get());
             debug!("Character children: {:?}", character_children);
             continue;
         };
-        let (pointer_id, pointer_transform) = pointer;
-        let pointer_pos = pointer_transform.translation();
+        let (cursor_id, cursor_transform) = cursor;
+        let cursor_pos = cursor_transform.translation();
 
         let window = window_query.get_single().expect("Need a single window");
 
@@ -237,7 +237,7 @@ fn handle_input(
                     if !disable_sfx {
                         commands.spawn((
                             SpatialBundle {
-                                transform: Transform::from_translation(pointer_pos),
+                                transform: Transform::from_translation(cursor_pos),
                                 ..default()
                             },
                             Name::new("Click sound"),
@@ -250,7 +250,7 @@ fn handle_input(
                         ));
                     }
                     tool_click_event_writer.send(ToolClickEvent::Pressed {
-                        pointer_id,
+                        cursor_id,
                         way: action.into(),
                     });
                 }
@@ -259,7 +259,7 @@ fn handle_input(
                     if !disable_sfx {
                         commands.spawn((
                             SpatialBundle {
-                                transform: Transform::from_translation(pointer_pos),
+                                transform: Transform::from_translation(cursor_pos),
                                 ..default()
                             },
                             Name::new("Click sound"),
@@ -272,7 +272,7 @@ fn handle_input(
                         ));
                     }
                     tool_click_event_writer.send(ToolClickEvent::Released {
-                        pointer_id,
+                        cursor_id,
                         way: action.into(),
                     });
                 }
@@ -286,13 +286,13 @@ fn handle_input(
                     debug!("{:?} pressed", action);
                     match bridge.sender.send((
                         action.get_thread_message(Motion::Down),
-                        pointer_pos.x as i32,
-                        -pointer_pos.y as i32,
+                        cursor_pos.x as i32,
+                        -cursor_pos.y as i32,
                     )) {
                         Ok(_) => {
                             commands.spawn((
                                 SpatialBundle {
-                                    transform: Transform::from_translation(pointer_pos),
+                                    transform: Transform::from_translation(cursor_pos),
                                     ..default()
                                 },
                                 Name::new("Click sound"),
@@ -313,13 +313,13 @@ fn handle_input(
                     debug!("{:?} released", action);
                     match bridge.sender.send((
                         action.get_thread_message(Motion::Up),
-                        pointer_pos.x as i32,
-                        -pointer_pos.y as i32,
+                        cursor_pos.x as i32,
+                        -cursor_pos.y as i32,
                     )) {
                         Ok(_) => {
                             commands.spawn((
                                 SpatialBundle {
-                                    transform: Transform::from_translation(pointer_pos),
+                                    transform: Transform::from_translation(cursor_pos),
                                     ..default()
                                 },
                                 Name::new("Click sound"),

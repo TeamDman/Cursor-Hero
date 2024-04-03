@@ -12,7 +12,6 @@ use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use cursor_hero_agent::agent_plugin::AgentPlugin;
 use cursor_hero_camera::camera_plugin::CameraPlugin;
 use cursor_hero_character::character_plugin::CharacterPlugin;
-use cursor_hero_cursor_mirror::cursor_mirroring_plugin::CursorMirroringPlugin;
 use cursor_hero_environment::environment_plugin::EnvironmentPlugin;
 use cursor_hero_environment_nametag::environment_nametag_plugin::EnvironmentNametagPlugin;
 use cursor_hero_hover::hover_tool::HoverToolPlugin;
@@ -26,8 +25,8 @@ use cursor_hero_memory::primary_window_memory_plugin::restore_window;
 use cursor_hero_physics::damping_plugin::DampingPlugin;
 use cursor_hero_physics::physics_plugin::PhysicsPlugin;
 use cursor_hero_physics_debug::physics_debug_plugin::PhysicsDebugPlugin;
-use cursor_hero_cursor::pointer_plugin::PointerPlugin;
-use cursor_hero_cursor_types::pointer_types_plugin::PointerTypesPlugin;
+use cursor_hero_cursor::cursor_plugin::CursorPlugin;
+use cursor_hero_cursor_types::cursor_types_plugin::CursorTypesPlugin;
 use cursor_hero_pressure_plate::pressure_plate_plugin::PressurePlatePlugin;
 use cursor_hero_screen::screen_plugin::ScreenPlugin;
 use cursor_hero_screen::screen_update_plugin::ScreenUpdatePlugin;
@@ -154,7 +153,6 @@ impl Plugin for DefaultLaunchModePlugin {
         app.add_plugins(AboutTextPlugin);
         app.add_plugins(CameraPlugin);
         app.add_plugins(CharacterPlugin);
-        app.add_plugins(CursorMirroringPlugin);
         app.add_plugins(DampingPlugin);
         app.add_plugins(EnvironmentNametagPlugin);
         app.add_plugins(EnvironmentPlugin);
@@ -168,8 +166,8 @@ impl Plugin for DefaultLaunchModePlugin {
         app.add_plugins(MathPlugin);
         app.add_plugins(PhysicsDebugPlugin);
         app.add_plugins(PhysicsPlugin);
-        app.add_plugins(PointerPlugin);
-        app.add_plugins(PointerTypesPlugin);
+        app.add_plugins(CursorPlugin);
+        app.add_plugins(CursorTypesPlugin);
         app.add_plugins(PressurePlatePlugin);
         app.add_plugins(ScreenPlugin);
         app.add_plugins(ScreenUpdatePlugin);
@@ -195,7 +193,7 @@ wgpu_hal=warn,
 "
 // bevy_ecs=info,
 // cursor_hero=debug,
-// cursor_hero_cursor::pointer_hover_plugin=info,
+// cursor_hero_cursor::cursor_hover_plugin=info,
 // cursor_hero_ollama::ollama_status_worker_plugin=info,
 // cursor_hero_voice_to_text::voice_to_text_ping_plugin=info,
 // cursor_hero_voice_to_text::voice_to_text_worker_plugin=info,

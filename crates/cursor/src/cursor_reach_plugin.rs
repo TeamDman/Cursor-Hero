@@ -6,9 +6,9 @@ use cursor_hero_cursor_types::prelude::*;
 use cursor_hero_sprint_tool_types::sprint_tool_types_plugin::SprintEvent;
 use cursor_hero_toolbelt_types::toolbelt_types::Wheel;
 
-pub struct PointerReachPlugin;
+pub struct CursorReachPlugin;
 
-impl Plugin for PointerReachPlugin {
+impl Plugin for CursorReachPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, handle_reach_events);
         app.add_systems(Update, handle_sprint_events);
@@ -16,31 +16,31 @@ impl Plugin for PointerReachPlugin {
 }
 
 fn handle_reach_events(
-    mut reach_events: EventReader<PointerReachEvent>,
+    mut reach_events: EventReader<CursorReachEvent>,
     character_query: Query<&Children, With<Character>>,
-    mut pointer_query: Query<&mut Pointer>,
+    mut cursor_query: Query<&mut Cursor>,
 ) {
     for event in reach_events.read() {
         match event {
-            PointerReachEvent::SetPointer { pointer_id, reach } => {
-                let Ok(mut pointer) = pointer_query.get_mut(*pointer_id) else {
-                    warn!("Pointer not found processing {:?}", event);
+            CursorReachEvent::SetCursor { cursor_id, reach } => {
+                let Ok(mut cursor) = cursor_query.get_mut(*cursor_id) else {
+                    warn!("cursor not found processing {:?}", event);
                     continue;
                 };
-                pointer.reach = *reach;
+                cursor.reach = *reach;
             }
-            PointerReachEvent::SetPointerPercent {
-                pointer_id,
+            CursorReachEvent::SetCursorPercent {
+                cursor_id,
                 percent,
             } => {
-                let Ok(mut pointer) = pointer_query.get_mut(*pointer_id) else {
-                    warn!("Pointer not found processing {:?}", event);
+                let Ok(mut cursor) = cursor_query.get_mut(*cursor_id) else {
+                    warn!("cursor not found processing {:?}", event);
                     continue;
                 };
-                pointer.reach = (pointer.default_reach, pointer.sprint_reach).lerp(*percent);
+                cursor.reach = (cursor.default_reach, cursor.sprint_reach).lerp(*percent);
             }
 
-            PointerReachEvent::SetCharacter {
+            CursorReachEvent::SetCharacter {
                 character_id,
                 reach,
             } => {
@@ -50,17 +50,17 @@ fn handle_reach_events(
                 };
                 let mut found = false;
                 for kid in character.iter() {
-                    let Ok(mut pointer) = pointer_query.get_mut(*kid) else {
+                    let Ok(mut cursor) = cursor_query.get_mut(*kid) else {
                         continue;
                     };
-                    pointer.reach = *reach;
+                    cursor.reach = *reach;
                     found = true;
                 }
                 if !found {
-                    warn!("Pointer not found processing {:?}", event);
+                    warn!("cursor not found processing {:?}", event);
                 }
             }
-            PointerReachEvent::SetCharacterPercent {
+            CursorReachEvent::SetCharacterPercent {
                 character_id,
                 percent,
             } => {
@@ -70,39 +70,39 @@ fn handle_reach_events(
                 };
                 let mut found = false;
                 for kid in character.iter() {
-                    let Ok(mut pointer) = pointer_query.get_mut(*kid) else {
+                    let Ok(mut cursor) = cursor_query.get_mut(*kid) else {
                         continue;
                     };
-                    pointer.reach = (pointer.default_reach, pointer.sprint_reach).lerp(*percent);
+                    cursor.reach = (cursor.default_reach, cursor.sprint_reach).lerp(*percent);
                     found = true;
                 }
                 if !found {
-                    warn!("Pointer not found processing {:?}", event);
+                    warn!("cursor not found processing {:?}", event);
                 }
             }
 
-            PointerReachEvent::ResetPointer { pointer_id } => {
-                let Ok(mut pointer) = pointer_query.get_mut(*pointer_id) else {
-                    warn!("Pointer not found processing {:?}", event);
+            CursorReachEvent::ResetCursor { cursor_id } => {
+                let Ok(mut cursor) = cursor_query.get_mut(*cursor_id) else {
+                    warn!("cursor not found processing {:?}", event);
                     continue;
                 };
-                pointer.reach = pointer.default_reach;
+                cursor.reach = cursor.default_reach;
             }
-            PointerReachEvent::ResetCharacter { character_id } => {
+            CursorReachEvent::ResetCharacter { character_id } => {
                 let Ok(character) = character_query.get(*character_id) else {
                     warn!("Character not found processing {:?}", event);
                     continue;
                 };
                 let mut found = false;
                 for kid in character.iter() {
-                    let Ok(mut pointer) = pointer_query.get_mut(*kid) else {
+                    let Ok(mut cursor) = cursor_query.get_mut(*kid) else {
                         continue;
                     };
-                    pointer.reach = pointer.default_reach;
+                    cursor.reach = cursor.default_reach;
                     found = true;
                 }
                 if !found {
-                    warn!("Pointer not found processing {:?}", event);
+                    warn!("cursor not found processing {:?}", event);
                 }
             }
         }
@@ -110,7 +110,7 @@ fn handle_reach_events(
 }
 
 fn handle_sprint_events(
-    mut reach_events: EventWriter<PointerReachEvent>,
+    mut reach_events: EventWriter<CursorReachEvent>,
     mut sprint_events: EventReader<SprintEvent>,
     character_query: Query<&Children, With<Character>>,
     toolbelt_query: Query<&Wheel, With<Character>>,
@@ -139,13 +139,13 @@ fn handle_sprint_events(
                 character_id,
                 throttle,
             } => {
-                reach_events.send(PointerReachEvent::SetCharacterPercent {
+                reach_events.send(CursorReachEvent::SetCharacterPercent {
                     character_id: *character_id,
                     percent: *throttle,
                 });
             }
             SprintEvent::Stop { character_id } => {
-                reach_events.send(PointerReachEvent::ResetCharacter {
+                reach_events.send(CursorReachEvent::ResetCharacter {
                     character_id: *character_id,
                 });
             }

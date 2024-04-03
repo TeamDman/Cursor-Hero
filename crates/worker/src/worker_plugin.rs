@@ -48,6 +48,7 @@ fn create_worker_thread<T: Message, G: Message>(
     let handler_error_handler = config.handle_threadbound_message_error_handler;
     let sleep_duration = config.sleep_duration;
     let is_ui_automation_thread = config.is_ui_automation_thread;
+    let receiver = config.threadbound_message_receiver;
     if let Err(e) = thread::Builder::new().name(name.clone()).spawn(move || {
         if is_ui_automation_thread {
             unsafe {
@@ -64,22 +65,14 @@ fn create_worker_thread<T: Message, G: Message>(
         let rt = tokio::runtime::Runtime::new().unwrap();
         rt.block_on(async {
             loop {
-                let msg = match thread_rx.recv() {
+                let msg = match (receiver)(&thread_rx) {
                     Ok(msg) => msg,
                     Err(e) => {
-                        error!(
-                            "[{}] Threadbound channel recv failure {:?}, exiting: ",
-                            name, e
-                        );
+                        error!("[{}] Threadbound channel receiver failure: {:?}, quitting loop", name, e);
                         break;
                     }
                 };
                 if let Err(e) = (handler)(&msg, &game_tx) {
-                    // eprintln cause bevy logging isn't guaranteed to display
-                    // eprintln!(
-                    //     "[{}] Failed to process thread message {:?}, got error {:?}",
-                    //     name, msg, e
-                    // );
                     error!(
                         "[{}] Failed to process thread message {:?}, got error {:?}",
                         name, msg, e

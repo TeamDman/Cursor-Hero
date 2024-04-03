@@ -75,7 +75,6 @@ cursor_hero_environment_nametag = { workspace = true }
 cursor_hero_environment = { workspace = true }
 cursor_hero_xelu_prompts = { workspace = true }
 cursor_hero_wallpaper = { workspace = true }
-cursor_hero_cursor_mirror = {workspace = true}
 cursor_hero_hover = {workspace = true}
 cursor_hero_pressure_plate = {workspace = true}
 cursor_hero_level_bounds = {workspace = true}

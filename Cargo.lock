@@ -1914,16 +1914,9 @@ dependencies = [
  "cursor_hero_sprint_tool_types",
  "cursor_hero_toolbelt_types",
  "cursor_hero_winutils",
+ "cursor_hero_worker",
  "leafwing-input-manager",
  "raw-window-handle",
-]
-
-[[package]]
-name = "cursor_hero_cursor_mirror"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "cursor_hero_winutils",
 ]
 
 [[package]]
@@ -2315,7 +2308,6 @@ dependencies = [
  "cursor_hero_chat_types",
  "cursor_hero_click_drag_character_movement",
  "cursor_hero_cursor",
- "cursor_hero_cursor_mirror",
  "cursor_hero_cursor_types",
  "cursor_hero_data",
  "cursor_hero_environment",

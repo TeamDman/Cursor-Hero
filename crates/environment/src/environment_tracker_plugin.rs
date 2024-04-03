@@ -20,7 +20,7 @@ fn track(
     level_bounds_holder_query: Query<&Parent, With<LevelBoundsHolder>>,
 ) {
     for (thing_id, thing_environment_tag, thing_colliding_entities) in thing_query.iter_mut() {
-        // find out what level bounds the pointer is touching
+        // find out what level bounds the cursor is touching
         // find those bounds' parent
         // find the parent of the parent to get the environment ID
         let environment_ids = thing_colliding_entities

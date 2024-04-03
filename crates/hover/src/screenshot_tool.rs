@@ -165,7 +165,7 @@ fn handle_input(
     tools: Query<(&ActionState<ScreenshotToolAction>, &Parent), With<ActiveTool>>,
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<&Children, With<Character>>,
-    pointers: Query<&GlobalTransform, With<Pointer>>,
+    cursors: Query<&GlobalTransform, With<Cursor>>,
     mut bridge: EventWriter<ThreadboundMessage>,
     egui_context_query: Query<&EguiContext, With<PrimaryWindow>>,
 ) {
@@ -184,18 +184,18 @@ fn handle_input(
         };
         let character_children = character;
 
-        let Some(pointer) = character_children
+        let Some(cursor) = character_children
             .iter()
-            .filter_map(|x| pointers.get(*x).ok())
+            .filter_map(|x| cursors.get(*x).ok())
             .next()
         else {
-            //TODO: warn if more than one pointer found
-            warn!("Character {:?} missing a pointer?", toolbelt_parent.get());
+            //TODO: warn if more than one cursor found
+            warn!("Character {:?} missing a cursor?", toolbelt_parent.get());
             debug!("Character children: {:?}", character_children);
             continue;
         };
-        let pointer_transform = pointer;
-        let pointer_translation = pointer_transform.translation();
+        let cursor_transform = cursor;
+        let cursor_translation = cursor_transform.translation();
         let hovering_over_egui = egui_context_query
             .get_single()
             .ok()
@@ -207,28 +207,28 @@ fn handle_input(
         if tool_actions.just_pressed(ScreenshotToolAction::Capture) {
             info!("Capture");
             let msg = ThreadboundMessage::Capture {
-                world_position: pointer_translation,
+                world_position: cursor_translation,
             };
             bridge.send(msg);
         }
         if tool_actions.just_pressed(ScreenshotToolAction::CaptureBrick) {
             info!("CaptureBrick");
             let msg = ThreadboundMessage::CaptureBrick {
-                world_position: pointer_translation,
+                world_position: cursor_translation,
             };
             bridge.send(msg);
         }
         if tool_actions.just_pressed(ScreenshotToolAction::Print) {
             info!("Print");
             let msg = ThreadboundMessage::Print {
-                world_position: pointer_translation,
+                world_position: cursor_translation,
             };
             bridge.send(msg);
         }
         if tool_actions.just_pressed(ScreenshotToolAction::Fracture) {
             info!("Fracture");
             let msg = ThreadboundMessage::Fracture {
-                world_position: pointer_translation,
+                world_position: cursor_translation,
             };
             bridge.send(msg);
         }

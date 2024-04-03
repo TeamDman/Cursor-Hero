@@ -2,14 +2,14 @@ use bevy::prelude::*;
 
 use crate::prelude::*;
 
-pub struct PointerTypesPlugin;
-impl Plugin for PointerTypesPlugin {
+pub struct CursorTypesPlugin;
+impl Plugin for CursorTypesPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<Pointer>();
-        app.register_type::<MainPointer>();
-        app.configure_sets(Update, PointerSystemSet::Position);
+        app.register_type::<Cursor>();
+        app.register_type::<MainCursor>();
+        app.configure_sets(Update, CursorSystemSet::Position);
 
-        app.add_event::<PointerReachEvent>();
+        app.add_event::<CursorReachEvent>();
 
         app.register_type::<Hovered>();
         app.register_type::<Hoverable>();
@@ -21,5 +21,8 @@ impl Plugin for PointerTypesPlugin {
         app.register_type::<Pressing>();
         app.add_event::<ClickEvent>();
         app.add_event::<ToolClickEvent>();
+
+        app.register_type::<CursorMirror>();
+        app.register_type::<HostCursorPosition>();
     }
 }

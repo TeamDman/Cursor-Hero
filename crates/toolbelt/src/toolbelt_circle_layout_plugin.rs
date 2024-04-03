@@ -40,7 +40,7 @@ pub fn update_render_data(
         Without<Tool>,
     >,
     tool_query: Query<Entity, With<Tool>>,
-    mut pointer_reach_events: EventWriter<PointerReachEvent>,
+    mut cursor_reach_events: EventWriter<CursorReachEvent>,
 ) {
     for toolbelt in toolbelt_query.iter_mut() {
         let (mut toolbelt, toolbelt_actions, toolbelt_parent, toolbelt_children) = toolbelt;
@@ -67,7 +67,7 @@ pub fn update_render_data(
         wheel.spin = wheel.spin_start + (wheel.spin_end - wheel.spin_start) * open;
         wheel.scale = wheel.scale_start + (wheel.scale_end - wheel.scale_start) * open;
         wheel.alpha = wheel.alpha_start + (wheel.alpha_end - wheel.alpha_start) * open;
-        pointer_reach_events.send(PointerReachEvent::SetCharacter {
+        cursor_reach_events.send(CursorReachEvent::SetCharacter {
             character_id: toolbelt_parent.get(),
             reach: wheel.radius,
         });
@@ -75,7 +75,7 @@ pub fn update_render_data(
 }
 
 fn reset_reach(
-    mut pointer_reach_events: EventWriter<PointerReachEvent>,
+    mut cursor_reach_events: EventWriter<CursorReachEvent>,
     mut toolbelt_opening_events: EventReader<ToolbeltOpeningEvent>,
     toolbelt_query: Query<&Parent, With<Toolbelt>>,
 ) {
@@ -87,7 +87,7 @@ fn reset_reach(
             continue;
         };
         let character_id = toolbelt.get();
-        pointer_reach_events.send(PointerReachEvent::ResetCharacter { character_id });
+        cursor_reach_events.send(CursorReachEvent::ResetCharacter { character_id });
     }
 }
 

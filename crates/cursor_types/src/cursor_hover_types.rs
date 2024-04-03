@@ -4,11 +4,11 @@ use bevy::prelude::*;
 pub enum HoverEvent {
     Start {
         target_id: Entity,
-        pointer_id: Entity,
+        cursor_id: Entity,
     },
     End {
         target_id: Entity,
-        pointer_id: Entity,
+        cursor_id: Entity,
     },
 }
 

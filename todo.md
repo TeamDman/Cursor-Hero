@@ -70,7 +70,7 @@ UI tree egui improvements.
 
 - tree structure component that can render a tree structure following the flat-but-annotated style of the inspect.exe tree of the vscode file explorer
 - agent memory reset (gun?)
-  - points towards pointer
+  - points towards cursor
   - projectile shoot
   - sfx
   - projectile hit

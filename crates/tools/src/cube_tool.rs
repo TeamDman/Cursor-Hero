@@ -89,7 +89,7 @@ fn handle_input(
     tools: Query<(&ActionState<CubeToolAction>, &Parent), With<ActiveTool>>,
     toolbelts: Query<&Parent, With<Toolbelt>>,
     characters: Query<&Children, With<Character>>,
-    pointers: Query<&GlobalTransform, With<Pointer>>,
+    cursors: Query<&GlobalTransform, With<Cursor>>,
     mut cubes: Query<(Entity, &GlobalTransform, &mut LinearVelocity), With<CubeToolInteractable>>,
 ) {
     for tool in tools.iter() {
@@ -107,17 +107,17 @@ fn handle_input(
         };
         let character_children = character;
 
-        let Some(pointer) = character_children
+        let Some(cursor) = character_children
             .iter()
-            .filter_map(|x| pointers.get(*x).ok())
+            .filter_map(|x| cursors.get(*x).ok())
             .next()
         else {
-            //TODO: warn if more than one pointer found
-            warn!("Character {:?} missing a pointer?", toolbelt_parent.get());
+            //TODO: warn if more than one cursor found
+            warn!("Character {:?} missing a cursor?", toolbelt_parent.get());
             debug!("Character children: {:?}", character_children);
             continue;
         };
-        let pointer_transform = pointer;
+        let cursor_transform = cursor;
 
         if tool_actions.just_pressed(CubeToolAction::Spawn) {
             info!("Spawn Cube");
@@ -129,7 +129,7 @@ fn handle_input(
                         custom_size: Some(Vec2::new(15.0, 15.0)),
                         ..default()
                     },
-                    transform: Transform::from_translation(pointer_transform.translation()),
+                    transform: Transform::from_translation(cursor_transform.translation()),
                     ..default()
                 },
                 RigidBody::Dynamic,
@@ -139,11 +139,11 @@ fn handle_input(
         }
         if tool_actions.just_pressed(CubeToolAction::Remove) {
             info!("Remove Cube");
-            // remove the cube closest to the pointer
+            // remove the cube closest to the cursor
             let mut closest_cube = None;
             let mut closest_dist = f32::MAX;
             for (c_e, c_t, _) in cubes.iter() {
-                let dist = c_t.translation().distance(pointer_transform.translation());
+                let dist = c_t.translation().distance(cursor_transform.translation());
                 if dist < closest_dist {
                     closest_cube = Some(c_e);
                     closest_dist = dist;
@@ -164,9 +164,9 @@ fn handle_input(
             if tool_actions.just_pressed(CubeToolAction::Attract) {
                 info!("Attract Cube");
             }
-            // add a force to all cubes towards the pointer
+            // add a force to all cubes towards the cursor
             for (_, c_t, mut c_v) in cubes.iter_mut() {
-                let diff = pointer.translation() - c_t.translation();
+                let diff = cursor.translation() - c_t.translation();
                 let force = diff.normalize() * 100.0;
                 c_v.x += force.x;
                 c_v.y += force.y;

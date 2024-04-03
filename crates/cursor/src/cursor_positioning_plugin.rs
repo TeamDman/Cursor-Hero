@@ -7,7 +7,7 @@ use cursor_hero_camera::camera_plugin::MainCamera;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_environment_types::prelude::*;
 use cursor_hero_input::active_input_state_plugin::InputMethod;
-use cursor_hero_cursor_types::pointer_behaviour_types::PointerMovementBehaviour;
+use cursor_hero_cursor_types::cursor_behaviour_types::CursorMovementBehaviour;
 use cursor_hero_cursor_types::prelude::*;
 use cursor_hero_winutils::win_mouse::set_cursor_position;
 use cursor_hero_winutils::win_window::get_window_bounds;
@@ -16,13 +16,13 @@ use leafwing_input_manager::prelude::*;
 
 use bevy::window::RawHandleWrapper;
 
-pub struct PointerPositioningPlugin;
-impl Plugin for PointerPositioningPlugin {
+pub struct CursorPositioningPlugin;
+impl Plugin for CursorPositioningPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             PostUpdate,
-            (update_pointer)
-                .in_set(PointerSystemSet::Position)
+            (update_cursor)
+                .in_set(CursorSystemSet::Position)
                 .after(PhysicsSet::Sync)
                 .after(TransformSystem::TransformPropagate),
         );
@@ -30,7 +30,7 @@ impl Plugin for PointerPositioningPlugin {
 }
 
 #[derive(Default, Debug)]
-struct PointerUpdate {
+struct CursorUpdate {
     local_target: Option<Vec2>,
     global_target: Option<Vec2>,
     host_target: Option<IVec2>,
@@ -38,7 +38,7 @@ struct PointerUpdate {
 
 #[derive(Debug)]
 struct DecisionInfo {
-    current_behaviour: PointerMovementBehaviour,
+    current_behaviour: CursorMovementBehaviour,
     is_main_character: bool,
     in_host_environment: bool,
     stick_in_use: bool,
@@ -47,50 +47,50 @@ struct DecisionInfo {
 
 #[allow(clippy::type_complexity)]
 #[allow(clippy::too_many_arguments)]
-fn update_pointer(
-    mut pointer_query: Query<
+fn update_cursor(
+    mut cursor_query: Query<
         (
             &mut Transform,
             &GlobalTransform,
             &mut Position,
-            &ActionState<PointerAction>,
-            &mut Pointer,
+            &ActionState<CursorAction>,
+            &mut Cursor,
             Option<&EnvironmentTracker>,
             &Parent,
         ),
-        (Without<Character>, With<Pointer>),
+        (Without<Character>, With<Cursor>),
     >,
     mut character_query: Query<
         (Ref<GlobalTransform>, Option<&MainCharacter>),
-        (With<Character>, Without<Pointer>, Without<MainCamera>),
+        (With<Character>, Without<Cursor>, Without<MainCamera>),
     >,
     camera_query: Query<
         (&Camera, &GlobalTransform),
-        (With<MainCamera>, Without<Character>, Without<Pointer>),
+        (With<MainCamera>, Without<Character>, Without<Cursor>),
     >,
     window_query: Query<(&Window, &RawHandleWrapper), With<PrimaryWindow>>,
     input_method: Res<InputMethod>,
     environment_query: Query<(), With<HostEnvironment>>,
     mut last_known_cursor_position: Local<Option<Vec2>>,
-    mut previous_update: Local<PointerUpdate>,
+    mut previous_update: Local<CursorUpdate>,
 ) {
-    for pointer in pointer_query.iter_mut() {
+    for cursor in cursor_query.iter_mut() {
         let (
-            mut pointer_transform,
-            pointer_global_transform,
-            mut pointer_position,
-            pointer_actions,
-            mut pointer,
-            pointer_environment,
-            pointer_parent,
-        ) = pointer;
+            mut cursor_transform,
+            cursor_global_transform,
+            mut cursor_position,
+            cursor_actions,
+            mut cursor,
+            cursor_environment,
+            cursor_parent,
+        ) = cursor;
 
-        let stick_in_use = pointer_actions.pressed(PointerAction::Move);
-        let in_host_environment = pointer_environment
+        let stick_in_use = cursor_actions.pressed(CursorAction::Move);
+        let in_host_environment = cursor_environment
             .map(|e| environment_query.contains(e.environment_id))
             .unwrap_or(false);
 
-        let Ok(character) = character_query.get_mut(pointer_parent.get()) else {
+        let Ok(character) = character_query.get_mut(cursor_parent.get()) else {
             warn!("No character found");
             continue;
         };
@@ -109,7 +109,7 @@ fn update_pointer(
         let (window, window_handle) = window;
 
         let decision_info = DecisionInfo {
-            current_behaviour: pointer.movement_behaviour,
+            current_behaviour: cursor.movement_behaviour,
             is_main_character: is_main_character.is_some(),
             in_host_environment,
             stick_in_use,
@@ -134,19 +134,19 @@ fn update_pointer(
                 in_host_environment: true,
                 active_input_method: InputMethod::Keyboard,
                 ..
-            } => PointerMovementBehaviour::SetHostCursorFromPointerWorldCoords,
+            } => CursorMovementBehaviour::SetHostCursorFromCursorWorldCoords,
             DecisionInfo {
                 is_main_character: true,
                 stick_in_use: false,
                 active_input_method: InputMethod::MouseAndKeyboard,
                 ..
-            } => PointerMovementBehaviour::SetPointerFromHostCursorWindowCoords,
+            } => CursorMovementBehaviour::SetCursorFromHostCursorWindowCoords,
             DecisionInfo {
                 is_main_character: true,
                 in_host_environment: false,
                 stick_in_use: true,
                 ..
-            } => PointerMovementBehaviour::SetHostCursorFromWindowCoords,
+            } => CursorMovementBehaviour::SetHostCursorFromWindowCoords,
             DecisionInfo {
                 is_main_character: true,
                 in_host_environment: false,
@@ -154,33 +154,33 @@ fn update_pointer(
                 ..
             } => decision_info.current_behaviour,
             DecisionInfo {
-                current_behaviour: PointerMovementBehaviour::None,
+                current_behaviour: CursorMovementBehaviour::None,
                 ..
-            } => PointerMovementBehaviour::None,
+            } => CursorMovementBehaviour::None,
             _ => {
                 warn!("Unhandled case: {:?}", decision_info);
                 decision_info.current_behaviour
             }
         };
 
-        if next_behaviour != pointer.movement_behaviour {
+        if next_behaviour != cursor.movement_behaviour {
             info!(
                 "Switching to {:?} given {:?}",
                 next_behaviour, decision_info
             );
-            pointer.movement_behaviour = next_behaviour;
+            cursor.movement_behaviour = next_behaviour;
         }
 
-        let this_update = match pointer.movement_behaviour {
-            PointerMovementBehaviour::None => {
+        let this_update = match cursor.movement_behaviour {
+            CursorMovementBehaviour::None => {
                 // sync physics to render
-                PointerUpdate {
+                CursorUpdate {
                     local_target: None,
-                    global_target: Some(pointer_global_transform.translation().xy()),
+                    global_target: Some(cursor_global_transform.translation().xy()),
                     host_target: None,
                 }
             }
-            PointerMovementBehaviour::SetPointerFromHostCursorWindowCoords => {
+            CursorMovementBehaviour::SetCursorFromHostCursorWindowCoords => {
                 // usual mode for mouse and keyboard input
                 match window.cursor_position().or(*last_known_cursor_position) {
                     Some(host_cursor_xy) => {
@@ -196,36 +196,36 @@ fn update_pointer(
                         };
                         let local_target =
                             global_target - character_global_transform.translation().xy();
-                        PointerUpdate {
+                        CursorUpdate {
                             local_target: Some(local_target),
                             global_target: Some(global_target),
                             host_target: None,
                         }
                     }
                     None => {
-                        if pointer.log_behaviour == PointerLogBehaviour::ErrorsAndPositionUpdates {
+                        if cursor.log_behaviour == CursorLogBehaviour::ErrorsAndPositionUpdates {
                             warn!("No cursor position found");
                         }
-                        PointerUpdate::default()
+                        CursorUpdate::default()
                     }
                 }
             }
-            PointerMovementBehaviour::SetHostCursorFromPointerWorldCoords => {
-                // host follows pointer, render and physics are the same
+            CursorMovementBehaviour::SetHostCursorFromCursorWorldCoords => {
+                // host follows cursor, render and physics are the same
                 if stick_in_use {
-                    match pointer_actions.axis_pair(PointerAction::Move) {
+                    match cursor_actions.axis_pair(CursorAction::Move) {
                         Some(axis_pair) => {
                             let look = axis_pair.xy();
                             if look.x.is_nan() || look.y.is_nan() {
-                                warn!("{} | look vector is unusable", pointer.movement_behaviour);
-                                PointerUpdate::default()
+                                warn!("{} | look vector is unusable", cursor.movement_behaviour);
+                                CursorUpdate::default()
                             } else {
                                 let character_translation =
                                     character_global_transform.translation();
-                                let local_target = look * pointer.reach;
+                                let local_target = look * cursor.reach;
                                 let global_target = character_translation.xy() + local_target;
                                 let host_target = global_target.neg_y().as_ivec2();
-                                PointerUpdate {
+                                CursorUpdate {
                                     local_target: Some(local_target),
                                     global_target: Some(global_target),
                                     host_target: Some(host_target),
@@ -233,40 +233,40 @@ fn update_pointer(
                             }
                         }
                         None => {
-                            warn!("{}, No axis pair found?", pointer.movement_behaviour);
-                            PointerUpdate::default()
+                            warn!("{}, No axis pair found?", cursor.movement_behaviour);
+                            CursorUpdate::default()
                         }
                     }
                 } else {
-                    // pointer stick not in use, reset pointer to the origin of the character
+                    // cursor stick not in use, reset cursor to the origin of the character
                     let character_translation = character_global_transform.translation();
                     let local_target = Vec2::ZERO;
                     let global_target = character_translation.xy();
                     let host_target = character_translation.xy().neg_y().as_ivec2();
-                    PointerUpdate {
+                    CursorUpdate {
                         local_target: Some(local_target),
                         global_target: Some(global_target),
                         host_target: Some(host_target),
                     }
                 }
             }
-            PointerMovementBehaviour::SetHostCursorFromWindowCoords => {
+            CursorMovementBehaviour::SetHostCursorFromWindowCoords => {
                 if stick_in_use {
                     // stick in use
-                    // the host cursor will go over the pointer's window position
-                    match pointer_actions.axis_pair(PointerAction::Move) {
+                    // the host cursor will go over the cursor's window position
+                    match cursor_actions.axis_pair(CursorAction::Move) {
                         Some(axis_pair) => {
                             let look = axis_pair.xy();
 
                             // the look vector could be unusable
                             if look.x.is_nan() || look.y.is_nan() {
-                                warn!("{} | look vector is unusable", pointer.movement_behaviour);
-                                PointerUpdate::default()
+                                warn!("{} | look vector is unusable", cursor.movement_behaviour);
+                                CursorUpdate::default()
                             } else {
                                 // the spot you want to be is the character position + stick direction
                                 let character_translation =
                                     character_global_transform.translation();
-                                let local_target = look * pointer.reach;
+                                let local_target = look * cursor.reach;
                                 let global_target =
                                     character_translation + local_target.extend(0.0);
 
@@ -295,7 +295,7 @@ fn update_pointer(
                                         host_target
                                     });
 
-                                PointerUpdate {
+                                CursorUpdate {
                                     local_target: Some(local_target.xy()),
                                     global_target: Some(global_target.xy()),
                                     host_target,
@@ -303,13 +303,13 @@ fn update_pointer(
                             }
                         }
                         None => {
-                            warn!("{} | No axis pair found?", pointer.movement_behaviour);
-                            PointerUpdate::default()
+                            warn!("{} | No axis pair found?", cursor.movement_behaviour);
+                            CursorUpdate::default()
                         }
                     }
                 } else {
                     // stick not in use
-                    // reset pointer to the origin of the character
+                    // reset cursor to the origin of the character
                     let character_translation = character_global_transform.translation();
                     let local_target = Vec2::ZERO;
                     let global_target = character_translation.xy().neg_y();
@@ -339,7 +339,7 @@ fn update_pointer(
                             host_target
                         });
 
-                    PointerUpdate {
+                    CursorUpdate {
                         local_target: Some(local_target),
                         global_target: Some(global_target),
                         host_target,
@@ -353,17 +353,17 @@ fn update_pointer(
         if this_update.local_target != previous_update.local_target
             && let Some(local_target) = this_update.local_target
         {
-            let target_distance = local_target - pointer_transform.translation.xy();
+            let target_distance = local_target - cursor_transform.translation.xy();
             if target_distance != Vec2::ZERO {
                 // Not at destination, update render body (which physics will follow)
-                if pointer.log_behaviour == PointerLogBehaviour::ErrorsAndPositionUpdates {
+                if cursor.log_behaviour == CursorLogBehaviour::ErrorsAndPositionUpdates {
                     debug!(
                         "{} stick={:?} | target_distance={:?}, updating render body to local_target={:?}",
-                        pointer.movement_behaviour, stick_in_use, target_distance, local_target
+                        cursor.movement_behaviour, stick_in_use, target_distance, local_target
                     );
                 }
-                pointer_transform.translation.x = local_target.x;
-                pointer_transform.translation.y = local_target.y;
+                cursor_transform.translation.x = local_target.x;
+                cursor_transform.translation.y = local_target.y;
                 render_updated = true;
             }
         }
@@ -373,21 +373,21 @@ fn update_pointer(
             && this_update.global_target != previous_update.global_target
             && let Some(global_target) = this_update.global_target
         {
-            let target_distance = global_target - pointer_position.xy();
+            let target_distance = global_target - cursor_position.xy();
             if target_distance != Vec2::ZERO {
                 // Not at destination, update physics body
-                if pointer.log_behaviour == PointerLogBehaviour::ErrorsAndPositionUpdates {
+                if cursor.log_behaviour == CursorLogBehaviour::ErrorsAndPositionUpdates {
                     debug!(
                         "{} stick={:?} | target_distance={:?}, updating physics body to global_target={:?}",
-                        pointer.movement_behaviour, stick_in_use, target_distance, global_target
+                        cursor.movement_behaviour, stick_in_use, target_distance, global_target
                     );
                 }
                 // prevent feedback loop
-                let pointer_position = pointer_position.bypass_change_detection();
+                let cursor_position = cursor_position.bypass_change_detection();
 
                 // update physics body
-                pointer_position.x = global_target.x;
-                pointer_position.y = global_target.y;
+                cursor_position.x = global_target.x;
+                cursor_position.y = global_target.y;
             }
         }
 
@@ -396,17 +396,17 @@ fn update_pointer(
         {
             match set_cursor_position(host_target) {
                 Ok(_) => {
-                    if pointer.log_behaviour == PointerLogBehaviour::ErrorsAndPositionUpdates {
+                    if cursor.log_behaviour == CursorLogBehaviour::ErrorsAndPositionUpdates {
                         debug!(
                             "{} | set host cursor to {:?}",
-                            pointer.movement_behaviour, host_target
+                            cursor.movement_behaviour, host_target
                         );
                     }
                 }
                 Err(e) => {
                     warn!(
                         "{} | host cursor update failed, tried setting to {:?}, error={:?}",
-                        pointer.movement_behaviour, host_target, e
+                        cursor.movement_behaviour, host_target, e
                     );
                 }
             }

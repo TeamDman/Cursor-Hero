@@ -6,26 +6,26 @@ use cursor_hero_environment_types::environment_types::TrackEnvironmentTag;
 use cursor_hero_cursor_types::prelude::*;
 use leafwing_input_manager::prelude::*;
 
-pub struct PointerSpawningPlugin;
+pub struct CursorSpawningPlugin;
 
-impl Plugin for PointerSpawningPlugin {
+impl Plugin for CursorSpawningPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, insert_pointer);
+        app.add_systems(Update, insert_cursor);
     }
 }
 
 #[allow(clippy::type_complexity)]
-fn insert_pointer(
+fn insert_cursor(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     character: Query<(Entity, Option<&MainCharacter>, Option<&AgentCharacter>), Added<Character>>,
 ) {
     for character in character.iter() {
         let (character_id, is_main_character, is_agent_character) = character;
-        info!("Creating pointer for character '{:?}'", character_id);
+        info!("Creating cursor for character '{:?}'", character_id);
         commands.entity(character_id).with_children(|parent| {
             let mut p = parent.spawn((
-                Name::new("Pointer"),
+                Name::new("Cursor"),
                 SpriteBundle {
                     texture: asset_server.load("textures/cursor.png"),
                     transform: Transform::from_xyz(0.0, 0.0, 2.0),
@@ -44,18 +44,18 @@ fn insert_pointer(
             match (is_main_character.is_some(), is_agent_character.is_some()) {
                 (true, false) => {
                     p.insert((
-                        MainPointer,
-                        Pointer::new_host_pointer(),
-                        InputManagerBundle::<PointerAction> {
-                            input_map: PointerAction::default_input_map(),
+                        MainCursor,
+                        Cursor::new_host_cursor(),
+                        InputManagerBundle::<CursorAction> {
+                            input_map: CursorAction::default_input_map(),
                             action_state: ActionState::default(),
                         },
                     ));
                 }
                 (false, true) => {
                     p.insert((
-                        Pointer::new_agent_pointer(),
-                        InputManagerBundle::<PointerAction> {
+                        Cursor::new_agent_cursor(),
+                        InputManagerBundle::<CursorAction> {
                             input_map: InputMap::default(),
                             action_state: ActionState::default(),
                         },
@@ -67,8 +67,8 @@ fn insert_pointer(
                         character_id, is_main, is_agent
                     );
                     p.insert((
-                        Pointer::new_unknown_pointer(),
-                        InputManagerBundle::<PointerAction> {
+                        Cursor::new_unknown_cursor(),
+                        InputManagerBundle::<CursorAction> {
                             input_map: InputMap::default(),
                             action_state: ActionState::default(),
                         },
