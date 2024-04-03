@@ -31,12 +31,10 @@ app_icons_bevy_example=trace,
             .build(),
     );
     app.add_plugins(WorkerPlugin {
-        config: WorkerConfig::<ThreadboundMessage, GameboundMessage> {
+        config: WorkerConfig::<ThreadboundMessage, GameboundMessage, ()> {
             name: "ui_snapshot".to_string(),
             is_ui_automation_thread: true,
-            handle_threadbound_message: |msg, reply_tx| {
-                handle_threadbound_message(msg, reply_tx).map_err(|e| Box::new(e) as _)
-            },
+            handle_threadbound_message,
             ..default()
         },
     });
@@ -53,17 +51,18 @@ app_icons_bevy_example=trace,
 enum ThreadboundMessage {
     GatherRunningProcessIcons,
 }
-impl Message for ThreadboundMessage {}
+impl WorkerMessage for ThreadboundMessage {}
 
 #[derive(Debug, Clone, Event)]
 enum GameboundMessage {
     RunningProcessIcons(HashMap<String, Vec<RgbaImage>>),
 }
-impl Message for GameboundMessage {}
+impl WorkerMessage for GameboundMessage {}
 
 fn handle_threadbound_message(
     msg: &ThreadboundMessage,
     reply_tx: &Sender<GameboundMessage>,
+    _state: &mut (),
 ) -> Result<()> {
     let ThreadboundMessage::GatherRunningProcessIcons = msg;
     let process_iter = ProcessIterator::new()?;

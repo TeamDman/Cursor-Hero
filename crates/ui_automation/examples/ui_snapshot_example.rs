@@ -2,6 +2,7 @@ use bevy::log::LogPlugin;
 use bevy::prelude::*;
 use bevy::window::ExitCondition;
 use cursor_hero_memory_types::prelude::get_persist_file;
+use cursor_hero_memory_types::prelude::MemoryConfig;
 use cursor_hero_memory_types::prelude::Usage;
 use cursor_hero_ui_automation::prelude::*;
 use cursor_hero_worker::prelude::*;
@@ -31,7 +32,7 @@ cursor_hero_worker=debug,
             .build(),
     );
     app.add_plugins(WorkerPlugin {
-        config: WorkerConfig::<ThreadboundUISnapshotMessage, GameboundUISnapshotMessage> {
+        config: WorkerConfig::<ThreadboundUISnapshotMessage, GameboundUISnapshotMessage, ()> {
             name: "ui_snapshot".to_string(),
             is_ui_automation_thread: true,
             handle_threadbound_message: handle_threadbound_message,
@@ -47,17 +48,18 @@ cursor_hero_worker=debug,
 enum ThreadboundUISnapshotMessage {
     TakeSnapshot,
 }
-impl Message for ThreadboundUISnapshotMessage {}
+impl WorkerMessage for ThreadboundUISnapshotMessage {}
 
 #[derive(Debug, Reflect, Clone, Event)]
 enum GameboundUISnapshotMessage {
     Snapshot(UiSnapshot),
 }
-impl Message for GameboundUISnapshotMessage {}
+impl WorkerMessage for GameboundUISnapshotMessage {}
 
 fn handle_threadbound_message(
     msg: &ThreadboundUISnapshotMessage,
     reply_tx: &Sender<GameboundUISnapshotMessage>,
+    _state: &mut (),
 ) -> anyhow::Result<()> {
     let ThreadboundUISnapshotMessage::TakeSnapshot = msg;
     debug!("taking snapshot");
@@ -90,14 +92,13 @@ fn trigger(
     events.send(ThreadboundUISnapshotMessage::TakeSnapshot);
 }
 
-fn receive(mut snapshot: EventReader<GameboundUISnapshotMessage>) {
+fn receive(mut snapshot: EventReader<GameboundUISnapshotMessage>, memory_config: Res<MemoryConfig>) {
     for msg in snapshot.read() {
         match msg {
             GameboundUISnapshotMessage::Snapshot(snapshot) => {
                 debug!("received snapshot, writing to file");
                 match get_persist_file(
                     memory_config.as_ref(),
-                    file!(),
                     "ui_snapshot.txt",
                     Usage::Persist,
                 ) {

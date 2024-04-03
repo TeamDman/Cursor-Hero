@@ -71,10 +71,11 @@ use crate::ToBevyIRect;
 //////////////////////
 /// GET MONITOR INFOS
 //////////////////////
+pub type MonitorId = u32;
 
 #[derive(Debug)]
 pub struct MonitorInfo {
-    pub id: u32,
+    pub id: MonitorId,
     pub name: String,
     pub rect: IRect,
     pub work_area: IRect, // the area of the monitor not covered by the taskbar

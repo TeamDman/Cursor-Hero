@@ -3,7 +3,7 @@ use bevy::sprite::Anchor;
 use cursor_hero_cursor_types::prelude::*;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
 use cursor_hero_worker::prelude::anyhow::Result;
-use cursor_hero_worker::prelude::Message;
+use cursor_hero_worker::prelude::WorkerMessage;
 use cursor_hero_worker::prelude::Sender;
 use cursor_hero_worker::prelude::WorkerConfig;
 use cursor_hero_worker::prelude::WorkerPlugin;
@@ -12,10 +12,10 @@ pub struct CursorMirroringPlugin;
 impl Plugin for CursorMirroringPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(WorkerPlugin {
-            config: WorkerConfig::<ThreadboundCursorMessage, GameboundCursorMessage> {
+            config: WorkerConfig::<ThreadboundCursorMessage, GameboundCursorMessage, ()> {
                 name: "cursor_mirroring".to_string(),
                 handle_threadbound_message: handle_threadbound_message,
-                threadbound_message_receiver: |_thread_rx| {
+                threadbound_message_receiver: |_thread_rx, _state| {
                     // Keep the thread working on the task without waiting for a message
                     Ok(ThreadboundCursorMessage::CaptureCursorPosition)
                 },
@@ -33,18 +33,19 @@ impl Plugin for CursorMirroringPlugin {
 enum ThreadboundCursorMessage {
     CaptureCursorPosition,
 }
-impl Message for ThreadboundCursorMessage {}
+impl WorkerMessage for ThreadboundCursorMessage {}
 
 // This can be made public in the types crate if the need arises
 #[derive(Debug, Reflect, Clone, Event)]
 enum GameboundCursorMessage {
     HostCursorPosition(IVec2),
 }
-impl Message for GameboundCursorMessage {}
+impl WorkerMessage for GameboundCursorMessage {}
 
 fn handle_threadbound_message(
     msg: &ThreadboundCursorMessage,
     reply_tx: &Sender<GameboundCursorMessage>,
+    _state: &mut (),
 ) -> Result<()> {
     let ThreadboundCursorMessage::CaptureCursorPosition = msg;
     let pos = get_cursor_position()?;

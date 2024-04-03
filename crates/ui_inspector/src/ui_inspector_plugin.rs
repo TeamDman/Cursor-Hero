@@ -11,7 +11,7 @@ use bevy_egui::EguiContexts;
 use bevy_inspector_egui::reflect_inspector::InspectorUi;
 use cursor_hero_ui_automation::prelude::*;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
-use cursor_hero_worker::prelude::Message;
+use cursor_hero_worker::prelude::WorkerMessage;
 use cursor_hero_worker::prelude::Sender;
 use cursor_hero_worker::prelude::WorkerConfig;
 use cursor_hero_worker::prelude::WorkerPlugin;
@@ -24,7 +24,7 @@ pub struct UiInspectorPlugin;
 impl Plugin for UiInspectorPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(WorkerPlugin {
-            config: WorkerConfig::<ThreadboundUISnapshotMessage, GameboundUISnapshotMessage> {
+            config: WorkerConfig::<ThreadboundUISnapshotMessage, GameboundUISnapshotMessage, ()> {
                 name: "ui_hover".to_string(),
                 is_ui_automation_thread: true,
                 handle_threadbound_message: handle_threadbound_message,
@@ -51,7 +51,7 @@ enum ThreadboundUISnapshotMessage {
         runtime_id: RuntimeId,
     },
 }
-impl Message for ThreadboundUISnapshotMessage {}
+impl WorkerMessage for ThreadboundUISnapshotMessage {}
 
 #[derive(Debug, Reflect, Clone, Event)]
 enum GameboundUISnapshotMessage {
@@ -67,12 +67,13 @@ enum GameboundUISnapshotMessage {
     },
     Error,
 }
-impl Message for GameboundUISnapshotMessage {}
+impl WorkerMessage for GameboundUISnapshotMessage {}
 
 
 fn handle_threadbound_message_error_handler(
     _msg: &ThreadboundUISnapshotMessage,
     reply_tx: &Sender<GameboundUISnapshotMessage>,
+    _state: &mut (),
     _error: &Error,
 ) -> Result<()> {
     reply_tx.send(GameboundUISnapshotMessage::Error)?;
@@ -81,6 +82,7 @@ fn handle_threadbound_message_error_handler(
 fn handle_threadbound_message(
     msg: &ThreadboundUISnapshotMessage,
     reply_tx: &Sender<GameboundUISnapshotMessage>,
+    _state: &mut (),
 ) -> Result<()> {
     match msg {
         ThreadboundUISnapshotMessage::CaptureHovered => {

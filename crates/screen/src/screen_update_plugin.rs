@@ -9,88 +9,112 @@ use bevy::window::PrimaryWindow;
 use bevy::winit::WinitWindows;
 use cursor_hero_metrics::Metrics;
 use cursor_hero_winutils::win_screen_capture::get_full_monitor_capturers;
+use cursor_hero_winutils::win_screen_capture::MonitorId;
 use cursor_hero_winutils::win_screen_capture::MonitorRegionCapturer;
-
-pub struct CapturerHolderResource {
-    pub capturers: Vec<MonitorRegionCapturer>,
-}
-
-// Define a struct to hold captured frames
-struct CapturedFrame {
-    data: Vec<u8>,
-}
-
-// Shared resource for captured frames
-#[derive(Resource)]
-struct FrameHolderResource {
-    frames: Arc<Mutex<HashMap<u32, CapturedFrame>>>,
-    enabled: Arc<Mutex<bool>>,
-}
+use cursor_hero_worker::prelude::anyhow::Error;
+use cursor_hero_worker::prelude::anyhow::Result;
+use cursor_hero_worker::prelude::Sender;
+use cursor_hero_worker::prelude::WorkerConfig;
+use cursor_hero_worker::prelude::WorkerMessage;
+use cursor_hero_worker::prelude::WorkerPlugin;
+use cursor_hero_worker::prelude::WorkerState;
 
 pub struct ScreenUpdatePlugin;
 
 impl Plugin for ScreenUpdatePlugin {
     fn build(&self, app: &mut App) {
-        // Create a shared resource for captured frames
-        let frames = Arc::new(Mutex::new(HashMap::new()));
-
-        // Clone the Arc to move into the capture thread
-        let frames_pointer = Arc::clone(&frames);
-
-        let capturer_holder = Arc::new(Mutex::new(CapturerHolderResource {
-            capturers: get_full_monitor_capturers().unwrap(),
-        }));
-
-        let enabled = Arc::new(Mutex::new(true));
-        let enabled_pointer = Arc::clone(&enabled);
-
-        let captured_frames = FrameHolderResource { frames, enabled };
-
-        // Spawn a separate thread for capturing frames
-        let ch = Arc::clone(&capturer_holder);
-        thread::spawn(move || loop {
-            if !*enabled_pointer.lock().unwrap() {
-                thread::sleep(std::time::Duration::from_millis(100));
-                continue;
-            }
-            let frames = capture_frames(ch.clone());
-            let mut shared_frames = frames_pointer.lock().unwrap();
-            *shared_frames = frames;
+        app.add_plugins(WorkerPlugin {
+            config: WorkerConfig::<ThreadboundMessage, GameboundMessage, ThreadState> {
+                name: "screen_update_plugin".to_string(),
+                threadbound_message_receiver: |thread_rx, _state| {
+                    // Continuously capture frames when no messages present
+                    match thread_rx.try_recv() {
+                        Ok(x) => Ok(x),
+                        _ => Ok(ThreadboundMessage::CaptureFrames),
+                    }
+                },
+                handle_threadbound_message,
+                sleep_duration: std::time::Duration::from_nanos(1_000_000_000 / 144), // 144hz
+                ..default()
+            },
         });
-
-        app.add_systems(Update, update_screens)
-            .insert_resource(captured_frames)
-            .insert_non_send_resource(CapturerHolderResource {
-                capturers: get_full_monitor_capturers().unwrap(),
-            });
+        app.add_systems(Update, update_screens);
     }
 }
 
-fn capture_frames(capturers: Arc<Mutex<CapturerHolderResource>>) -> HashMap<u32, CapturedFrame> {
-    capturers
-        .lock()
-        .unwrap()
-        .capturers
-        .iter_mut()
-        .map(|capturer| {
-            // let mut metrics = Metrics::default();
-            // let frame = capturer.capture(&mut Some(metrics)).unwrap();
-            let frame = capturer.capture(&mut None).unwrap();
-            let frame = CapturedFrame {
-                data: frame.to_vec(),
-            };
-            (capturer.monitor.info.id, frame)
+#[derive(Debug, Clone)]
+struct CapturedFrame {
+    data: Vec<u8>,
+}
+
+struct ThreadState {
+    capturers: Vec<MonitorRegionCapturer>,
+    enabled: bool,
+}
+impl WorkerState for ThreadState {
+    fn try_default() -> Result<Self> {
+        Ok(ThreadState {
+            capturers: get_full_monitor_capturers()?,
+            enabled: true,
         })
-        .collect::<HashMap<u32, CapturedFrame>>()
+    }
+}
+
+#[derive(Debug, Reflect, Clone, Event)]
+enum ThreadboundMessage {
+    SetEnabled(bool),
+    CaptureFrames,
+}
+impl WorkerMessage for ThreadboundMessage {}
+
+#[derive(Debug, Clone, Event)]
+enum GameboundMessage {
+    Frames(HashMap<MonitorId, CapturedFrame>),
+}
+impl WorkerMessage for GameboundMessage {}
+
+fn handle_threadbound_message(
+    msg: &ThreadboundMessage,
+    reply_tx: &Sender<GameboundMessage>,
+    state: &mut ThreadState,
+) -> Result<()> {
+    match msg {
+        ThreadboundMessage::SetEnabled(enabled) => {
+            state.enabled = *enabled;
+        }
+        ThreadboundMessage::CaptureFrames => {
+            if !state.enabled {
+                return Ok(());
+            }
+            let frames = state
+                .capturers
+                .iter_mut()
+                .map(|capturer| {
+                    // let mut metrics = Metrics::default();
+                    // let frame = capturer.capture(&mut Some(metrics)).unwrap();
+                    let frame = capturer.capture(&mut None)?;
+                    let frame = CapturedFrame {
+                        data: frame.to_vec(),
+                    };
+                    Ok::<(u32, CapturedFrame), Error>((capturer.monitor.info.id, frame))
+                })
+                .filter_map(Result::ok)
+                .collect::<HashMap<u32, CapturedFrame>>();
+            reply_tx.send(GameboundMessage::Frames(frames))?;
+        }
+    }
+    Ok(())
 }
 
 fn update_screens(
     mut query: Query<(&mut Screen, &Handle<Image>)>,
     mut textures: ResMut<Assets<Image>>,
     time: Res<Time>,
-    frames: Res<FrameHolderResource>,
+    mut gamebound_messages: EventReader<GameboundMessage>,
+    mut threadbound_messages: EventWriter<ThreadboundMessage>,
     window_query: Query<Entity, With<PrimaryWindow>>,
     winit_windows: NonSend<WinitWindows>,
+    mut sent_disabled: Local<bool>,
 ) {
     let window_id = window_query.single();
     let Some(winit_window) = winit_windows.get_window(window_id) else {
@@ -98,36 +122,33 @@ fn update_screens(
         return;
     };
     if winit_window.is_minimized().unwrap_or(false) {
-        *frames.enabled.lock().unwrap() = false;
+        if !*sent_disabled {
+            threadbound_messages.send(ThreadboundMessage::SetEnabled(false));
+            *sent_disabled = true;
+        }
         return;
     } else {
-        *frames.enabled.lock().unwrap() = true;
-    }
-
-    let monitor_frames = frames.frames.lock().unwrap();
-    for (mut screen, texture) in &mut query {
-        if let Some(refresh_rate) = screen.refresh_rate.as_mut() {
-            // tick the refresh rate timer
-            refresh_rate.tick(time.delta());
-            // skip if not time to refresh
-            if !refresh_rate.finished() {
-                continue;
-            }
-        } else {
-            // skip if no refresh rate
-            continue;
+        if *sent_disabled {
+            threadbound_messages.send(ThreadboundMessage::SetEnabled(true));
+            *sent_disabled = false;
         }
-
+    }
+    let Some(msg) = gamebound_messages.read().last() else {
+        return;
+    };
+    let GameboundMessage::Frames(frames) = msg;
+    for screen in &mut query {
+        let (screen, texture) = screen;
         // find the frame captured in the other thread
         let mut metrics = Metrics::default();
         metrics.begin("lookup");
-        let frame = monitor_frames.get(&screen.id).unwrap();
+        if let Some(frame) = frames.get(&screen.id) {
+            // update the texture
+            metrics.begin("texture");
+            textures.get_mut(texture).map(|t| t.data = frame.data.clone());
+            metrics.end("texture");
+        }
         metrics.end("lookup");
-
-        // update the texture
-        metrics.begin("texture");
-        textures.get_mut(texture).unwrap().data = frame.data.clone();
-        metrics.end("texture");
 
         // report metrics
         // println!("{}", metrics.report());

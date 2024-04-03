@@ -27,7 +27,7 @@ use cursor_hero_ui_automation::prelude::gather_incomplete_ui_tree_starting_deep;
 use cursor_hero_ui_automation::prelude::DrillId;
 use cursor_hero_ui_automation::prelude::ElementInfo;
 use cursor_hero_worker::prelude::anyhow::Result;
-use cursor_hero_worker::prelude::Message;
+use cursor_hero_worker::prelude::WorkerMessage;
 use cursor_hero_worker::prelude::WorkerConfig;
 use cursor_hero_worker::prelude::WorkerPlugin;
 use leafwing_input_manager::prelude::*;
@@ -39,7 +39,7 @@ pub struct ScreenshotToolPlugin;
 impl Plugin for ScreenshotToolPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(WorkerPlugin {
-            config: WorkerConfig::<ThreadboundMessage, GameboundMessage> {
+            config: WorkerConfig::<ThreadboundMessage, GameboundMessage, ()> {
                 name: "screenshot_tool".to_string(),
                 is_ui_automation_thread: true,
                 handle_threadbound_message,
@@ -63,7 +63,7 @@ enum ThreadboundMessage {
     Print { world_position: Vec3 },
     Fracture { world_position: Vec3 },
 }
-impl Message for ThreadboundMessage {}
+impl WorkerMessage for ThreadboundMessage {}
 
 #[derive(Debug, Reflect, Clone, Event)]
 enum GameboundMessage {
@@ -83,7 +83,7 @@ enum GameboundMessage {
         world_position: Vec3,
     },
 }
-impl Message for GameboundMessage {}
+impl WorkerMessage for GameboundMessage {}
 
 #[derive(Component, Reflect, Default)]
 struct ScreenshotTool;
@@ -238,6 +238,7 @@ fn handle_input(
 fn handle_threadbound_message(
     msg: &ThreadboundMessage,
     reply_tx: &Sender<GameboundMessage>,
+    _state: &mut (),
 ) -> Result<()> {
     match msg {
         ThreadboundMessage::Capture { world_position }

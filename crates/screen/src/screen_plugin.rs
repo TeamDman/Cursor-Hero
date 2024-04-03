@@ -4,6 +4,7 @@ use cursor_hero_bevy::prelude::NegativeYIRect;
 use cursor_hero_environment_types::prelude::*;
 use cursor_hero_level_bounds::level_bounds_plugin::LevelBoundsEvent;
 use cursor_hero_winutils::win_screen_capture::get_all_monitors;
+use cursor_hero_winutils::win_screen_capture::MonitorId;
 use image::DynamicImage;
 use screenshots::Screen as ScreenLib;
 use std::collections::VecDeque;
@@ -22,9 +23,8 @@ impl Plugin for ScreenPlugin {
 #[derive(Component, Default, Reflect)]
 #[reflect(Component)]
 pub struct Screen {
-    pub id: u32,
+    pub id: MonitorId,
     pub name: String,
-    pub refresh_rate: Option<Timer>,
 }
 #[derive(Component, Default, Reflect)]
 pub struct GameScreen;
@@ -89,10 +89,6 @@ fn spawn_screens_in_new_environments(
                                 Screen {
                                     name: name.clone(),
                                     id: screen.display_info.id,
-                                    refresh_rate: Some(Timer::from_seconds(
-                                        0.1,
-                                        TimerMode::Repeating,
-                                    )),
                                 },
                                 HostScreen,
                                 Name::new(format!("Screen {}", name)),
@@ -139,7 +135,6 @@ fn spawn_screens_in_new_environments(
                             Screen {
                                 name: name.to_string(),
                                 id: 1,
-                                refresh_rate: None,
                             },
                             GameScreen,
                             Name::new(name),

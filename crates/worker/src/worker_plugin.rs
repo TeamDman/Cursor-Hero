@@ -5,18 +5,20 @@ use std::thread;
 
 use windows::Win32::System::Com::CoInitializeEx;
 use windows::Win32::System::Com::COINIT_MULTITHREADED;
-pub struct WorkerPlugin<T, G>
+pub struct WorkerPlugin<T, G, S>
 where
-    T: Message,
-    G: Message,
+    T: WorkerMessage,
+    G: WorkerMessage,
+    S: WorkerState,
 {
-    pub config: WorkerConfig<T, G>,
+    pub config: WorkerConfig<T, G, S>,
 }
 
-impl<T, G> Plugin for WorkerPlugin<T, G>
+impl<T, G, S> Plugin for WorkerPlugin<T, G, S>
 where
-    T: Message,
-    G: Message,
+    T: WorkerMessage,
+    G: WorkerMessage,
+    S: WorkerState,
 {
     fn build(&self, app: &mut App) {
         // TODO: conditionally register if T or G support it
@@ -25,18 +27,18 @@ where
         app.add_event::<T>();
         app.add_event::<G>();
         app.insert_resource(self.config.clone());
-        app.add_systems(Startup, create_worker_thread::<T, G>);
-        app.add_systems(Update, bridge_requests::<T, G>);
-        app.add_systems(Update, bridge_responses::<T, G>);
+        app.add_systems(Startup, create_worker_thread::<T, G, S>);
+        app.add_systems(Update, bridge_requests::<T, G, S>);
+        app.add_systems(Update, bridge_responses::<T, G, S>);
     }
 }
 
-fn create_worker_thread<T: Message, G: Message>(
-    config: Res<WorkerConfig<T, G>>,
+fn create_worker_thread<T: WorkerMessage, G: WorkerMessage, S: WorkerState>(
+    config: Res<WorkerConfig<T, G, S>>,
     mut commands: Commands,
 ) {
-    let (game_tx, game_rx) = bounded::<G>(10);
-    let (thread_tx, thread_rx) = bounded::<T>(10);
+    let (game_tx, game_rx) = bounded::<G>(config.gamebound_channel_capacity);
+    let (thread_tx, thread_rx) = bounded::<T>(config.threadbound_channel_capacity);
 
     commands.insert_resource(Bridge {
         sender: thread_tx,
@@ -62,22 +64,27 @@ fn create_worker_thread<T: Message, G: Message>(
             }
         }
 
+        let Ok(mut state) = S::try_default() else {
+            error!("[{}] Failed to initialize state", name);
+            return;
+        };
+
         let rt = tokio::runtime::Runtime::new().unwrap();
         rt.block_on(async {
             loop {
-                let msg = match (receiver)(&thread_rx) {
+                let msg = match (receiver)(&thread_rx, &mut state) {
                     Ok(msg) => msg,
                     Err(e) => {
                         error!("[{}] Threadbound channel receiver failure: {:?}, quitting loop", name, e);
                         break;
                     }
                 };
-                if let Err(e) = (handler)(&msg, &game_tx) {
+                if let Err(e) = (handler)(&msg, &game_tx, &mut state) {
                     error!(
                         "[{}] Failed to process thread message {:?}, got error {:?}",
                         name, msg, e
                     );
-                    if let Err(ee) = (handler_error_handler)(&msg, &game_tx, &e) {
+                    if let Err(ee) = (handler_error_handler)(&msg, &game_tx, &mut state, &e) {
                         error!(
                             "[{}] BAD NEWS! Failed while processing error handler for message {:?} that produced error {:?}, got new error {:?}",
                             name, msg, e, ee
@@ -94,8 +101,8 @@ fn create_worker_thread<T: Message, G: Message>(
     }
 }
 
-fn bridge_requests<T: Message, G: Message>(
-    config: Res<WorkerConfig<T, G>>,
+fn bridge_requests<T: WorkerMessage, G: WorkerMessage, S: WorkerState>(
+    config: Res<WorkerConfig<T, G, S>>,
     bridge: ResMut<Bridge<T, G>>,
     mut events: EventReader<T>,
 ) {
@@ -107,8 +114,8 @@ fn bridge_requests<T: Message, G: Message>(
     }
 }
 
-fn bridge_responses<T: Message, G: Message>(
-    config: Res<WorkerConfig<T, G>>,
+fn bridge_responses<T: WorkerMessage, G: WorkerMessage, S: WorkerState>(
+    config: Res<WorkerConfig<T, G, S>>,
     bridge: ResMut<Bridge<T, G>>,
     mut events: EventWriter<G>,
 ) {

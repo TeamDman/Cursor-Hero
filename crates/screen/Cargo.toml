@@ -11,6 +11,7 @@ cursor_hero_bevy = { workspace = true }
 cursor_hero_environment_types = { workspace = true }
 cursor_hero_level_bounds = { workspace = true }
 cursor_hero_winutils = { workspace = true}
+cursor_hero_worker = { workspace = true}
 bevy = { workspace = true }
 bevy-inspector-egui = { workspace = true }
 bevy_xpbd_2d = { workspace = true }
