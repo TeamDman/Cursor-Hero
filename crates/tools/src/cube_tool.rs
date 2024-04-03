@@ -4,7 +4,7 @@ use leafwing_input_manager::prelude::*;
 
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_physics::damping_plugin::MovementDamping;
-use cursor_hero_pointer_types::prelude::*;
+use cursor_hero_cursor_types::prelude::*;
 
 use cursor_hero_toolbelt_types::prelude::*;
 

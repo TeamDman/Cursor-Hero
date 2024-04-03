@@ -1,7 +1,7 @@
 use cursor_hero_toolbelt_types::toolbelt_types::*;
 
 use bevy::prelude::*;
-use cursor_hero_pointer_types::prelude::*;
+use cursor_hero_cursor_types::prelude::*;
 
 use leafwing_input_manager::action_state::ActionState;
 

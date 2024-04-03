@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
 use bevy_xpbd_2d::components::Sensor;
-use cursor_hero_pointer_types::prelude::*;
+use cursor_hero_cursor_types::prelude::*;
 
 use leafwing_input_manager::action_state::ActionState;
 

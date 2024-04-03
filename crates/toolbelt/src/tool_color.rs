@@ -1,7 +1,7 @@
 use cursor_hero_toolbelt_types::toolbelt_types::*;
 
 use bevy::prelude::*;
-use cursor_hero_pointer_types::prelude::*;
+use cursor_hero_cursor_types::prelude::*;
 
 enum ToolColor {
     Active,

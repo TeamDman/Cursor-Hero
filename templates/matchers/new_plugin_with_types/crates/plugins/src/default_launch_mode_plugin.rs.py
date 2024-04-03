@@ -61,8 +61,8 @@ def gather_variables(text: str) -> dict[str,str]:
 #use cursor_hero_physics::damping_plugin::DampingPlugin;
 #use cursor_hero_physics::physics_plugin::PhysicsPlugin;
 #use cursor_hero_physics_debug::physics_debug_plugin::PhysicsDebugPlugin;
-#use cursor_hero_pointer::pointer_plugin::PointerPlugin;
-#use cursor_hero_pointer_types::pointer_types_plugin::PointerTypesPlugin;
+#use cursor_hero_cursor::pointer_plugin::PointerPlugin;
+#use cursor_hero_cursor_types::pointer_types_plugin::PointerTypesPlugin;
 #use cursor_hero_pressure_plate::pressure_plate_plugin::PressurePlatePlugin;
 #use cursor_hero_restart_memory::MemoryPlugin;
 ##[cfg(debug_assertions)]

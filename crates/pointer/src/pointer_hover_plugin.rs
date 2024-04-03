@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_xpbd_2d::components::CollidingEntities;
-use cursor_hero_pointer_types::prelude::*;
+use cursor_hero_cursor_types::prelude::*;
 
 pub struct PointerHoverPlugin;
 

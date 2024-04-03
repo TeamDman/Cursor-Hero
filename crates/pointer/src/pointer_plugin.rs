@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use cursor_hero_pointer_types::pointer_action_types::PointerActionPlugin;
+use cursor_hero_cursor_types::pointer_action_types::PointerActionPlugin;
 
 use crate::pointer_click_plugin::PointerClickPlugin;
 use crate::pointer_hover_plugin::PointerHoverPlugin;

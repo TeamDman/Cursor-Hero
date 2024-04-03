@@ -8,7 +8,7 @@ use cursor_hero_toolbelt_types::toolbelt_types::*;
 use bevy::prelude::*;
 use bevy::transform::TransformSystem;
 use cursor_hero_input::update_gamepad_settings::PRESS_THRESHOLD;
-use cursor_hero_pointer_types::prelude::*;
+use cursor_hero_cursor_types::prelude::*;
 
 use itertools::Itertools;
 use leafwing_input_manager::action_state::ActionState;

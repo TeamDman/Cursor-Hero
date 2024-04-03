@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy::utils::HashMap;
 use bevy_xpbd_2d::prelude::*;
 use cursor_hero_host_fs_types::host_fs_types::HostPath;
-use cursor_hero_pointer_types::prelude::*;
+use cursor_hero_cursor_types::prelude::*;
 
 use cursor_hero_toolbelt_types::prelude::*;
 use leafwing_input_manager::prelude::*;

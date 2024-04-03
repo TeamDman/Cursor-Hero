@@ -15,7 +15,7 @@ use cursor_hero_camera::camera_plugin::MainCamera;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_environment_types::prelude::TrackEnvironmentTag;
 use cursor_hero_physics::damping_plugin::MovementDamping;
-use cursor_hero_pointer_types::prelude::*;
+use cursor_hero_cursor_types::prelude::*;
 use cursor_hero_screen::get_image::get_image;
 use cursor_hero_screen::get_image::ScreensToImageParam;
 use cursor_hero_toolbelt_types::prelude::*;

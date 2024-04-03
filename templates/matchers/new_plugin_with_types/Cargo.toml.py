@@ -287,7 +287,7 @@ def gather_variables(text: str) -> dict[str,str]:
 #cursor_hero_agent_types = { path = "./crates/agent_types" }
 #cursor_hero_physics_debug = { path = "./crates/physics_debug" }
 #cursor_hero_math = { path = "./crates/math" }
-#cursor_hero_pointer_types = { path = "./crates/pointer_types" }
+#cursor_hero_cursor_types = { path = "./crates/pointer_types" }
 #cursor_hero_toolbelt_types = { path = "./crates/toolbelt_types" }
 #cursor_hero_sprint_tool_types = { path = "./crates/sprint_tool_types" }
 #cursor_hero_sprint_tool = { path = "./crates/sprint_tool" }
@@ -310,7 +310,7 @@ def gather_variables(text: str) -> dict[str,str]:
 #cursor_hero_metrics = { path = "./crates/metrics" }
 #cursor_hero_click_drag_character_movement = { path = "./crates/click_drag_character_movement" }
 #cursor_hero_physics = { path = "./crates/physics" }
-#cursor_hero_pointer = { path = "./crates/pointer" }
+#cursor_hero_cursor = { path = "./crates/pointer" }
 #cursor_hero_screen = { path = "./crates/screen" }
 #cursor_hero_toolbelt = { path = "./crates/toolbelt" }
 #cursor_hero_tools = { path = "./crates/tools" }

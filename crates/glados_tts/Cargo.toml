@@ -14,7 +14,7 @@ reqwest = {workspace = true}
 urlencoding = {workspace = true}
 crossbeam-channel = { workspace = true }
 cursor_hero_environment_types = {workspace = true}
-cursor_hero_pointer_types = {workspace = true}
+cursor_hero_cursor_types = {workspace = true}
 cursor_hero_math = {workspace = true}
 bevy_xpbd_2d = { workspace = true }
 rodio = { workspace = true, features=["wav"]}

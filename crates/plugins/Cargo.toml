@@ -63,7 +63,7 @@ cursor_hero_agent_types = { workspace = true }
 cursor_hero_physics_debug = { workspace = true }
 cursor_hero_math = { workspace = true }
 cursor_hero_version = { workspace = true }
-cursor_hero_pointer_types = { workspace = true }
+cursor_hero_cursor_types = { workspace = true }
 cursor_hero_toolbelt_types = { workspace = true }
 cursor_hero_sprint_tool_types = { workspace = true }
 cursor_hero_sprint_tool = { workspace = true }
@@ -86,7 +86,7 @@ cursor_hero_data = {workspace = true}
 cursor_hero_metrics = {workspace = true}
 cursor_hero_click_drag_character_movement = {workspace = true}
 cursor_hero_physics = {workspace = true}
-cursor_hero_pointer = {workspace = true}
+cursor_hero_cursor = {workspace = true}
 cursor_hero_screen = {workspace = true}
 cursor_hero_toolbelt = {workspace = true}
 cursor_hero_tools = {workspace = true}

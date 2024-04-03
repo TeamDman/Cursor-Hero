@@ -26,8 +26,8 @@ use cursor_hero_memory::primary_window_memory_plugin::restore_window;
 use cursor_hero_physics::damping_plugin::DampingPlugin;
 use cursor_hero_physics::physics_plugin::PhysicsPlugin;
 use cursor_hero_physics_debug::physics_debug_plugin::PhysicsDebugPlugin;
-use cursor_hero_pointer::pointer_plugin::PointerPlugin;
-use cursor_hero_pointer_types::pointer_types_plugin::PointerTypesPlugin;
+use cursor_hero_cursor::pointer_plugin::PointerPlugin;
+use cursor_hero_cursor_types::pointer_types_plugin::PointerTypesPlugin;
 use cursor_hero_pressure_plate::pressure_plate_plugin::PressurePlatePlugin;
 use cursor_hero_screen::screen_plugin::ScreenPlugin;
 use cursor_hero_screen::screen_update_plugin::ScreenUpdatePlugin;
@@ -195,7 +195,7 @@ wgpu_hal=warn,
 "
 // bevy_ecs=info,
 // cursor_hero=debug,
-// cursor_hero_pointer::pointer_hover_plugin=info,
+// cursor_hero_cursor::pointer_hover_plugin=info,
 // cursor_hero_ollama::ollama_status_worker_plugin=info,
 // cursor_hero_voice_to_text::voice_to_text_ping_plugin=info,
 // cursor_hero_voice_to_text::voice_to_text_worker_plugin=info,

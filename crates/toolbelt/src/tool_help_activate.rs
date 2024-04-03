@@ -3,7 +3,7 @@ use cursor_hero_toolbelt_types::toolbelt_types::*;
 use bevy::prelude::*;
 use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
-use cursor_hero_pointer_types::prelude::*;
+use cursor_hero_cursor_types::prelude::*;
 
 use cursor_hero_xelu_prompts::texture_path_for_input;
 use leafwing_input_manager::prelude::*;

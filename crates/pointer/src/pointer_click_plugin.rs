@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy::utils::HashMap;
 use bevy::utils::HashSet;
 use bevy_xpbd_2d::components::CollidingEntities;
-use cursor_hero_pointer_types::prelude::*;
+use cursor_hero_cursor_types::prelude::*;
 
 pub struct PointerClickPlugin;
 

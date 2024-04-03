@@ -3,7 +3,7 @@ use bevy_xpbd_2d::prelude::*;
 use cursor_hero_environment_types::prelude::*;
 use cursor_hero_math::prelude::Lerp;
 use cursor_hero_ollama_types::prelude::*;
-use cursor_hero_pointer_types::prelude::*;
+use cursor_hero_cursor_types::prelude::*;
 pub struct OllamaButtonPlugin;
 
 impl Plugin for OllamaButtonPlugin {

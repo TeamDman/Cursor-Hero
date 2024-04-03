@@ -2,8 +2,8 @@ use bevy::input::gamepad::GamepadEvent;
 use bevy::input::keyboard::KeyboardInput;
 use bevy::prelude::*;
 use cursor_hero_host_event_types::prelude::HostEvent;
-use cursor_hero_pointer_types::pointer_action_types::PointerAction;
-use cursor_hero_pointer_types::pointer_types::MainPointer;
+use cursor_hero_cursor_types::pointer_action_types::PointerAction;
+use cursor_hero_cursor_types::pointer_types::MainPointer;
 use leafwing_input_manager::action_state::ActionState;
 
 pub struct ActiveInputStatePlugin;

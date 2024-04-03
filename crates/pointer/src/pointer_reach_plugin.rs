@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_math::prelude::Lerp;
-use cursor_hero_pointer_types::prelude::*;
+use cursor_hero_cursor_types::prelude::*;
 
 use cursor_hero_sprint_tool_types::sprint_tool_types_plugin::SprintEvent;
 use cursor_hero_toolbelt_types::toolbelt_types::Wheel;

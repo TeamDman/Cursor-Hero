@@ -3,7 +3,7 @@ use bevy::sprite::Anchor;
 use bevy_xpbd_2d::prelude::*;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_environment_types::environment_types::TrackEnvironmentTag;
-use cursor_hero_pointer_types::prelude::*;
+use cursor_hero_cursor_types::prelude::*;
 use leafwing_input_manager::prelude::*;
 
 pub struct PointerSpawningPlugin;
