@@ -199,7 +199,7 @@ where
                 ..default()
             });
         });
-        info!("{:?} => {:?}", self.event, self.name);
+        debug!("{:?} => {:?}", self.event, self.name);
     }
 }
 

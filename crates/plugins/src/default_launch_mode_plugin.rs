@@ -89,10 +89,14 @@ use cursor_hero_window_position::prelude::*;
 use cursor_hero_window_position_types::prelude::*;
 use cursor_hero_window_swap_tool::prelude::*;
 use cursor_hero_window_swap_tool_types::prelude::*;
+use cursor_hero_ui_inspector::prelude::*;
+use cursor_hero_ui_inspector_types::prelude::*;
 pub struct DefaultLaunchModePlugin;
 
 impl Plugin for DefaultLaunchModePlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(UIInspectorTypesPlugin);
+        app.add_plugins(UIInspectorPlugin);
         app.add_plugins(MemoryTypesPlugin);
         let memory_config = MemoryConfig {
             save_dir: "Cursor Hero Memory".to_string(),
@@ -182,21 +186,20 @@ impl Plugin for DefaultLaunchModePlugin {
 
         #[cfg(debug_assertions)]
         let log_plugin = LogPlugin {
-            level: bevy::log::Level::DEBUG,
+            level: bevy::log::Level::INFO,
             filter: "
-info,
 wgpu_core=warn,
 wgpu_hal=warn,
-bevy_ecs=info,
-cursor_hero=debug,
-cursor_hero_pointer::pointer_hover_plugin=info,
-cursor_hero_ollama::ollama_status_worker_plugin=info,
-cursor_hero_voice_to_text::voice_to_text_ping_plugin=info,
-cursor_hero_voice_to_text::voice_to_text_worker_plugin=info,
-cursor_hero_glados_tts::glados_tts_status_worker_plugin=info,
-cursor_hero_tools::click_tool=info,
-cursor_hero_memory=info
-            "
+"
+// bevy_ecs=info,
+// cursor_hero=debug,
+// cursor_hero_pointer::pointer_hover_plugin=info,
+// cursor_hero_ollama::ollama_status_worker_plugin=info,
+// cursor_hero_voice_to_text::voice_to_text_ping_plugin=info,
+// cursor_hero_voice_to_text::voice_to_text_worker_plugin=info,
+// cursor_hero_glados_tts::glados_tts_status_worker_plugin=info,
+// cursor_hero_tools::click_tool=info,
+// cursor_hero_memory=info
             .replace('\n', "")
             .trim()
             .into(),

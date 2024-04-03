@@ -1,10 +1,10 @@
-#![feature(let_chains, trivial_bounds)]
-use anyhow::Context;
-use anyhow::Error;
-use anyhow::Result;
+use bevy::prelude::*;
+use cursor_hero_ui_inspector_types::prelude::UIData;
+use cursor_hero_worker::prelude::anyhow::Context;
+use cursor_hero_worker::prelude::anyhow::Error;
+use cursor_hero_worker::prelude::anyhow::Result;
 use bevy::input::common_conditions::input_toggle_active;
 use bevy::log::LogPlugin;
-use bevy::prelude::*;
 use bevy::utils::HashMap;
 use bevy::window::PrimaryWindow;
 use bevy_egui::egui;
@@ -13,7 +13,6 @@ use bevy_egui::EguiContexts;
 use bevy_egui::EguiSet;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_inspector_egui::reflect_inspector::InspectorUi;
-use cursor_hero_memory::primary_window_memory_plugin::PrimaryWindowMemoryPlugin;
 use cursor_hero_ui_automation::prelude::*;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
 use cursor_hero_worker::prelude::Message;
@@ -22,52 +21,31 @@ use cursor_hero_worker::prelude::WorkerConfig;
 use cursor_hero_worker::prelude::WorkerPlugin;
 use itertools::Itertools;
 use uiautomation::UIAutomation;
-fn main() {
-    let mut app = App::new();
-    app.add_plugins(
-        DefaultPlugins
-            .set(LogPlugin {
-                level: bevy::log::Level::DEBUG,
-                filter: "
-info,
-wgpu_core=warn,
-wgpu_hal=warn,
-ui_hover_example=trace,
-cursor_hero_worker=debug,
-"
-                .replace('\n', "")
-                .trim()
-                .into(),
-            })
-            .build(),
-    );
-    app.add_plugins(WorkerPlugin {
-        config: WorkerConfig::<ThreadboundUISnapshotMessage, GameboundUISnapshotMessage> {
-            name: "ui_hover".to_string(),
-            is_ui_automation_thread: true,
-            handle_threadbound_message: handle_threadbound_message,
-            handle_threadbound_message_error_handler: handle_threadbound_message_error_handler,
-            ..default()
-        },
-    });
-    app.add_plugins(
-        WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)),
-    );
-    app.add_plugins(PrimaryWindowMemoryPlugin);
-    app.insert_resource(ClearColor(Color::rgb(0.992, 0.714, 0.69)));
-    app.add_systems(Startup, spawn_camera);
-    app.add_systems(Update, periodic_snapshot);
-    app.add_systems(Update, fetch_requested);
-    app.add_systems(Update, receive);
-    app.add_systems(Update, gui.after(EguiSet::InitContexts));
-    app.init_resource::<UIData>();
-    app.register_type::<UIData>();
-    app.run();
+use cursor_hero_ui_inspector_types::prelude::FetchingState;
+
+pub struct UIInspectorPlugin;
+
+impl Plugin for UIInspectorPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_plugins(WorkerPlugin {
+            config: WorkerConfig::<ThreadboundUISnapshotMessage, GameboundUISnapshotMessage> {
+                name: "ui_hover".to_string(),
+                is_ui_automation_thread: true,
+                handle_threadbound_message: handle_threadbound_message,
+                handle_threadbound_message_error_handler: handle_threadbound_message_error_handler,
+                ..default()
+            },
+        });
+        let condition = input_toggle_active(false, KeyCode::Grave);
+        app.add_systems(Update, periodic_snapshot.run_if(condition.clone()));
+        app.add_systems(Update, fetch_requested.run_if(condition.clone()));
+        app.add_systems(Update, receive.run_if(condition.clone()));
+        app.add_systems(Update, gui.run_if(condition));
+        // app.add_systems(Update, gui.after(EguiSet::InitContexts));
+
+    }
 }
 
-fn spawn_camera(mut commands: Commands) {
-    commands.spawn(Camera2dBundle::default());
-}
 
 #[derive(Debug, Reflect, Clone, Event)]
 enum ThreadboundUISnapshotMessage {
@@ -95,27 +73,6 @@ enum GameboundUISnapshotMessage {
 }
 impl Message for GameboundUISnapshotMessage {}
 
-#[derive(Debug, Reflect)]
-enum FetchingState {
-    FetchRequest,
-    FetchDispatched,
-    Fetched(Vec<ElementInfo>),
-}
-
-#[derive(Resource, Debug, Reflect, Default)]
-#[reflect(Resource)]
-struct UIData {
-    pub start: ElementInfo,
-    pub hovered: ElementInfo,
-    pub ui_tree: ElementInfo,
-    pub selected: Option<DrillId>,
-    pub expanded: Vec<DrillId>,
-    pub fresh: bool,
-    pub in_flight: bool,
-    pub paused: bool,
-    // Include runtime id in case tree changes and we quickly fetch something with the same drill_id before the first request comes back
-    pub fetching: HashMap<(DrillId, RuntimeId), FetchingState>,
-}
 
 fn handle_threadbound_message_error_handler(
     _msg: &ThreadboundUISnapshotMessage,

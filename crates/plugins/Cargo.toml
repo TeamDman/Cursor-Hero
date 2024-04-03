@@ -7,6 +7,8 @@ edition = "2021"
 
 
 [dependencies]
+cursor_hero_ui_inspector = { workspace = true }
+cursor_hero_ui_inspector_types = { workspace = true }
 cursor_hero_worker = { workspace = true }
 cursor_hero_worker_types = { workspace = true }
 cursor_hero_memory = { workspace = true }

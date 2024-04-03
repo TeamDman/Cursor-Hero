@@ -57,7 +57,6 @@ impl Plugin for InspectLaunchModePlugin {
                 .set(LogPlugin {
                     level: bevy::log::Level::DEBUG,
                     filter: "
-info,
 wgpu_core=warn,
 wgpu_hal=warn,
 "
