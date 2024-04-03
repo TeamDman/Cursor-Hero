@@ -6,7 +6,7 @@
 
 def gather_variables(text: str) -> dict[str,str]:
     # use_statements
-    find = "pub struct MyPlugin;"
+    find = "pub struct DefaultLaunchModePlugin;"
     include = False
     index = text.find(find)
     assert index != -1, f"Coult not find `{find}`"
