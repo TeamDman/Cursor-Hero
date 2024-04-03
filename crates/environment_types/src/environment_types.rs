@@ -3,8 +3,15 @@ use bevy::prelude::*;
 #[derive(Component, Debug, Reflect, Clone, Copy)]
 pub enum EnvironmentKind {
     Host,
-    HostUIWatcher,
-    Game,
+    Agent,
+}
+impl EnvironmentKind {
+    pub fn name(&self) -> &str {
+        match self {
+            EnvironmentKind::Host => "Host Environment",
+            EnvironmentKind::Agent => "Agent Environment",
+        }
+    }
 }
 
 #[derive(Component, Debug, Reflect, Eq, PartialEq)]
@@ -15,9 +22,7 @@ pub struct EnvironmentTracker {
 #[derive(Component, Debug, Reflect)]
 pub struct HostEnvironment;
 #[derive(Component, Debug, Reflect)]
-pub struct HostUIWatcherEnvironment;
-#[derive(Component, Debug, Reflect)]
-pub struct GameEnvironment;
+pub struct AgentEnvironment;
 
 #[derive(Component, Default, Reflect)]
 pub struct Nametag;
@@ -27,7 +32,6 @@ pub struct TrackEnvironmentTag;
 
 #[derive(Event, Debug, Reflect)]
 pub struct CreateEnvironmentRequestEvent {
-    pub name: String,
     pub origin: Vec2,
     pub kind: EnvironmentKind,
 }

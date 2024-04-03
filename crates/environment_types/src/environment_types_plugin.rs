@@ -9,8 +9,7 @@ impl Plugin for EnvironmentTypesPlugin {
         app.register_type::<EnvironmentTracker>();
         app.register_type::<EnvironmentKind>();
         app.register_type::<HostEnvironment>();
-        app.register_type::<HostUIWatcherEnvironment>();
-        app.register_type::<GameEnvironment>();
+        app.register_type::<AgentEnvironment>();
         app.register_type::<Nametag>();
         app.add_event::<CreateEnvironmentRequestEvent>();
         app.add_event::<PopulateEnvironmentEvent>();

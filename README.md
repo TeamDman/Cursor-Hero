@@ -38,7 +38,7 @@ UI information is attached to the bricks, using `bevy-egui` to render UI element
 
 Using `egui`, the tree hierarchy of the UI is shown for the bricks created by clicking on UI elements in the screen texture. The tree could potentially grow to something like inspect.exe, where the properties of the UI element can be explored. Currently, the tree folding and selectable labels is working, but the properties panel on the right is not yet implemented.
 
-In addition to showing the host environment, a game environment is also constructed. The game environment contains a virtual agent and a mimicry of the host OS. The mimicry extends to include a copy of the desktop background, a taskbar that pulls the colour from the OS preferences, and a start menu button that toggles visibility of an empty panel.
+In addition to showing the host environment, an agent environment is also constructed. The agent environment contains a virtual agent and a mimicry of the host OS. The mimicry extends to include a copy of the desktop background, a taskbar that pulls the colour from the OS preferences, and a start menu button that toggles visibility of an empty panel.
 
 The virtual agent walks in circles. It has an observation buffer which other systems can publish events for something happening, and the buffer will conditionally append such events which are used in the construction of prompts for a local LLM ran using `ollama`.
 

@@ -22,7 +22,7 @@ impl Plugin for EnvironmentNametagPlugin {
 fn spawn_nametags_in_new_environments(
     mut environment_reader: EventReader<PopulateEnvironmentEvent>,
     mut commands: Commands,
-    environment_query: Query<&Name, Or<(With<HostEnvironment>, With<GameEnvironment>)>>,
+    environment_query: Query<&Name, Or<(With<HostEnvironment>, With<AgentEnvironment>)>>,
     asset_server: Res<AssetServer>,
 ) {
     for event in environment_reader.read() {

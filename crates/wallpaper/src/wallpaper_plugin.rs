@@ -16,7 +16,7 @@ pub struct Wallpaper;
 fn spawn_wallpaper(
     mut commands: Commands,
     mut environment_events: EventReader<PopulateEnvironmentEvent>,
-    environment_query: Query<&GameEnvironment>,
+    environment_query: Query<&AgentEnvironment>,
     asset_server: Res<AssetServer>,
 ) {
     for event in environment_events.read() {

@@ -50,7 +50,7 @@ pub struct LevelBounds;
 fn handle_populate_environment_events(
     mut commands: Commands,
     mut events: EventReader<PopulateEnvironmentEvent>,
-    environment_query: Query<(), Or<(With<HostEnvironment>, With<GameEnvironment>)>>,
+    environment_query: Query<(), Or<(With<HostEnvironment>, With<AgentEnvironment>)>>,
 ) {
     for event in events.read() {
         if !environment_query.contains(event.environment_id) {

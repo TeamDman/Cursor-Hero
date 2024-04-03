@@ -19,15 +19,13 @@ fn send_create_host_event(mut events: EventWriter<CreateEnvironmentRequestEvent>
     events.send(CreateEnvironmentRequestEvent {
         kind: EnvironmentKind::Host,
         origin: Vec2::new(0.0, 0.0),
-        name: "Host Environment".to_string(),
     });
 }
 
 fn send_create_game_event(mut events: EventWriter<CreateEnvironmentRequestEvent>) {
     events.send(CreateEnvironmentRequestEvent {
-        kind: EnvironmentKind::Game,
+        kind: EnvironmentKind::Agent,
         origin: Vec2::new(0.0, -3000.0),
-        name: "Game Environment".to_string(),
     });
 }
 
@@ -49,24 +47,21 @@ fn handle_create_events(
     mut create_events: EventReader<CreateEnvironmentRequestEvent>,
 ) {
     for event in create_events.read() {
-        info!("Creating host environment at {:?}", event.origin);
+        info!("Creating environment at {:?}", event.origin);
         let mut c = commands.spawn((
             SpatialBundle {
                 transform: Transform::from_translation(event.origin.extend(0.0)),
                 ..default()
             },
             event.kind,
-            Name::new(event.name.clone()),
+            Name::new(event.kind.name().to_string()),
         ));
         match event.kind {
             EnvironmentKind::Host => {
                 c.insert(HostEnvironment);
             }
-            EnvironmentKind::Game => {
-                c.insert(GameEnvironment);
-            }
-            EnvironmentKind::HostUIWatcher => {
-                c.insert(HostUIWatcherEnvironment);
+            EnvironmentKind::Agent => {
+                c.insert(AgentEnvironment);
             }
         }
     }
