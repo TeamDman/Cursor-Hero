@@ -55,7 +55,7 @@ fn toolbelt_events(
     mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for event in reader.read() {
-        let (ToolbeltLoadout::Default | ToolbeltLoadout::Inspector | ToolbeltLoadout::Keyboard) =
+        let (ToolbeltLoadout::Default | ToolbeltLoadout::Keyboard) =
             event.loadout
         else {
             continue;

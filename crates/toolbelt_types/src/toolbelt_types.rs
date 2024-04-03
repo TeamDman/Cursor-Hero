@@ -82,11 +82,9 @@ impl Default for ToolbeltBundle {
 pub enum ToolbeltLoadout {
     #[default]
     Default,
-    Inspector,
     Taskbar,
     Keyboard,
     Agent,
-    Chat,
     WindowPosition,
 }
 impl ToolbeltLoadout {

@@ -21,9 +21,7 @@ fn toolbelt_events(
     mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for event in reader.read() {
-        let (ToolbeltLoadout::Inspector
-        | ToolbeltLoadout::Taskbar
-        | ToolbeltLoadout::Chat
+        let (ToolbeltLoadout::Taskbar
         | ToolbeltLoadout::Keyboard
         | ToolbeltLoadout::WindowPosition) = event.loadout
         else {

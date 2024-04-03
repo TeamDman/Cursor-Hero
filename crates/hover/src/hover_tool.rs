@@ -23,14 +23,15 @@ fn toolbelt_events(
     mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for event in reader.read() {
-        if event.loadout == ToolbeltLoadout::Inspector {
-            ToolSpawnConfig::<HoverTool, NoInputs>::new(HoverTool, event.id, event)
-                .with_src_path(file!().into())
-                .guess_name(file!())
-                .guess_image(file!(), &asset_server, "png")
-                .with_description("UI hover visuals")
-                .spawn(&mut commands);
+        if event.loadout != ToolbeltLoadout::Default {
+            continue;
         }
+        ToolSpawnConfig::<HoverTool, NoInputs>::new(HoverTool, event.id, event)
+            .with_src_path(file!().into())
+            .guess_name(file!())
+            .guess_image(file!(), &asset_server, "png")
+            .with_description("UI hover visuals")
+            .spawn(&mut commands);
     }
 }
 

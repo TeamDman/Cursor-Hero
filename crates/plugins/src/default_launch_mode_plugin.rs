@@ -17,7 +17,6 @@ use cursor_hero_environment::environment_plugin::EnvironmentPlugin;
 use cursor_hero_environment_nametag::environment_nametag_plugin::EnvironmentNametagPlugin;
 use cursor_hero_hover::hover_tool::HoverToolPlugin;
 use cursor_hero_hover::hover_ui_automation_plugin::HoverUiAutomationPlugin;
-use cursor_hero_hover::inspect_wheel_tool::InspectWheelToolPlugin;
 use cursor_hero_hover::screenshot_tool::ScreenshotToolPlugin;
 use cursor_hero_icon::IconPlugin;
 use cursor_hero_input::InputPlugin;
@@ -161,7 +160,6 @@ impl Plugin for DefaultLaunchModePlugin {
         app.add_plugins(IconPlugin);
         app.add_plugins(InputPlugin);
         app.add_plugins(ScreenshotToolPlugin);
-        app.add_plugins(InspectWheelToolPlugin);
         app.add_plugins(LevelBoundsPlugin);
         app.add_plugins(MathPlugin);
         app.add_plugins(PhysicsDebugPlugin);

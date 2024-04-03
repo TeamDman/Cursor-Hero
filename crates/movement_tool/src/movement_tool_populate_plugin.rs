@@ -19,7 +19,6 @@ fn handle_toolbelt_events(
     for event in reader.read() {
         match event.loadout {
             ToolbeltLoadout::Default
-            | ToolbeltLoadout::Inspector
             | ToolbeltLoadout::Taskbar
             | ToolbeltLoadout::WindowPosition
             | ToolbeltLoadout::Keyboard => {

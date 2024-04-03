@@ -30,7 +30,7 @@ fn toolbelt_events(
     mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for event in reader.read() {
-        let ToolbeltLoadout::Inspector = event.loadout else {
+        let ToolbeltLoadout::Default = event.loadout else {
             continue;
         };
         ToolSpawnConfig::<CubeTool, CubeToolAction>::new(CubeTool, event.id, event)

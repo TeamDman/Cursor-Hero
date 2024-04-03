@@ -52,7 +52,7 @@ impl Plugin for ScreenshotToolPlugin {
         app.add_systems(Update, toolbelt_events);
         app.add_systems(Update, handle_input);
         app.add_systems(Update, handle_replies);
-        app.add_systems(Update, ui);
+        // app.add_systems(Update, ui);
     }
 }
 
@@ -145,7 +145,7 @@ fn toolbelt_events(
     mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for event in reader.read() {
-        if event.loadout == ToolbeltLoadout::Inspector {
+        if event.loadout == ToolbeltLoadout::Default {
             ToolSpawnConfig::<ScreenshotTool, ScreenshotToolAction>::new(
                 ScreenshotTool,
                 event.id,
@@ -155,6 +155,7 @@ fn toolbelt_events(
             .guess_name(file!())
             .guess_image(file!(), &asset_server, "webp")
             .with_description("Turn UI elements into information.")
+            .with_starting_state(StartingState::Inactive)
             .spawn(&mut commands);
         }
     }

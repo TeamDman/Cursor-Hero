@@ -53,7 +53,7 @@ fn toolbelt_events(
     mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for event in reader.read() {
-        let (ToolbeltLoadout::Default | ToolbeltLoadout::Inspector) = event.loadout else {
+        let ToolbeltLoadout::Default = event.loadout else {
             continue;
         };
         ToolSpawnConfig::<_, ZoomToolAction>::new(ZoomTool::default(), event.id, event)

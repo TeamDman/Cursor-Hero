@@ -49,7 +49,7 @@ fn toolbelt_events(
     mut reader: EventReader<ToolbeltPopulateEvent>,
 ) {
     for event in reader.read() {
-        let (ToolbeltLoadout::Inspector | ToolbeltLoadout::Default) = event.loadout else {
+        let ToolbeltLoadout::Default = event.loadout else {
             continue;
         };
         ToolSpawnConfig::<_, ScrollToolAction>::new(ScrollTool::default(), event.id, event)

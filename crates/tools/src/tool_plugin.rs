@@ -4,7 +4,6 @@ use crate::click_tool::ClickToolPlugin;
 use crate::cube_tool::CubeToolPlugin;
 use crate::default_wheel_tool::DefaultWheelToolPlugin;
 use crate::focus_tool::FocusToolPlugin;
-use crate::hello_tool::HelloToolPlugin;
 use crate::keyboard_tool::KeyboardToolPlugin;
 use crate::keyboard_wheel_tool::KeyboardWheelToolPlugin;
 use crate::level_bounds_visibility_tool::LevelBoundsVisibilityToolPlugin;
@@ -30,7 +29,6 @@ impl Plugin for ToolPlugin {
         // app.add_plugins(WindowDragToolPlugin);
         app.add_plugins(KeyboardToolPlugin);
         app.add_plugins(KeyboardWheelToolPlugin);
-        app.add_plugins(HelloToolPlugin);
         app.add_plugins(LevelBoundsVisibilityToolPlugin);
         #[cfg(debug_assertions)]
         app.add_plugins(RestartToolPlugin);
