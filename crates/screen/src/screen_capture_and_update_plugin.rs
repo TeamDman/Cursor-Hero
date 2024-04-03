@@ -19,9 +19,9 @@ use cursor_hero_worker::prelude::WorkerMessage;
 use cursor_hero_worker::prelude::WorkerPlugin;
 use cursor_hero_worker::prelude::WorkerState;
 
-pub struct ScreenUpdatePlugin;
+pub struct ScreenCaptureAndUpdatePlugin;
 
-impl Plugin for ScreenUpdatePlugin {
+impl Plugin for ScreenCaptureAndUpdatePlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(WorkerPlugin {
             config: WorkerConfig::<ThreadboundMessage, GameboundMessage, ThreadState> {
@@ -81,6 +81,7 @@ fn handle_threadbound_message(
     match msg {
         ThreadboundMessage::SetEnabled(enabled) => {
             state.enabled = *enabled;
+            info!("Screen capture enabled: {}", enabled)
         }
         ThreadboundMessage::CaptureFrames => {
             if !state.enabled {

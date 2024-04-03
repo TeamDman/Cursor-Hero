@@ -101,7 +101,7 @@ cursor_hero_icon = { path = "./crates/icon" }
 #inline_tweak = {git = "https://github.com/Uriopass/inline_tweak", version = "1.1.0", tag = "v1.1.0"} # features=["derive"]
 anyhow = "1.0.75"
 glam = "0.25.0"
-# bevy = { path = "../bevy", features = ["dynamic_linking"] }
+# bevy = { version = "0.12.1", path = "../bevy"}
 bevy = { version = "0.12.1", git = "https://github.com/TeamDman/bevy.git", branch = "cursor_hero" }
 # bevy-inspector-egui = { version = "0.22.1", path="../bevy-inspector-egui/crates/bevy-inspector-egui" }
 bevy-inspector-egui = { version = "0.22.1", git = "https://github.com/TeamDman/bevy-inspector-egui.git", branch = "cursor_hero" }

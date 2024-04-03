@@ -29,7 +29,7 @@ use cursor_hero_cursor::cursor_plugin::CursorPlugin;
 use cursor_hero_cursor_types::cursor_types_plugin::CursorTypesPlugin;
 use cursor_hero_pressure_plate::pressure_plate_plugin::PressurePlatePlugin;
 use cursor_hero_screen::screen_plugin::ScreenPlugin;
-use cursor_hero_screen::screen_update_plugin::ScreenUpdatePlugin;
+use cursor_hero_screen::screen_capture_and_update_plugin::ScreenCaptureAndUpdatePlugin;
 use cursor_hero_sprint_tool::sprint_tool_plugin::SprintToolPlugin;
 use cursor_hero_sprint_tool_types::sprint_tool_types_plugin::SprintToolTypesPlugin;
 use cursor_hero_taskbar::taskbar_plugin::TaskbarPlugin;
@@ -170,7 +170,7 @@ impl Plugin for DefaultLaunchModePlugin {
         app.add_plugins(CursorTypesPlugin);
         app.add_plugins(PressurePlatePlugin);
         app.add_plugins(ScreenPlugin);
-        app.add_plugins(ScreenUpdatePlugin);
+        app.add_plugins(ScreenCaptureAndUpdatePlugin);
         app.add_plugins(SprintToolPlugin);
         app.add_plugins(SprintToolTypesPlugin);
         app.add_plugins(TaskbarPlugin);
@@ -187,10 +187,7 @@ impl Plugin for DefaultLaunchModePlugin {
         #[cfg(debug_assertions)]
         let log_plugin = LogPlugin {
             level: bevy::log::Level::INFO,
-            filter: "
-wgpu_core=warn,
-wgpu_hal=warn,
-"
+            filter: "wgpu=error"
 // bevy_ecs=info,
 // cursor_hero=debug,
 // cursor_hero_cursor::cursor_hover_plugin=info,
@@ -216,7 +213,7 @@ wgpu_hal=warn,
         #[cfg(not(debug_assertions))]
         let log_plugin = LogPlugin {
             level: bevy::log::Level::INFO,
-            filter: "info,wgpu_core=warn,wgpu_hal=warn".into(),
+            filter: "wgpu=error".into(),
         };
         const AUDIO_SCALE: f32 = 1. / 100.0;
         let version = match app.world.get_resource::<Version>() {
