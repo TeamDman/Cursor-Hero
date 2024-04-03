@@ -134,7 +134,7 @@ fn trigger_gather_info(
             if let Err(e) = bridge.sender.send(ThreadboundMessage::TakeSnapshot) {
                 error!("Failed to send thread message: {:?}", e);
             }
-            *cooldown = Some(Timer::from_seconds(5.0, TimerMode::Once));
+            *cooldown = Some(Timer::from_seconds(1.0, TimerMode::Once));
         }
     }
 }

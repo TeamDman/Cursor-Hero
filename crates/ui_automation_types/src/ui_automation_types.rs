@@ -98,7 +98,7 @@ impl ToBevyIRect for uiautomation::types::Rect {
 ///
 /// Contains the named constants used to identify Microsoft UI Automation control types.
 #[repr(u32)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Reflect)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Reflect, Serialize, Deserialize)]
 pub enum ControlType {
     /// Identifies the Button control type.
     Button = 50000u32,
@@ -231,7 +231,7 @@ impl From<uiautomation::controls::ControlType> for ControlType {
     }
 }
 
-#[derive(Eq, PartialEq, Clone, Reflect, Hash, Default)]
+#[derive(Eq, PartialEq, Clone, Reflect, Hash, Default, Serialize, Deserialize)]
 pub struct RuntimeId(pub Vec<i32>);
 impl std::fmt::Display for RuntimeId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -252,7 +252,7 @@ impl std::fmt::Debug for RuntimeId {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Reflect, Default, Hash)]
+#[derive(Debug, Eq, PartialEq, Clone, Reflect, Default, Hash, Serialize, Deserialize)]
 pub enum DrillId {
     Root,
     Child(VecDeque<usize>),
@@ -297,7 +297,7 @@ impl std::fmt::Display for DrillId {
     }
 }
 
-#[derive(Debug, Clone, Reflect, PartialEq)]
+#[derive(Debug, Clone, Reflect, PartialEq, Serialize, Deserialize)]
 // #[reflect(no_field_bounds)] //https://github.com/bevyengine/bevy/issues/8965
 pub struct ElementInfo {
     pub name: String,

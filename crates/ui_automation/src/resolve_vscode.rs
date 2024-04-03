@@ -226,12 +226,14 @@ fn resolve_footer(footer: &UIElement, automation: &UIAutomation) -> Result<VSCod
         .context("finding first")?;
     let text = cursor_position_elem.get_name().context("getting name")?;
     // "Ln 218, Col 5"
+    // "Ln 218, Col 5 (15 selected)"
+
     let cursor_position = text
         .split(", ")
-        .map(|part| part.split(' ').last().and_then(|s| s.parse::<usize>().ok()))
+        .map(|part| part.split(' ').nth(1).and_then(|s| s.parse::<usize>().ok()))
         .collect_vec();
     let cursor_position = match cursor_position.as_slice() {
-        [Some(line), Some(column)] | [Some(line), Some(column), _] => {
+        [Some(line), Some(column)] => {
             IVec2::new(*column as i32, *line as i32)
         }
         _ => {
