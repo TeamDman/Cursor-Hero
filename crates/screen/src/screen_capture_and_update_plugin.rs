@@ -1,7 +1,3 @@
-use std::sync::Arc;
-use std::sync::Mutex;
-use std::thread;
-
 use crate::screen_plugin::Screen;
 use bevy::prelude::*;
 use bevy::utils::HashMap;
@@ -72,11 +68,20 @@ enum ThreadboundMessage {
 }
 impl WorkerMessage for ThreadboundMessage {}
 
-#[derive(Debug, Clone, Event)]
+#[derive(Clone, Event)]
 enum GameboundMessage {
     Frames(HashMap<MonitorId, CapturedFrame>),
 }
 impl WorkerMessage for GameboundMessage {}
+impl std::fmt::Debug for GameboundMessage {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            GameboundMessage::Frames(frames) => {
+                write!(f, "GameboundMessage::Frames(len={})", frames.len())
+            }
+        }
+    }
+}
 
 fn handle_threadbound_message(
     msg: &ThreadboundMessage,
@@ -115,7 +120,6 @@ fn handle_threadbound_message(
 fn update_screens(
     mut query: Query<(&mut Screen, &Handle<Image>)>,
     mut textures: ResMut<Assets<Image>>,
-    time: Res<Time>,
     mut gamebound_messages: EventReader<GameboundMessage>,
     mut threadbound_messages: EventWriter<ThreadboundMessage>,
     window_query: Query<Entity, With<PrimaryWindow>>,

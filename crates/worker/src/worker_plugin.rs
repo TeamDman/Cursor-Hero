@@ -80,6 +80,7 @@ fn create_worker_thread<T: WorkerMessage, G: WorkerMessage, S: WorkerState>(
                     }
                 };
                 if let Err(e) = (handler)(&msg, &game_tx, &mut state) {
+                    // TODO: leave logging the error to the handler
                     error!(
                         "[{}] Failed to process thread message {:?}, got error {:?}",
                         name, msg, e

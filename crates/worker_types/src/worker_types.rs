@@ -37,7 +37,7 @@ pub type ThreadboundMessageErrorHandler<T, G, S> =
 pub type ThreadboundMessageReceiver<T, S> = fn(thread_rx: &Receiver<T>, state: &mut S) -> Result<T>;
 
 
-struct TGSHolder<T,G,S> {
+pub struct TGSHolder<T,G,S> {
     _phantom_t: PhantomData<T>,
     _phantom_g: PhantomData<G>,
     _phantom_s: PhantomData<S>,

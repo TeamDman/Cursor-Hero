@@ -79,6 +79,7 @@ impl Default for ToolbeltBundle {
 }
 
 #[derive(Reflect, Clone, Copy, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
 pub enum ToolbeltLoadout {
     #[default]
     Default,
