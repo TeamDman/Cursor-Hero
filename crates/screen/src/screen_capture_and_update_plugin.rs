@@ -23,6 +23,11 @@ pub struct ScreenCaptureAndUpdatePlugin;
 
 impl Plugin for ScreenCaptureAndUpdatePlugin {
     fn build(&self, app: &mut App) {
+        #[cfg(debug_assertions)]
+        let refresh_fps = 10;
+        #[cfg(not(debug_assertions))]
+        let refresh_fps = 144;
+
         app.add_plugins(WorkerPlugin {
             config: WorkerConfig::<ThreadboundMessage, GameboundMessage, ThreadState> {
                 name: "screen_update_plugin".to_string(),
@@ -34,7 +39,7 @@ impl Plugin for ScreenCaptureAndUpdatePlugin {
                     }
                 },
                 handle_threadbound_message,
-                sleep_duration: std::time::Duration::from_nanos(1_000_000_000 / 144), // 144hz
+                sleep_duration: std::time::Duration::from_nanos(1_000_000_000 / refresh_fps),
                 ..default()
             },
         });
