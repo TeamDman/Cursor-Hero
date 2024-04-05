@@ -1,25 +1,27 @@
 use std::time::Duration;
 
-use bevy::prelude::*;
-use cursor_hero_ui_inspector_types::prelude::UIData;
-use cursor_hero_worker::prelude::anyhow::Context;
-use cursor_hero_worker::prelude::anyhow::Error;
-use cursor_hero_worker::prelude::anyhow::Result;
 use bevy::input::common_conditions::input_toggle_active;
+use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy_egui::egui;
 use bevy_egui::egui::Align2;
 use bevy_egui::EguiContexts;
 use bevy_inspector_egui::reflect_inspector::InspectorUi;
 use cursor_hero_ui_automation::prelude::*;
+use cursor_hero_ui_hover_types::prelude::GameHoveredIndicator;
+use cursor_hero_ui_hover_types::prelude::HostHoveredIndicator;
+use cursor_hero_ui_inspector_types::prelude::FetchingState;
+use cursor_hero_ui_inspector_types::prelude::UIData;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
-use cursor_hero_worker::prelude::WorkerMessage;
+use cursor_hero_worker::prelude::anyhow::Context;
+use cursor_hero_worker::prelude::anyhow::Error;
+use cursor_hero_worker::prelude::anyhow::Result;
 use cursor_hero_worker::prelude::Sender;
 use cursor_hero_worker::prelude::WorkerConfig;
+use cursor_hero_worker::prelude::WorkerMessage;
 use cursor_hero_worker::prelude::WorkerPlugin;
 use itertools::Itertools;
 use uiautomation::UIAutomation;
-use cursor_hero_ui_inspector_types::prelude::FetchingState;
 
 pub struct UiInspectorPlugin;
 
@@ -40,14 +42,14 @@ impl Plugin for UiInspectorPlugin {
         app.add_systems(Update, receive.run_if(condition.clone()));
         app.add_systems(Update, gui.run_if(condition));
         // app.add_systems(Update, gui.after(EguiSet::InitContexts));
-
     }
 }
 
-
 #[derive(Debug, Reflect, Clone, Event)]
 enum ThreadboundUISnapshotMessage {
-    CaptureHovered,
+    CaptureHovered {
+        pos: IVec2,
+    },
     ChildrenFetchRequest {
         drill_id: DrillId,
         runtime_id: RuntimeId,
@@ -71,7 +73,6 @@ enum GameboundUISnapshotMessage {
 }
 impl WorkerMessage for GameboundUISnapshotMessage {}
 
-
 fn handle_threadbound_message_error_handler(
     _msg: &ThreadboundUISnapshotMessage,
     reply_tx: &Sender<GameboundUISnapshotMessage>,
@@ -87,10 +88,9 @@ fn handle_threadbound_message(
     _state: &mut (),
 ) -> Result<()> {
     match msg {
-        ThreadboundUISnapshotMessage::CaptureHovered => {
+        ThreadboundUISnapshotMessage::CaptureHovered { pos } => {
             debug!("taking snapshot");
-            let cursor_pos = get_cursor_position()?;
-            let hovered = find_element_at(cursor_pos)?;
+            let hovered = find_element_at(*pos)?;
             let hovered_info = gather_single_element_info(&hovered)?;
             let gathered = gather_incomplete_ui_tree_starting_deep(hovered)?;
             if let Err(e) = reply_tx.send(GameboundUISnapshotMessage::Hovered {
@@ -157,7 +157,8 @@ fn periodic_snapshot(
     mut cooldown: Local<Option<Timer>>,
     time: Res<Time>,
     mut events: EventWriter<ThreadboundUISnapshotMessage>,
-    window: Query<&Window, With<PrimaryWindow>>,
+    game_hovered_query: Query<&GameHoveredIndicator>,
+    host_hovered_query: Query<&HostHoveredIndicator>,
 ) {
     // Check cooldown
     let default_duration = Duration::from_secs_f32(0.5);
@@ -172,21 +173,24 @@ fn periodic_snapshot(
     }
 
     // Check other conditions
-    let Ok(window) = window.get_single() else {
-        return;
-    };
-    if window.cursor_position().is_some() {
-        return;
-    }
     if data.paused {
         return;
     }
     if data.in_flight {
         return;
     }
+    let pos = match (
+        game_hovered_query.get_single(),
+        host_hovered_query.get_single(),
+    ) {
+        (Ok(GameHoveredIndicator { cursor_pos, .. }), _) => *cursor_pos,
+        (_, Ok(HostHoveredIndicator { cursor_pos, .. })) => *cursor_pos,
+        _ => return,
+    };
+
 
     // Send snapshot request
-    events.send(ThreadboundUISnapshotMessage::CaptureHovered);
+    events.send(ThreadboundUISnapshotMessage::CaptureHovered { pos });
     data.in_flight = true;
 }
 

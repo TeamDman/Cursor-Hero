@@ -2658,6 +2658,7 @@ dependencies = [
  "bevy-inspector-egui",
  "bevy_egui",
  "cursor_hero_ui_automation",
+ "cursor_hero_ui_hover_types",
  "cursor_hero_ui_inspector_types",
  "cursor_hero_winutils",
  "cursor_hero_worker",

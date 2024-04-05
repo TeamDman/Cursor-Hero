@@ -15,3 +15,4 @@ cursor_hero_worker = { workspace = true }
 uiautomation = { workspace = true }
 itertools = { workspace = true }
 cursor_hero_winutils = { workspace = true }
+cursor_hero_ui_hover_types = { workspace = true }

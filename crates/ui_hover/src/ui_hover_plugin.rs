@@ -4,11 +4,10 @@ use cursor_hero_bevy::prelude::NegativeYIVec2;
 use cursor_hero_cursor_types::cursor_types::MainCursor;
 use cursor_hero_ui_automation::prelude::find_element_at;
 use cursor_hero_ui_automation::prelude::gather_single_element_info;
-use cursor_hero_ui_hover_types::prelude::GameHoveredIndicatorTag;
+use cursor_hero_ui_hover_types::prelude::GameHoveredIndicator;
 use cursor_hero_ui_hover_types::prelude::GameboundHoverMessage;
+use cursor_hero_ui_hover_types::prelude::HostHoveredIndicator;
 use cursor_hero_ui_hover_types::prelude::HoverInfo;
-use cursor_hero_ui_hover_types::prelude::HoveredElement;
-use cursor_hero_ui_hover_types::prelude::ScreenHoveredIndicatorTag;
 use cursor_hero_ui_hover_types::prelude::ThreadboundHoverMessage;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
 use cursor_hero_worker::prelude::anyhow::Error;
@@ -63,16 +62,22 @@ fn handle_threadbound_message(
     _state: &mut (),
 ) -> Result<()> {
     let reply = match msg {
-        ThreadboundHoverMessage::AtPositionFromGame(pos) => {
-            let root = find_element_at(*pos)?;
+        ThreadboundHoverMessage::AtPositionFromGame(cursor_pos) => {
+            let root = find_element_at(*cursor_pos)?;
             let info = gather_single_element_info(&root)?;
-            GameboundHoverMessage::GameHoverInfo(info)
+            GameboundHoverMessage::GameHoverInfo {
+                info,
+                cursor_pos: *cursor_pos,
+            }
         }
         ThreadboundHoverMessage::AtHostCursorPosition => {
-            let pos = get_cursor_position()?;
-            let root = find_element_at(pos)?;
+            let cursor_pos = get_cursor_position()?;
+            let root = find_element_at(cursor_pos)?;
             let info = gather_single_element_info(&root)?;
-            GameboundHoverMessage::HostHoverInfo(info)
+            GameboundHoverMessage::HostHoverInfo {
+                info,
+                cursor_pos,
+            }
         }
         ThreadboundHoverMessage::ClearHost => GameboundHoverMessage::ClearHostHoverInfo,
         ThreadboundHoverMessage::ClearGame => GameboundHoverMessage::ClearGameHoverInfo,
@@ -165,14 +170,20 @@ fn handle_gamebound_messages(
 ) {
     for msg in messages.read() {
         match msg {
-            GameboundHoverMessage::HostHoverInfo(info) => {
-                hover_info.host_element = Some(info.clone());
+            GameboundHoverMessage::HostHoverInfo { info, cursor_pos }=> {
+                hover_info.host_element = Some(HostHoveredIndicator {
+                    info: info.clone(),
+                    cursor_pos: *cursor_pos,
+                });
             }
             GameboundHoverMessage::ClearHostHoverInfo => {
                 hover_info.host_element = None;
             }
-            GameboundHoverMessage::GameHoverInfo(info) => {
-                hover_info.game_element = Some(info.clone());
+            GameboundHoverMessage::GameHoverInfo { info, cursor_pos } => {
+                hover_info.game_element = Some(GameHoveredIndicator {
+                    info: info.clone(),
+                    cursor_pos: *cursor_pos,
+                });
             }
             GameboundHoverMessage::ClearGameHoverInfo => {
                 hover_info.game_element = None;
@@ -183,39 +194,44 @@ fn handle_gamebound_messages(
 
 #[allow(clippy::type_complexity)]
 fn update_visuals(
-    mut screen_indicator: Query<
-        (Entity, &mut Sprite, &mut Transform, &mut HoveredElement),
+    mut host_indicator: Query<
         (
-            With<ScreenHoveredIndicatorTag>,
-            Without<GameHoveredIndicatorTag>,
+            Entity,
+            &mut Sprite,
+            &mut Transform,
+            &mut HostHoveredIndicator,
         ),
+        Without<GameHoveredIndicator>,
     >,
     mut game_indicator: Query<
-        (Entity, &mut Sprite, &mut Transform, &mut HoveredElement),
         (
-            With<GameHoveredIndicatorTag>,
-            Without<ScreenHoveredIndicatorTag>,
+            Entity,
+            &mut Sprite,
+            &mut Transform,
+            &mut GameHoveredIndicator,
         ),
+        Without<HostHoveredIndicator>,
     >,
     hovered: Res<HoverInfo>,
     mut commands: Commands,
 ) {
-    if let Ok((entity, mut sprite, mut transform, mut element)) = screen_indicator.get_single_mut()
-    {
-        if let Some(info) = &hovered.host_element {
-            let bounds = info.bounding_rect.as_rect();
+    if let Ok(host_indicator) = host_indicator.get_single_mut() {
+        let (entity, mut sprite, mut transform, mut indicator) = host_indicator;
+        if let Some(existing) = &hovered.host_element {
+            let bounds = existing.info.bounding_rect.as_rect();
             sprite.custom_size = Some(Vec2::new(bounds.width(), bounds.height()));
             transform.translation = Vec3::new(
                 bounds.min.x + bounds.width() / 2.,
                 -bounds.min.y - bounds.height() / 2.,
                 0.,
             );
-            element.info = info.clone();
+            *indicator = existing.clone();
         } else {
             commands.entity(entity).despawn_recursive();
         }
-    } else if let Some(info) = &hovered.host_element {
-        let bounds = info.bounding_rect.as_rect();
+    } else if let Some(existing) = &hovered.host_element {
+        let bounds = existing.info.bounding_rect.as_rect();
+        let indicator = existing.clone();
         commands.spawn((
             SpriteBundle {
                 transform: Transform::from_xyz(
@@ -231,26 +247,27 @@ fn update_visuals(
                 ..default()
             },
             Name::new("Screen Hovered Indicator"),
-            ScreenHoveredIndicatorTag,
-            HoveredElement { info: info.clone() },
+            indicator
         ));
     }
 
-    if let Ok((entity, mut sprite, mut transform, mut element)) = game_indicator.get_single_mut() {
-        if let Some(info) = &hovered.game_element {
-            let bounds = info.bounding_rect.as_rect();
+    if let Ok(game_indicator) = game_indicator.get_single_mut() {
+        let (entity, mut sprite, mut transform, mut indicator) = game_indicator;
+        if let Some(existing) = &hovered.game_element {
+            let bounds = existing.info.bounding_rect.as_rect();
             sprite.custom_size = Some(Vec2::new(bounds.width(), bounds.height()));
             transform.translation = Vec3::new(
                 bounds.min.x + bounds.width() / 2.,
                 -bounds.min.y - bounds.height() / 2.,
                 0.,
             );
-            element.info = info.clone();
+            *indicator = existing.clone();
         } else {
             commands.entity(entity).despawn_recursive();
         }
-    } else if let Some(info) = &hovered.game_element {
-        let bounds = info.bounding_rect.as_rect();
+    } else if let Some(existing) = &hovered.game_element {
+        let bounds = existing.info.bounding_rect.as_rect();
+        let indicator = existing.clone();
         commands.spawn((
             SpriteBundle {
                 transform: Transform::from_xyz(
@@ -265,9 +282,8 @@ fn update_visuals(
                 },
                 ..default()
             },
-            Name::new("Game Hovered Indicator"),
-            GameHoveredIndicatorTag,
-            HoveredElement { info: info.clone() },
+            Name::new("Game Hovered Indicator"),   
+            indicator
         ));
     }
 }
