@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_tools::prelude::*;
-
-use crate::hover_ui_automation_plugin::HoverInfo;
+use cursor_hero_ui_hover_types::prelude::HoverInfo;
 
 pub struct HoverToolPlugin;
 
@@ -40,12 +39,14 @@ fn tick(
     mut hover_info: ResMut<HoverInfo>,
 ) {
     if tool_query.iter().next().is_some() {
-        if !hover_info.is_enabled() {
+        if !hover_info.enabled {
             info!("Enabling hover info");
-            hover_info.set_enabled(true);
+            hover_info.enabled = true;
         }
-    } else if hover_info.is_enabled() {
+    } else if hover_info.enabled {
         info!("Disabling hover info");
-        hover_info.set_enabled(false);
+        hover_info.enabled = false;
+        hover_info.host_element = None;
+        hover_info.game_element = None;
     }
 }

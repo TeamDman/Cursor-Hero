@@ -109,8 +109,15 @@ fn bridge_requests<T: WorkerMessage, G: WorkerMessage, S: WorkerState>(
 ) {
     for event in events.read() {
         trace!("[{}] Bevy => Thread: {:?}", config.name, event);
-        if let Err(e) = bridge.sender.send(event.clone()) {
-            error!("[{}] Threadbound channel failure: {:?}", config.name, e);
+        if let Err(e) = bridge.sender.try_send(event.clone()) {
+            match e {
+                crossbeam_channel::TrySendError::Full(_) => {
+                    error!("[{}] Threadbound channel is full, dropping message: {:?}", config.name, event);
+                }
+                crossbeam_channel::TrySendError::Disconnected(_) => {
+                    error!("[{}] Threadbound channel is disconnected, dropping message: {:?}", config.name, event);
+                }
+            }
         }
     }
 }

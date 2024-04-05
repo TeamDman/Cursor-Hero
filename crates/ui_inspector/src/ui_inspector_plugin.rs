@@ -159,44 +159,33 @@ fn periodic_snapshot(
     mut events: EventWriter<ThreadboundUISnapshotMessage>,
     window: Query<&Window, With<PrimaryWindow>>,
 ) {
+    // Check cooldown
+    let default_duration = Duration::from_secs_f32(0.5);
+    let Some(cooldown) = cooldown.as_mut() else {
+        cooldown.replace(Timer::new(default_duration, TimerMode::Repeating));
+        return;
+    };
+    if cooldown.tick(time.delta()).just_finished() {
+        cooldown.reset();
+    } else {
+        return;
+    }
+
+    // Check other conditions
     let Ok(window) = window.get_single() else {
         return;
     };
     if window.cursor_position().is_some() {
         return;
     }
-    let default_duration = Duration::from_secs_f32(0.5);
-    let cooldown_over = if let Some(cooldown) = cooldown.as_mut() {
-        if cooldown.tick(time.delta()).just_finished() {
-            if cooldown.duration() != default_duration {
-                cooldown.set_duration(default_duration);
-            }
-            cooldown.reset();
-            true
-        } else {
-            false
-        }
-    } else {
-        cooldown.replace(Timer::from_seconds(default_duration.as_secs_f32(), TimerMode::Repeating));
-        true
-    };
-    if !cooldown_over {
-        return;
-    }
-
     if data.paused {
         return;
     }
-
     if data.in_flight {
-        warn!("Too fast!");
-        if let Some(ref mut cooldown) = cooldown.as_mut() {
-            cooldown.set_duration(Duration::from_secs(5));
-            cooldown.reset();
-        }
         return;
     }
 
+    // Send snapshot request
     events.send(ThreadboundUISnapshotMessage::CaptureHovered);
     data.in_flight = true;
 }

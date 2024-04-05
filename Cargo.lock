@@ -2079,6 +2079,7 @@ dependencies = [
  "cursor_hero_toolbelt_types",
  "cursor_hero_tools",
  "cursor_hero_ui_automation",
+ "cursor_hero_ui_hover_types",
  "cursor_hero_winutils",
  "cursor_hero_worker",
  "image",
@@ -2631,7 +2632,13 @@ name = "cursor_hero_ui_hover"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "cursor_hero_bevy",
+ "cursor_hero_camera",
+ "cursor_hero_cursor_types",
+ "cursor_hero_ui_automation",
  "cursor_hero_ui_hover_types",
+ "cursor_hero_winutils",
+ "cursor_hero_worker",
 ]
 
 [[package]]
@@ -2639,6 +2646,8 @@ name = "cursor_hero_ui_hover_types"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "cursor_hero_ui_automation_types",
+ "cursor_hero_worker_types",
 ]
 
 [[package]]
