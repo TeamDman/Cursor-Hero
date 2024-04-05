@@ -89,7 +89,7 @@ fn handle_gamebound_messages(
     let environment_id = character_query.get_single().ok().map(|c| c.environment_id);
     while let Ok(msg) = bridge.receiver.try_recv() {
         let (msg_kind, GameboundMessage::Snapshot(snapshot)) = ("Snapshot", msg);
-        debug!("Received message {}:\n{}", msg_kind, snapshot);
+        debug!("Received message {}", msg_kind);
 
         observation_events.send(SomethingObservableHappenedEvent::UISnapshot {
             snapshot: snapshot.clone(),
