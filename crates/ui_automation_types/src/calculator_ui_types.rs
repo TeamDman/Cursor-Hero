@@ -30,7 +30,7 @@ pub struct CalculatorState {
     pub memory_store_button: (ElementInfo, String),
     pub memory_add_button: (ElementInfo, String),
     pub memory_subtract_button: (ElementInfo, String),
-    pub period_button: (ElementInfo, String),
+    pub decimal_button: (ElementInfo, String),
     pub left_paren_button: (ElementInfo, String),
     pub right_paren_button: (ElementInfo, String),
     pub square_root_button: (ElementInfo, String),

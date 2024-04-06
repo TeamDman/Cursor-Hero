@@ -46,7 +46,7 @@ pub(crate) fn resolve_calculator(
         memory_store_button: (ElementInfo::default(), "todo".to_string()),
         memory_add_button: (ElementInfo::default(), "todo".to_string()),
         memory_subtract_button: (ElementInfo::default(), "todo".to_string()),
-        period_button: (ElementInfo::default(), "todo".to_string()),
+        decimal_button: (ElementInfo::default(), "todo".to_string()),
         left_paren_button: (ElementInfo::default(), "todo".to_string()),
         right_paren_button: (ElementInfo::default(), "todo".to_string()),
         square_root_button: (ElementInfo::default(), "todo".to_string()),
