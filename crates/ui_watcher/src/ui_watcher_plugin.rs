@@ -6,69 +6,39 @@ use cursor_hero_memory_types::prelude::MemoryConfig;
 use cursor_hero_memory_types::prelude::Usage;
 use cursor_hero_observation_types::observation_types::SomethingObservableHappenedEvent;
 use cursor_hero_ui_automation::prelude::take_snapshot;
-use cursor_hero_ui_automation::prelude::UiSnapshot;
+use cursor_hero_ui_watcher_types::ui_watcher_types::GameboundUIWatcherMessage;
+use cursor_hero_ui_watcher_types::ui_watcher_types::ThreadboundUIWatcherMessage;
+use cursor_hero_worker::prelude::anyhow::Result;
+use cursor_hero_worker::prelude::Sender;
+use cursor_hero_worker::prelude::WorkerConfig;
+use cursor_hero_worker::prelude::WorkerPlugin;
 use std::io::Write;
-use std::thread;
 
-use crossbeam_channel::bounded;
-use crossbeam_channel::Receiver;
-use crossbeam_channel::Sender;
 pub struct UiWatcherPlugin;
 
 impl Plugin for UiWatcherPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_worker_thread);
+        app.add_plugins(WorkerPlugin {
+            config: WorkerConfig::<ThreadboundUIWatcherMessage, GameboundUIWatcherMessage, ()> {
+                name: "ui watcher".to_string(),
+                handle_threadbound_message,
+                ..default()
+            },
+        });
         app.add_systems(Update, handle_gamebound_messages);
         app.add_systems(Update, trigger_gather_info);
     }
 }
 
-#[derive(Debug)]
-enum ThreadboundMessage {
-    TakeSnapshot,
-}
-
-#[derive(Debug)]
-enum GameboundMessage {
-    Snapshot(UiSnapshot),
-}
-
-#[derive(Resource)]
-struct Bridge {
-    pub sender: Sender<ThreadboundMessage>,
-    pub receiver: Receiver<GameboundMessage>,
-}
-
-fn spawn_worker_thread(mut commands: Commands) {
-    let (tx, rx) = bounded::<_>(10);
-    let (reply_tx, reply_rx) = bounded::<_>(10); // New channel for replies
-
-    commands.insert_resource(Bridge {
-        sender: tx,
-        receiver: reply_rx,
-    });
-    thread::spawn(move || loop {
-        let action = match rx.recv() {
-            Ok(action) => action,
-            Err(e) => {
-                error!("Failed to receive thread message, exiting: {:?}", e);
-                break;
-            }
-        };
-        if let Err(e) = handle_threadbound_messages(action, &reply_tx) {
-            error!("Failed to process thread message: {:?}", e);
-        }
-    });
-}
-
-fn handle_threadbound_messages(
-    action: ThreadboundMessage,
-    reply_tx: &Sender<GameboundMessage>,
-) -> Result<(), Box<dyn std::error::Error>> {
-    match action {
-        ThreadboundMessage::TakeSnapshot => {
+fn handle_threadbound_message(
+    msg: &ThreadboundUIWatcherMessage,
+    reply_tx: &Sender<GameboundUIWatcherMessage>,
+    _state: &mut (),
+) -> Result<()> {
+    match msg {
+        ThreadboundUIWatcherMessage::TakeSnapshot => {
             let snapshot = take_snapshot()?;
-            let msg = GameboundMessage::Snapshot(snapshot);
+            let msg = GameboundUIWatcherMessage::Snapshot(snapshot);
             // println!("Sending {:?}", msg);
             reply_tx.send(msg)?;
         }
@@ -79,16 +49,16 @@ fn handle_threadbound_messages(
 
 fn handle_gamebound_messages(
     memory_config: Res<MemoryConfig>,
-    bridge: Res<Bridge>,
+    mut gamebound_events: EventReader<GameboundUIWatcherMessage>,
     mut observation_events: EventWriter<SomethingObservableHappenedEvent>,
     character_query: Query<&EnvironmentTracker, With<MainCharacter>>,
 ) {
-    if bridge.receiver.is_empty() {
+    if gamebound_events.is_empty() {
         return;
     }
     let environment_id = character_query.get_single().ok().map(|c| c.environment_id);
-    while let Ok(msg) = bridge.receiver.try_recv() {
-        let (msg_kind, GameboundMessage::Snapshot(snapshot)) = ("Snapshot", msg);
+    for msg in gamebound_events.read() {
+        let (msg_kind, GameboundUIWatcherMessage::Snapshot(snapshot)) = ("Snapshot", msg);
         debug!("Received message {}", msg_kind);
 
         observation_events.send(SomethingObservableHappenedEvent::UISnapshot {
@@ -102,7 +72,7 @@ fn handle_gamebound_messages(
             Usage::Persist,
         ) {
             Ok(mut file) => {
-                if let Err(e) = file.write_all(snapshot.to_string().as_bytes()) {
+                if let Err(e) = file.write_all(format!("{:#?}", snapshot).as_bytes()) {
                     error!("Failed to write to file: {:?}", e);
                 } else {
                     info!("Wrote snapshot to file {:?}", file);
@@ -116,25 +86,20 @@ fn handle_gamebound_messages(
 }
 
 fn trigger_gather_info(
-    bridge: ResMut<Bridge>,
+    mut events: EventWriter<ThreadboundUIWatcherMessage>,
     mut cooldown: Local<Option<Timer>>,
     time: Res<Time>,
 ) {
-    match *cooldown {
-        Some(ref mut timer) => {
-            if timer.tick(time.delta()).just_finished() {
-                *cooldown = None;
-            }
-        }
-        None => {
-            debug!("Triggering gather info");
-            // if let Err(e) = bridge.sender.send(ThreadboundMessage::GatherFocusInfo) {
-            //     error!("Failed to send thread message: {:?}", e);
-            // }
-            if let Err(e) = bridge.sender.send(ThreadboundMessage::TakeSnapshot) {
-                error!("Failed to send thread message: {:?}", e);
-            }
-            *cooldown = Some(Timer::from_seconds(1.0, TimerMode::Once));
-        }
+    // handle cooldown
+    let Some(cooldown) = cooldown.as_mut() else {
+        cooldown.replace(Timer::from_seconds(1.0, TimerMode::Repeating));
+        return;
+    };
+    if !cooldown.tick(time.delta()).just_finished() {
+        return;
     }
+
+    // send event to worker
+    debug!("Triggering gather info");
+    events.send(ThreadboundUIWatcherMessage::TakeSnapshot);
 }

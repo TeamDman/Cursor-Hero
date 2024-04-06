@@ -52,7 +52,7 @@ fn update_buffers(
             };
             if !can_see {
                 if buffer.log_level == ObservationLogLevel::All {
-                    debug!("Buffer {:?} cannot see event {:?}", buffer_id, event)
+                    debug!("Buffer {:?} cannot see event {}", buffer_id, event)
                 }
                 continue;
             }
@@ -62,7 +62,7 @@ fn update_buffers(
                 origin: event.clone(),
             };
             if buffer.log_level == ObservationLogLevel::All {
-                debug!("Buffer {:?} observed event {:?}", buffer_id, &entry)
+                debug!("Buffer {:?} observed event {}", buffer_id, &entry)
             }
             buffer.observations.push(entry);
 

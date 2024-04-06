@@ -9,3 +9,4 @@ edition = "2021"
 bevy = { workspace = true }
 uiautomation = {workspace = true}
 cursor_hero_ui_automation = {workspace = true}
+cursor_hero_worker_types = {workspace = true}

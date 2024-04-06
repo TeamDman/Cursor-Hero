@@ -30,13 +30,19 @@ impl HexList for Vec<i32> {
 pub struct UiSnapshot {
     pub app_windows: Vec<AppWindow>,
 }
-
+impl UiSnapshot {
+    fn as_long_string(&self) -> String {
+        let mut s = String::new();
+        s.push_str("# UI Snapshot\n");
+        for window in self.app_windows.iter() {
+            s.push_str(&format!("## {}\n\n{}\n", window.variant_name(), window));
+        }
+        s
+    }
+}
 impl Display for UiSnapshot {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        writeln!(f, "# UI Snapshot\n")?;
-        for window in self.app_windows.iter() {
-            writeln!(f, "## {}\n\n{}\n", window.variant_name(), window)?;
-        }
+        writeln!(f, "UI Snapshot ({} windows)", self.app_windows.len())?;
         fmt::Result::Ok(())
     }
 }

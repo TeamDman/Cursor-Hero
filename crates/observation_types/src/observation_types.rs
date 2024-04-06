@@ -74,6 +74,11 @@ pub struct ObservationBufferEntry {
     pub datetime: DateTime<Local>,
     pub origin: SomethingObservableHappenedEvent,
 }
+impl std::fmt::Display for ObservationBufferEntry {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}: {}", self.datetime, self.origin)
+    }
+}
 
 #[derive(Event, Debug, Clone, Reflect)]
 pub enum ObservationBufferEvent {
@@ -116,7 +121,7 @@ impl Display for SomethingObservableHappenedEvent {
                 )
             }
             SomethingObservableHappenedEvent::UISnapshot { snapshot, .. } => {
-                write!(f, "Snapshot of an app window: {:?}", snapshot)
+                write!(f, "Snapshot with {} windows", snapshot.app_windows.len())
             }
         }
     }

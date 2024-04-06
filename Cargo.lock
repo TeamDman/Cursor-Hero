@@ -2695,6 +2695,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "cursor_hero_ui_automation",
+ "cursor_hero_worker_types",
  "uiautomation",
 ]
 

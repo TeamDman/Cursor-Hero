@@ -11,6 +11,6 @@ impl Plugin for ObservationLogPlugin {
 
 fn log_observations(mut observation_event_reader: EventReader<SomethingObservableHappenedEvent>) {
     for event in observation_event_reader.read() {
-        info!("{:?}", event);
+        info!("{}", event);
     }
 }
