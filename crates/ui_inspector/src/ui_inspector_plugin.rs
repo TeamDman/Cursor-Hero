@@ -42,7 +42,7 @@ impl Plugin for UiInspectorPlugin {
             trigger_tree_update_for_hovered.run_if(condition.clone()),
         );
         app.add_systems(Update, fetch_requested.run_if(condition.clone()));
-        app.add_systems(Update, receive.run_if(condition.clone()));
+        app.add_systems(Update, handle_gamebound_messages.run_if(condition.clone()));
         app.add_systems(Update, gui.run_if(condition.clone()));
         app.add_systems(Update, handle_inspector_events.run_if(condition));
     }
@@ -153,14 +153,41 @@ fn fetch_requested(
 }
 
 fn trigger_tree_update_for_hovered(
-    mut data: ResMut<UIData>,
+    mut ui_data: ResMut<UIData>,
     mut cooldown: Local<Option<Timer>>,
     time: Res<Time>,
     mut events: EventWriter<ThreadboundUISnapshotMessage>,
     game_hover_query: Query<&GameHoverIndicator>,
     host_hover_query: Query<&HostHoverIndicator>,
 ) {
-    // Check cooldown
+    // Do nothing if paused
+    if ui_data.paused {
+        return;
+    }
+
+    // Get position of cursor
+    let pos = match (game_hover_query.get_single(), host_hover_query.get_single()) {
+        (Ok(GameHoverIndicator { cursor_pos, .. }), _) => *cursor_pos,
+        (_, Ok(HostHoverIndicator { cursor_pos, .. })) => *cursor_pos,
+        _ => return,
+    };
+
+    // Update selected based on the deepest matching cached element
+    ui_data.selected = ui_data
+        .ui_tree
+        .get_descendents()
+        .into_iter()
+        .filter(|info| info.bounding_rect.contains(pos))
+        .min_by_key(|info| info.bounding_rect.size().length_squared())
+        .map(|info| info.drill_id.clone());
+
+        
+    // Do nothing if already waiting for a response
+    if ui_data.in_flight {
+        return;
+    }
+
+    // Do nothing if on cooldown
     let default_duration = Duration::from_secs_f32(0.5);
     let Some(cooldown) = cooldown.as_mut() else {
         cooldown.replace(Timer::new(default_duration, TimerMode::Repeating));
@@ -172,25 +199,15 @@ fn trigger_tree_update_for_hovered(
         return;
     }
 
-    // Check other conditions
-    if data.paused {
-        return;
-    }
-    if data.in_flight {
-        return;
-    }
-    let pos = match (game_hover_query.get_single(), host_hover_query.get_single()) {
-        (Ok(GameHoverIndicator { info, .. }), _) => info.bounding_rect.center(),
-        (_, Ok(HostHoverIndicator { info, .. })) => info.bounding_rect.center(),
-        _ => return,
-    };
-
     // Send snapshot request
     events.send(ThreadboundUISnapshotMessage::CapturePartialTreeAt { pos });
-    data.in_flight = true;
+    ui_data.in_flight = true;
 }
 
-fn receive(mut snapshot: EventReader<GameboundUISnapshotMessage>, mut ui_data: ResMut<UIData>) {
+fn handle_gamebound_messages(
+    mut snapshot: EventReader<GameboundUISnapshotMessage>,
+    mut ui_data: ResMut<UIData>,
+) {
     for msg in snapshot.read() {
         match msg {
             GameboundUISnapshotMessage::Error => {
@@ -241,7 +258,7 @@ fn handle_inspector_events(
         let Some(info) = ui_data.ui_tree.lookup_drill_id_mut(selected_drill_id) else {
             return;
         };
-        
+
         // get identifier
         fn as_rust_identifier(info: &ElementInfo) -> String {
             format!(
@@ -261,15 +278,11 @@ fn handle_inspector_events(
         // build content
         let content = format!(
             "let {} = root.drill(&walker, vec![{}]?.try_into()?;\n",
-            identifier,
-            drill_id
+            identifier, drill_id
         );
 
         // append to scratch pad
-        ui_data.scratch_pad.push_str(
-            content
-            .as_str(),
-        );
+        ui_data.scratch_pad.push_str(content.as_str());
     }
 }
 

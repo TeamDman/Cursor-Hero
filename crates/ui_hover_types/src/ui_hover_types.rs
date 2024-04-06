@@ -14,10 +14,12 @@ pub struct HoverInfo {
 #[derive(Component, Reflect, Debug, Clone)]
 pub struct HostHoverIndicator {
     pub info: ElementInfo,
+    pub cursor_pos: IVec2,
 }
 #[derive(Component, Reflect, Debug, Clone)]
 pub struct GameHoverIndicator {
     pub info: ElementInfo,
+    pub cursor_pos: IVec2,
 }
 
 #[derive(Component, Reflect, Debug, Clone)]
@@ -31,10 +33,12 @@ pub struct InspectorHoverIndicator {
 pub enum GameboundHoverMessage {
     HostHoverInfo {
         info: ElementInfo,
+        cursor_pos: IVec2,
     },
     ClearHostHoverInfo,
     GameHoverInfo {
         info: ElementInfo,
+        cursor_pos: IVec2,
     },
     ClearGameHoverInfo,
 }

@@ -77,13 +77,16 @@ fn handle_threadbound_message(
         ThreadboundHoverMessage::AtPositionFromGame(cursor_pos) => {
             let root = find_element_at(*cursor_pos)?;
             let info = gather_single_element_info(&root)?;
-            GameboundHoverMessage::GameHoverInfo { info }
+            GameboundHoverMessage::GameHoverInfo {
+                info,
+                cursor_pos: cursor_pos.clone(),
+            }
         }
         ThreadboundHoverMessage::AtHostCursorPosition => {
             let cursor_pos = get_cursor_position()?;
             let root = find_element_at(cursor_pos)?;
             let info = gather_single_element_info(&root)?;
-            GameboundHoverMessage::HostHoverInfo { info }
+            GameboundHoverMessage::HostHoverInfo { info, cursor_pos }
         }
         ThreadboundHoverMessage::ClearHost => GameboundHoverMessage::ClearHostHoverInfo,
         ThreadboundHoverMessage::ClearGame => GameboundHoverMessage::ClearGameHoverInfo,
@@ -197,20 +200,26 @@ fn handle_gamebound_messages(
 ) {
     for msg in messages.read() {
         match msg {
-            GameboundHoverMessage::HostHoverInfo { info } => {
+            GameboundHoverMessage::HostHoverInfo { info, cursor_pos } => {
                 if info.name == "Program Manager" && info.class_name == "Progman" {
                     return;
                 }
-                hover_info.host_hover_indicator = Some(HostHoverIndicator { info: info.clone() });
+                hover_info.host_hover_indicator = Some(HostHoverIndicator {
+                    info: info.clone(),
+                    cursor_pos: cursor_pos.clone(),
+                });
             }
             GameboundHoverMessage::ClearHostHoverInfo => {
                 hover_info.host_hover_indicator = None;
             }
-            GameboundHoverMessage::GameHoverInfo { info } => {
+            GameboundHoverMessage::GameHoverInfo { info, cursor_pos } => {
                 if info.name == "Program Manager" && info.class_name == "Progman" {
                     return;
                 }
-                hover_info.game_hover_indicator = Some(GameHoverIndicator { info: info.clone() });
+                hover_info.game_hover_indicator = Some(GameHoverIndicator {
+                    info: info.clone(),
+                    cursor_pos: cursor_pos.clone(),
+                });
             }
             GameboundHoverMessage::ClearGameHoverInfo => {
                 hover_info.game_hover_indicator = None;
