@@ -8,8 +8,8 @@ use bevy_egui::egui::Align2;
 use bevy_egui::EguiContexts;
 use bevy_inspector_egui::reflect_inspector::InspectorUi;
 use cursor_hero_ui_automation::prelude::*;
-use cursor_hero_ui_hover_types::prelude::GameHoveredIndicator;
-use cursor_hero_ui_hover_types::prelude::HostHoveredIndicator;
+use cursor_hero_ui_hover_types::prelude::GameHoverIndicator;
+use cursor_hero_ui_hover_types::prelude::HostHoverIndicator;
 use cursor_hero_ui_inspector_types::prelude::FetchingState;
 use cursor_hero_ui_inspector_types::prelude::UIData;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
@@ -157,8 +157,8 @@ fn periodic_snapshot(
     mut cooldown: Local<Option<Timer>>,
     time: Res<Time>,
     mut events: EventWriter<ThreadboundUISnapshotMessage>,
-    game_hovered_query: Query<&GameHoveredIndicator>,
-    host_hovered_query: Query<&HostHoveredIndicator>,
+    game_hover_query: Query<&GameHoverIndicator>,
+    host_hover_query: Query<&HostHoverIndicator>,
 ) {
     // Check cooldown
     let default_duration = Duration::from_secs_f32(0.5);
@@ -180,11 +180,11 @@ fn periodic_snapshot(
         return;
     }
     let pos = match (
-        game_hovered_query.get_single(),
-        host_hovered_query.get_single(),
+        game_hover_query.get_single(),
+        host_hover_query.get_single(),
     ) {
-        (Ok(GameHoveredIndicator { cursor_pos, .. }), _) => *cursor_pos,
-        (_, Ok(HostHoveredIndicator { cursor_pos, .. })) => *cursor_pos,
+        (Ok(GameHoverIndicator { cursor_pos, .. }), _) => *cursor_pos,
+        (_, Ok(HostHoverIndicator { cursor_pos, .. })) => *cursor_pos,
         _ => return,
     };
 
@@ -290,7 +290,7 @@ fn gui(
                     return;
                 };
                 let found = ui_data.ui_tree.lookup_drill_id_mut(id);
-                debug!("found {:?}", found);
+                // debug!("found {:?}", found);
                 let Some(x) = found else {
                     return;
                 };

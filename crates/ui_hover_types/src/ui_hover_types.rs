@@ -4,18 +4,18 @@ use cursor_hero_worker_types::prelude::WorkerMessage;
 
 #[derive(Resource, Default, Reflect)]
 pub struct HoverInfo {
-    pub host_element: Option<HostHoveredIndicator>,
-    pub game_element: Option<GameHoveredIndicator>,
+    pub host_element: Option<HostHoverIndicator>,
+    pub game_element: Option<GameHoverIndicator>,
     pub enabled: bool,
 }
 
 #[derive(Component, Reflect, Debug, Clone)]
-pub struct HostHoveredIndicator {
+pub struct HostHoverIndicator {
     pub info: ElementInfo,
     pub cursor_pos: IVec2,
 }
 #[derive(Component, Reflect, Debug, Clone)]
-pub struct GameHoveredIndicator {
+pub struct GameHoverIndicator {
     pub info: ElementInfo,
     pub cursor_pos: IVec2,
 }

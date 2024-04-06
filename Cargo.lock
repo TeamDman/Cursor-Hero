@@ -2632,11 +2632,13 @@ name = "cursor_hero_ui_hover"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "bevy_xpbd_2d",
  "cursor_hero_bevy",
  "cursor_hero_camera",
  "cursor_hero_cursor_types",
  "cursor_hero_ui_automation",
  "cursor_hero_ui_hover_types",
+ "cursor_hero_ui_inspector_types",
  "cursor_hero_winutils",
  "cursor_hero_worker",
 ]

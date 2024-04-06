@@ -1,14 +1,22 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
+use bevy_xpbd_2d::components::Collider;
+use bevy_xpbd_2d::components::RigidBody;
+use bevy_xpbd_2d::components::Sensor;
 use cursor_hero_bevy::prelude::NegativeYIVec2;
+use cursor_hero_cursor_types::cursor_click_types::ClickEvent;
+use cursor_hero_cursor_types::cursor_click_types::Clickable;
+use cursor_hero_cursor_types::cursor_click_types::Way;
+use cursor_hero_cursor_types::cursor_hover_types::Hoverable;
 use cursor_hero_cursor_types::cursor_types::MainCursor;
 use cursor_hero_ui_automation::prelude::find_element_at;
 use cursor_hero_ui_automation::prelude::gather_single_element_info;
-use cursor_hero_ui_hover_types::prelude::GameHoveredIndicator;
+use cursor_hero_ui_hover_types::prelude::GameHoverIndicator;
 use cursor_hero_ui_hover_types::prelude::GameboundHoverMessage;
-use cursor_hero_ui_hover_types::prelude::HostHoveredIndicator;
+use cursor_hero_ui_hover_types::prelude::HostHoverIndicator;
 use cursor_hero_ui_hover_types::prelude::HoverInfo;
 use cursor_hero_ui_hover_types::prelude::ThreadboundHoverMessage;
+use cursor_hero_ui_inspector_types::prelude::UIData;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
 use cursor_hero_worker::prelude::anyhow::Error;
 use cursor_hero_worker::prelude::anyhow::Result;
@@ -35,6 +43,7 @@ impl Plugin for UiHoverPlugin {
         app.add_systems(Update, trigger_game_hover_info_update);
         app.add_systems(Update, handle_gamebound_messages);
         app.add_systems(Update, update_visuals);
+        app.add_systems(Update, hovered_click_listener);
     }
 }
 
@@ -171,7 +180,7 @@ fn handle_gamebound_messages(
     for msg in messages.read() {
         match msg {
             GameboundHoverMessage::HostHoverInfo { info, cursor_pos }=> {
-                hover_info.host_element = Some(HostHoveredIndicator {
+                hover_info.host_element = Some(HostHoverIndicator {
                     info: info.clone(),
                     cursor_pos: *cursor_pos,
                 });
@@ -180,7 +189,7 @@ fn handle_gamebound_messages(
                 hover_info.host_element = None;
             }
             GameboundHoverMessage::GameHoverInfo { info, cursor_pos } => {
-                hover_info.game_element = Some(GameHoveredIndicator {
+                hover_info.game_element = Some(GameHoverIndicator {
                     info: info.clone(),
                     cursor_pos: *cursor_pos,
                 });
@@ -199,18 +208,18 @@ fn update_visuals(
             Entity,
             &mut Sprite,
             &mut Transform,
-            &mut HostHoveredIndicator,
+            &mut HostHoverIndicator,
         ),
-        Without<GameHoveredIndicator>,
+        Without<GameHoverIndicator>,
     >,
     mut game_indicator: Query<
         (
             Entity,
             &mut Sprite,
             &mut Transform,
-            &mut GameHoveredIndicator,
+            &mut GameHoverIndicator,
         ),
-        Without<HostHoveredIndicator>,
+        Without<HostHoverIndicator>,
     >,
     hovered: Res<HoverInfo>,
     mut commands: Commands,
@@ -246,7 +255,12 @@ fn update_visuals(
                 },
                 ..default()
             },
-            Name::new("Screen Hovered Indicator"),
+            Clickable,
+            Hoverable,
+            RigidBody::Static,
+            Sensor,
+            Collider::cuboid(bounds.width(), bounds.height()),
+            Name::new("Host Hovered Indicator"),
             indicator
         ));
     }
@@ -282,8 +296,39 @@ fn update_visuals(
                 },
                 ..default()
             },
+            Clickable,
+            Hoverable,
+            RigidBody::Static,
+            Sensor,
+            Collider::cuboid(bounds.width(), bounds.height()),
             Name::new("Game Hovered Indicator"),   
             indicator
         ));
+    }
+}
+
+
+fn hovered_click_listener(
+    mut click_events: EventReader<ClickEvent>,
+    game_hover_query: Query<&GameHoverIndicator>,
+    host_hover_query: Query<&HostHoverIndicator>,
+    mut ui_data: ResMut<UIData>,
+) {
+    for event in click_events.read() {
+        let ClickEvent::Clicked {
+            target_id,
+            cursor_id: _,
+            way,
+        } = event
+        else {
+            continue;
+        };
+        if way != &Way::Left {
+            continue;
+        }
+        if game_hover_query.get(*target_id).is_ok() || host_hover_query.get(*target_id).is_ok() {
+            ui_data.paused ^= true;
+            info!("Hover indicator clicked, paused set to {}", ui_data.paused);
+        }
     }
 }
