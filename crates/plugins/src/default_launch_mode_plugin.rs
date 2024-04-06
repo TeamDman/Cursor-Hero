@@ -191,7 +191,7 @@ impl Plugin for DefaultLaunchModePlugin {
         #[cfg(debug_assertions)]
         let log_plugin = LogPlugin {
             level: bevy::log::Level::INFO,
-            filter: "wgpu=error,cursor_hero=debug"
+            filter: "wgpu=error,cursor_hero=debug,cursor_hero_ui_automation_types=debug"
 // bevy_ecs=info,
 // cursor_hero=debug,
 // cursor_hero_cursor::cursor_hover_plugin=info,

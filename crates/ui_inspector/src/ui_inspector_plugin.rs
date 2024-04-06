@@ -322,7 +322,7 @@ fn gui(
     egui::Window::new("Paused")
         .id(id)
         .title_bar(false)
-        .anchor(Align2::RIGHT_TOP, (5.0, 5.0))
+        .default_pos((ctx.screen_rect().max.x - 200.0, 5.0))
         .show(ctx, |ui| {
             ui.checkbox(&mut ui_data.paused, "Paused");
         });
@@ -370,15 +370,16 @@ fn ui_for_element_info(
             }
             let label = if element_info.automation_id.is_empty() {
                 format!(
-                    "{:?} | {}",
-                    element_info.name, element_info.localized_control_type
+                    "{:?} | {} | {}",
+                    element_info.name, element_info.localized_control_type, element_info.drill_id,
                 )
             } else {
                 format!(
-                    "{:?} | {} | {}",
+                    "{:?} | {} | {} | {}",
                     element_info.name,
                     element_info.localized_control_type,
-                    element_info.automation_id
+                    element_info.automation_id,
+                    element_info.drill_id,
                 )
             };
             if ui.toggle_value(&mut selected, label).changed() {

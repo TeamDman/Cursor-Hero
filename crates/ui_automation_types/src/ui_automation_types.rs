@@ -1,6 +1,7 @@
 use crate::prelude::CalculatorState;
 use crate::vscode_ui_types::*;
 use bevy::prelude::*;
+use itertools::Itertools;
 use serde::Deserialize;
 use serde::Serialize;
 use std::collections::VecDeque;
@@ -265,6 +266,11 @@ pub enum DrillId {
     #[default]
     Unknown,
 }
+impl FromIterator<usize> for DrillId {
+    fn from_iter<T: IntoIterator<Item = usize>>(iter: T) -> Self {
+        DrillId::Child(iter.into_iter().collect())
+    }
+}
 impl From<Vec<usize>> for DrillId {
     fn from(value: Vec<usize>) -> Self {
         DrillId::Child(value.into())
@@ -288,17 +294,17 @@ impl From<VecDeque<i32>> for DrillId {
 impl std::fmt::Display for DrillId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            DrillId::Root => write!(f, "Root"),
+            DrillId::Root => write!(f, "DrillId::Root"),
             DrillId::Child(drill_id) => write!(
                 f,
-                "{}",
+                "DrillId::Child({})",
                 drill_id
                     .iter()
                     .map(|x| x.to_string())
                     .collect::<Vec<String>>()
                     .join(",")
             ),
-            DrillId::Unknown => write!(f, "Unknown"),
+            DrillId::Unknown => write!(f, "DrillId::Unknown"),
         }
     }
 }
@@ -318,6 +324,11 @@ pub struct ElementInfo {
     pub drill_id: DrillId,
     #[reflect(ignore)]
     pub children: Option<Vec<ElementInfo>>,
+}
+impl std::fmt::Display for ElementInfo {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "'{}' - {}", self.name, self.drill_id)
+    }
 }
 impl Default for ElementInfo {
     fn default() -> Self {
@@ -359,81 +370,84 @@ impl TryFrom<UIElement> for ElementInfo {
 }
 impl ElementInfo {
     pub fn lookup_drill_id(&self, drill_id: DrillId) -> Option<&ElementInfo> {
-        self.lookup_drill_id_inner(drill_id, 0)
-    }
-    fn lookup_drill_id_inner(&self, drill_id: DrillId, skip: usize) -> Option<&ElementInfo> {
-        // println!("Looking in {} for {:?} ({:?})", self.name, drill_id.map(|x| x.iter().skip(skip).collect::<Vec<&usize>>()), drill_id);
-        if self.drill_id == drill_id {
-            return Some(self);
-        }
-        let DrillId::Child(drill_id) = drill_id else {
-            return None;
-        };
-        if drill_id.is_empty() {
-            return None;
-        }
-        // println!("found children {:?}", children.children.iter().map(|x| x.drill_id.clone()).collect_vec());
-        for child in self.children.as_ref()? {
-            let DrillId::Child(child_drill_id) = &child.drill_id else {
-                continue;
-            };
-            if child_drill_id.back() == drill_id.get(skip + 1) {
-                if skip == drill_id.len() - 1 {
-                    return Some(child);
-                } else {
-                    return child.lookup_drill_id_inner(DrillId::Child(drill_id.clone()), skip + 1);
-                }
-            }
-        }
-        None
-    }
-    pub fn lookup_drill_id_mut(&mut self, drill_id: DrillId) -> Option<&mut ElementInfo> {
-        self.lookup_drill_id_mut_inner(drill_id, 0)
-    }
-
-    fn lookup_drill_id_mut_inner(
-        &mut self,
-        drill_id: DrillId,
-        skip: usize,
-    ) -> Option<&mut ElementInfo> {
-        println!(
-            "Looking in {} for {:?} ({:?})",
-            self.name,
-            match drill_id {
-                DrillId::Child(ref drill_id) => drill_id
-                    .clone()
-                    .into_iter()
-                    .skip(skip)
-                    .collect::<Vec<usize>>(),
-                _ => vec![],
-            },
-            drill_id
+        // Log info for problem solving
+        trace!(
+            "Looking in {} for {}, found children {:?}",
+            self,
+            drill_id,
+            self.children.as_ref().map(|c| c
+                .iter()
+                .map(|x| format!("{} - {}", x.name, x.drill_id.to_string()))
+                .collect_vec())
         );
-        if self.drill_id == drill_id {
-            return Some(self);
-        }
-        let DrillId::Child(drill_id) = drill_id else {
+
+        // Only child drill IDs are valid search targets
+        let DrillId::Child(drill_id_inner) = drill_id else {
             return None;
         };
-        if drill_id.is_empty() {
-            return None;
+
+        // Base case
+        if drill_id_inner.is_empty() {
+            return Some(self);
         }
 
-        for child in self.children.as_deref_mut()?.iter_mut() {
+        // Search children
+        for child in self.children.as_ref()? {
+            // Only child drill IDs are valid search targets
             let DrillId::Child(child_drill_id) = &child.drill_id else {
                 continue;
             };
-            if child_drill_id.back() == drill_id.get(skip + 1) {
-                if skip == drill_id.len() - 1 {
-                    return Some(child);
-                } else {
-                    return child
-                        .lookup_drill_id_mut_inner(DrillId::Child(drill_id.clone()), skip + 1);
-                }
+
+            // If the child lays on our search path
+            if child_drill_id.back() == drill_id_inner.front() {
+                // Recurse
+                return child
+                    .lookup_drill_id(DrillId::Child(drill_id_inner.into_iter().skip(1).collect()));
             }
         }
         None
     }
+    
+    pub fn lookup_drill_id_mut(&mut self, drill_id: DrillId) -> Option<&mut ElementInfo> {
+        // Log info for problem solving
+        trace!(
+            "Looking in {} for {}, found children {:?}",
+            self,
+            drill_id,
+            self.children.as_ref().map(|c| c
+                .iter()
+                .map(|x| format!("{} - {}", x.name, x.drill_id.to_string()))
+                .collect_vec())
+        );
+
+        // Only child drill IDs are valid search targets
+        let DrillId::Child(drill_id_inner) = drill_id else {
+            return None;
+        };
+
+        // Base case
+        if drill_id_inner.is_empty() {
+            return Some(self);
+        }
+
+        // Search children
+        for child in self.children.as_deref_mut()?.iter_mut() {
+            // Only child drill IDs are valid search targets
+            let DrillId::Child(child_drill_id) = &child.drill_id else {
+                continue;
+            };
+
+            // If the child lays on our search path
+            if child_drill_id.back() == drill_id_inner.front() {
+                // Recurse
+                return child.lookup_drill_id_mut(DrillId::Child(
+                    drill_id_inner.into_iter().skip(1).collect(),
+                ));
+            }
+        }
+        None
+    }
+
     pub fn get_descendents(&self) -> Vec<&ElementInfo> {
         let mut descendents = vec![];
         if let Some(children) = &self.children {
