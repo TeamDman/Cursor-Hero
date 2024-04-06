@@ -4,13 +4,13 @@ use cursor_hero_version::version_plugin::VersionPlugin;
 
 enum LaunchMode {
     Default,
-    Inspect,
+    Headless,
 }
 
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
     let launch_mode = match args.get(1).map(|s| s.as_str()) {
-        Some("inspect") => LaunchMode::Inspect,
+        Some("headless") => LaunchMode::Headless,
         _ => LaunchMode::Default,
     };
 
@@ -21,8 +21,8 @@ fn main() {
         LaunchMode::Default => {
             app.add_plugins(DefaultLaunchModePlugin);
         }
-        LaunchMode::Inspect => {
-            app.add_plugins(InspectLaunchModePlugin);
+        LaunchMode::Headless => {
+            app.add_plugins(HeadlessLaunchModePlugin);
         }
     }
     app.run();

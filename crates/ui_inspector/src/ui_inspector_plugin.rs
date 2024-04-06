@@ -286,32 +286,36 @@ fn gui(
                     ui.heading("Properties");
                 });
                 let id = ui_data.selected.clone();
-                if let Some(id) = id
-                    && let Some(x) = ui_data.ui_tree.lookup_drill_id_mut(id)
-                {
-                    inspector.ui_for_reflect_readonly(x, ui);
-                    ui.separator();
-                    ui.label("drill_id");
-                    let drill_id = x.drill_id.to_string();
-                    inspector.ui_for_reflect_readonly(&drill_id, ui);
-                    if ui.button("copy").clicked() {
-                        ui.output_mut(|out| {
-                            out.copied_text = drill_id.clone();
-                        });
-                        info!("Copied drill_id {} to clipboard", drill_id);
-                    }
-                    ui.label("runtime_id");
-                    let runtime_id = x.runtime_id.to_string();
-                    inspector.ui_for_reflect_readonly(&runtime_id, ui);
-                    if ui.button("copy").clicked() {
-                        ui.output_mut(|out| {
-                            out.copied_text = runtime_id.clone();
-                        });
-                        info!("Copied runtime_id {} to clipboard", runtime_id);
-                    }
+                let Some(id) = id else {
+                    return;
+                };
+                let found = ui_data.ui_tree.lookup_drill_id_mut(id);
+                debug!("found {:?}", found);
+                let Some(x) = found else {
+                    return;
+                };
+                inspector.ui_for_reflect_readonly(x, ui);
+                ui.separator();
+                ui.label("drill_id");
+                let drill_id = x.drill_id.to_string();
+                inspector.ui_for_reflect_readonly(&drill_id, ui);
+                if ui.button("copy").clicked() {
+                    ui.output_mut(|out| {
+                        out.copied_text = drill_id.clone();
+                    });
+                    info!("Copied drill_id {} to clipboard", drill_id);
+                }
+                ui.label("runtime_id");
+                let runtime_id = x.runtime_id.to_string();
+                inspector.ui_for_reflect_readonly(&runtime_id, ui);
+                if ui.button("copy").clicked() {
+                    ui.output_mut(|out| {
+                        out.copied_text = runtime_id.clone();
+                    });
+                    info!("Copied runtime_id {} to clipboard", runtime_id);
                 }
                 // inspector.ui_for_reflect_readonly(&data, ui);
-            });
+            }); 
         });
 
     let id = egui::Id::new("Paused");
