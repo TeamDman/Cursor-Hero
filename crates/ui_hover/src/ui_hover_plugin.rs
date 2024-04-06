@@ -18,6 +18,7 @@ use cursor_hero_ui_hover_types::prelude::HostHoverIndicator;
 use cursor_hero_ui_hover_types::prelude::HoverInfo;
 use cursor_hero_ui_hover_types::prelude::InspectorHoverIndicator;
 use cursor_hero_ui_hover_types::prelude::ThreadboundHoverMessage;
+use cursor_hero_ui_inspector_types::prelude::InspectorEvent;
 use cursor_hero_ui_inspector_types::prelude::UIData;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
 use cursor_hero_worker::prelude::anyhow::Error;
@@ -134,7 +135,7 @@ fn trigger_game_hover_info_update(
         .map(|ctx| ctx.clone().get_mut().is_pointer_over_area())
         .unwrap_or(false)
     {
-        hover_info.game_element = None;
+        hover_info.game_hover_indicator = None;
         return;
     }
 
@@ -153,7 +154,7 @@ fn trigger_game_hover_info_update(
         let check = Some(msg.clone());
         if *debounce != check {
             *debounce = check;
-            hover_info.game_element = None;
+            hover_info.game_hover_indicator = None;
         }
         return;
     }
@@ -200,19 +201,19 @@ fn handle_gamebound_messages(
                 if info.name == "Program Manager" && info.class_name == "Progman" {
                     return;
                 }
-                hover_info.host_element = Some(HostHoverIndicator { info: info.clone() });
+                hover_info.host_hover_indicator = Some(HostHoverIndicator { info: info.clone() });
             }
             GameboundHoverMessage::ClearHostHoverInfo => {
-                hover_info.host_element = None;
+                hover_info.host_hover_indicator = None;
             }
             GameboundHoverMessage::GameHoverInfo { info } => {
                 if info.name == "Program Manager" && info.class_name == "Progman" {
                     return;
                 }
-                hover_info.game_element = Some(GameHoverIndicator { info: info.clone() });
+                hover_info.game_hover_indicator = Some(GameHoverIndicator { info: info.clone() });
             }
             GameboundHoverMessage::ClearGameHoverInfo => {
-                hover_info.game_element = None;
+                hover_info.game_hover_indicator = None;
             }
         }
     }
@@ -250,7 +251,7 @@ fn update_visuals(
     if let Ok(host_indicator) = host_indicator.get_single_mut() {
         // indicator exists
         let (entity, mut sprite, mut transform, mut indicator) = host_indicator;
-        if let Some(existing) = &hovered.host_element {
+        if let Some(existing) = &hovered.host_hover_indicator {
             // hovered exists
             // update indicator
             let bounds = existing.info.bounding_rect.as_rect();
@@ -266,7 +267,7 @@ fn update_visuals(
             // despawn indicator
             commands.entity(entity).despawn_recursive();
         }
-    } else if let Some(existing) = &hovered.host_element {
+    } else if let Some(existing) = &hovered.host_hover_indicator {
         // indicator does not exist
         // spawn indicator
         let bounds = existing.info.bounding_rect.as_rect();
@@ -299,7 +300,7 @@ fn update_visuals(
     if let Ok(game_indicator) = game_indicator.get_single_mut() {
         // indicator exists
         let (entity, mut sprite, mut transform, mut indicator) = game_indicator;
-        if let Some(existing) = &hovered.game_element {
+        if let Some(existing) = &hovered.game_hover_indicator {
             // hovered exists
             // update indicator
             let bounds = existing.info.bounding_rect.as_rect();
@@ -315,7 +316,7 @@ fn update_visuals(
             // despawn indicator
             commands.entity(entity).despawn_recursive();
         }
-    } else if let Some(existing) = &hovered.game_element {
+    } else if let Some(existing) = &hovered.game_hover_indicator {
         // indicator does not exist
         // spawn indicator
         let bounds = existing.info.bounding_rect.as_rect();
@@ -348,7 +349,7 @@ fn update_visuals(
     if let Ok(inspector_indicator) = inspector_indicator.get_single_mut() {
         // indicator exists
         let (entity, mut sprite, mut transform, mut indicator) = inspector_indicator;
-        if let Some(existing) = &hovered.inspector_element {
+        if let Some(existing) = &hovered.inspector_hover_indicator {
             // hovered exists
             // update indicator
             let bounds = existing.info.bounding_rect.as_rect();
@@ -364,7 +365,7 @@ fn update_visuals(
             // despawn indicator
             commands.entity(entity).despawn_recursive();
         }
-    } else if let Some(existing) = &hovered.inspector_element {
+    } else if let Some(existing) = &hovered.inspector_hover_indicator {
         // indicator does not exist
         // spawn indicator
         let bounds = existing.info.bounding_rect.as_rect();
@@ -399,6 +400,7 @@ fn hovered_click_listener(
     game_hover_query: Query<&GameHoverIndicator>,
     host_hover_query: Query<&HostHoverIndicator>,
     mut ui_data: ResMut<UIData>,
+    mut inspector_events: EventWriter<InspectorEvent>,
 ) {
     for event in click_events.read() {
         let ClickEvent::Clicked {
@@ -409,12 +411,14 @@ fn hovered_click_listener(
         else {
             continue;
         };
-        if way != &Way::Left {
-            continue;
-        }
-        if game_hover_query.get(*target_id).is_ok() || host_hover_query.get(*target_id).is_ok() {
-            ui_data.paused ^= true;
-            info!("Hover indicator clicked, paused set to {}", ui_data.paused);
+        if way == &Way::Left {
+            if game_hover_query.get(*target_id).is_ok() || host_hover_query.get(*target_id).is_ok()
+            {
+                ui_data.paused ^= true;
+                info!("Hover indicator clicked, paused set to {}", ui_data.paused);
+            }
+        } else if way == &Way::Right {
+            inspector_events.send(InspectorEvent::PushScratchPad);
         }
     }
 }

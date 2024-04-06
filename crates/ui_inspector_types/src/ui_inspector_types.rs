@@ -4,6 +4,7 @@ use cursor_hero_ui_automation_types::prelude::{DrillId, ElementInfo, RuntimeId};
 #[derive(Resource, Debug, Reflect, Default)]
 #[reflect(Resource)]
 pub struct UIData {
+    pub scratch_pad: String,
     pub start: ElementInfo,
     pub hovered: Option<ElementInfo>,
     pub ui_tree: ElementInfo,
@@ -21,4 +22,9 @@ pub enum FetchingState {
     FetchRequest,
     FetchDispatched,
     Fetched(Vec<ElementInfo>),
+}
+
+#[derive(Debug, Reflect, Event)]
+pub enum InspectorEvent {
+    PushScratchPad,
 }

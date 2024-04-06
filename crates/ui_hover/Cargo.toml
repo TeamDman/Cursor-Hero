@@ -16,4 +16,5 @@ cursor_hero_winutils = { workspace = true }
 cursor_hero_cursor_types = { workspace = true }
 cursor_hero_bevy = { workspace = true }
 bevy_xpbd_2d = { workspace = true }
-bevy_egui = {workspace = true}
+bevy_egui = { workspace = true }
+itertools = { workspace = true }

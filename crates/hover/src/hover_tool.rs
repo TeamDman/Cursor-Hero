@@ -46,7 +46,8 @@ fn tick(
     } else if hover_info.enabled {
         info!("Disabling hover info");
         hover_info.enabled = false;
-        hover_info.host_element = None;
-        hover_info.game_element = None;
+        hover_info.host_hover_indicator = None;
+        hover_info.game_hover_indicator = None;
+        hover_info.inspector_hover_indicator = None;
     }
 }

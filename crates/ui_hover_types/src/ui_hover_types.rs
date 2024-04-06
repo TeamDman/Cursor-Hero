@@ -5,9 +5,9 @@ use cursor_hero_worker_types::prelude::WorkerMessage;
 #[derive(Resource, Default, Reflect)]
 #[reflect(Resource)]
 pub struct HoverInfo {
-    pub host_element: Option<HostHoverIndicator>,
-    pub game_element: Option<GameHoverIndicator>,
-    pub inspector_element: Option<InspectorHoverIndicator>,
+    pub host_hover_indicator: Option<HostHoverIndicator>,
+    pub game_hover_indicator: Option<GameHoverIndicator>,
+    pub inspector_hover_indicator: Option<InspectorHoverIndicator>,
     pub enabled: bool,
 }
 

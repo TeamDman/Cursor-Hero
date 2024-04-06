@@ -11,6 +11,7 @@ use cursor_hero_ui_hover_types::prelude::HostHoverIndicator;
 use cursor_hero_ui_hover_types::prelude::HoverInfo;
 use cursor_hero_ui_hover_types::prelude::InspectorHoverIndicator;
 use cursor_hero_ui_inspector_types::prelude::FetchingState;
+use cursor_hero_ui_inspector_types::prelude::InspectorEvent;
 use cursor_hero_ui_inspector_types::prelude::UIData;
 use cursor_hero_worker::prelude::anyhow::Context;
 use cursor_hero_worker::prelude::anyhow::Error;
@@ -42,8 +43,8 @@ impl Plugin for UiInspectorPlugin {
         );
         app.add_systems(Update, fetch_requested.run_if(condition.clone()));
         app.add_systems(Update, receive.run_if(condition.clone()));
-        app.add_systems(Update, gui.run_if(condition));
-        // app.add_systems(Update, gui.after(EguiSet::InitContexts));
+        app.add_systems(Update, gui.run_if(condition.clone()));
+        app.add_systems(Update, handle_inspector_events.run_if(condition));
     }
 }
 
@@ -195,10 +196,7 @@ fn receive(mut snapshot: EventReader<GameboundUISnapshotMessage>, mut ui_data: R
             GameboundUISnapshotMessage::Error => {
                 ui_data.in_flight = false;
             }
-            GameboundUISnapshotMessage::PartialTree {
-                ui_tree,
-                start,
-            } => {
+            GameboundUISnapshotMessage::PartialTree { ui_tree, start } => {
                 ui_data.in_flight = false;
                 ui_data.ui_tree = ui_tree.clone();
                 ui_data.start = start.clone();
@@ -226,6 +224,52 @@ fn receive(mut snapshot: EventReader<GameboundUISnapshotMessage>, mut ui_data: R
                 }
             }
         }
+    }
+}
+
+fn handle_inspector_events(
+    mut inspector_events: EventReader<InspectorEvent>,
+    mut ui_data: ResMut<UIData>,
+) {
+    for event in inspector_events.read() {
+        let InspectorEvent::PushScratchPad = event;
+
+        // get selected info
+        let Some(selected_drill_id) = ui_data.selected.clone() else {
+            return;
+        };
+        let Some(info) = ui_data.ui_tree.lookup_drill_id_mut(selected_drill_id) else {
+            return;
+        };
+        
+        // get identifier
+        fn as_rust_identifier(info: &ElementInfo) -> String {
+            format!(
+                "{}_{}",
+                info.name.replace(" ", "_").to_lowercase(),
+                info.class_name.to_lowercase()
+            )
+        }
+        let identifier = as_rust_identifier(info);
+
+        // get drill id
+        let drill_id = match info.drill_id {
+            DrillId::Child(ref inner) => inner.iter().map(|x| x.to_string()).join(", "),
+            _ => "".to_string(),
+        };
+
+        // build content
+        let content = format!(
+            "let {} = root.drill(&walker, vec![{}]?.try_into()?;\n",
+            identifier,
+            drill_id
+        );
+
+        // append to scratch pad
+        ui_data.scratch_pad.push_str(
+            content
+            .as_str(),
+        );
     }
 }
 
@@ -263,9 +307,9 @@ fn gui(
                         ui.heading("UI Tree");
                     });
                     egui::ScrollArea::both().show(ui, |ui| {
-                        let id = id.with(ui_data.ui_tree.runtim○e_id.clone());
+                        let id = id.with(ui_data.ui_tree.runtime_id.clone());
                         let mut elem = ui_data.ui_tree.clone();
-                        
+
                         // resets each frame before being set when drawing expandos
                         ui_data.hovered = None;
 
@@ -275,9 +319,9 @@ fn gui(
                     });
                 });
 
-            egui::TopBottomPanel::bottom(id.with("invisible bottom panel"))
+            egui::TopBottomPanel::bottom(id.with("invisible panel to make things work"))
                 .show_separator_line(false)
-                .show_inside(ui, |_| ());
+                .show_inside(ui, |_ui| {});
 
             egui::CentralPanel::default().show_inside(ui, |ui| {
                 ui.vertical_centered(|ui| {
@@ -313,6 +357,16 @@ fn gui(
                     info!("Copied runtime_id {} to clipboard", runtime_id);
                 }
                 // inspector.ui_for_reflect_readonly(&data, ui);
+
+                ui.vertical_centered(|ui| {
+                    ui.heading("Scratch Pad");
+                });
+                if ui.button("clear").clicked() {
+                    ui_data.scratch_pad.clear();
+                }
+                egui::TextEdit::multiline(&mut ui_data.scratch_pad)
+                    .desired_width(ui.available_width())
+                    .show(ui);
             });
         });
 
@@ -326,9 +380,10 @@ fn gui(
         });
     ui_data.fresh = false;
 
-    hover_info.inspector_element = ui_data.hovered.as_ref().map(|elem| InspectorHoverIndicator {
-        info: elem.clone(),
-    });
+    hover_info.inspector_hover_indicator = ui_data
+        .hovered
+        .as_ref()
+        .map(|elem| InspectorHoverIndicator { info: elem.clone() });
 }
 
 #[allow(clippy::too_many_arguments)]
