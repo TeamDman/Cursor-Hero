@@ -2,11 +2,8 @@
 
 ## Active
 
-UI tree egui improvements.
-- "Copy drill ID" button
-- UI element picture-in-picture
-- "Copy rust expression" which uses reflection to get the rust code to lift a property into a new variable
-
+- Fix properties not working
+- Finish calculator stub
 
 ## Up Next
 

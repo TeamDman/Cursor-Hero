@@ -14,3 +14,4 @@ cursor_hero_environment_types = { workspace = true }
 cursor_hero_observation_types = { workspace = true }
 cursor_hero_memory_types = { workspace = true }
 cursor_hero_character_types = { workspace = true }
+cursor_hero_worker = { workspace = true }

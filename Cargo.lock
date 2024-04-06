@@ -2686,6 +2686,7 @@ dependencies = [
  "cursor_hero_observation_types",
  "cursor_hero_ui_automation",
  "cursor_hero_ui_watcher_types",
+ "cursor_hero_worker",
 ]
 
 [[package]]

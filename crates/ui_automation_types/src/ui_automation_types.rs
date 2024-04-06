@@ -390,7 +390,19 @@ impl ElementInfo {
         drill_id: DrillId,
         skip: usize,
     ) -> Option<&mut ElementInfo> {
-        // println!("Looking in {} for {:?} ({:?})", self.name, drill_id.map(|x| x.iter().skip(skip).collect::<Vec<&usize>>()), drill_id);
+        println!(
+            "Looking in {} for {:?} ({:?})",
+            self.name,
+            match drill_id {
+                DrillId::Child(ref drill_id) => drill_id
+                    .clone()
+                    .into_iter()
+                    .skip(skip)
+                    .collect::<Vec<usize>>(),
+                _ => vec![],
+            },
+            drill_id
+        );
         if self.drill_id == drill_id {
             return Some(self);
         }
