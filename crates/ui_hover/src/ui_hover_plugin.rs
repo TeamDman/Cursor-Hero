@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
+use bevy_egui::EguiContext;
 use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
 use bevy_xpbd_2d::components::Sensor;
@@ -83,10 +84,7 @@ fn handle_threadbound_message(
             let cursor_pos = get_cursor_position()?;
             let root = find_element_at(cursor_pos)?;
             let info = gather_single_element_info(&root)?;
-            GameboundHoverMessage::HostHoverInfo {
-                info,
-                cursor_pos,
-            }
+            GameboundHoverMessage::HostHoverInfo { info, cursor_pos }
         }
         ThreadboundHoverMessage::ClearHost => GameboundHoverMessage::ClearHostHoverInfo,
         ThreadboundHoverMessage::ClearGame => GameboundHoverMessage::ClearGameHoverInfo,
@@ -125,11 +123,23 @@ fn trigger_game_hover_info_update(
     mut debounce: Local<Option<ThreadboundHoverMessage>>,
     mut cooldown: Local<Option<Timer>>,
     time: Res<Time>,
+    egui_context_query: Query<&EguiContext, With<PrimaryWindow>>,
 ) {
+    // Do nothing when disabled
     if !hover_info.enabled {
         return;
     }
 
+    // Do nothing when hovering over egui
+    if egui_context_query
+        .get_single()
+        .map(|ctx| ctx.clone().get_mut().is_pointer_over_area())
+        .unwrap_or(false)
+    {
+        return;
+    }
+
+    // Get window
     let window = match window_query.get_single() {
         Ok(window) => window,
         Err(e) => {
@@ -138,6 +148,7 @@ fn trigger_game_hover_info_update(
         }
     };
 
+    // Check if cursor is outside of window
     if window.cursor_position().is_none() {
         let msg = ThreadboundHoverMessage::ClearGame;
         let check = Some(msg.clone());
@@ -148,6 +159,7 @@ fn trigger_game_hover_info_update(
         return;
     }
 
+    // Delay between updates
     let Some(cooldown) = cooldown.as_mut() else {
         cooldown.replace(Timer::from_seconds(0.1, TimerMode::Repeating));
         return;
@@ -156,6 +168,7 @@ fn trigger_game_hover_info_update(
         return;
     }
 
+    // Get cursor position
     let cursor = match cursor_query.get_single() {
         Ok(cursor) => cursor,
         Err(e) => {
@@ -164,13 +177,18 @@ fn trigger_game_hover_info_update(
         }
     };
 
+    // Prepare message
     let cursor_pos = cursor.translation().truncate().as_ivec2().neg_y();
     let msg = ThreadboundHoverMessage::AtPositionFromGame(cursor_pos);
+
+    // Debounce
     let check = Some(msg.clone());
-    if *debounce != check {
-        *debounce = check;
-        messages.send(msg);
+    if *debounce == check {
+        return;
     }
+
+    // Send message
+    messages.send(msg);
 }
 
 fn handle_gamebound_messages(
@@ -179,7 +197,7 @@ fn handle_gamebound_messages(
 ) {
     for msg in messages.read() {
         match msg {
-            GameboundHoverMessage::HostHoverInfo { info, cursor_pos }=> {
+            GameboundHoverMessage::HostHoverInfo { info, cursor_pos } => {
                 hover_info.host_element = Some(HostHoverIndicator {
                     info: info.clone(),
                     cursor_pos: *cursor_pos,
@@ -204,21 +222,11 @@ fn handle_gamebound_messages(
 #[allow(clippy::type_complexity)]
 fn update_visuals(
     mut host_indicator: Query<
-        (
-            Entity,
-            &mut Sprite,
-            &mut Transform,
-            &mut HostHoverIndicator,
-        ),
+        (Entity, &mut Sprite, &mut Transform, &mut HostHoverIndicator),
         Without<GameHoverIndicator>,
     >,
     mut game_indicator: Query<
-        (
-            Entity,
-            &mut Sprite,
-            &mut Transform,
-            &mut GameHoverIndicator,
-        ),
+        (Entity, &mut Sprite, &mut Transform, &mut GameHoverIndicator),
         Without<HostHoverIndicator>,
     >,
     hovered: Res<HoverInfo>,
@@ -261,7 +269,7 @@ fn update_visuals(
             Sensor,
             Collider::cuboid(bounds.width(), bounds.height()),
             Name::new("Host Hovered Indicator"),
-            indicator
+            indicator,
         ));
     }
 
@@ -301,12 +309,11 @@ fn update_visuals(
             RigidBody::Static,
             Sensor,
             Collider::cuboid(bounds.width(), bounds.height()),
-            Name::new("Game Hovered Indicator"),   
-            indicator
+            Name::new("Game Hovered Indicator"),
+            indicator,
         ));
     }
 }
-
 
 fn hovered_click_listener(
     mut click_events: EventReader<ClickEvent>,
