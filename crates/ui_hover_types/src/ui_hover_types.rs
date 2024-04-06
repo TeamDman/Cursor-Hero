@@ -3,21 +3,26 @@ use cursor_hero_ui_automation_types::prelude::ElementInfo;
 use cursor_hero_worker_types::prelude::WorkerMessage;
 
 #[derive(Resource, Default, Reflect)]
+#[reflect(Resource)]
 pub struct HoverInfo {
     pub host_element: Option<HostHoverIndicator>,
     pub game_element: Option<GameHoverIndicator>,
+    pub inspector_element: Option<InspectorHoverIndicator>,
     pub enabled: bool,
 }
 
 #[derive(Component, Reflect, Debug, Clone)]
 pub struct HostHoverIndicator {
     pub info: ElementInfo,
-    pub cursor_pos: IVec2,
 }
 #[derive(Component, Reflect, Debug, Clone)]
 pub struct GameHoverIndicator {
     pub info: ElementInfo,
-    pub cursor_pos: IVec2,
+}
+
+#[derive(Component, Reflect, Debug, Clone)]
+pub struct InspectorHoverIndicator {
+    pub info: ElementInfo,
 }
 
 
@@ -26,12 +31,10 @@ pub struct GameHoverIndicator {
 pub enum GameboundHoverMessage {
     HostHoverInfo {
         info: ElementInfo,
-        cursor_pos: IVec2,
     },
     ClearHostHoverInfo,
     GameHoverInfo {
         info: ElementInfo,
-        cursor_pos: IVec2,
     },
     ClearGameHoverInfo,
 }

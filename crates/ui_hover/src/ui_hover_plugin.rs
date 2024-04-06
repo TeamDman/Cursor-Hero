@@ -16,6 +16,7 @@ use cursor_hero_ui_hover_types::prelude::GameHoverIndicator;
 use cursor_hero_ui_hover_types::prelude::GameboundHoverMessage;
 use cursor_hero_ui_hover_types::prelude::HostHoverIndicator;
 use cursor_hero_ui_hover_types::prelude::HoverInfo;
+use cursor_hero_ui_hover_types::prelude::InspectorHoverIndicator;
 use cursor_hero_ui_hover_types::prelude::ThreadboundHoverMessage;
 use cursor_hero_ui_inspector_types::prelude::UIData;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
@@ -75,16 +76,13 @@ fn handle_threadbound_message(
         ThreadboundHoverMessage::AtPositionFromGame(cursor_pos) => {
             let root = find_element_at(*cursor_pos)?;
             let info = gather_single_element_info(&root)?;
-            GameboundHoverMessage::GameHoverInfo {
-                info,
-                cursor_pos: *cursor_pos,
-            }
+            GameboundHoverMessage::GameHoverInfo { info }
         }
         ThreadboundHoverMessage::AtHostCursorPosition => {
             let cursor_pos = get_cursor_position()?;
             let root = find_element_at(cursor_pos)?;
             let info = gather_single_element_info(&root)?;
-            GameboundHoverMessage::HostHoverInfo { info, cursor_pos }
+            GameboundHoverMessage::HostHoverInfo { info }
         }
         ThreadboundHoverMessage::ClearHost => GameboundHoverMessage::ClearHostHoverInfo,
         ThreadboundHoverMessage::ClearGame => GameboundHoverMessage::ClearGameHoverInfo,
@@ -136,6 +134,7 @@ fn trigger_game_hover_info_update(
         .map(|ctx| ctx.clone().get_mut().is_pointer_over_area())
         .unwrap_or(false)
     {
+        hover_info.game_element = None;
         return;
     }
 
@@ -197,20 +196,20 @@ fn handle_gamebound_messages(
 ) {
     for msg in messages.read() {
         match msg {
-            GameboundHoverMessage::HostHoverInfo { info, cursor_pos } => {
-                hover_info.host_element = Some(HostHoverIndicator {
-                    info: info.clone(),
-                    cursor_pos: *cursor_pos,
-                });
+            GameboundHoverMessage::HostHoverInfo { info } => {
+                if info.name == "Program Manager" && info.class_name == "Progman" {
+                    return;
+                }
+                hover_info.host_element = Some(HostHoverIndicator { info: info.clone() });
             }
             GameboundHoverMessage::ClearHostHoverInfo => {
                 hover_info.host_element = None;
             }
-            GameboundHoverMessage::GameHoverInfo { info, cursor_pos } => {
-                hover_info.game_element = Some(GameHoverIndicator {
-                    info: info.clone(),
-                    cursor_pos: *cursor_pos,
-                });
+            GameboundHoverMessage::GameHoverInfo { info } => {
+                if info.name == "Program Manager" && info.class_name == "Progman" {
+                    return;
+                }
+                hover_info.game_element = Some(GameHoverIndicator { info: info.clone() });
             }
             GameboundHoverMessage::ClearGameHoverInfo => {
                 hover_info.game_element = None;
@@ -223,18 +222,37 @@ fn handle_gamebound_messages(
 fn update_visuals(
     mut host_indicator: Query<
         (Entity, &mut Sprite, &mut Transform, &mut HostHoverIndicator),
-        Without<GameHoverIndicator>,
+        (
+            Without<GameHoverIndicator>,
+            Without<InspectorHoverIndicator>,
+        ),
     >,
     mut game_indicator: Query<
         (Entity, &mut Sprite, &mut Transform, &mut GameHoverIndicator),
-        Without<HostHoverIndicator>,
+        (
+            Without<HostHoverIndicator>,
+            Without<InspectorHoverIndicator>,
+        ),
+    >,
+    mut inspector_indicator: Query<
+        (
+            Entity,
+            &mut Sprite,
+            &mut Transform,
+            &mut InspectorHoverIndicator,
+        ),
+        (Without<HostHoverIndicator>, Without<GameHoverIndicator>),
     >,
     hovered: Res<HoverInfo>,
     mut commands: Commands,
 ) {
+    // host indicator
     if let Ok(host_indicator) = host_indicator.get_single_mut() {
+        // indicator exists
         let (entity, mut sprite, mut transform, mut indicator) = host_indicator;
         if let Some(existing) = &hovered.host_element {
+            // hovered exists
+            // update indicator
             let bounds = existing.info.bounding_rect.as_rect();
             sprite.custom_size = Some(Vec2::new(bounds.width(), bounds.height()));
             transform.translation = Vec3::new(
@@ -244,9 +262,13 @@ fn update_visuals(
             );
             *indicator = existing.clone();
         } else {
+            // hovered does not exist
+            // despawn indicator
             commands.entity(entity).despawn_recursive();
         }
     } else if let Some(existing) = &hovered.host_element {
+        // indicator does not exist
+        // spawn indicator
         let bounds = existing.info.bounding_rect.as_rect();
         let indicator = existing.clone();
         commands.spawn((
@@ -273,9 +295,13 @@ fn update_visuals(
         ));
     }
 
+    // game indicator
     if let Ok(game_indicator) = game_indicator.get_single_mut() {
+        // indicator exists
         let (entity, mut sprite, mut transform, mut indicator) = game_indicator;
         if let Some(existing) = &hovered.game_element {
+            // hovered exists
+            // update indicator
             let bounds = existing.info.bounding_rect.as_rect();
             sprite.custom_size = Some(Vec2::new(bounds.width(), bounds.height()));
             transform.translation = Vec3::new(
@@ -285,9 +311,13 @@ fn update_visuals(
             );
             *indicator = existing.clone();
         } else {
+            // hovered does not exist
+            // despawn indicator
             commands.entity(entity).despawn_recursive();
         }
     } else if let Some(existing) = &hovered.game_element {
+        // indicator does not exist
+        // spawn indicator
         let bounds = existing.info.bounding_rect.as_rect();
         let indicator = existing.clone();
         commands.spawn((
@@ -310,6 +340,55 @@ fn update_visuals(
             Sensor,
             Collider::cuboid(bounds.width(), bounds.height()),
             Name::new("Game Hovered Indicator"),
+            indicator,
+        ));
+    }
+
+    // inspector indicator
+    if let Ok(inspector_indicator) = inspector_indicator.get_single_mut() {
+        // indicator exists
+        let (entity, mut sprite, mut transform, mut indicator) = inspector_indicator;
+        if let Some(existing) = &hovered.inspector_element {
+            // hovered exists
+            // update indicator
+            let bounds = existing.info.bounding_rect.as_rect();
+            sprite.custom_size = Some(Vec2::new(bounds.width(), bounds.height()));
+            transform.translation = Vec3::new(
+                bounds.min.x + bounds.width() / 2.,
+                -bounds.min.y - bounds.height() / 2.,
+                0.,
+            );
+            *indicator = existing.clone();
+        } else {
+            // hovered does not exist
+            // despawn indicator
+            commands.entity(entity).despawn_recursive();
+        }
+    } else if let Some(existing) = &hovered.inspector_element {
+        // indicator does not exist
+        // spawn indicator
+        let bounds = existing.info.bounding_rect.as_rect();
+        let indicator = existing.clone();
+        commands.spawn((
+            SpriteBundle {
+                transform: Transform::from_xyz(
+                    bounds.min.x + bounds.width() / 2.,
+                    -bounds.min.y - bounds.height() / 2.,
+                    0.,
+                ),
+                sprite: Sprite {
+                    custom_size: Some(Vec2::new(bounds.width(), bounds.height())),
+                    color: Color::rgba(1.0, 0.855, 0.431, 0.05),
+                    ..default()
+                },
+                ..default()
+            },
+            Clickable,
+            Hoverable,
+            RigidBody::Static,
+            Sensor,
+            Collider::cuboid(bounds.width(), bounds.height()),
+            Name::new("Inspector Hovered Indicator"),
             indicator,
         ));
     }

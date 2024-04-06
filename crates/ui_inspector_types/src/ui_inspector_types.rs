@@ -5,7 +5,7 @@ use cursor_hero_ui_automation_types::prelude::{DrillId, ElementInfo, RuntimeId};
 #[reflect(Resource)]
 pub struct UIData {
     pub start: ElementInfo,
-    pub hovered: ElementInfo,
+    pub hovered: Option<ElementInfo>,
     pub ui_tree: ElementInfo,
     pub selected: Option<DrillId>,
     pub expanded: Vec<DrillId>,

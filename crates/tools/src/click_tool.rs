@@ -187,6 +187,15 @@ fn handle_input(
     window_query: Query<&Window, With<PrimaryWindow>>,
     egui_context_query: Query<&EguiContext, With<PrimaryWindow>>,
 ) {
+    // Do nothing when hovering over egui
+    if egui_context_query
+        .get_single()
+        .map(|ctx| ctx.clone().get_mut().is_pointer_over_area())
+        .unwrap_or(false)
+    {
+        return;
+    }
+
     for tool in tools.iter() {
         let (tool_actions, tool_parent) = tool;
 
@@ -222,11 +231,6 @@ fn handle_input(
         let cursor_pos = cursor_transform.translation();
 
         let window = window_query.get_single().expect("Need a single window");
-
-        let Ok(egui_context) = egui_context_query.get_single() else {
-            return;
-        };
-        let disable_sfx = egui_context.clone().get_mut().is_pointer_over_area();
         if window.cursor_position().is_some() {
             // The host cursor is over the window
             // Perform virtual click instead of sending a message to the worker thread
@@ -234,21 +238,21 @@ fn handle_input(
             for action in ClickToolAction::variants() {
                 if tool_actions.just_pressed(action) {
                     debug!("{:?} pressed", action);
-                    if !disable_sfx {
-                        commands.spawn((
-                            SpatialBundle {
-                                transform: Transform::from_translation(cursor_pos),
-                                ..default()
-                            },
-                            Name::new("Click sound"),
-                            AudioBundle {
-                                source: asset_server.load(action.get_audio_path(Motion::Down)),
-                                settings: PlaybackSettings::DESPAWN
-                                    .with_spatial(true)
-                                    .with_volume(Volume::Relative(VolumeLevel::new(0.5))),
-                            },
-                        ));
-                    }
+
+                    commands.spawn((
+                        SpatialBundle {
+                            transform: Transform::from_translation(cursor_pos),
+                            ..default()
+                        },
+                        Name::new("Click sound"),
+                        AudioBundle {
+                            source: asset_server.load(action.get_audio_path(Motion::Down)),
+                            settings: PlaybackSettings::DESPAWN
+                                .with_spatial(true)
+                                .with_volume(Volume::Relative(VolumeLevel::new(0.5))),
+                        },
+                    ));
+
                     tool_click_event_writer.send(ToolClickEvent::Pressed {
                         cursor_id,
                         way: action.into(),
@@ -256,21 +260,21 @@ fn handle_input(
                 }
                 if tool_actions.just_released(action) {
                     debug!("{:?} released", action);
-                    if !disable_sfx {
-                        commands.spawn((
-                            SpatialBundle {
-                                transform: Transform::from_translation(cursor_pos),
-                                ..default()
-                            },
-                            Name::new("Click sound"),
-                            AudioBundle {
-                                source: asset_server.load(action.get_audio_path(Motion::Up)),
-                                settings: PlaybackSettings::DESPAWN
-                                    .with_spatial(true)
-                                    .with_volume(Volume::Relative(VolumeLevel::new(0.5))),
-                            },
-                        ));
-                    }
+                    
+                    commands.spawn((
+                        SpatialBundle {
+                            transform: Transform::from_translation(cursor_pos),
+                            ..default()
+                        },
+                        Name::new("Click sound"),
+                        AudioBundle {
+                            source: asset_server.load(action.get_audio_path(Motion::Up)),
+                            settings: PlaybackSettings::DESPAWN
+                                .with_spatial(true)
+                                .with_volume(Volume::Relative(VolumeLevel::new(0.5))),
+                        },
+                    ));
+
                     tool_click_event_writer.send(ToolClickEvent::Released {
                         cursor_id,
                         way: action.into(),

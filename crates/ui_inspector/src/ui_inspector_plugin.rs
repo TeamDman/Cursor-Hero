@@ -2,17 +2,16 @@ use std::time::Duration;
 
 use bevy::input::common_conditions::input_toggle_active;
 use bevy::prelude::*;
-use bevy::window::PrimaryWindow;
 use bevy_egui::egui;
-use bevy_egui::egui::Align2;
 use bevy_egui::EguiContexts;
 use bevy_inspector_egui::reflect_inspector::InspectorUi;
 use cursor_hero_ui_automation::prelude::*;
 use cursor_hero_ui_hover_types::prelude::GameHoverIndicator;
 use cursor_hero_ui_hover_types::prelude::HostHoverIndicator;
+use cursor_hero_ui_hover_types::prelude::HoverInfo;
+use cursor_hero_ui_hover_types::prelude::InspectorHoverIndicator;
 use cursor_hero_ui_inspector_types::prelude::FetchingState;
 use cursor_hero_ui_inspector_types::prelude::UIData;
-use cursor_hero_winutils::win_mouse::get_cursor_position;
 use cursor_hero_worker::prelude::anyhow::Context;
 use cursor_hero_worker::prelude::anyhow::Error;
 use cursor_hero_worker::prelude::anyhow::Result;
@@ -37,7 +36,10 @@ impl Plugin for UiInspectorPlugin {
             },
         });
         let condition = input_toggle_active(false, KeyCode::Grave);
-        app.add_systems(Update, periodic_snapshot.run_if(condition.clone()));
+        app.add_systems(
+            Update,
+            trigger_tree_update_for_hovered.run_if(condition.clone()),
+        );
         app.add_systems(Update, fetch_requested.run_if(condition.clone()));
         app.add_systems(Update, receive.run_if(condition.clone()));
         app.add_systems(Update, gui.run_if(condition));
@@ -47,7 +49,7 @@ impl Plugin for UiInspectorPlugin {
 
 #[derive(Debug, Reflect, Clone, Event)]
 enum ThreadboundUISnapshotMessage {
-    CaptureHovered {
+    CapturePartialTreeAt {
         pos: IVec2,
     },
     ChildrenFetchRequest {
@@ -59,10 +61,9 @@ impl WorkerMessage for ThreadboundUISnapshotMessage {}
 
 #[derive(Debug, Reflect, Clone, Event)]
 enum GameboundUISnapshotMessage {
-    Hovered {
+    PartialTree {
         ui_tree: ElementInfo,
         start: ElementInfo,
-        hovered: ElementInfo,
     },
     ChildrenFetchResponse {
         drill_id: DrillId,
@@ -88,15 +89,13 @@ fn handle_threadbound_message(
     _state: &mut (),
 ) -> Result<()> {
     match msg {
-        ThreadboundUISnapshotMessage::CaptureHovered { pos } => {
+        ThreadboundUISnapshotMessage::CapturePartialTreeAt { pos } => {
             debug!("taking snapshot");
-            let hovered = find_element_at(*pos)?;
-            let hovered_info = gather_single_element_info(&hovered)?;
-            let gathered = gather_incomplete_ui_tree_starting_deep(hovered)?;
-            if let Err(e) = reply_tx.send(GameboundUISnapshotMessage::Hovered {
+            let start = find_element_at(*pos)?;
+            let gathered = gather_incomplete_ui_tree_starting_deep(start)?;
+            if let Err(e) = reply_tx.send(GameboundUISnapshotMessage::PartialTree {
                 ui_tree: gathered.ui_tree,
                 start: gathered.start_info,
-                hovered: hovered_info,
             }) {
                 error!("Failed to send snapshot: {:?}", e);
             }
@@ -152,7 +151,7 @@ fn fetch_requested(
     }
 }
 
-fn periodic_snapshot(
+fn trigger_tree_update_for_hovered(
     mut data: ResMut<UIData>,
     mut cooldown: Local<Option<Timer>>,
     time: Res<Time>,
@@ -179,18 +178,14 @@ fn periodic_snapshot(
     if data.in_flight {
         return;
     }
-    let pos = match (
-        game_hover_query.get_single(),
-        host_hover_query.get_single(),
-    ) {
-        (Ok(GameHoverIndicator { cursor_pos, .. }), _) => *cursor_pos,
-        (_, Ok(HostHoverIndicator { cursor_pos, .. })) => *cursor_pos,
+    let pos = match (game_hover_query.get_single(), host_hover_query.get_single()) {
+        (Ok(GameHoverIndicator { info, .. }), _) => info.bounding_rect.center(),
+        (_, Ok(HostHoverIndicator { info, .. })) => info.bounding_rect.center(),
         _ => return,
     };
 
-
     // Send snapshot request
-    events.send(ThreadboundUISnapshotMessage::CaptureHovered { pos });
+    events.send(ThreadboundUISnapshotMessage::CapturePartialTreeAt { pos });
     data.in_flight = true;
 }
 
@@ -200,15 +195,13 @@ fn receive(mut snapshot: EventReader<GameboundUISnapshotMessage>, mut ui_data: R
             GameboundUISnapshotMessage::Error => {
                 ui_data.in_flight = false;
             }
-            GameboundUISnapshotMessage::Hovered {
+            GameboundUISnapshotMessage::PartialTree {
                 ui_tree,
                 start,
-                hovered,
             } => {
                 ui_data.in_flight = false;
                 ui_data.ui_tree = ui_tree.clone();
                 ui_data.start = start.clone();
-                ui_data.hovered = hovered.clone();
                 ui_data.selected = Some(start.drill_id.clone());
                 ui_data.expanded = ui_tree
                     .get_descendents()
@@ -240,6 +233,7 @@ fn gui(
     mut contexts: EguiContexts,
     mut ui_data: ResMut<UIData>,
     type_registry: Res<AppTypeRegistry>,
+    mut hover_info: ResMut<HoverInfo>,
 ) {
     let ctx = contexts.ctx_mut();
 
@@ -269,8 +263,12 @@ fn gui(
                         ui.heading("UI Tree");
                     });
                     egui::ScrollArea::both().show(ui, |ui| {
-                        let id = id.with(ui_data.ui_tree.runtime_id.clone());
+                        let id = id.with(ui_data.ui_tree.runtim○e_id.clone());
                         let mut elem = ui_data.ui_tree.clone();
+                        
+                        // resets each frame before being set when drawing expandos
+                        ui_data.hovered = None;
+
                         ui_for_element_info(id, ui, &mut ui_data, &mut elem, &mut inspector);
                         ui_data.ui_tree = elem;
                         ui.allocate_space(ui.available_size());
@@ -315,7 +313,7 @@ fn gui(
                     info!("Copied runtime_id {} to clipboard", runtime_id);
                 }
                 // inspector.ui_for_reflect_readonly(&data, ui);
-            }); 
+            });
         });
 
     let id = egui::Id::new("Paused");
@@ -327,6 +325,10 @@ fn gui(
             ui.checkbox(&mut ui_data.paused, "Paused");
         });
     ui_data.fresh = false;
+
+    hover_info.inspector_element = ui_data.hovered.as_ref().map(|elem| InspectorHoverIndicator {
+        info: elem.clone(),
+    });
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -347,21 +349,7 @@ fn ui_for_element_info(
         expando.set_open(default_open);
         data.fetching.clear();
     }
-    if expando.is_open() && element_info.children.is_none() {
-        let key = (
-            element_info.drill_id.clone(),
-            element_info.runtime_id.clone(),
-        );
-        let found = data.fetching.get_mut(&key);
-        if !found.is_some() {
-            data.fetching.insert(key, FetchingState::FetchRequest);
-        } else if let Some(FetchingState::Fetched(ref mut children)) = found {
-            element_info.children = Some(std::mem::take(children));
-            data.fetching.remove(&key);
-        } else {
-            ui.label("fetching...");
-        }
-    }
+    let expando_is_open = expando.is_open();
     expando
         .show_header(ui, |ui| {
             let mut selected = data.selected == Some(element_info.drill_id.clone());
@@ -382,13 +370,17 @@ fn ui_for_element_info(
                     element_info.drill_id,
                 )
             };
-            if ui.toggle_value(&mut selected, label).changed() {
+            let toggle = ui.toggle_value(&mut selected, label);
+            if toggle.changed() {
                 data.selected = if selected {
                     Some(element_info.drill_id.clone())
                 } else {
                     None
                 };
             };
+            if toggle.hovered() {
+                data.hovered = Some(element_info.clone());
+            }
         })
         .body(|ui| {
             if let Some(ref mut children) = element_info.children {
@@ -400,6 +392,20 @@ fn ui_for_element_info(
                         child,
                         _inspector,
                     );
+                }
+            } else if expando_is_open {
+                let key = (
+                    element_info.drill_id.clone(),
+                    element_info.runtime_id.clone(),
+                );
+                let found = data.fetching.get_mut(&key);
+                if !found.is_some() {
+                    data.fetching.insert(key, FetchingState::FetchRequest);
+                } else if let Some(FetchingState::Fetched(ref mut children)) = found {
+                    element_info.children = Some(std::mem::take(children));
+                    data.fetching.remove(&key);
+                } else {
+                    ui.label("fetching...");
                 }
             }
         });
