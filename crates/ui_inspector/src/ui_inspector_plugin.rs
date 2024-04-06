@@ -1,10 +1,13 @@
-use std::time::Duration;
-
 use bevy::input::common_conditions::input_toggle_active;
 use bevy::prelude::*;
 use bevy_egui::egui;
 use bevy_egui::EguiContexts;
+use bevy_egui::EguiUserTextures;
 use bevy_inspector_egui::reflect_inspector::InspectorUi;
+use cursor_hero_bevy::prelude::TopLeftI;
+use cursor_hero_bevy::prelude::TranslateIVec2;
+use cursor_hero_screen::get_image::get_image;
+use cursor_hero_screen::get_image::ScreensToImageParam;
 use cursor_hero_ui_automation::prelude::*;
 use cursor_hero_ui_hover_types::prelude::GameHoverIndicator;
 use cursor_hero_ui_hover_types::prelude::HostHoverIndicator;
@@ -12,6 +15,7 @@ use cursor_hero_ui_hover_types::prelude::HoverInfo;
 use cursor_hero_ui_hover_types::prelude::InspectorHoverIndicator;
 use cursor_hero_ui_inspector_types::prelude::FetchingState;
 use cursor_hero_ui_inspector_types::prelude::InspectorEvent;
+use cursor_hero_ui_inspector_types::prelude::PreviewImage;
 use cursor_hero_ui_inspector_types::prelude::UIData;
 use cursor_hero_worker::prelude::anyhow::Context;
 use cursor_hero_worker::prelude::anyhow::Error;
@@ -20,7 +24,12 @@ use cursor_hero_worker::prelude::Sender;
 use cursor_hero_worker::prelude::WorkerConfig;
 use cursor_hero_worker::prelude::WorkerMessage;
 use cursor_hero_worker::prelude::WorkerPlugin;
+use image::DynamicImage;
+use image::ImageBuffer;
+use image::Rgba;
+use image::RgbaImage;
 use itertools::Itertools;
+use std::time::Duration;
 use uiautomation::UIAutomation;
 
 pub struct UiInspectorPlugin;
@@ -44,7 +53,8 @@ impl Plugin for UiInspectorPlugin {
         app.add_systems(Update, fetch_requested.run_if(condition.clone()));
         app.add_systems(Update, handle_gamebound_messages.run_if(condition.clone()));
         app.add_systems(Update, gui.run_if(condition.clone()));
-        app.add_systems(Update, handle_inspector_events.run_if(condition));
+        app.add_systems(Update, handle_inspector_events.run_if(condition.clone()));
+        app.add_systems(Update, update_preview_image.run_if(condition));
     }
 }
 
@@ -181,7 +191,6 @@ fn trigger_tree_update_for_hovered(
         .min_by_key(|info| info.bounding_rect.size().length_squared())
         .map(|info| info.drill_id.clone());
 
-        
     // Do nothing if already waiting for a response
     if ui_data.in_flight {
         return;
@@ -286,12 +295,96 @@ fn handle_inspector_events(
     }
 }
 
+fn update_preview_image(
+    screen_access: ScreensToImageParam,
+    asset_server: Res<AssetServer>,
+    mut ui_data: ResMut<UIData>,
+    mut debounce: Local<Option<DrillId>>,
+    mut egui_user_textures: ResMut<EguiUserTextures>,
+) {
+    // Avoid duplicate work
+    if *debounce == ui_data.selected {
+        return;
+    }
+
+    // Get the drill_id of the parent of selected
+    let Some(DrillId::Child(ref inner)) = ui_data.selected else {
+        ui_data.selected_preview = None;
+        return;
+    };
+    let mut parent_drill_id = inner.clone();
+    parent_drill_id.pop_back();
+
+    // Find the parent in the cache
+    let Some(selected_parent) = ui_data
+        .ui_tree
+        .lookup_drill_id(DrillId::Child(parent_drill_id))
+    else {
+        return;
+    };
+
+    // Get the selected element
+    let Some(last) = inner.back() else {
+        return;
+    };
+    let Some(selected) = selected_parent.lookup_drill_id([last].into_iter().cloned().collect())
+    else {
+        return;
+    };
+
+    // Get the texture of the element
+    let texture_region = selected_parent.bounding_rect;
+    let Ok(image) = get_image(texture_region, &screen_access) else {
+        return;
+    };
+
+    // Get the size of the texture
+    let size = image.size();
+
+    // Convert to an image buffer for manipulation
+    let Some(mut image) = ImageBuffer::from_raw(size.x, size.y, image.data) as Option<RgbaImage> else {
+        return;
+    };
+
+    // Calculate region to highlight
+    let parent_region = selected_parent.bounding_rect;
+    let highlight_region = selected.bounding_rect.translate(&-parent_region.top_left());
+
+    // Apply the highlight
+    for (x, y, pixel) in image.enumerate_pixels_mut() {
+        if highlight_region.contains(IVec2::new(x as i32, y as i32)) {
+            *pixel = Rgba([pixel.0[0].saturating_add(50), pixel.0[1].saturating_add(50), pixel.0[2], pixel.0[3]]);
+        }
+    }
+
+    // Convert back to Bevy image
+    let image = Image::from_dynamic(DynamicImage::ImageRgba8(image), true);
+
+    // Register the handle with egui
+    let handle = asset_server.add(image);
+    egui_user_textures.add_image(handle.clone());
+    ui_data.selected_preview = Some(PreviewImage { handle, size });
+
+    // Track work
+    *debounce = ui_data.selected.clone();
+}
+
 fn gui(
     mut contexts: EguiContexts,
     mut ui_data: ResMut<UIData>,
     type_registry: Res<AppTypeRegistry>,
     mut hover_info: ResMut<HoverInfo>,
 ) {
+    // Get preview image
+    let preview = if let Some(ref preview) = ui_data.selected_preview
+        && let Some(texture_id) = contexts.image_id(&preview.handle)
+    {
+        let size = preview.size.as_vec2().normalize() * 400.0;
+        Some((texture_id, (size.x, size.y)))
+    } else {
+        None
+    };
+
     let ctx = contexts.ctx_mut();
 
     let mut cx = bevy_inspector_egui::reflect_inspector::Context {
@@ -340,11 +433,12 @@ fn gui(
                 ui.vertical_centered(|ui| {
                     ui.heading("Properties");
                 });
-                let id = ui_data.selected.clone();
-                let Some(id) = id else {
+                let Some(selected_drill_id) = ui_data.selected.clone() else {
                     return;
                 };
-                let found = ui_data.ui_tree.lookup_drill_id_mut(id);
+                let found = ui_data
+                    .ui_tree
+                    .lookup_drill_id_mut(selected_drill_id.clone());
                 // debug!("found {:?}", found);
                 let Some(x) = found else {
                     return;
@@ -369,7 +463,14 @@ fn gui(
                     });
                     info!("Copied runtime_id {} to clipboard", runtime_id);
                 }
-                // inspector.ui_for_reflect_readonly(&data, ui);
+
+                ui.vertical_centered(|ui| {
+                    ui.heading("Preview");
+                });
+
+                if let Some((texture_id, size)) = preview {
+                    ui.image(egui::load::SizedTexture::new(texture_id, size));
+                }
 
                 ui.vertical_centered(|ui| {
                     ui.heading("Scratch Pad");

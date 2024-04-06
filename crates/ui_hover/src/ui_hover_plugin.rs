@@ -151,15 +151,9 @@ fn trigger_game_hover_info_update(
         }
     };
 
-    // Check if cursor is outside of window
+    // Clear game hover indicator when cursor is outside of window
     if window.cursor_position().is_none() {
-        let msg = ThreadboundHoverMessage::ClearGame;
-        let check = Some(msg.clone());
-        if *debounce != check {
-            *debounce = check;
-            hover_info.game_hover_indicator = None;
-        }
-        return;
+        hover_info.game_hover_indicator = None;
     }
 
     // Delay between updates
@@ -192,6 +186,7 @@ fn trigger_game_hover_info_update(
 
     // Send message
     messages.send(msg);
+    *debounce = check;
 }
 
 fn handle_gamebound_messages(

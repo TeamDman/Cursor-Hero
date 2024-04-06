@@ -2661,11 +2661,14 @@ dependencies = [
  "bevy",
  "bevy-inspector-egui",
  "bevy_egui",
+ "cursor_hero_bevy",
+ "cursor_hero_screen",
  "cursor_hero_ui_automation",
  "cursor_hero_ui_hover_types",
  "cursor_hero_ui_inspector_types",
  "cursor_hero_winutils",
  "cursor_hero_worker",
+ "image",
  "itertools 0.12.0",
  "uiautomation",
 ]
@@ -2675,6 +2678,7 @@ name = "cursor_hero_ui_inspector_types"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "bevy_egui",
  "cursor_hero_ui_automation_types",
 ]
 
