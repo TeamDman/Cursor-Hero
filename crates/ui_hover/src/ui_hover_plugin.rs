@@ -296,7 +296,6 @@ fn update_visuals(
                 ..default()
             },
             Clickable,
-            Hoverable,
             RigidBody::Static,
             Sensor,
             Collider::cuboid(bounds.width(), bounds.height()),
@@ -345,7 +344,6 @@ fn update_visuals(
                 ..default()
             },
             Clickable,
-            Hoverable,
             RigidBody::Static,
             Sensor,
             Collider::cuboid(bounds.width(), bounds.height()),
