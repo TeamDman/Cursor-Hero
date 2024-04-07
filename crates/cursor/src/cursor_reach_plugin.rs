@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use cursor_hero_character_types::prelude::*;
-use cursor_hero_math::prelude::Lerp;
 use cursor_hero_cursor_types::prelude::*;
+use cursor_hero_math::prelude::Lerp;
 
 use cursor_hero_sprint_tool_types::sprint_tool_types_plugin::SprintEvent;
 use cursor_hero_toolbelt_types::toolbelt_types::Wheel;
@@ -29,10 +29,7 @@ fn handle_reach_events(
                 };
                 cursor.reach = *reach;
             }
-            CursorReachEvent::SetCursorPercent {
-                cursor_id,
-                percent,
-            } => {
+            CursorReachEvent::SetCursorPercent { cursor_id, percent } => {
                 let Ok(mut cursor) = cursor_query.get_mut(*cursor_id) else {
                     warn!("cursor not found processing {:?}", event);
                     continue;

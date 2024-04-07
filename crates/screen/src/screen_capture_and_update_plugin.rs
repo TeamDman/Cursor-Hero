@@ -137,11 +137,9 @@ fn update_screens(
             *sent_disabled = true;
         }
         return;
-    } else {
-        if *sent_disabled {
-            threadbound_messages.send(ThreadboundMessage::SetEnabled(true));
-            *sent_disabled = false;
-        }
+    } else if *sent_disabled {
+        threadbound_messages.send(ThreadboundMessage::SetEnabled(true));
+        *sent_disabled = false;
     }
     let Some(msg) = gamebound_messages.read().last() else {
         return;
@@ -155,7 +153,9 @@ fn update_screens(
         if let Some(frame) = frames.get(&screen.id) {
             // update the texture
             metrics.begin("texture");
-            textures.get_mut(texture).map(|t| t.data = frame.data.clone());
+            if let Some(t) = textures.get_mut(texture) {
+                t.data = frame.data.clone();
+            }
             metrics.end("texture");
         }
         metrics.end("lookup");

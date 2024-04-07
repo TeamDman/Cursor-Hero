@@ -11,10 +11,10 @@ use cursor_hero_cursor_types::cursor_click_types::Way;
 use cursor_hero_cursor_types::cursor_types::MainCursor;
 use cursor_hero_ui_automation::prelude::find_element_at;
 use cursor_hero_ui_automation::prelude::gather_single_element_info;
-use cursor_hero_ui_hover_types::prelude::HoverIndicator;
 use cursor_hero_ui_hover_types::prelude::GameHoverIndicator;
 use cursor_hero_ui_hover_types::prelude::GameboundHoverMessage;
 use cursor_hero_ui_hover_types::prelude::HostHoverIndicator;
+use cursor_hero_ui_hover_types::prelude::HoverIndicator;
 use cursor_hero_ui_hover_types::prelude::HoverInfo;
 use cursor_hero_ui_hover_types::prelude::InspectorHoverIndicator;
 use cursor_hero_ui_hover_types::prelude::ThreadboundHoverMessage;
@@ -79,7 +79,7 @@ fn handle_threadbound_message(
             let info = gather_single_element_info(&root)?;
             GameboundHoverMessage::GameHoverInfo {
                 info,
-                cursor_pos: cursor_pos.clone(),
+                cursor_pos: *cursor_pos,
             }
         }
         ThreadboundHoverMessage::AtHostCursorPosition => {
@@ -117,6 +117,7 @@ fn trigger_host_hover_info_update(
     messages.send(msg);
 }
 
+#[allow(clippy::too_many_arguments)]
 fn trigger_game_hover_info_update(
     cursor_query: Query<&GlobalTransform, With<MainCursor>>,
     window_query: Query<&Window, With<PrimaryWindow>>,
@@ -201,7 +202,7 @@ fn handle_gamebound_messages(
                 }
                 hover_info.host_hover_indicator = Some(HostHoverIndicator {
                     info: info.clone(),
-                    cursor_pos: cursor_pos.clone(),
+                    cursor_pos: *cursor_pos,
                 });
             }
             GameboundHoverMessage::ClearHostHoverInfo => {
@@ -213,7 +214,7 @@ fn handle_gamebound_messages(
                 }
                 hover_info.game_hover_indicator = Some(GameHoverIndicator {
                     info: info.clone(),
-                    cursor_pos: cursor_pos.clone(),
+                    cursor_pos: *cursor_pos,
                 });
             }
             GameboundHoverMessage::ClearGameHoverInfo => {
@@ -227,7 +228,12 @@ struct IndicatorParams {
     color: Color,
     name: &'static str,
 }
-fn update_indicator<T: Component + Clone + HoverIndicator + PartialEq, A: Component, B: Component>(
+#[allow(clippy::type_complexity)]
+fn update_indicator<
+    T: Component + Clone + HoverIndicator + PartialEq,
+    A: Component,
+    B: Component,
+>(
     indicator_query: &mut Query<
         (Entity, &mut Sprite, &mut Transform, &mut Collider, &mut T),
         (Without<A>, Without<B>),

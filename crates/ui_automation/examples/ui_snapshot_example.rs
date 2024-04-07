@@ -92,16 +92,15 @@ fn trigger(
     events.send(ThreadboundUISnapshotMessage::TakeSnapshot);
 }
 
-fn receive(mut snapshot: EventReader<GameboundUISnapshotMessage>, memory_config: Res<MemoryConfig>) {
+fn receive(
+    mut snapshot: EventReader<GameboundUISnapshotMessage>,
+    memory_config: Res<MemoryConfig>,
+) {
     for msg in snapshot.read() {
         match msg {
             GameboundUISnapshotMessage::Snapshot(snapshot) => {
                 debug!("received snapshot, writing to file");
-                match get_persist_file(
-                    memory_config.as_ref(),
-                    "ui_snapshot.txt",
-                    Usage::Persist,
-                ) {
+                match get_persist_file(memory_config.as_ref(), "ui_snapshot.txt", Usage::Persist) {
                     Ok(mut file) => {
                         if let Err(e) = file.write_all(snapshot.to_string().as_bytes()) {
                             debug!("Failed to write to file: {:?}", e);

@@ -2,15 +2,7 @@ use bevy::math::IRect;
 use cursor_hero_ui_automation_types::prelude::DrillId;
 use cursor_hero_ui_automation_types::prelude::ElementInfo;
 use cursor_hero_ui_automation_types::prelude::RuntimeId;
-use itertools::Itertools;
-use std::collections::VecDeque;
-use uiautomation::Error;
-use uiautomation::UIAutomation;
 use uiautomation::UIElement;
-use uiautomation::UITreeWalker;
-
-use crate::gather_children::GatherChildrenable;
-use crate::gather_children::StopBehaviour;
 
 pub fn gather_single_element_info(element: &UIElement) -> Result<ElementInfo, uiautomation::Error> {
     let name = element.get_name()?;

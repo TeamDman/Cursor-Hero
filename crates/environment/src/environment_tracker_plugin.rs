@@ -15,7 +15,10 @@ impl Plugin for EnvironmentTrackerPlugin {
 
 fn track(
     mut commands: Commands,
-    mut thing_query: Query<(Entity, Option<&mut EnvironmentTracker>, &CollidingEntities), Without<DoNotTrackEnvironment>>,
+    mut thing_query: Query<
+        (Entity, Option<&mut EnvironmentTracker>, &CollidingEntities),
+        Without<DoNotTrackEnvironment>,
+    >,
     level_bounds_query: Query<&Parent, With<LevelBounds>>,
     level_bounds_holder_query: Query<&Parent, With<LevelBoundsHolder>>,
 ) {

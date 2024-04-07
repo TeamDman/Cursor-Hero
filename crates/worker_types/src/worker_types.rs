@@ -17,8 +17,7 @@ where
 
 pub trait WorkerMessage: std::fmt::Debug + Event + Send + Sync + Clone + 'static {}
 
-pub trait WorkerState: 'static + Sized
-//  + Send + Sync + Clone
+pub trait WorkerState: 'static + Sized //  + Send + Sync + Clone
 {
     fn try_default() -> Result<Self>;
 }
@@ -36,15 +35,14 @@ pub type ThreadboundMessageErrorHandler<T, G, S> =
 
 pub type ThreadboundMessageReceiver<T, S> = fn(thread_rx: &Receiver<T>, state: &mut S) -> Result<T>;
 
-
-pub struct TGSHolder<T,G,S> {
+pub struct TGSHolder<T, G, S> {
     _phantom_t: PhantomData<T>,
     _phantom_g: PhantomData<G>,
     _phantom_s: PhantomData<S>,
 }
-unsafe impl <T, G, S> Send for TGSHolder<T, G, S> {}
-unsafe impl <T, G, S> Sync for TGSHolder<T, G, S> {}
-impl <T, G, S> Clone for TGSHolder<T, G, S> {
+unsafe impl<T, G, S> Send for TGSHolder<T, G, S> {}
+unsafe impl<T, G, S> Sync for TGSHolder<T, G, S> {}
+impl<T, G, S> Clone for TGSHolder<T, G, S> {
     fn clone(&self) -> Self {
         TGSHolder {
             _phantom_t: PhantomData,
@@ -89,15 +87,15 @@ impl<T: WorkerMessage, G: WorkerMessage, S: WorkerState> Default for WorkerConfi
         }
     }
 }
-impl <T,G,S> Clone for WorkerConfig<T,G,S> {
+impl<T, G, S> Clone for WorkerConfig<T, G, S> {
     fn clone(&self) -> Self {
         WorkerConfig {
             name: self.name.clone(),
             sleep_duration: self.sleep_duration,
             is_ui_automation_thread: self.is_ui_automation_thread,
-            threadbound_message_receiver: self.threadbound_message_receiver.clone(),
-            handle_threadbound_message: self.handle_threadbound_message.clone(),
-            handle_threadbound_message_error_handler: self.handle_threadbound_message_error_handler.clone(),
+            threadbound_message_receiver: self.threadbound_message_receiver,
+            handle_threadbound_message: self.handle_threadbound_message,
+            handle_threadbound_message_error_handler: self.handle_threadbound_message_error_handler,
             gamebound_channel_capacity: self.gamebound_channel_capacity,
             threadbound_channel_capacity: self.threadbound_channel_capacity,
             tgs_holder: self.tgs_holder.clone(),

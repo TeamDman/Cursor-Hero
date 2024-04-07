@@ -1,10 +1,9 @@
-
-use cursor_hero_worker_types::prelude::WorkerMessage;
 use bevy::prelude::*;
+use cursor_hero_ui_automation::prelude::UiSnapshot;
+use cursor_hero_worker_types::prelude::WorkerMessage;
 use std::fmt;
 use std::fmt::Display;
 use std::fmt::Formatter;
-use cursor_hero_ui_automation::prelude::UiSnapshot;
 use uiautomation::controls::ControlType;
 use uiautomation::UIElement;
 
@@ -43,9 +42,6 @@ impl Display for AppUIElement {
         }
     }
 }
-
-
-
 
 #[derive(Event, Debug, Reflect, Clone)]
 pub enum ThreadboundUIWatcherMessage {

@@ -53,16 +53,18 @@ pub struct CalculatorState {
 }
 impl std::fmt::Display for CalculatorState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Calculator ({}{})", self.expression.name, self.display.name)
+        write!(
+            f,
+            "Calculator ({}{})",
+            self.expression.name, self.display.name
+        )
     }
 }
-
 
 #[derive(Event, Debug, Reflect, Default)]
 pub struct SpawnCalculatorRequest {
     calculator_state: CalculatorState,
 }
-
 
 #[derive(Component, Debug, Reflect, Default, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Calculator;

@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 use bevy_xpbd_2d::prelude::*;
+use cursor_hero_cursor_types::prelude::*;
 use cursor_hero_environment_types::prelude::*;
 use cursor_hero_math::prelude::Lerp;
-use cursor_hero_cursor_types::prelude::*;
 use cursor_hero_voice_to_text_types::prelude::*;
 
 pub struct VoiceToTextButtonPlugin;

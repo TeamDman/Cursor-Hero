@@ -7,9 +7,9 @@ use bevy::window::PrimaryWindow;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use cursor_hero_memory::primary_window_memory_plugin::PrimaryWindowMemoryPlugin;
 use cursor_hero_ui_automation::prelude::*;
-use cursor_hero_worker::prelude::WorkerMessage;
 use cursor_hero_worker::prelude::Sender;
 use cursor_hero_worker::prelude::WorkerConfig;
+use cursor_hero_worker::prelude::WorkerMessage;
 use cursor_hero_worker::prelude::WorkerPlugin;
 fn main() {
     let mut app = App::new();

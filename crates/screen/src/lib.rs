@@ -3,8 +3,8 @@ use bevy::math::IVec2;
 use screenshots::display_info::DisplayInfo;
 
 pub mod get_image;
-pub mod screen_plugin;
 pub mod screen_capture_and_update_plugin;
+pub mod screen_plugin;
 
 pub trait ToBevyIRect {
     fn to_bevy_irect(&self) -> IRect;

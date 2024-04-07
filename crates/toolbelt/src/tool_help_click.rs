@@ -1,8 +1,8 @@
 use bevy::prelude::*;
-use cursor_hero_host_fs_types::host_fs_types::HostPath;
-use cursor_hero_host_fs_types::host_fs_types::HostPathAction;
 use cursor_hero_cursor_types::cursor_click_types::ClickEvent;
 use cursor_hero_cursor_types::cursor_click_types::Way;
+use cursor_hero_host_fs_types::host_fs_types::HostPath;
+use cursor_hero_host_fs_types::host_fs_types::HostPathAction;
 use cursor_hero_toolbelt_types::toolbelt_types::ToolHelpTrigger;
 
 /// Doesn't work with loadouts without the click tool lol

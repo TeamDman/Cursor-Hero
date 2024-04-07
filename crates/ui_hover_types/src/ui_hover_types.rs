@@ -55,8 +55,6 @@ impl HoverIndicator for InspectorHoverIndicator {
     }
 }
 
-
-
 #[derive(Debug, Reflect, Clone, Event)]
 pub enum GameboundHoverMessage {
     HostHoverInfo {

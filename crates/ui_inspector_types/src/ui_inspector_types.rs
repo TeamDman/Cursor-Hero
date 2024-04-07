@@ -1,5 +1,8 @@
-use bevy::{prelude::*, utils::HashMap};
-use cursor_hero_ui_automation_types::prelude::{DrillId, ElementInfo, RuntimeId};
+use bevy::prelude::*;
+use bevy::utils::HashMap;
+use cursor_hero_ui_automation_types::prelude::DrillId;
+use cursor_hero_ui_automation_types::prelude::ElementInfo;
+use cursor_hero_ui_automation_types::prelude::RuntimeId;
 
 #[derive(Resource, Debug, Reflect, Default)]
 pub struct PreviewImage {

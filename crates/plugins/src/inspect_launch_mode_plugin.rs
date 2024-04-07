@@ -60,7 +60,7 @@ impl Plugin for HeadlessLaunchModePlugin {
 wgpu_core=warn,
 wgpu_hal=warn,
 "
-// cursor_hero=debug,
+                    // cursor_hero=debug,
                     .replace('\n', "")
                     .trim()
                     .into(),

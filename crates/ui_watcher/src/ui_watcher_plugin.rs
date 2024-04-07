@@ -66,11 +66,7 @@ fn handle_gamebound_messages(
             environment_id,
         });
 
-        match get_persist_file(
-            memory_config.as_ref(),
-            "results.txt",
-            Usage::Persist,
-        ) {
+        match get_persist_file(memory_config.as_ref(), "results.txt", Usage::Persist) {
             Ok(mut file) => {
                 if let Err(e) = file.write_all(format!("{:#?}", snapshot).as_bytes()) {
                     error!("Failed to write to file: {:?}", e);

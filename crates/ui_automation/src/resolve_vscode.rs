@@ -233,9 +233,7 @@ fn resolve_footer(footer: &UIElement, automation: &UIAutomation) -> Result<VSCod
         .map(|part| part.split(' ').nth(1).and_then(|s| s.parse::<usize>().ok()))
         .collect_vec();
     let cursor_position = match cursor_position.as_slice() {
-        [Some(line), Some(column)] => {
-            IVec2::new(*column as i32, *line as i32)
-        }
+        [Some(line), Some(column)] => IVec2::new(*column as i32, *line as i32),
         _ => {
             return Err(AppResolveError::BadStructure(format!(
                 "Bad cursor position {:?}",

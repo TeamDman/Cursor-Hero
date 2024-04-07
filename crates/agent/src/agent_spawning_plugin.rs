@@ -28,10 +28,7 @@ fn spawn_agent(
         if !environment_query.contains(event.environment_id) {
             continue;
         }
-        info!(
-            "Spawning agent for environment {:?}",
-            event.environment_id
-        );
+        info!("Spawning agent for environment {:?}", event.environment_id);
         commands
             .entity(event.environment_id)
             .with_children(|parent| {

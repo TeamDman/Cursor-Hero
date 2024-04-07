@@ -3,9 +3,9 @@ use bevy::sprite::Anchor;
 use cursor_hero_cursor_types::prelude::*;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
 use cursor_hero_worker::prelude::anyhow::Result;
-use cursor_hero_worker::prelude::WorkerMessage;
 use cursor_hero_worker::prelude::Sender;
 use cursor_hero_worker::prelude::WorkerConfig;
+use cursor_hero_worker::prelude::WorkerMessage;
 use cursor_hero_worker::prelude::WorkerPlugin;
 
 pub struct CursorMirroringPlugin;
@@ -14,7 +14,7 @@ impl Plugin for CursorMirroringPlugin {
         app.add_plugins(WorkerPlugin {
             config: WorkerConfig::<ThreadboundCursorMessage, GameboundCursorMessage, ()> {
                 name: "cursor_mirroring".to_string(),
-                handle_threadbound_message: handle_threadbound_message,
+                handle_threadbound_message,
                 threadbound_message_receiver: |_thread_rx, _state| {
                     // Keep the thread working on the task without waiting for a message
                     Ok(ThreadboundCursorMessage::CaptureCursorPosition)
@@ -65,7 +65,7 @@ fn handle_gamebound_messages(
         latest = Some(msg);
     }
     if let Some(GameboundCursorMessage::HostCursorPosition(pos)) = latest {
-        res.0 = pos.clone();
+        res.0 = *pos;
     }
 }
 

@@ -3,10 +3,10 @@ use cursor_hero_cursor_types::cursor_action_types::CursorActionPlugin;
 
 use crate::cursor_click_plugin::CursorClickPlugin;
 use crate::cursor_hover_plugin::CursorHoverPlugin;
+use crate::cursor_mirroring_plugin::CursorMirroringPlugin;
 use crate::cursor_positioning_plugin::CursorPositioningPlugin;
 use crate::cursor_reach_plugin::CursorReachPlugin;
 use crate::cursor_spawning_plugin::CursorSpawningPlugin;
-use crate::cursor_mirroring_plugin::CursorMirroringPlugin;
 
 pub struct CursorPlugin;
 impl Plugin for CursorPlugin {

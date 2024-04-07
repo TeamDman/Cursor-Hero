@@ -260,7 +260,7 @@ fn handle_input(
                 }
                 if tool_actions.just_released(action) {
                     debug!("{:?} released", action);
-                    
+
                     commands.spawn((
                         SpatialBundle {
                             transform: Transform::from_translation(cursor_pos),

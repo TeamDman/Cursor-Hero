@@ -31,16 +31,16 @@ impl HexList for Vec<i32> {
 pub struct UiSnapshot {
     pub app_windows: Vec<AppWindow>,
 }
-impl UiSnapshot {
-    fn as_long_string(&self) -> String {
-        let mut s = String::new();
-        s.push_str("# UI Snapshot\n");
-        for window in self.app_windows.iter() {
-            s.push_str(&format!("## {}\n\n{}\n", window.variant_name(), window));
-        }
-        s
-    }
-}
+// impl UiSnapshot {
+//     fn as_long_string(&self) -> String {
+//         let mut s = String::new();
+//         s.push_str("# UI Snapshot\n");
+//         for window in self.app_windows.iter() {
+//             s.push_str(&format!("## {}\n\n{}\n", window.variant_name(), window));
+//         }
+//         s
+//     }
+// }
 impl Display for UiSnapshot {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         writeln!(f, "UI Snapshot ({} windows)", self.app_windows.len())?;
@@ -380,7 +380,7 @@ impl ElementInfo {
             drill_id,
             self.children.as_ref().map(|c| c
                 .iter()
-                .map(|x| format!("{} - {}", x.name, x.drill_id.to_string()))
+                .map(|x| format!("{} - {}", x.name, x.drill_id))
                 .collect_vec())
         );
 
@@ -413,7 +413,7 @@ impl ElementInfo {
         }
         None
     }
-    
+
     pub fn lookup_drill_id_mut(&mut self, drill_id: DrillId) -> Option<&mut ElementInfo> {
         // Log info for problem solving
         trace!(
@@ -422,7 +422,7 @@ impl ElementInfo {
             drill_id,
             self.children.as_ref().map(|c| c
                 .iter()
-                .map(|x| format!("{} - {}", x.name, x.drill_id.to_string()))
+                .map(|x| format!("{} - {}", x.name, x.drill_id))
                 .collect_vec())
         );
 

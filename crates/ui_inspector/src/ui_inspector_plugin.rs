@@ -43,8 +43,8 @@ impl Plugin for UiInspectorPlugin {
             config: WorkerConfig::<ThreadboundUISnapshotMessage, GameboundUISnapshotMessage, ()> {
                 name: "ui_hover".to_string(),
                 is_ui_automation_thread: true,
-                handle_threadbound_message: handle_threadbound_message,
-                handle_threadbound_message_error_handler: handle_threadbound_message_error_handler,
+                handle_threadbound_message,
+                handle_threadbound_message_error_handler,
                 ..default()
             },
         });
@@ -66,14 +66,14 @@ impl Plugin for UiInspectorPlugin {
 
 #[derive(Debug, Reflect, Clone, Event)]
 enum ThreadboundUISnapshotMessage {
-    UIDataUpdateRequest {
+    UIDataUpdate {
         pos: IVec2,
     },
-    GatherChildrenRequest {
+    GatherChildren {
         parent_drill_id: DrillId,
         parent_runtime_id: RuntimeId,
     },
-    TreeClipboardRequest {
+    TreeClipboard {
         parent_drill_id: DrillId,
         parent_runtime_id: RuntimeId,
     },
@@ -113,7 +113,7 @@ fn handle_threadbound_message(
     _state: &mut (),
 ) -> Result<()> {
     match msg {
-        ThreadboundUISnapshotMessage::UIDataUpdateRequest { pos } => {
+        ThreadboundUISnapshotMessage::UIDataUpdate { pos } => {
             debug!("taking snapshot");
             // Find element at position
             let start = find_element_at(*pos)?;
@@ -129,7 +129,7 @@ fn handle_threadbound_message(
                 error!("Failed to send snapshot: {:?}", e);
             }
         }
-        ThreadboundUISnapshotMessage::GatherChildrenRequest {
+        ThreadboundUISnapshotMessage::GatherChildren {
             parent_drill_id,
             parent_runtime_id,
         } => {
@@ -154,7 +154,7 @@ fn handle_threadbound_message(
                 error!("Failed to send ChildrenFetchResponse: {:?}", e);
             }
         }
-        ThreadboundUISnapshotMessage::TreeClipboardRequest {
+        ThreadboundUISnapshotMessage::TreeClipboard {
             parent_drill_id,
             parent_runtime_id,
         } => {
@@ -198,7 +198,7 @@ fn trigger_gather_children_request(
     for (key, state) in data.fetching.iter_mut() {
         if let FetchingState::FetchRequest = state {
             *state = FetchingState::FetchDispatched;
-            events.send(ThreadboundUISnapshotMessage::GatherChildrenRequest {
+            events.send(ThreadboundUISnapshotMessage::GatherChildren {
                 parent_drill_id: key.0.clone(),
                 parent_runtime_id: key.1.clone(),
             });
@@ -264,7 +264,7 @@ fn trigger_tree_update_for_hovered(
     }
 
     // Send snapshot request
-    events.send(ThreadboundUISnapshotMessage::UIDataUpdateRequest { pos });
+    events.send(ThreadboundUISnapshotMessage::UIDataUpdate { pos });
     ui_data.in_flight = true;
 }
 
@@ -334,7 +334,7 @@ fn handle_inspector_events(
         fn as_rust_identifier(info: &ElementInfo) -> String {
             format!(
                 "{}_{}",
-                info.name.replace(" ", "_").to_lowercase(),
+                info.name.replace(' ', "_").to_lowercase(),
                 info.class_name.to_lowercase()
             )
         }
@@ -577,12 +577,10 @@ fn gui(
                 ui.vertical_centered(|ui| {
                     ui.heading("Properties");
                     if ui.button("copy tree from here").clicked() {
-                        threadbound_events.send(
-                            ThreadboundUISnapshotMessage::TreeClipboardRequest {
-                                parent_drill_id: selected_info.drill_id.clone(),
-                                parent_runtime_id: selected_info.runtime_id.clone(),
-                            },
-                        );
+                        threadbound_events.send(ThreadboundUISnapshotMessage::TreeClipboard {
+                            parent_drill_id: selected_info.drill_id.clone(),
+                            parent_runtime_id: selected_info.runtime_id.clone(),
+                        });
                     }
                 });
                 inspector.ui_for_reflect_readonly(selected_info, ui);
@@ -711,7 +709,7 @@ fn ui_for_element_info(
                     element_info.runtime_id.clone(),
                 );
                 let found = data.fetching.get_mut(&key);
-                if !found.is_some() {
+                if found.is_none() {
                     data.fetching.insert(key, FetchingState::FetchRequest);
                 } else if let Some(FetchingState::Fetched(ref mut children)) = found {
                     element_info.children = Some(std::mem::take(children));
