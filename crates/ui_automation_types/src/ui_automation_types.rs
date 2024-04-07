@@ -309,7 +309,7 @@ impl std::fmt::Display for DrillId {
     }
 }
 
-#[derive(Debug, Clone, Reflect, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Reflect, PartialEq, Eq, Serialize, Deserialize)]
 // #[reflect(no_field_bounds)] //https://github.com/bevyengine/bevy/issues/8965
 pub struct ElementInfo {
     pub name: String,

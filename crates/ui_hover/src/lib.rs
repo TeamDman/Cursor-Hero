@@ -1,3 +1,4 @@
+#![feature(let_chains)]
 pub mod ui_hover_plugin;
 
 pub mod prelude {

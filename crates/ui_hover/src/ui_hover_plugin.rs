@@ -8,10 +8,10 @@ use cursor_hero_bevy::prelude::NegativeYIVec2;
 use cursor_hero_cursor_types::cursor_click_types::ClickEvent;
 use cursor_hero_cursor_types::cursor_click_types::Clickable;
 use cursor_hero_cursor_types::cursor_click_types::Way;
-use cursor_hero_cursor_types::cursor_hover_types::Hoverable;
 use cursor_hero_cursor_types::cursor_types::MainCursor;
 use cursor_hero_ui_automation::prelude::find_element_at;
 use cursor_hero_ui_automation::prelude::gather_single_element_info;
+use cursor_hero_ui_hover_types::prelude::HoverIndicator;
 use cursor_hero_ui_hover_types::prelude::GameHoverIndicator;
 use cursor_hero_ui_hover_types::prelude::GameboundHoverMessage;
 use cursor_hero_ui_hover_types::prelude::HostHoverIndicator;
@@ -223,17 +223,100 @@ fn handle_gamebound_messages(
     }
 }
 
+struct IndicatorParams {
+    color: Color,
+    name: &'static str,
+}
+fn update_indicator<T: Component + Clone + HoverIndicator + PartialEq, A: Component, B: Component>(
+    indicator_query: &mut Query<
+        (Entity, &mut Sprite, &mut Transform, &mut Collider, &mut T),
+        (Without<A>, Without<B>),
+    >,
+    hovered_indicator_option: &Option<T>,
+    commands: &mut Commands,
+    params: IndicatorParams,
+) {
+    // host indicator
+    if let Ok(indicator) = indicator_query.get_single_mut() {
+        // indicator exists
+        let (entity, mut sprite, mut transform, mut collider, mut indicator) = indicator;
+        // if let Some(existing) = hovered_indicator_option && existing.get_info() == indicator.get_info() {
+        //     // no change
+        //     // do nothing
+        // } else {
+        //     // despawn indicator
+        //     commands.entity(entity).despawn_recursive();
+        // }
+
+        if let Some(existing) = hovered_indicator_option {
+            // hovered exists
+            // update indicator
+            let bounds = existing.get_bounds();
+            sprite.custom_size = Some(Vec2::new(bounds.width(), bounds.height()));
+            transform.translation = Vec3::new(
+                bounds.min.x + bounds.width() / 2.,
+                -bounds.min.y - bounds.height() / 2.,
+                0.,
+            );
+            *collider = Collider::cuboid(bounds.width(), bounds.height());
+            *indicator = existing.clone();
+        } else {
+            // hovered does not exist
+            // despawn indicator
+            commands.entity(entity).despawn_recursive();
+        }
+    } else if let Some(existing) = hovered_indicator_option {
+        // indicator does not exist
+        // spawn indicator
+        let bounds = existing.get_bounds();
+        let indicator = existing.clone();
+        commands.spawn((
+            SpriteBundle {
+                transform: Transform::from_xyz(
+                    bounds.min.x + bounds.width() / 2.,
+                    -bounds.min.y - bounds.height() / 2.,
+                    0.,
+                ),
+                sprite: Sprite {
+                    custom_size: Some(Vec2::new(bounds.width(), bounds.height())),
+                    color: params.color,
+                    ..default()
+                },
+                ..default()
+            },
+            Clickable,
+            RigidBody::Kinematic,
+            Sensor,
+            Collider::cuboid(bounds.width(), bounds.height()),
+            Name::new(params.name),
+            indicator,
+        ));
+    }
+}
+
 #[allow(clippy::type_complexity)]
 fn update_visuals(
     mut host_indicator: Query<
-        (Entity, &mut Sprite, &mut Transform, &mut HostHoverIndicator),
+        (
+            Entity,
+            &mut Sprite,
+            &mut Transform,
+            &mut Collider,
+            &mut HostHoverIndicator,
+        ),
         (
             Without<GameHoverIndicator>,
             Without<InspectorHoverIndicator>,
         ),
     >,
     mut game_indicator: Query<
-        (Entity, &mut Sprite, &mut Transform, &mut GameHoverIndicator),
+        (
+            Entity,
+            &mut Sprite,
+            &mut Transform,
+            &mut Collider,
+            &mut GameHoverIndicator,
+        ),
         (
             Without<HostHoverIndicator>,
             Without<InspectorHoverIndicator>,
@@ -244,6 +327,7 @@ fn update_visuals(
             Entity,
             &mut Sprite,
             &mut Transform,
+            &mut Collider,
             &mut InspectorHoverIndicator,
         ),
         (Without<HostHoverIndicator>, Without<GameHoverIndicator>),
@@ -251,150 +335,39 @@ fn update_visuals(
     hovered: Res<HoverInfo>,
     mut commands: Commands,
 ) {
-    // host indicator
-    if let Ok(host_indicator) = host_indicator.get_single_mut() {
-        // indicator exists
-        let (entity, mut sprite, mut transform, mut indicator) = host_indicator;
-        if let Some(existing) = &hovered.host_hover_indicator {
-            // hovered exists
-            // update indicator
-            let bounds = existing.info.bounding_rect.as_rect();
-            sprite.custom_size = Some(Vec2::new(bounds.width(), bounds.height()));
-            transform.translation = Vec3::new(
-                bounds.min.x + bounds.width() / 2.,
-                -bounds.min.y - bounds.height() / 2.,
-                0.,
-            );
-            *indicator = existing.clone();
-        } else {
-            // hovered does not exist
-            // despawn indicator
-            commands.entity(entity).despawn_recursive();
-        }
-    } else if let Some(existing) = &hovered.host_hover_indicator {
-        // indicator does not exist
-        // spawn indicator
-        let bounds = existing.info.bounding_rect.as_rect();
-        let indicator = existing.clone();
-        commands.spawn((
-            SpriteBundle {
-                transform: Transform::from_xyz(
-                    bounds.min.x + bounds.width() / 2.,
-                    -bounds.min.y - bounds.height() / 2.,
-                    0.,
-                ),
-                sprite: Sprite {
-                    custom_size: Some(Vec2::new(bounds.width(), bounds.height())),
-                    color: Color::rgba(0.141, 0.675, 0.949, 0.05),
-                    ..default()
-                },
-                ..default()
-            },
-            Clickable,
-            RigidBody::Static,
-            Sensor,
-            Collider::cuboid(bounds.width(), bounds.height()),
-            Name::new("Host Hovered Indicator"),
-            indicator,
-        ));
-    }
+    // Define parameters for each indicator type
+    let host_params = IndicatorParams {
+        color: Color::rgba(0.141, 0.675, 0.949, 0.05),
+        name: "Host Hovered Indicator",
+    };
+    let game_params = IndicatorParams {
+        color: Color::rgba(0.641, 0.275, 0.649, 0.05),
+        name: "Game Hovered Indicator",
+    };
+    let inspector_params = IndicatorParams {
+        color: Color::rgba(1.0, 0.855, 0.431, 0.05),
+        name: "Inspector Hovered Indicator",
+    };
 
-    // game indicator
-    if let Ok(game_indicator) = game_indicator.get_single_mut() {
-        // indicator exists
-        let (entity, mut sprite, mut transform, mut indicator) = game_indicator;
-        if let Some(existing) = &hovered.game_hover_indicator {
-            // hovered exists
-            // update indicator
-            let bounds = existing.info.bounding_rect.as_rect();
-            sprite.custom_size = Some(Vec2::new(bounds.width(), bounds.height()));
-            transform.translation = Vec3::new(
-                bounds.min.x + bounds.width() / 2.,
-                -bounds.min.y - bounds.height() / 2.,
-                0.,
-            );
-            *indicator = existing.clone();
-        } else {
-            // hovered does not exist
-            // despawn indicator
-            commands.entity(entity).despawn_recursive();
-        }
-    } else if let Some(existing) = &hovered.game_hover_indicator {
-        // indicator does not exist
-        // spawn indicator
-        let bounds = existing.info.bounding_rect.as_rect();
-        let indicator = existing.clone();
-        commands.spawn((
-            SpriteBundle {
-                transform: Transform::from_xyz(
-                    bounds.min.x + bounds.width() / 2.,
-                    -bounds.min.y - bounds.height() / 2.,
-                    0.,
-                ),
-                sprite: Sprite {
-                    custom_size: Some(Vec2::new(bounds.width(), bounds.height())),
-                    color: Color::rgba(0.641, 0.275, 0.649, 0.05),
-                    ..default()
-                },
-                ..default()
-            },
-            Clickable,
-            RigidBody::Static,
-            Sensor,
-            Collider::cuboid(bounds.width(), bounds.height()),
-            Name::new("Game Hovered Indicator"),
-            indicator,
-        ));
-    }
-
-    // inspector indicator
-    if let Ok(inspector_indicator) = inspector_indicator.get_single_mut() {
-        // indicator exists
-        let (entity, mut sprite, mut transform, mut indicator) = inspector_indicator;
-        if let Some(existing) = &hovered.inspector_hover_indicator {
-            // hovered exists
-            // update indicator
-            let bounds = existing.info.bounding_rect.as_rect();
-            sprite.custom_size = Some(Vec2::new(bounds.width(), bounds.height()));
-            transform.translation = Vec3::new(
-                bounds.min.x + bounds.width() / 2.,
-                -bounds.min.y - bounds.height() / 2.,
-                0.,
-            );
-            *indicator = existing.clone();
-        } else {
-            // hovered does not exist
-            // despawn indicator
-            commands.entity(entity).despawn_recursive();
-        }
-    } else if let Some(existing) = &hovered.inspector_hover_indicator {
-        // indicator does not exist
-        // spawn indicator
-        let bounds = existing.info.bounding_rect.as_rect();
-        let indicator = existing.clone();
-        commands.spawn((
-            SpriteBundle {
-                transform: Transform::from_xyz(
-                    bounds.min.x + bounds.width() / 2.,
-                    -bounds.min.y - bounds.height() / 2.,
-                    0.,
-                ),
-                sprite: Sprite {
-                    custom_size: Some(Vec2::new(bounds.width(), bounds.height())),
-                    color: Color::rgba(1.0, 0.855, 0.431, 0.05),
-                    ..default()
-                },
-                ..default()
-            },
-            Clickable,
-            Hoverable,
-            RigidBody::Static,
-            Sensor,
-            Collider::cuboid(bounds.width(), bounds.height()),
-            Name::new("Inspector Hovered Indicator"),
-            indicator,
-        ));
-    }
+    // Call `update_indicator` for each type
+    update_indicator(
+        &mut host_indicator,
+        &hovered.host_hover_indicator,
+        &mut commands,
+        host_params,
+    );
+    update_indicator(
+        &mut game_indicator,
+        &hovered.game_hover_indicator,
+        &mut commands,
+        game_params,
+    );
+    update_indicator(
+        &mut inspector_indicator,
+        &hovered.inspector_hover_indicator,
+        &mut commands,
+        inspector_params,
+    );
 }
 
 fn hovered_click_listener(

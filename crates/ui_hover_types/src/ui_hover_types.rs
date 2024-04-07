@@ -10,21 +10,49 @@ pub struct HoverInfo {
     pub inspector_hover_indicator: Option<InspectorHoverIndicator>,
     pub enabled: bool,
 }
-
-#[derive(Component, Reflect, Debug, Clone)]
+pub trait HoverIndicator {
+    fn get_info(&self) -> &ElementInfo;
+    fn get_bounds(&self) -> Rect;
+}
+#[derive(Component, Reflect, Debug, Clone, PartialEq, Eq)]
 pub struct HostHoverIndicator {
     pub info: ElementInfo,
     pub cursor_pos: IVec2,
 }
-#[derive(Component, Reflect, Debug, Clone)]
+impl HoverIndicator for HostHoverIndicator {
+    fn get_info(&self) -> &ElementInfo {
+        &self.info
+    }
+    fn get_bounds(&self) -> Rect {
+        self.info.bounding_rect.as_rect()
+    }
+}
+
+#[derive(Component, Reflect, Debug, Clone, PartialEq, Eq)]
 pub struct GameHoverIndicator {
     pub info: ElementInfo,
     pub cursor_pos: IVec2,
 }
+impl HoverIndicator for GameHoverIndicator {
+    fn get_info(&self) -> &ElementInfo {
+        &self.info
+    }
+    fn get_bounds(&self) -> Rect {
+        self.info.bounding_rect.as_rect()
+    }
+}
 
-#[derive(Component, Reflect, Debug, Clone)]
+#[derive(Component, Reflect, Debug, Clone, PartialEq, Eq)]
 pub struct InspectorHoverIndicator {
     pub info: ElementInfo,
+}
+impl HoverIndicator for InspectorHoverIndicator {
+    fn get_info(&self) -> &ElementInfo {
+        &self.info
+    }
+    fn get_bounds(&self) -> Rect {
+        self.info.bounding_rect.as_rect()
+    }
 }
 
 
