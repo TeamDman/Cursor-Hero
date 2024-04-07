@@ -2379,6 +2379,7 @@ dependencies = [
  "cursor_hero_worker",
  "cursor_hero_worker_types",
  "cursor_hero_xelu_prompts",
+ "itertools 0.12.0",
 ]
 
 [[package]]

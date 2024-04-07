@@ -38,8 +38,6 @@ use cursor_hero_toolbelt_types::toolbelt_types_plugin::ToolbeltTypesPlugin;
 use cursor_hero_tools::ToolPlugin;
 use cursor_hero_ui::about_text_plugin::AboutTextPlugin;
 use cursor_hero_ui::fps_text_plugin::FpsTextPlugin;
-use cursor_hero_ui_watcher::ui_watcher_plugin::UiWatcherPlugin;
-use cursor_hero_ui_watcher_types::ui_watcher_types_plugin::UiWatcherTypesPlugin;
 use cursor_hero_version::version_plugin::Version;
 use cursor_hero_wallpaper::wallpaper_plugin::WallpaperPlugin;
 
@@ -93,6 +91,7 @@ use cursor_hero_ui_inspector::prelude::*;
 use cursor_hero_ui_inspector_types::prelude::*;
 use cursor_hero_ui_hover::prelude::*;
 use cursor_hero_ui_hover_types::prelude::*;
+use itertools::Itertools;
 pub struct DefaultLaunchModePlugin;
 
 impl Plugin for DefaultLaunchModePlugin {
@@ -180,44 +179,34 @@ impl Plugin for DefaultLaunchModePlugin {
         app.add_plugins(ToolbeltTypesPlugin);
         app.add_plugins(ToolPlugin);
         app.add_plugins(WallpaperPlugin);
-        app.add_plugins(UiWatcherTypesPlugin);
-        app.add_plugins(UiWatcherPlugin);
+        // app.add_plugins(UiWatcherTypesPlugin);
+        // app.add_plugins(UiWatcherPlugin);
 
         // must be before the default plugins
         app.add_plugins(EmbeddedAssetPlugin {
             mode: bevy_embedded_assets::PluginMode::ReplaceDefault,
         });
 
-        #[cfg(debug_assertions)]
         let log_plugin = LogPlugin {
             level: bevy::log::Level::INFO,
-            filter: "wgpu=error,cursor_hero=debug,cursor_hero_ui_automation_types=debug"
-// bevy_ecs=info,
-// cursor_hero=debug,
-// cursor_hero_cursor::cursor_hover_plugin=info,
-// cursor_hero_ollama::ollama_status_worker_plugin=info,
-// cursor_hero_voice_to_text::voice_to_text_ping_plugin=info,
-// cursor_hero_voice_to_text::voice_to_text_worker_plugin=info,
-// cursor_hero_glados_tts::glados_tts_status_worker_plugin=info,
-// cursor_hero_tools::click_tool=info,
-// cursor_hero_memory=info
-            .replace('\n', "")
+            filter: "
+                wgpu=error
+                cursor_hero=debug
+                cursor_hero_ollama::ollama_status_worker_plugin=info
+                cursor_hero_voice_to_text::voice_to_text_ping_plugin=info
+                cursor_hero_voice_to_text::voice_to_text_worker_plugin=info
+                cursor_hero_glados_tts::glados_tts_status_worker_plugin=info
+                cursor_hero_tools::click_tool=info
+                // cursor_hero_memory=info
+                // cursor_hero_ui_automation_types=trace
+            "
+            .lines()
+            .map(|line| line.trim())
+            .filter(|line| !line.starts_with("//"))
+            .filter(|line| !line.is_empty())
+            .join(",")
             .trim()
             .into(),
-            // TODO: fix warnings when minimized
-        };
-        //         #[cfg(debug_assertions)]
-        //         let log_plugin = LogPlugin {
-        //             level: bevy::log::Level::DEBUG,
-        //             filter: "
-        // debug
-        //             ".replace('\n',"").trim().into(),
-        //             // TODO: fix warnings when minimized
-        //         };
-        #[cfg(not(debug_assertions))]
-        let log_plugin = LogPlugin {
-            level: bevy::log::Level::INFO,
-            filter: "wgpu=error".into(),
         };
         const AUDIO_SCALE: f32 = 1. / 100.0;
         let version = match app.world.get_resource::<Version>() {

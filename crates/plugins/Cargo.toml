@@ -95,3 +95,4 @@ cursor_hero_winutils = {workspace = true}
 bevy = {workspace = true}
 bevy_embedded_assets = { workspace = true }
 bevy-inspector-egui = { workspace = true }
+itertools = {workspace = true}
