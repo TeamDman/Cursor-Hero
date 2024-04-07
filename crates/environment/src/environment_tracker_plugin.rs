@@ -15,11 +15,12 @@ impl Plugin for EnvironmentTrackerPlugin {
 
 fn track(
     mut commands: Commands,
-    mut thing_query: Query<(Entity, Option<&mut EnvironmentTracker>, &CollidingEntities)>,
+    mut thing_query: Query<(Entity, Option<&mut EnvironmentTracker>, &CollidingEntities), Without<DoNotTrackEnvironment>>,
     level_bounds_query: Query<&Parent, With<LevelBounds>>,
     level_bounds_holder_query: Query<&Parent, With<LevelBoundsHolder>>,
 ) {
-    for (thing_id, thing_environment_tag, thing_colliding_entities) in thing_query.iter_mut() {
+    for thing in thing_query.iter_mut() {
+        let (thing_id, thing_environment_tag, thing_colliding_entities) = thing;
         // find out what level bounds the cursor is touching
         // find those bounds' parent
         // find the parent of the parent to get the environment ID

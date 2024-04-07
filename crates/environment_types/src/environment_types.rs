@@ -15,6 +15,9 @@ impl EnvironmentKind {
 }
 
 #[derive(Component, Debug, Reflect, Eq, PartialEq)]
+pub struct DoNotTrackEnvironment;
+
+#[derive(Component, Debug, Reflect, Eq, PartialEq)]
 pub struct EnvironmentTracker {
     pub environment_id: Entity,
 }
