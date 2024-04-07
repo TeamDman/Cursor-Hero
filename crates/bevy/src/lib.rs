@@ -6,6 +6,7 @@ mod rect_scaled;
 mod rect_with_properties;
 mod translate;
 mod vec_into_rect;
+mod area;
 
 pub mod prelude {
     pub use crate::neg_y::*;
@@ -16,4 +17,5 @@ pub mod prelude {
     pub use crate::rect_with_properties::*;
     pub use crate::translate::*;
     pub use crate::vec_into_rect::*;
+    pub use crate::area::*;
 }
