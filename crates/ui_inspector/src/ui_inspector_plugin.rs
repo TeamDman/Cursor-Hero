@@ -307,34 +307,70 @@ fn update_preview_image(
         return;
     }
 
-    // Get the drill_id of the parent of selected
-    let Some(DrillId::Child(ref inner)) = ui_data.selected else {
-        ui_data.selected_preview = None;
-        return;
-    };
-    let mut parent_drill_id = inner.clone();
-    parent_drill_id.pop_back();
+    let (info, parent_info) = match ui_data.selected.clone() {
+        Some(DrillId::Child(ref inner)) => {
+            // Get parent ID by dropping last element
+            let mut parent_drill_id = inner.clone();
+            parent_drill_id.pop_back();
+            let parent_drill_id = match parent_drill_id.len() {
+                0 => DrillId::Root,
+                _ => DrillId::Child(parent_drill_id),
+            };
 
-    // Find the parent in the cache
-    let Some(selected_parent) = ui_data
-        .ui_tree
-        .lookup_drill_id(DrillId::Child(parent_drill_id))
-    else {
-        return;
+            // Look up info for parent
+            let Some(parent_info) = ui_data.ui_tree.lookup_drill_id(parent_drill_id.clone()) else {
+                warn!("Failed to find parent info for {:?}", parent_drill_id);
+                return;
+            };
+
+            // Look up info
+            let Some(last) = inner.back() else {
+                warn!("Failed to find last element in {:?}", inner);
+                return;
+            };
+            let Some(info) = parent_info.lookup_drill_id([last].into_iter().cloned().collect())
+            else {
+                warn!("Failed to find info for {:?}", inner);
+                return;
+            };
+            (info, parent_info)
+        }
+        Some(DrillId::Root) => {
+            let info = &ui_data.ui_tree;
+            let parent_info = &ui_data.ui_tree;
+            (info, parent_info)
+        }
+        Some(DrillId::Unknown) => {
+            warn!("Selected drill_id is unknown");
+            return
+        },
+        None => return,
     };
 
-    // Get the selected element
-    let Some(last) = inner.back() else {
-        return;
+    let world_capture_region = match parent_info.drill_id {
+        DrillId::Root => info.children.as_ref().map_or_else(
+            || info.bounding_rect,
+            |children| {
+                children
+                    .iter()
+                    .fold(info.bounding_rect, |acc, x| acc.union(x.bounding_rect))
+            },
+        ),
+        DrillId::Child(_) => parent_info.bounding_rect,
+        DrillId::Unknown => {
+            warn!("Parent drill_id is unknown");
+            return
+        },
     };
-    let Some(selected) = selected_parent.lookup_drill_id([last].into_iter().cloned().collect())
-    else {
-        return;
-    };
+
+    // Calculate regions
+    let texture_highlight_region = info
+        .bounding_rect
+        .translate(&-world_capture_region.top_left());
 
     // Get the texture of the element
-    let texture_region = selected_parent.bounding_rect;
-    let Ok(image) = get_image(texture_region, &screen_access) else {
+    let Ok(image) = get_image(world_capture_region, &screen_access) else {
+        warn!("Failed to get image for region {:?}", world_capture_region);
         return;
     };
 
@@ -342,18 +378,21 @@ fn update_preview_image(
     let size = image.size();
 
     // Convert to an image buffer for manipulation
-    let Some(mut image) = ImageBuffer::from_raw(size.x, size.y, image.data) as Option<RgbaImage> else {
+    let Some(mut image) = ImageBuffer::from_raw(size.x, size.y, image.data) as Option<RgbaImage>
+    else {
+        warn!("Failed to convert image to buffer");
         return;
     };
 
-    // Calculate region to highlight
-    let parent_region = selected_parent.bounding_rect;
-    let highlight_region = selected.bounding_rect.translate(&-parent_region.top_left());
-
     // Apply the highlight
     for (x, y, pixel) in image.enumerate_pixels_mut() {
-        if highlight_region.contains(IVec2::new(x as i32, y as i32)) {
-            *pixel = Rgba([pixel.0[0].saturating_add(50), pixel.0[1].saturating_add(50), pixel.0[2], pixel.0[3]]);
+        if texture_highlight_region.contains(IVec2::new(x as i32, y as i32)) {
+            *pixel = Rgba([
+                pixel.0[0].saturating_add(50),
+                pixel.0[1].saturating_add(50),
+                pixel.0[2],
+                pixel.0[3],
+            ]);
         }
     }
 

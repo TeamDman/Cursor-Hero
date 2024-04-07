@@ -382,8 +382,11 @@ impl ElementInfo {
         );
 
         // Only child drill IDs are valid search targets
-        let DrillId::Child(drill_id_inner) = drill_id else {
-            return None;
+        // Short circuit here if looking for root
+        let drill_id_inner = match drill_id {
+            DrillId::Child(drill_id_inner) => drill_id_inner,
+            DrillId::Root => return Some(self),
+            DrillId::Unknown => return None,
         };
 
         // Base case
@@ -421,8 +424,11 @@ impl ElementInfo {
         );
 
         // Only child drill IDs are valid search targets
-        let DrillId::Child(drill_id_inner) = drill_id else {
-            return None;
+        // Short circuit here if looking for root
+        let drill_id_inner = match drill_id {
+            DrillId::Child(drill_id_inner) => drill_id_inner,
+            DrillId::Root => return Some(self),
+            DrillId::Unknown => return None,
         };
 
         // Base case
