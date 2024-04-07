@@ -52,7 +52,10 @@ impl Plugin for UiInspectorPlugin {
             Update,
             trigger_tree_update_for_hovered.run_if(condition.clone()),
         );
-        app.add_systems(Update, trigger_gather_children_request.run_if(condition.clone()));
+        app.add_systems(
+            Update,
+            trigger_gather_children_request.run_if(condition.clone()),
+        );
         app.add_systems(Update, handle_gamebound_messages.run_if(condition.clone()));
         app.add_systems(Update, gui.run_if(condition.clone()));
         app.add_systems(Update, handle_inspector_events.run_if(condition.clone()));
@@ -414,7 +417,13 @@ fn update_preview_image(
                     .fold(info.bounding_rect, |acc, x| acc.union(x.bounding_rect))
             },
         ),
-        DrillId::Child(_) => parent_info.bounding_rect,
+        DrillId::Child(_) => {
+            if parent_info.bounding_rect.is_empty() {
+                info.bounding_rect
+            } else {
+                parent_info.bounding_rect
+            }
+        }
         DrillId::Unknown => {
             warn!("Parent drill_id is unknown");
             return;
@@ -496,7 +505,6 @@ fn gui(
 
     let id = egui::Id::new("Inspector");
     egui::Window::new("Inspector")
-        .title_bar(false)
         .id(id)
         .default_pos((5.0, 5.0))
         .default_width(1200.0)
@@ -540,10 +548,12 @@ fn gui(
                 ui.vertical_centered(|ui| {
                     ui.heading("Properties");
                     if ui.button("copy tree from here").clicked() {
-                        threadbound_events.send(ThreadboundUISnapshotMessage::TreeClipboardRequest {
-                            parent_drill_id: selected_info.drill_id.clone(),
-                            parent_runtime_id: selected_info.runtime_id.clone(),
-                        });
+                        threadbound_events.send(
+                            ThreadboundUISnapshotMessage::TreeClipboardRequest {
+                                parent_drill_id: selected_info.drill_id.clone(),
+                                parent_runtime_id: selected_info.runtime_id.clone(),
+                            },
+                        );
                     }
                 });
                 inspector.ui_for_reflect_readonly(selected_info, ui);
