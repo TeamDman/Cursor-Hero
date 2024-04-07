@@ -619,9 +619,11 @@ fn gui(
                 if ui.button("clear").clicked() {
                     ui_data.scratch_pad.clear();
                 }
-                egui::TextEdit::multiline(&mut ui_data.scratch_pad)
-                    .desired_width(ui.available_width())
-                    .show(ui);
+                egui::ScrollArea::vertical().show(ui, |ui| {
+                    egui::TextEdit::multiline(&mut ui_data.scratch_pad)
+                        .desired_width(ui.available_width())
+                        .show(ui);
+                });
             });
         });
 
