@@ -50,7 +50,7 @@ impl Plugin for UiInspectorPlugin {
             Update,
             trigger_tree_update_for_hovered.run_if(condition.clone()),
         );
-        app.add_systems(Update, fetch_requested.run_if(condition.clone()));
+        app.add_systems(Update, trigger_gather_children_request.run_if(condition.clone()));
         app.add_systems(Update, handle_gamebound_messages.run_if(condition.clone()));
         app.add_systems(Update, gui.run_if(condition.clone()));
         app.add_systems(Update, handle_inspector_events.run_if(condition.clone()));
@@ -60,26 +60,33 @@ impl Plugin for UiInspectorPlugin {
 
 #[derive(Debug, Reflect, Clone, Event)]
 enum ThreadboundUISnapshotMessage {
-    CapturePartialTreeAt {
+    UIDataUpdateRequest {
         pos: IVec2,
     },
-    ChildrenFetchRequest {
-        drill_id: DrillId,
-        runtime_id: RuntimeId,
+    GatherChildrenRequest {
+        parent_drill_id: DrillId,
+        parent_runtime_id: RuntimeId,
+    },
+    TreeClipboardRequest {
+        parent_drill_id: DrillId,
+        parent_runtime_id: RuntimeId,
     },
 }
 impl WorkerMessage for ThreadboundUISnapshotMessage {}
 
 #[derive(Debug, Reflect, Clone, Event)]
 enum GameboundUISnapshotMessage {
-    PartialTree {
+    UpdateUIData {
         ui_tree: ElementInfo,
         start: ElementInfo,
     },
-    ChildrenFetchResponse {
+    GatherChildrenResponse {
         drill_id: DrillId,
         runtime_id: RuntimeId,
         children: Vec<ElementInfo>,
+    },
+    TreeClipboardResponse {
+        ui_tree: ElementInfo,
     },
     Error,
 }
@@ -100,63 +107,94 @@ fn handle_threadbound_message(
     _state: &mut (),
 ) -> Result<()> {
     match msg {
-        ThreadboundUISnapshotMessage::CapturePartialTreeAt { pos } => {
+        ThreadboundUISnapshotMessage::UIDataUpdateRequest { pos } => {
             debug!("taking snapshot");
+            // Find element at position
             let start = find_element_at(*pos)?;
-            let gathered = gather_incomplete_ui_tree_starting_deep(start)?;
-            if let Err(e) = reply_tx.send(GameboundUISnapshotMessage::PartialTree {
+
+            // Gather tree
+            let gathered = gather_info_tree_ancestry_filtered(start)?;
+
+            // Send reply
+            if let Err(e) = reply_tx.send(GameboundUISnapshotMessage::UpdateUIData {
                 ui_tree: gathered.ui_tree,
                 start: gathered.start_info,
             }) {
                 error!("Failed to send snapshot: {:?}", e);
             }
         }
-        ThreadboundUISnapshotMessage::ChildrenFetchRequest {
-            drill_id,
-            runtime_id,
+        ThreadboundUISnapshotMessage::GatherChildrenRequest {
+            parent_drill_id,
+            parent_runtime_id,
         } => {
-            debug!("fetching children for {:?}", drill_id);
+            debug!("fetching children for {:?}", parent_drill_id);
+            // Get parent
             let automation = UIAutomation::new().context("creating automation")?;
             let walker = automation.create_tree_walker().context("creating walker")?;
             let root = automation.get_root_element().context("getting root")?;
-            let found = root.drill(&walker, drill_id.clone()).context("drilling")?;
-            let mut children = found
-                .gather_children(&walker, &StopBehaviour::EndOfSiblings)
-                .into_iter()
-                .enumerate()
-                .filter_map(|(i, child)| {
-                    gather_single_element_info(&child)
-                        .ok()
-                        .map(|mut child_info| {
-                            child_info.drill_id = DrillId::Child(vec![i].into_iter().collect());
-                            child_info
-                        })
-                })
-                .collect_vec();
+            let parent = root
+                .drill(&walker, parent_drill_id.clone())
+                .context("drilling")?;
 
-            update_drill_ids(Some(&mut children), &drill_id);
-            if let Err(e) = reply_tx.send(GameboundUISnapshotMessage::ChildrenFetchResponse {
-                drill_id: drill_id.clone(),
-                runtime_id: runtime_id.clone(),
+            // Get children
+            let children = gather_info_children(&parent, parent_drill_id, &walker)?;
+
+            // Send reply
+            if let Err(e) = reply_tx.send(GameboundUISnapshotMessage::GatherChildrenResponse {
+                drill_id: parent_drill_id.clone(),
+                runtime_id: parent_runtime_id.clone(),
                 children,
             }) {
                 error!("Failed to send ChildrenFetchResponse: {:?}", e);
+            }
+        }
+        ThreadboundUISnapshotMessage::TreeClipboardRequest {
+            parent_drill_id,
+            parent_runtime_id,
+        } => {
+            debug!("fetching tree for {:?}", parent_drill_id);
+            // Get parent
+            let automation = UIAutomation::new().context("creating automation")?;
+            let walker = automation.create_tree_walker().context("creating walker")?;
+            let root = automation.get_root_element().context("getting root")?;
+            let parent = root
+                .drill(&walker, parent_drill_id.clone())
+                .context("drilling")?;
+
+            // Validate parent
+            let id = parent.get_runtime_id()?;
+            if id != parent_runtime_id.0 {
+                error!(
+                    "Parent runtime_id mismatch: expected {:?}, got {:?}",
+                    parent_runtime_id, id
+                );
+                return Ok(());
+            }
+
+            // Get tree
+            let tree = gather_info_tree(parent)?;
+
+            // Send reply
+            if let Err(e) =
+                reply_tx.send(GameboundUISnapshotMessage::TreeClipboardResponse { ui_tree: tree })
+            {
+                error!("Failed to send snapshot: {:?}", e);
             }
         }
     }
     Ok(())
 }
 
-fn fetch_requested(
+fn trigger_gather_children_request(
     mut data: ResMut<UIData>,
     mut events: EventWriter<ThreadboundUISnapshotMessage>,
 ) {
     for (key, state) in data.fetching.iter_mut() {
         if let FetchingState::FetchRequest = state {
             *state = FetchingState::FetchDispatched;
-            events.send(ThreadboundUISnapshotMessage::ChildrenFetchRequest {
-                drill_id: key.0.clone(),
-                runtime_id: key.1.clone(),
+            events.send(ThreadboundUISnapshotMessage::GatherChildrenRequest {
+                parent_drill_id: key.0.clone(),
+                parent_runtime_id: key.1.clone(),
             });
         }
     }
@@ -209,20 +247,21 @@ fn trigger_tree_update_for_hovered(
     }
 
     // Send snapshot request
-    events.send(ThreadboundUISnapshotMessage::CapturePartialTreeAt { pos });
+    events.send(ThreadboundUISnapshotMessage::UIDataUpdateRequest { pos });
     ui_data.in_flight = true;
 }
 
 fn handle_gamebound_messages(
     mut snapshot: EventReader<GameboundUISnapshotMessage>,
     mut ui_data: ResMut<UIData>,
+    mut contexts: EguiContexts,
 ) {
     for msg in snapshot.read() {
         match msg {
             GameboundUISnapshotMessage::Error => {
                 ui_data.in_flight = false;
             }
-            GameboundUISnapshotMessage::PartialTree { ui_tree, start } => {
+            GameboundUISnapshotMessage::UpdateUIData { ui_tree, start } => {
                 ui_data.in_flight = false;
                 ui_data.ui_tree = ui_tree.clone();
                 ui_data.start = start.clone();
@@ -237,7 +276,7 @@ fn handle_gamebound_messages(
                 ui_data.fresh = true;
                 debug!("Received snapshot");
             }
-            GameboundUISnapshotMessage::ChildrenFetchResponse {
+            GameboundUISnapshotMessage::GatherChildrenResponse {
                 drill_id,
                 runtime_id,
                 children,
@@ -248,6 +287,12 @@ fn handle_gamebound_messages(
                         .fetching
                         .insert(key, FetchingState::Fetched(children.clone()));
                 }
+            }
+            GameboundUISnapshotMessage::TreeClipboardResponse { ui_tree } => {
+                contexts.ctx_mut().output_mut(|out| {
+                    out.copied_text = format!("{:#?}", ui_tree);
+                });
+                debug!("Received snapshot");
             }
         }
     }
@@ -413,6 +458,7 @@ fn gui(
     mut ui_data: ResMut<UIData>,
     type_registry: Res<AppTypeRegistry>,
     mut hover_info: ResMut<HoverInfo>,
+    mut threadbound_events: EventWriter<ThreadboundUISnapshotMessage>,
 ) {
     // Get preview image
     let preview = if let Some(ref preview) = ui_data.selected_preview
@@ -469,23 +515,28 @@ fn gui(
                 .show_inside(ui, |_ui| {});
 
             egui::CentralPanel::default().show_inside(ui, |ui| {
-                ui.vertical_centered(|ui| {
-                    ui.heading("Properties");
-                });
                 let Some(selected_drill_id) = ui_data.selected.clone() else {
                     return;
                 };
-                let found = ui_data
+                let Some(selected_info) = ui_data
                     .ui_tree
-                    .lookup_drill_id_mut(selected_drill_id.clone());
-                // debug!("found {:?}", found);
-                let Some(x) = found else {
+                    .lookup_drill_id_mut(selected_drill_id.clone())
+                else {
                     return;
                 };
-                inspector.ui_for_reflect_readonly(x, ui);
+                ui.vertical_centered(|ui| {
+                    ui.heading("Properties");
+                    if ui.button("copy tree from here").clicked() {
+                        threadbound_events.send(ThreadboundUISnapshotMessage::TreeClipboardRequest {
+                            parent_drill_id: selected_info.drill_id.clone(),
+                            parent_runtime_id: selected_info.runtime_id.clone(),
+                        });
+                    }
+                });
+                inspector.ui_for_reflect_readonly(selected_info, ui);
                 ui.separator();
                 ui.label("drill_id");
-                let drill_id = x.drill_id.to_string();
+                let drill_id = selected_info.drill_id.to_string();
                 inspector.ui_for_reflect_readonly(&drill_id, ui);
                 if ui.button("copy").clicked() {
                     ui.output_mut(|out| {
@@ -494,7 +545,7 @@ fn gui(
                     info!("Copied drill_id {} to clipboard", drill_id);
                 }
                 ui.label("runtime_id");
-                let runtime_id = x.runtime_id.to_string();
+                let runtime_id = selected_info.runtime_id.to_string();
                 inspector.ui_for_reflect_readonly(&runtime_id, ui);
                 if ui.button("copy").clicked() {
                     ui.output_mut(|out| {

@@ -23,7 +23,7 @@ use cursor_hero_tools::cube_tool::CubeToolInteractable;
 use cursor_hero_tools::prelude::*;
 use cursor_hero_ui_automation::prelude::find_element_at;
 use cursor_hero_ui_automation::prelude::gather_elements_at;
-use cursor_hero_ui_automation::prelude::gather_incomplete_ui_tree_starting_deep;
+use cursor_hero_ui_automation::prelude::gather_info_tree_ancestry_filtered;
 use cursor_hero_ui_automation::prelude::DrillId;
 use cursor_hero_ui_automation::prelude::ElementInfo;
 use cursor_hero_worker::prelude::anyhow::Result;
@@ -251,7 +251,7 @@ fn handle_threadbound_message(
 
             let id = elem.get_automation_id()?;
             info!("Automation ID: {}", id);
-            let gathered = gather_incomplete_ui_tree_starting_deep(elem)?;
+            let gathered = gather_info_tree_ancestry_filtered(elem)?;
             // debug!("Element info: {:?}", element_info);
             let msg = match msg {
                 ThreadboundMessage::Capture { world_position } => GameboundMessage::Capture {
@@ -283,7 +283,7 @@ fn handle_threadbound_message(
             // Send the info
             let id = elem.get_automation_id()?;
             info!("Automation ID: {}", id);
-            let gathered = gather_incomplete_ui_tree_starting_deep(elem)?;
+            let gathered = gather_info_tree_ancestry_filtered(elem)?;
             reply_tx.send(GameboundMessage::Print(gathered.ui_tree))?;
         }
         ThreadboundMessage::Fracture { world_position } => {
@@ -294,7 +294,7 @@ fn handle_threadbound_message(
             let data = found
                 .into_iter()
                 .filter_map(|(elem, depth)| {
-                    gather_incomplete_ui_tree_starting_deep(elem)
+                    gather_info_tree_ancestry_filtered(elem)
                         .ok()
                         .map(|info| (info.start_info, depth))
                 })

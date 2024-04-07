@@ -2,8 +2,12 @@
 
 ## Active
 
-- Fix properties not working
-- Finish calculator stub
+- Calculator world representation with working buttons
+  - Button in host to toggle "overlay" 
+  - Button in game to spawn calculator
+  - Button on calculator to sync state
+    - Host to game
+    - Game to host
 
 ## Up Next
 
