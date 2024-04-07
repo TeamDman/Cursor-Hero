@@ -31,9 +31,9 @@ impl Plugin for CursorPositioningPlugin {
 
 #[derive(Default, Debug)]
 struct CursorUpdate {
-    local_target: Option<Vec2>,
-    global_target: Option<Vec2>,
-    host_target: Option<IVec2>,
+    local_transform: Option<Vec2>,
+    global_position: Option<Vec2>,
+    host_cursor: Option<IVec2>,
 }
 
 #[derive(Debug)]
@@ -69,7 +69,7 @@ fn update_cursor(
         (With<MainCamera>, Without<Character>, Without<Cursor>),
     >,
     window_query: Query<(&Window, &RawHandleWrapper), With<PrimaryWindow>>,
-    input_method: Res<InputMethod>,
+    input_method: Res<State<InputMethod>>,
     environment_query: Query<(), With<HostEnvironment>>,
     mut last_known_cursor_position: Local<Option<Vec2>>,
     mut previous_update: Local<CursorUpdate>,
@@ -113,7 +113,7 @@ fn update_cursor(
             is_main_character: is_main_character.is_some(),
             in_host_environment,
             stick_in_use,
-            active_input_method: *input_method,
+            active_input_method: *input_method.get(),
         };
 
         let next_behaviour = match decision_info {
@@ -175,9 +175,9 @@ fn update_cursor(
             CursorMovementBehaviour::None => {
                 // sync physics to render
                 CursorUpdate {
-                    local_target: None,
-                    global_target: Some(cursor_global_transform.translation().xy()),
-                    host_target: None,
+                    local_transform: None,
+                    global_position: Some(cursor_global_transform.translation().xy()),
+                    host_cursor: None,
                 }
             }
             CursorMovementBehaviour::SetCursorFromHostCursorWindowCoords => {
@@ -197,9 +197,9 @@ fn update_cursor(
                         let local_target =
                             global_target - character_global_transform.translation().xy();
                         CursorUpdate {
-                            local_target: Some(local_target),
-                            global_target: Some(global_target),
-                            host_target: None,
+                            local_transform: Some(local_target),
+                            global_position: Some(global_target),
+                            host_cursor: None,
                         }
                     }
                     None => {
@@ -226,9 +226,9 @@ fn update_cursor(
                                 let global_target = character_translation.xy() + local_target;
                                 let host_target = global_target.neg_y().as_ivec2();
                                 CursorUpdate {
-                                    local_target: Some(local_target),
-                                    global_target: Some(global_target),
-                                    host_target: Some(host_target),
+                                    local_transform: Some(local_target),
+                                    global_position: Some(global_target),
+                                    host_cursor: Some(host_target),
                                 }
                             }
                         }
@@ -244,9 +244,9 @@ fn update_cursor(
                     let global_target = character_translation.xy();
                     let host_target = character_translation.xy().neg_y().as_ivec2();
                     CursorUpdate {
-                        local_target: Some(local_target),
-                        global_target: Some(global_target),
-                        host_target: Some(host_target),
+                        local_transform: Some(local_target),
+                        global_position: Some(global_target),
+                        host_cursor: Some(host_target),
                     }
                 }
             }
@@ -296,9 +296,9 @@ fn update_cursor(
                                     });
 
                                 CursorUpdate {
-                                    local_target: Some(local_target.xy()),
-                                    global_target: Some(global_target.xy()),
-                                    host_target,
+                                    local_transform: Some(local_target.xy()),
+                                    global_position: Some(global_target.xy()),
+                                    host_cursor: host_target,
                                 }
                             }
                         }
@@ -340,9 +340,9 @@ fn update_cursor(
                         });
 
                     CursorUpdate {
-                        local_target: Some(local_target),
-                        global_target: Some(global_target),
-                        host_target,
+                        local_transform: Some(local_target),
+                        global_position: Some(global_target),
+                        host_cursor: host_target,
                     }
                 }
             }
@@ -350,8 +350,8 @@ fn update_cursor(
 
         // Update render body
         let mut render_updated = false;
-        if this_update.local_target != previous_update.local_target
-            && let Some(local_target) = this_update.local_target
+        if this_update.local_transform != previous_update.local_transform
+            && let Some(local_target) = this_update.local_transform
         {
             let target_distance = local_target - cursor_transform.translation.xy();
             if target_distance != Vec2::ZERO {
@@ -370,8 +370,8 @@ fn update_cursor(
 
         // Update physics body
         if !render_updated
-            && this_update.global_target != previous_update.global_target
-            && let Some(global_target) = this_update.global_target
+            && this_update.global_position != previous_update.global_position
+            && let Some(global_target) = this_update.global_position
         {
             let target_distance = global_target - cursor_position.xy();
             if target_distance != Vec2::ZERO {
@@ -391,8 +391,8 @@ fn update_cursor(
             }
         }
 
-        if this_update.host_target != previous_update.host_target
-            && let Some(host_target) = this_update.host_target
+        if this_update.host_cursor != previous_update.host_cursor
+            && let Some(host_target) = this_update.host_cursor
         {
             match set_cursor_position(host_target) {
                 Ok(_) => {

@@ -11,13 +11,11 @@ pub struct ActiveInputStatePlugin;
 impl Plugin for ActiveInputStatePlugin {
     fn build(&self, app: &mut App) {
         app.add_state::<InputMethod>();
-        app.insert_resource(InputMethod::MouseAndKeyboard);
         app.add_systems(Update, update_input_method);
     }
 }
 
-#[derive(Resource, Reflect, Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
-#[reflect(Resource)]
+#[derive(Reflect, Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 pub enum InputMethod {
     #[default]
     MouseAndKeyboard,
