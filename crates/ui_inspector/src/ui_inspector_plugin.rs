@@ -280,13 +280,13 @@ fn handle_inspector_events(
 
         // get drill id
         let drill_id = match info.drill_id {
-            DrillId::Child(ref inner) => inner.iter().map(|x| x.to_string()).join(", "),
+            DrillId::Child(ref inner) => inner.iter().skip(1).map(|x| x.to_string()).join(", "),
             _ => "".to_string(),
         };
 
         // build content
         let content = format!(
-            "let {} = root.drill(&walker, vec![{}]?.try_into()?;\n",
+            "let {0} = root.drill(&walker, vec![{1}]).context(\"{0}\")?.try_into()?;\n",
             identifier, drill_id
         );
 
@@ -342,8 +342,8 @@ fn update_preview_image(
         }
         Some(DrillId::Unknown) => {
             warn!("Selected drill_id is unknown");
-            return
-        },
+            return;
+        }
         None => return,
     };
 
@@ -359,8 +359,8 @@ fn update_preview_image(
         DrillId::Child(_) => parent_info.bounding_rect,
         DrillId::Unknown => {
             warn!("Parent drill_id is unknown");
-            return
-        },
+            return;
+        }
     };
 
     // Calculate regions
