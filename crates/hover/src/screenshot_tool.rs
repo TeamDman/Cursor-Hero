@@ -438,7 +438,7 @@ fn spawn_brick(
     let expanded = ui_tree
         .get_descendents()
         .iter()
-        .chain([ui_tree].iter())
+        .chain(std::iter::once(&ui_tree))
         .filter(|x| x.children.is_some())
         .map(|x| x.drill_id.clone())
         .collect();

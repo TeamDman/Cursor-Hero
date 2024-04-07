@@ -369,6 +369,9 @@ impl TryFrom<UIElement> for ElementInfo {
     }
 }
 impl ElementInfo {
+    pub fn is_stupid_size(&self) -> bool {
+        self.bounding_rect.width().abs() > 10_000 || self.bounding_rect.height().abs() > 10_000
+    }
     pub fn lookup_drill_id(&self, drill_id: DrillId) -> Option<&ElementInfo> {
         // Log info for problem solving
         trace!(

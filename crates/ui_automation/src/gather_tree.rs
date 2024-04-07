@@ -41,6 +41,7 @@ pub fn gather_info_tree_ancestry_filtered(
     let start_info = root_info
         .get_descendents()
         .into_iter()
+        .chain(std::iter::once(&root_info))
         .find(|info| match start_element.get_runtime_id() {
             Ok(id) => info.runtime_id.0 == id,
             Err(_) => false,

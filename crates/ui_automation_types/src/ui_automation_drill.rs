@@ -53,7 +53,8 @@ impl Drillable for UIElement {
                 }
                 drill_inner(self, walker, &mut path)
             }
-            DrillId::Root | DrillId::Unknown => Err(DrillError::BadPath.into()),
+            DrillId::Root => Ok(self.clone()),
+            DrillId::Unknown => Err(DrillError::BadPath.into()),
         }
     }
 }

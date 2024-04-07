@@ -1,6 +1,8 @@
 use bevy::input::common_conditions::input_toggle_active;
 use bevy::prelude::*;
+use bevy::window::PrimaryWindow;
 use bevy_egui::egui;
+use bevy_egui::EguiContext;
 use bevy_egui::EguiContexts;
 use bevy_egui::EguiUserTextures;
 use bevy_inspector_egui::reflect_inspector::InspectorUi;
@@ -207,9 +209,19 @@ fn trigger_tree_update_for_hovered(
     mut events: EventWriter<ThreadboundUISnapshotMessage>,
     game_hover_query: Query<&GameHoverIndicator>,
     host_hover_query: Query<&HostHoverIndicator>,
+    egui_context_query: Query<&EguiContext, With<PrimaryWindow>>,
 ) {
     // Do nothing if paused
     if ui_data.paused {
+        return;
+    }
+
+    // Do nothing when hovering over egui
+    if egui_context_query
+        .get_single()
+        .map(|ctx| ctx.clone().get_mut().is_pointer_over_area())
+        .unwrap_or(false)
+    {
         return;
     }
 
@@ -226,6 +238,7 @@ fn trigger_tree_update_for_hovered(
         .get_descendents()
         .into_iter()
         .filter(|info| info.bounding_rect.contains(pos))
+        .filter(|info| !info.is_stupid_size())
         .min_by_key(|info| info.bounding_rect.size().length_squared())
         .map(|info| info.drill_id.clone());
 
@@ -269,7 +282,7 @@ fn handle_gamebound_messages(
                 ui_data.expanded = ui_tree
                     .get_descendents()
                     .iter()
-                    .chain([ui_tree].iter())
+                    .chain(std::iter::once(&ui_tree))
                     .filter(|x| x.children.is_some())
                     .map(|x| x.drill_id.clone())
                     .collect();
