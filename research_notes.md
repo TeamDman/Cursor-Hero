@@ -20,6 +20,11 @@
 - [YOLOv9](https://github.com/WongKinYiu/yolov9)
 - [Ty on X: "Open Interpreter 0.2.1 is out! -  5X launch speed -  Local OSS model for GUI control -  Native control over Apple Mail, Calendar, Contacts, SMS -  New LLM-first web browser (powered by @perplexity\_ai) -  Profiles, Docker, Jupyter export... ↓ https://t.co/XU4gibTXWk" / X (twitter.com)](https://twitter.com/FieroTy/status/1767328066290987470)
 
+## Image Processing
+
+- [Template Matching by Correlation | Image Processing I - YouTube](https://www.youtube.com/watch?v=1_hwFc8PXVE)
+- [Seam Carving Algorithm in Python | Liquid Resizing - YouTube](https://www.youtube.com/watch?v=g2FAonk6bss&feature=youtu.be)
+
 ## RPA
 
 - [OpenAdaptAI/OpenAdapt: AI-First Process Automation with Large Multimodal Models (LMMs)](https://github.com/OpenAdaptAI/OpenAdapt)
