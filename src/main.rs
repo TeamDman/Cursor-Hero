@@ -11,7 +11,11 @@ fn main() {
     let args = std::env::args().collect::<Vec<String>>();
     let launch_mode = match args.get(1).map(|s| s.as_str()) {
         Some("headless") => LaunchMode::Headless,
-        _ => LaunchMode::Default,
+        None => LaunchMode::Default,
+        x => {
+            println!("Invalid launch mode: {:?}", x);
+            return;
+        }
     };
 
     let mut app = App::new();
