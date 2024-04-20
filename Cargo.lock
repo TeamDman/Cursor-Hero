@@ -1813,7 +1813,12 @@ name = "cursor_hero_calculator_app"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "cursor_hero_bevy",
  "cursor_hero_calculator_app_types",
+ "cursor_hero_cursor_types",
+ "cursor_hero_environment_types",
+ "cursor_hero_start_menu_types",
+ "cursor_hero_winutils",
 ]
 
 [[package]]
@@ -2465,6 +2470,8 @@ name = "cursor_hero_start_menu_types"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "bevy_xpbd_2d",
+ "cursor_hero_cursor_types",
 ]
 
 [[package]]
@@ -2651,6 +2658,7 @@ name = "cursor_hero_ui_hover_types"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "cursor_hero_cursor_types",
  "cursor_hero_ui_automation_types",
  "cursor_hero_worker_types",
 ]
@@ -2663,6 +2671,7 @@ dependencies = [
  "bevy-inspector-egui",
  "bevy_egui",
  "cursor_hero_bevy",
+ "cursor_hero_cursor_types",
  "cursor_hero_screen",
  "cursor_hero_ui_automation",
  "cursor_hero_ui_hover_types",

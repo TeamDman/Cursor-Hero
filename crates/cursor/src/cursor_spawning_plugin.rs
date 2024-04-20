@@ -3,7 +3,7 @@ use bevy::sprite::Anchor;
 use bevy_xpbd_2d::prelude::*;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_cursor_types::prelude::*;
-use cursor_hero_environment_types::environment_types::TrackEnvironmentTag;
+use cursor_hero_environment_types::environment_types::ShouldTrackEnvironment;
 use leafwing_input_manager::prelude::*;
 
 pub struct CursorSpawningPlugin;
@@ -36,7 +36,7 @@ fn insert_cursor(
                     },
                     ..Default::default()
                 },
-                TrackEnvironmentTag,
+                ShouldTrackEnvironment,
                 RigidBody::Dynamic,
                 Collider::cuboid(10.0, 10.0),
                 Sensor,

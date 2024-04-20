@@ -13,7 +13,7 @@ impl Plugin for ObservationBufferPlugin {
 
 fn update_buffers(
     mut observation_events: EventReader<SomethingObservableHappenedEvent>,
-    mut buffer_query: Query<(Entity, &mut ObservationBuffer, Option<&EnvironmentTracker>)>,
+    mut buffer_query: Query<(Entity, &mut ObservationBuffer, Option<&TrackedEnvironment>)>,
     mut buffer_events: EventWriter<ObservationBufferEvent>,
 ) {
     for event in observation_events.read() {
@@ -23,7 +23,7 @@ fn update_buffers(
             // Determine if the buffer can see the event
             let can_see = match (buffer_environment_tag, event) {
                 (
-                    Some(EnvironmentTracker {
+                    Some(TrackedEnvironment {
                         environment_id: buffer_environment_id,
                     }),
                     SomethingObservableHappenedEvent::Chat {
@@ -38,7 +38,7 @@ fn update_buffers(
                     },
                 ) => buffer_id == *observation_buffer_id,
                 (
-                    Some(EnvironmentTracker {
+                    Some(TrackedEnvironment {
                         environment_id: buffer_environment_id,
                     }),
                     SomethingObservableHappenedEvent::UISnapshot {

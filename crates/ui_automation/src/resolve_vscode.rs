@@ -16,7 +16,7 @@ pub(crate) fn resolve_vscode(
     elem: &UIElement,
     automation: &UIAutomation,
     focused: bool,
-) -> Result<AppWindow> {
+) -> Result<AppSnapshot> {
     let walker = automation.create_tree_walker().context("creating walker")?;
     let root = elem;
 
@@ -38,7 +38,7 @@ pub(crate) fn resolve_vscode(
     let footer = resolve_footer(&footer, automation).context("resolving footer")?;
     drop(temp);
 
-    Ok(AppWindow::VSCode(VSCodeWindow {
+    Ok(AppSnapshot::VSCode(VSCodeSnapshot {
         focused,
         header: VSCodeWindowHeader {},
         body,

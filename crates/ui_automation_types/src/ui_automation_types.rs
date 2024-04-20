@@ -1,4 +1,4 @@
-use crate::prelude::CalculatorState;
+use crate::prelude::CalculatorSnapshot;
 use crate::vscode_ui_types::*;
 use bevy::prelude::*;
 use itertools::Itertools;
@@ -29,7 +29,7 @@ impl HexList for Vec<i32> {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Reflect)]
 pub struct UiSnapshot {
-    pub app_windows: Vec<AppWindow>,
+    pub app_windows: Vec<AppSnapshot>,
 }
 // impl UiSnapshot {
 //     fn as_long_string(&self) -> String {
@@ -49,28 +49,28 @@ impl Display for UiSnapshot {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Reflect)]
-pub enum AppWindow {
-    VSCode(VSCodeWindow),
-    Calculator(CalculatorState),
+pub enum AppSnapshot {
+    VSCode(VSCodeSnapshot),
+    Calculator(CalculatorSnapshot),
     Unknown,
 }
 
-impl AppWindow {
+impl AppSnapshot {
     pub fn variant_name(&self) -> String {
         match self {
-            AppWindow::VSCode(_) => "VSCode".to_string(),
-            AppWindow::Calculator(_) => "Calculator".to_string(),
-            AppWindow::Unknown => "Unknown".to_string(),
+            AppSnapshot::VSCode(_) => "VSCode".to_string(),
+            AppSnapshot::Calculator(_) => "Calculator".to_string(),
+            AppSnapshot::Unknown => "Unknown".to_string(),
         }
     }
 }
 
-impl Display for AppWindow {
+impl Display for AppSnapshot {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            AppWindow::VSCode(window) => write!(f, "{}", window),
-            AppWindow::Calculator(window) => write!(f, "{}", window),
-            AppWindow::Unknown => write!(f, "Unknown"),
+            AppSnapshot::VSCode(window) => write!(f, "{}", window),
+            AppSnapshot::Calculator(window) => write!(f, "{}", window),
+            AppSnapshot::Unknown => write!(f, "Unknown"),
         }
     }
 }

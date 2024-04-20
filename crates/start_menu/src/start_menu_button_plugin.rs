@@ -66,8 +66,8 @@ fn add_start_menu_button_to_new_taskbars(
 fn click_listener(
     mut click_events: EventReader<ClickEvent>,
     start_menu_button_query: Query<&Children, With<StartMenuButton>>,
-    start_menu_query: Query<(), With<StartMenu>>,
-    mut start_menu_events: EventWriter<StartMenuEvent>,
+    start_menu_query: Query<(), With<StartMenuPanel>>,
+    mut start_menu_events: EventWriter<StartMenuPanelVisibilityChangeRequestEvent>,
 ) {
     for event in click_events.read() {
         let ClickEvent::Clicked {
@@ -87,11 +87,11 @@ fn click_listener(
                 .iter()
                 .any(|child| start_menu_query.get(*child).is_ok());
             if open {
-                start_menu_events.send(StartMenuEvent::Close {
+                start_menu_events.send(StartMenuPanelVisibilityChangeRequestEvent::Close {
                     start_menu_button_id: *target_id,
                 });
             } else {
-                start_menu_events.send(StartMenuEvent::Open {
+                start_menu_events.send(StartMenuPanelVisibilityChangeRequestEvent::Open {
                     start_menu_button_id: *target_id,
                 });
             }

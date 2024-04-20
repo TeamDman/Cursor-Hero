@@ -9,6 +9,8 @@ use bevy_inspector_egui::reflect_inspector::InspectorUi;
 use cursor_hero_bevy::prelude::Area;
 use cursor_hero_bevy::prelude::TopLeftI;
 use cursor_hero_bevy::prelude::TranslateIVec2;
+use cursor_hero_cursor_types::prelude::ClickEvent;
+use cursor_hero_cursor_types::prelude::Way;
 use cursor_hero_screen::get_image::get_image;
 use cursor_hero_screen::get_image::ScreensToImageParam;
 use cursor_hero_ui_automation::prelude::*;
@@ -60,7 +62,8 @@ impl Plugin for UiInspectorPlugin {
         app.add_systems(Update, handle_gamebound_messages.run_if(condition.clone()));
         app.add_systems(Update, gui.run_if(condition.clone()));
         app.add_systems(Update, handle_inspector_events.run_if(condition.clone()));
-        app.add_systems(Update, update_preview_image.run_if(condition));
+        app.add_systems(Update, update_preview_image.run_if(condition.clone()));
+        app.add_systems(Update, hovered_click_listener.run_if(condition.clone()));
     }
 }
 
@@ -532,12 +535,13 @@ fn gui(
     let type_registry = type_registry.read();
     let mut inspector = InspectorUi::for_bevy(&type_registry, &mut cx);
 
-    let id = egui::Id::new("Inspector");
-    egui::Window::new("Inspector")
+    let id = egui::Id::new("UIAutomation Inspector");
+    egui::Window::new("UIAutomation Inspector")
         .id(id)
         .default_pos((5.0, 5.0))
         .default_width(1200.0)
         .default_height(1000.0)
+        .default_open(false)
         .show(ctx, |ui| {
             egui::SidePanel::left(id.with("tree"))
                 .resizable(true)
@@ -719,4 +723,32 @@ fn ui_for_element_info(
                 }
             }
         });
+}
+
+fn hovered_click_listener(
+    mut click_events: EventReader<ClickEvent>,
+    game_hover_query: Query<&GameHoverIndicator>,
+    host_hover_query: Query<&HostHoverIndicator>,
+    mut ui_data: ResMut<UIData>,
+    mut inspector_events: EventWriter<InspectorEvent>,
+) {
+    for event in click_events.read() {
+        let ClickEvent::Clicked {
+            target_id,
+            cursor_id: _,
+            way,
+        } = event
+        else {
+            continue;
+        };
+        if way == &Way::Left {
+            if game_hover_query.get(*target_id).is_ok() || host_hover_query.get(*target_id).is_ok()
+            {
+                ui_data.paused ^= true;
+                info!("Hover indicator clicked, paused set to {}", ui_data.paused);
+            }
+        } else if way == &Way::Right {
+            inspector_events.send(InspectorEvent::PushScratchPad);
+        }
+    }
 }

@@ -13,7 +13,7 @@ pub(crate) fn resolve_app(
     elem: &UIElement,
     automation: &UIAutomation,
     focused: bool,
-) -> Result<AppWindow> {
+) -> Result<AppSnapshot> {
     match (
         elem.get_name(),
         elem.get_control_type(),
@@ -29,6 +29,6 @@ pub(crate) fn resolve_app(
         {
             resolve_calculator(elem, automation, focused).context("resolving calculator")
         }
-        _ => Ok(AppWindow::Unknown),
+        _ => Ok(AppSnapshot::Unknown),
     }
 }

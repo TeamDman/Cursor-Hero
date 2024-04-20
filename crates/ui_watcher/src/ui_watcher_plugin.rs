@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use cursor_hero_character_types::prelude::MainCharacter;
-use cursor_hero_environment_types::environment_types::EnvironmentTracker;
+use cursor_hero_environment_types::environment_types::TrackedEnvironment;
 use cursor_hero_memory_types::prelude::get_persist_file;
 use cursor_hero_memory_types::prelude::MemoryConfig;
 use cursor_hero_memory_types::prelude::Usage;
@@ -51,7 +51,7 @@ fn handle_gamebound_messages(
     memory_config: Res<MemoryConfig>,
     mut gamebound_events: EventReader<GameboundUIWatcherMessage>,
     mut observation_events: EventWriter<SomethingObservableHappenedEvent>,
-    character_query: Query<&EnvironmentTracker, With<MainCharacter>>,
+    character_query: Query<&TrackedEnvironment, With<MainCharacter>>,
 ) {
     if gamebound_events.is_empty() {
         return;

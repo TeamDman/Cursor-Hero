@@ -14,14 +14,14 @@ impl EnvironmentKind {
     }
 }
 
-#[derive(Component, Debug, Reflect, Eq, PartialEq)]
-pub struct DoNotTrackEnvironment;
+
+#[derive(Component, Debug, Reflect)]
+pub struct ShouldTrackEnvironment;
 
 #[derive(Component, Debug, Reflect, Eq, PartialEq)]
-pub struct EnvironmentTracker {
+pub struct TrackedEnvironment {
     pub environment_id: Entity,
 }
-
 #[derive(Component, Debug, Reflect)]
 pub struct HostEnvironment;
 #[derive(Component, Debug, Reflect)]
@@ -29,9 +29,6 @@ pub struct AgentEnvironment;
 
 #[derive(Component, Default, Reflect)]
 pub struct Nametag;
-
-#[derive(Component, Debug, Reflect)]
-pub struct TrackEnvironmentTag;
 
 #[derive(Event, Debug, Reflect)]
 pub struct CreateEnvironmentRequestEvent {

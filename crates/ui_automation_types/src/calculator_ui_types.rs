@@ -5,7 +5,7 @@ use serde::Serialize;
 use crate::prelude::ElementInfo;
 
 #[derive(Debug, Reflect, Default, Clone, Serialize, Deserialize, PartialEq)]
-pub struct CalculatorState {
+pub struct CalculatorSnapshot {
     pub expression: ElementInfo,
     pub display: ElementInfo,
     pub zero_button: ElementInfo,
@@ -51,7 +51,7 @@ pub struct CalculatorState {
     pub degrees_toggle_button: ElementInfo,
     pub scientific_notation_togglebutton: ElementInfo,
 }
-impl std::fmt::Display for CalculatorState {
+impl std::fmt::Display for CalculatorSnapshot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -60,14 +60,3 @@ impl std::fmt::Display for CalculatorState {
         )
     }
 }
-
-#[derive(Event, Debug, Reflect, Default)]
-pub struct SpawnCalculatorRequest {
-    calculator_state: CalculatorState,
-}
-
-#[derive(Component, Debug, Reflect, Default, Clone, Serialize, Deserialize, PartialEq)]
-pub struct Calculator;
-
-#[derive(Component, Debug, Reflect, Default)]
-pub struct NumberDisplayPanel;

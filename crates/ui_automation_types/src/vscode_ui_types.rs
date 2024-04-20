@@ -102,14 +102,14 @@ pub struct VSCodeWindowFooter {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, Reflect)]
-pub struct VSCodeWindow {
+pub struct VSCodeSnapshot {
     pub focused: bool,
     pub header: VSCodeWindowHeader,
     pub body: VSCodeWindowBody,
     pub footer: VSCodeWindowFooter,
 }
 
-impl Display for VSCodeWindow {
+impl Display for VSCodeSnapshot {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         writeln!(
             f,

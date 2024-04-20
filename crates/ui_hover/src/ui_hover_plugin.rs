@@ -5,9 +5,7 @@ use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
 use bevy_xpbd_2d::components::Sensor;
 use cursor_hero_bevy::prelude::NegativeYIVec2;
-use cursor_hero_cursor_types::cursor_click_types::ClickEvent;
 use cursor_hero_cursor_types::cursor_click_types::Clickable;
-use cursor_hero_cursor_types::cursor_click_types::Way;
 use cursor_hero_cursor_types::cursor_types::MainCursor;
 use cursor_hero_ui_automation::prelude::find_element_at;
 use cursor_hero_ui_automation::prelude::gather_single_element_info;
@@ -18,8 +16,6 @@ use cursor_hero_ui_hover_types::prelude::HoverIndicator;
 use cursor_hero_ui_hover_types::prelude::HoverInfo;
 use cursor_hero_ui_hover_types::prelude::InspectorHoverIndicator;
 use cursor_hero_ui_hover_types::prelude::ThreadboundHoverMessage;
-use cursor_hero_ui_inspector_types::prelude::InspectorEvent;
-use cursor_hero_ui_inspector_types::prelude::UIData;
 use cursor_hero_winutils::win_mouse::get_cursor_position;
 use cursor_hero_worker::prelude::anyhow::Error;
 use cursor_hero_worker::prelude::anyhow::Result;
@@ -46,7 +42,6 @@ impl Plugin for UiHoverPlugin {
         app.add_systems(Update, trigger_game_hover_info_update);
         app.add_systems(Update, handle_gamebound_messages);
         app.add_systems(Update, update_visuals);
-        app.add_systems(Update, hovered_click_listener);
     }
 }
 
@@ -374,32 +369,4 @@ fn update_visuals(
         &mut commands,
         inspector_params,
     );
-}
-
-fn hovered_click_listener(
-    mut click_events: EventReader<ClickEvent>,
-    game_hover_query: Query<&GameHoverIndicator>,
-    host_hover_query: Query<&HostHoverIndicator>,
-    mut ui_data: ResMut<UIData>,
-    mut inspector_events: EventWriter<InspectorEvent>,
-) {
-    for event in click_events.read() {
-        let ClickEvent::Clicked {
-            target_id,
-            cursor_id: _,
-            way,
-        } = event
-        else {
-            continue;
-        };
-        if way == &Way::Left {
-            if game_hover_query.get(*target_id).is_ok() || host_hover_query.get(*target_id).is_ok()
-            {
-                ui_data.paused ^= true;
-                info!("Hover indicator clicked, paused set to {}", ui_data.paused);
-            }
-        } else if way == &Way::Right {
-            inspector_events.send(InspectorEvent::PushScratchPad);
-        }
-    }
 }

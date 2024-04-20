@@ -5,9 +5,6 @@ use bevy::render::render_resource::ShaderRef;
 use bevy::sprite::Material2d;
 
 #[derive(Component, Debug, Reflect)]
-pub struct AppWindow;
-
-#[derive(Component, Debug, Reflect)]
 pub struct Taskbar {
     pub size: Vec2,
 }

@@ -7,7 +7,7 @@ pub(crate) fn resolve_calculator(
     elem: &UIElement,
     automation: &UIAutomation,
     _focused: bool,
-) -> Result<AppWindow> {
+) -> Result<AppSnapshot> {
     let walker = automation.create_tree_walker()?;
     let root = elem;
     let expression = root
@@ -187,7 +187,7 @@ pub(crate) fn resolve_calculator(
         .context("scientific_notation_togglebutton")?
         .try_into()?;
 
-    Ok(AppWindow::Calculator(CalculatorState {
+    Ok(AppSnapshot::Calculator(CalculatorSnapshot {
         expression,
         display,
         zero_button,

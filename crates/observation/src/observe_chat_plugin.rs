@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_chat_types::prelude::*;
-use cursor_hero_environment_types::environment_types::EnvironmentTracker;
+use cursor_hero_environment_types::environment_types::TrackedEnvironment;
 use cursor_hero_observation_types::prelude::*;
 pub struct ObserveChatPlugin;
 
@@ -14,7 +14,7 @@ impl Plugin for ObserveChatPlugin {
 fn observe_chat(
     mut chat_events: EventReader<ChatEvent>,
     mut observation_events: EventWriter<SomethingObservableHappenedEvent>,
-    character_query: Query<(Option<&Name>, Option<&EnvironmentTracker>), With<Character>>,
+    character_query: Query<(Option<&Name>, Option<&TrackedEnvironment>), With<Character>>,
 ) {
     for event in chat_events.read() {
         let ChatEvent::Chat {

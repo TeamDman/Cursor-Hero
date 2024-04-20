@@ -56,7 +56,7 @@ fn spawn_character(
         // },
         RigidBody::Kinematic,
         Collider::capsule(15.0, 12.5),
-        TrackEnvironmentTag,
+        ShouldTrackEnvironment,
     ));
     camera_events.send(CameraEvent::BeginFollowing {
         target_id: character.id(),

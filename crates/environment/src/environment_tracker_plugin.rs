@@ -16,8 +16,8 @@ impl Plugin for EnvironmentTrackerPlugin {
 fn track(
     mut commands: Commands,
     mut thing_query: Query<
-        (Entity, Option<&mut EnvironmentTracker>, &CollidingEntities),
-        Without<DoNotTrackEnvironment>,
+        (Entity, Option<&mut TrackedEnvironment>, &CollidingEntities),
+        With<ShouldTrackEnvironment>,
     >,
     level_bounds_query: Query<&Parent, With<LevelBounds>>,
     level_bounds_holder_query: Query<&Parent, With<LevelBoundsHolder>>,
@@ -51,12 +51,12 @@ fn track(
             if let Some(mut tag) = thing_environment_tag {
                 tag.environment_id = *environment_id;
             } else {
-                commands.entity(thing_id).insert(EnvironmentTracker {
+                commands.entity(thing_id).insert(TrackedEnvironment {
                     environment_id: *environment_id,
                 });
             }
         } else if thing_environment_tag.is_some() {
-            commands.entity(thing_id).remove::<EnvironmentTracker>();
+            commands.entity(thing_id).remove::<TrackedEnvironment>();
         }
     }
 }

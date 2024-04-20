@@ -130,7 +130,7 @@ fn step_2_of_making_the_calculators_in_the_game_match_the_calculator_apps_runnin
         let GameboundUISnapshotMessage::UISnapshot(snapshot) = msg;
         // debug!("Received snapshot: {:?}", snapshot);
         for app in snapshot.app_windows.iter() {
-            let AppWindow::Calculator(calculator) = app else {
+            let AppSnapshot::Calculator(calculator) = app else {
                 continue;
             };
             debug!("Received calculator: {:?}", calculator);

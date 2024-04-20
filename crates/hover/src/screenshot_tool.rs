@@ -14,7 +14,7 @@ use cursor_hero_bevy::prelude::NegativeYVec2;
 use cursor_hero_camera::camera_plugin::MainCamera;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_cursor_types::prelude::*;
-use cursor_hero_environment_types::prelude::TrackEnvironmentTag;
+use cursor_hero_environment_types::prelude::ShouldTrackEnvironment;
 use cursor_hero_physics::damping_plugin::MovementDamping;
 use cursor_hero_screen::get_image::get_image;
 use cursor_hero_screen::get_image::ScreensToImageParam;
@@ -465,7 +465,7 @@ fn spawn_brick(
         Clickable,
         CubeToolInteractable,
         RigidBody::Dynamic,
-        TrackEnvironmentTag,
+        ShouldTrackEnvironment,
         ScreenshotBrick {
             ui_tree: ui_tree.clone(),
             hero_element: hero_element.clone(),

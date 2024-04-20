@@ -5,9 +5,8 @@ pub struct EnvironmentTypesPlugin;
 
 impl Plugin for EnvironmentTypesPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<TrackEnvironmentTag>();
-        app.register_type::<EnvironmentTracker>();
-        app.register_type::<DoNotTrackEnvironment>();
+        app.register_type::<ShouldTrackEnvironment>();
+        app.register_type::<TrackedEnvironment>();
         app.register_type::<EnvironmentKind>();
         app.register_type::<HostEnvironment>();
         app.register_type::<AgentEnvironment>();

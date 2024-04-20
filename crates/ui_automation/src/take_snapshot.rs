@@ -17,7 +17,7 @@ pub fn take_snapshot() -> Result<UiSnapshot> {
     for elem in top_level_children {
         let focused = elem.get_runtime_id() == focused_app.get_runtime_id();
         let resolved = resolve_app(&elem, &automation, focused)?;
-        if resolved != AppWindow::Unknown {
+        if resolved != AppSnapshot::Unknown {
             apps.push((elem, resolved));
         }
     }
