@@ -149,9 +149,13 @@
 
 ## Art
 
-- [Aseprite - Animated sprite editor & pixel art tool](https://www.aseprite.org/)
+- [LibreSprite/LibreSprite: Animated sprite editor & pixel art tool -- Fork of the last GPLv2 commit of Aseprite (github.com)](https://github.com/LibreSprite/LibreSprite)
 
 ## UI
 
 - [linebender/vello: An experimental GPU compute-centric 2D renderer. (github.com)](https://github.com/linebender/vello)
   - [loopystudios/bevy\_vello: An integration to render with Vello in Bevy game engine. (github.com)](https://github.com/loopystudios/bevy_vello)
+
+## Evolutionary Algorithms
+
+- [bones-ai/rust-snake-ai: Training a Neural Network to play snake, uses genetic algorithm for neuro-evolution (github.com)](https://github.com/bones-ai/rust-snake-ai)
