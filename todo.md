@@ -2,8 +2,6 @@
 
 ## Active
 
-- ui data memory plugin
-
 ## Up Next
 
 

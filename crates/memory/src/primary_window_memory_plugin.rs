@@ -111,7 +111,7 @@ fn persist(
         }
         let file = get_persist_file(memory_config.as_ref(), PERSIST_FILE_NAME, Usage::Persist)
             .map_err(PersistError::Io)?;
-        write_to_disk(file, data)?;
+        write_to_disk(file, &data)?;
         *debounce = Some(data);
         Ok(PersistSuccess::WritePerformed)
     } else {

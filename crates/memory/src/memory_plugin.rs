@@ -6,6 +6,7 @@ use crate::agent_observation_memory_plugin::AgentObservationMemoryPlugin;
 use crate::main_camera_memory_plugin::MainCameraMemoryPlugin;
 use crate::main_character_memory_plugin::MainCharacterMemoryPlugin;
 use crate::primary_window_memory_plugin::PrimaryWindowMemoryPlugin;
+use crate::ui_data_memory_plugin::UIDataMemoryPlugin;
 use crate::voice_to_text_memory_plugin::VoiceToTextMemoryPlugin;
 
 pub struct MemoryPlugin {
@@ -30,6 +31,9 @@ impl Plugin for MemoryPlugin {
         }
         if self.build_config.agent_observation_memory_enabled {
             app.add_plugins(AgentObservationMemoryPlugin);
+        }
+        if self.build_config.ui_data_memory_enabled {
+            app.add_plugins(UIDataMemoryPlugin);
         }
     }
 }

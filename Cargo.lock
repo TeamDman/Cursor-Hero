@@ -2164,6 +2164,8 @@ dependencies = [
  "cursor_hero_observation_types",
  "cursor_hero_secret_types",
  "cursor_hero_toolbelt_types",
+ "cursor_hero_ui_automation_types",
+ "cursor_hero_ui_inspector_types",
  "cursor_hero_voice_to_text_types",
  "cursor_hero_winutils",
  "raw-window-handle",
@@ -2692,6 +2694,7 @@ dependencies = [
  "bevy",
  "bevy_egui",
  "cursor_hero_ui_automation_types",
+ "serde",
 ]
 
 [[package]]

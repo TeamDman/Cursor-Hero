@@ -114,7 +114,7 @@ impl CalculatorTheme for CalculatorThemeKind {
             CalculatorElementKind::DigitButton(7) => Rect::new(105.0, -377.0, 61.0, 33.0),
             CalculatorElementKind::DigitButton(8) => Rect::new(168.0, -377.0, 61.0, 33.0),
             CalculatorElementKind::DigitButton(9) => Rect::new(231.0, -377.0, 61.0, 33.0),
-            CalculatorElementKind::DigitButton(n) => Rect::new(0.0, 0.0, 0.0, 0.0),
+            CalculatorElementKind::DigitButton(_) => Rect::new(0.0, 0.0, 0.0, 0.0),
             CalculatorElementKind::PlusButton => Rect::new(294.0, -446.0, 60.0, 33.0),
             CalculatorElementKind::MinusButton => Rect::new(294.0, -412.0, 60.0, 32.0),
             CalculatorElementKind::MultiplyButton => Rect::new(294.0, -377.0, 60.0, 33.0),

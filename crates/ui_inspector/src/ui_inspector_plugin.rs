@@ -1,7 +1,9 @@
+use bevy::input::common_conditions::input_just_pressed;
 use bevy::input::common_conditions::input_toggle_active;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy_egui::egui;
+use bevy_egui::egui::collapsing_header::CollapsingState;
 use bevy_egui::egui::Color32;
 use bevy_egui::EguiContext;
 use bevy_egui::EguiContexts;
@@ -53,20 +55,40 @@ impl Plugin for UiInspectorPlugin {
                 ..default()
             },
         });
-        let condition = input_toggle_active(false, KeyCode::Grave);
+
+        let visible_condition = |ui_data: Res<UIData>| ui_data.visible;
         app.add_systems(
             Update,
-            trigger_tree_update_for_hovered.run_if(condition.clone()),
+            (|mut ui_data: ResMut<UIData>| {
+                ui_data.visible ^= true;
+            })
+            .run_if(input_just_pressed(KeyCode::Grave)),
         );
         app.add_systems(
             Update,
-            trigger_gather_children_request.run_if(condition.clone()),
+            trigger_tree_update_for_hovered.run_if(visible_condition.clone()),
         );
-        app.add_systems(Update, handle_gamebound_messages.run_if(condition.clone()));
-        app.add_systems(Update, gui.run_if(condition.clone()));
-        app.add_systems(Update, handle_inspector_events.run_if(condition.clone()));
-        app.add_systems(Update, update_preview_image.run_if(condition.clone()));
-        app.add_systems(Update, hovered_click_listener.run_if(condition.clone()));
+        app.add_systems(
+            Update,
+            trigger_gather_children_request.run_if(visible_condition.clone()),
+        );
+        app.add_systems(
+            Update,
+            handle_gamebound_messages.run_if(visible_condition.clone()),
+        );
+        app.add_systems(Update, gui.run_if(visible_condition.clone()));
+        app.add_systems(
+            Update,
+            handle_inspector_events.run_if(visible_condition.clone()),
+        );
+        app.add_systems(
+            Update,
+            update_preview_image.run_if(visible_condition.clone()),
+        );
+        app.add_systems(
+            Update,
+            hovered_click_listener.run_if(visible_condition.clone()),
+        );
     }
 }
 
@@ -541,6 +563,10 @@ fn gui(
     mut hover_info: ResMut<HoverInfo>,
     mut threadbound_events: EventWriter<ThreadboundUISnapshotMessage>,
 ) {
+    if !ui_data.visible {
+        return;
+    }
+
     // Get preview image
     let preview = if let Some(ref preview) = ui_data.selected_preview
         && let Some(texture_id) = contexts.image_id(&preview.handle)
@@ -568,8 +594,7 @@ fn gui(
         .default_pos((5.0, 5.0))
         .default_width(1200.0)
         .default_height(1000.0)
-        // .default_open(false)
-        .default_open(true)
+        .default_open(ui_data.open)
         .show(ctx, |ui| {
             egui::SidePanel::left(id.with("tree"))
                 .resizable(true)
@@ -784,6 +809,14 @@ fn gui(
                 });
             });
         });
+
+    if CollapsingState::load(ctx, id.with("collapsing"))
+        .map(|x| x.is_open())
+        .unwrap_or(ui_data.open)
+        != ui_data.open
+    {
+        ui_data.open = !ui_data.open;
+    }
 
     let id = egui::Id::new("Paused");
     egui::Window::new("Paused")

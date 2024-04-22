@@ -17,6 +17,7 @@ pub struct MemoryPluginBuildConfig {
     pub main_camera_memory_enabled: bool,
     pub voice_to_text_memory_enabled: bool,
     pub agent_observation_memory_enabled: bool,
+    pub ui_data_memory_enabled: bool,
 }
 
 impl MemoryPluginBuildConfig {
@@ -27,6 +28,7 @@ impl MemoryPluginBuildConfig {
             main_camera_memory_enabled: true,
             voice_to_text_memory_enabled: true,
             agent_observation_memory_enabled: true,
+            ui_data_memory_enabled: true,
         }
     }
 }
@@ -90,11 +92,11 @@ pub fn get_persist_file(
     Ok(file)
 }
 
-pub fn write_to_disk<T>(mut file: File, data: T) -> Result<PersistSuccess, PersistError>
+pub fn write_to_disk<T>(mut file: File, data: &T) -> Result<PersistSuccess, PersistError>
 where
     T: serde::Serialize,
 {
-    let serialized = serde_json::to_string_pretty(&data).map_err(PersistError::Json)?;
+    let serialized = serde_json::to_string_pretty(data).map_err(PersistError::Json)?;
     file.write_all(serialized.as_bytes())
         .map_err(PersistError::Io)?;
     Ok(PersistSuccess::WritePerformed)

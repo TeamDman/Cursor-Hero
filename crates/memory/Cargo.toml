@@ -15,6 +15,8 @@ cursor_hero_toolbelt_types = { workspace = true }
 cursor_hero_voice_to_text_types = { workspace = true }
 cursor_hero_secret_types = { workspace = true }
 cursor_hero_observation_types = { workspace = true }
+cursor_hero_ui_inspector_types = { workspace = true }
+cursor_hero_ui_automation_types = { workspace = true }
 raw-window-handle = { workspace = true }
 serde = { workspace = true, features=["derive"] }
 serde_json = { workspace = true }

@@ -9,3 +9,4 @@ edition = "2021"
 bevy = { workspace = true }
 cursor_hero_ui_automation_types = { workspace = true }
 bevy_egui = {workspace = true} # TODO: remove this
+serde = { workspace = true}

@@ -3,14 +3,16 @@ use bevy::utils::HashMap;
 use cursor_hero_ui_automation_types::prelude::DrillId;
 use cursor_hero_ui_automation_types::prelude::ElementInfo;
 use cursor_hero_ui_automation_types::prelude::RuntimeId;
+use serde::Serialize;
+use serde::Deserialize;
 
-#[derive(Resource, Debug, Reflect, Default)]
+#[derive(Resource, Debug, Reflect, Default, Clone)]
 pub struct PreviewImage {
     pub handle: Handle<Image>,
     pub size: UVec2,
 }
 
-#[derive(Debug, Reflect, Default, Eq, PartialEq)]
+#[derive(Debug, Reflect, Default, Eq, PartialEq, Clone, Serialize, Deserialize)]
 pub enum ScratchPadMode {
     #[default]
     Drill,
@@ -20,6 +22,8 @@ pub enum ScratchPadMode {
 #[derive(Resource, Debug, Reflect, Default)]
 #[reflect(Resource)]
 pub struct UIData {
+    pub visible: bool,
+    pub open: bool,
     pub scratch_pad: String,
     pub scratch_pad_mode: ScratchPadMode,
     pub mark: Option<DrillId>,
@@ -36,7 +40,7 @@ pub struct UIData {
     pub fetching: HashMap<(DrillId, RuntimeId), FetchingState>,
 }
 
-#[derive(Debug, Reflect)]
+#[derive(Debug, Reflect, Clone)]
 pub enum FetchingState {
     FetchRequest,
     FetchDispatched,

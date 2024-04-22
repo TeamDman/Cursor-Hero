@@ -3,6 +3,7 @@ mod main_camera_memory_plugin;
 mod main_character_memory_plugin;
 mod memory_plugin;
 pub mod primary_window_memory_plugin;
+mod ui_data_memory_plugin;
 mod voice_to_text_memory_plugin;
 
 pub mod prelude {
