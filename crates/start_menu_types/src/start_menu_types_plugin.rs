@@ -10,7 +10,7 @@ impl Plugin for StartMenuTypesPlugin {
 
         app.add_event::<StartMenuPanelVisibilityChangeRequestEvent>();
         app.register_type::<StartMenuPanelVisibilityChangeRequestEvent>();
-        
+
         app.add_event::<StartMenuPopulateEvent>();
         app.register_type::<StartMenuPopulateEvent>();
     }

@@ -2,6 +2,7 @@ use bevy::input::common_conditions::input_toggle_active;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy_egui::egui;
+use bevy_egui::egui::Color32;
 use bevy_egui::EguiContext;
 use bevy_egui::EguiContexts;
 use bevy_egui::EguiUserTextures;
@@ -9,6 +10,7 @@ use bevy_inspector_egui::reflect_inspector::InspectorUi;
 use cursor_hero_bevy::prelude::Area;
 use cursor_hero_bevy::prelude::TopLeftI;
 use cursor_hero_bevy::prelude::TranslateIVec2;
+use cursor_hero_calculator_app_types::calculator_app_types::CalculatorElementKind;
 use cursor_hero_cursor_types::prelude::ClickEvent;
 use cursor_hero_cursor_types::prelude::Way;
 use cursor_hero_screen::get_image::get_image;
@@ -21,6 +23,7 @@ use cursor_hero_ui_hover_types::prelude::InspectorHoverIndicator;
 use cursor_hero_ui_inspector_types::prelude::FetchingState;
 use cursor_hero_ui_inspector_types::prelude::InspectorEvent;
 use cursor_hero_ui_inspector_types::prelude::PreviewImage;
+use cursor_hero_ui_inspector_types::prelude::ScratchPadMode;
 use cursor_hero_ui_inspector_types::prelude::UIData;
 use cursor_hero_worker::prelude::anyhow::Context;
 use cursor_hero_worker::prelude::anyhow::Error;
@@ -329,31 +332,55 @@ fn handle_inspector_events(
         let Some(selected_drill_id) = ui_data.selected.clone() else {
             return;
         };
-        let Some(info) = ui_data.ui_tree.lookup_drill_id_mut(selected_drill_id) else {
+        let Some(info) = ui_data.ui_tree.lookup_drill_id(selected_drill_id.clone()) else {
             return;
         };
 
         // get identifier
-        fn as_rust_identifier(info: &ElementInfo) -> String {
-            format!(
-                "{}_{}",
-                info.name.replace(' ', "_").to_lowercase(),
-                info.class_name.to_lowercase()
-            )
-        }
-        let identifier = as_rust_identifier(info);
+        let mut identifier = info.as_identifier();
 
-        // get drill id
-        let drill_id = match info.drill_id {
-            DrillId::Child(ref inner) => inner.iter().skip(1).map(|x| x.to_string()).join(", "),
-            _ => "".to_string(),
+        let content = match ui_data.scratch_pad_mode {
+            ScratchPadMode::Drill => {
+                // get drill id
+                let drill_id = info
+                    .drill_id
+                    .as_child()
+                    .map(|d| d.iter().skip(1).map(|x| x.to_string()).join(", "))
+                    .unwrap_or_default();
+
+                // build content
+                let content = format!(
+                    "let {0} = root.drill(&walker, vec![{1}]).context(\"{0}\")?.try_into()?;\n",
+                    identifier, drill_id
+                );
+
+                content
+            }
+            ScratchPadMode::Bounds => {
+                let window = selected_drill_id
+                    .as_child()
+                    .map(|inner| inner.iter().take(1).cloned().collect())
+                    .and_then(|window_drill_id| ui_data.ui_tree.lookup_drill_id(window_drill_id))
+                    .unwrap_or(&ui_data.ui_tree);
+                if window.name == "Calculator"
+                    && let Some(calc_elem) = CalculatorElementKind::from_identifier(&identifier)
+                {
+                    identifier = format!("CalculatorElementKind::{}", calc_elem.get_name());
+                }
+
+                let bounds = info
+                    .bounding_rect
+                    .translated(&-window.bounding_rect.top_left());
+                format!(
+                    "{} => Rect::new({:.1},{:.1},{:.1},{:.1}),\n",
+                    identifier,
+                    bounds.top_left().x,
+                    -bounds.top_left().y,
+                    bounds.size().x,
+                    bounds.size().y
+                )
+            }
         };
-
-        // build content
-        let content = format!(
-            "let {0} = root.drill(&walker, vec![{1}]).context(\"{0}\")?.try_into()?;\n",
-            identifier, drill_id
-        );
 
         // append to scratch pad
         ui_data.scratch_pad.push_str(content.as_str());
@@ -439,7 +466,7 @@ fn update_preview_image(
         };
         let texture_highlight_region = info
             .bounding_rect
-            .translate(&-world_capture_region.top_left());
+            .translated(&-world_capture_region.top_left());
         let size = world_capture_region.size().abs().as_uvec2();
 
         // Check assumptions about reasonable image sizes given my personal monitor setup
@@ -541,16 +568,22 @@ fn gui(
         .default_pos((5.0, 5.0))
         .default_width(1200.0)
         .default_height(1000.0)
-        .default_open(false)
+        // .default_open(false)
+        .default_open(true)
         .show(ctx, |ui| {
             egui::SidePanel::left(id.with("tree"))
                 .resizable(true)
                 .width_range(100.0..=4000.0)
                 .default_width(600.0)
                 .show_inside(ui, |ui| {
+                    // LEFT PANEL
+
+                    // Header
                     ui.vertical_centered(|ui| {
                         ui.heading("UI Tree");
                     });
+
+                    // Tree
                     egui::ScrollArea::both().show(ui, |ui| {
                         let id = id.with(ui_data.ui_tree.runtime_id.clone());
                         let mut elem = ui_data.ui_tree.clone();
@@ -569,15 +602,22 @@ fn gui(
                 .show_inside(ui, |_ui| {});
 
             egui::CentralPanel::default().show_inside(ui, |ui| {
+                // RIGHT PANEL
+
+                // Ensure something is selected
                 let Some(selected_drill_id) = ui_data.selected.clone() else {
                     return;
                 };
-                let Some(selected_info) = ui_data
-                    .ui_tree
-                    .lookup_drill_id_mut(selected_drill_id.clone())
+
+                // Ensure the thing selected is in the tree
+                let Some(selected_info) =
+                    ui_data.ui_tree.lookup_drill_id(selected_drill_id.clone())
                 else {
                     return;
                 };
+
+                // Properties header
+                let mut mark_clicked = false;
                 ui.vertical_centered(|ui| {
                     ui.heading("Properties");
                     if ui.button("copy tree from here").clicked() {
@@ -586,9 +626,22 @@ fn gui(
                             parent_runtime_id: selected_info.runtime_id.clone(),
                         });
                     }
+                    let change_mark_button_text = match (&ui_data.mark, &selected_info.drill_id) {
+                        (Some(ref mark), drill_id) if mark == drill_id => "clear mark",
+                        _ => "set mark",
+                    };
+                    if ui.button(change_mark_button_text).clicked() {
+                        mark_clicked = true;
+                    }
                 });
+
+                // Properties
                 inspector.ui_for_reflect_readonly(selected_info, ui);
+
+                // Derived properties
                 ui.separator();
+
+                // Drill ID
                 ui.label("drill_id");
                 let drill_id = selected_info.drill_id.to_string();
                 inspector.ui_for_reflect_readonly(&drill_id, ui);
@@ -598,6 +651,8 @@ fn gui(
                     });
                     info!("Copied drill_id {} to clipboard", drill_id);
                 }
+
+                // Runtime ID
                 ui.label("runtime_id");
                 let runtime_id = selected_info.runtime_id.to_string();
                 inspector.ui_for_reflect_readonly(&runtime_id, ui);
@@ -608,6 +663,75 @@ fn gui(
                     info!("Copied runtime_id {} to clipboard", runtime_id);
                 }
 
+                // Bounds size
+                ui.label("bounds size");
+                let bounds_size = selected_info.bounding_rect.size().to_string();
+                inspector.ui_for_reflect_readonly(&bounds_size, ui);
+                if ui.button("copy").clicked() {
+                    ui.output_mut(|out| {
+                        out.copied_text = bounds_size.clone();
+                    });
+                    info!("Copied bounds size {} to clipboard", bounds_size);
+                }
+
+                ui.label("bounds relative to mark");
+
+                // Use mark if present, window otherwise
+                let compare_drill_id = ui_data
+                    .mark
+                    .clone()
+                    .or_else(|| {
+                        selected_drill_id
+                            .as_child()
+                            .map(|inner| inner.iter().take(1).cloned().collect())
+                    })
+                    .unwrap_or(DrillId::Root);
+
+                // Look up the comparison element
+                let compare = ui_data
+                    .ui_tree
+                    .lookup_drill_id(compare_drill_id)
+                    .unwrap_or(&ui_data.ui_tree);
+
+                // Get the bounds of the selected element relative to the comparison element
+                let bounds_relative = selected_info
+                    .bounding_rect
+                    .translated(&-compare.bounding_rect.top_left());
+
+                // Format as string
+                let bounds_relative_str = format!(
+                    "({},{},{},{})",
+                    bounds_relative.top_left().x,
+                    -bounds_relative.top_left().y,
+                    bounds_relative.width(),
+                    bounds_relative.height()
+                );
+
+                // Render the string
+                inspector.ui_for_reflect_readonly(&bounds_relative_str, ui);
+
+                // Render copy button
+                if ui.button("copy").clicked() {
+                    ui.output_mut(|out| {
+                        out.copied_text = bounds_relative_str.clone();
+                    });
+                    info!(
+                        "Copied bounds relative {} to clipboard",
+                        bounds_relative_str
+                    );
+                }
+
+                // We can borrow ui_data as mut now since this is
+                // the last time selected_info is borrowed
+                if mark_clicked {
+                    ui_data.mark = if ui_data.mark.is_none() {
+                        Some(selected_info.drill_id.clone())
+                    } else {
+                        None
+                    };
+                }
+
+                // Preview image if possible
                 if let Some((texture_id, size)) = preview {
                     ui.vertical_centered(|ui| {
                         ui.heading("Preview");
@@ -615,12 +739,44 @@ fn gui(
                     ui.image(egui::load::SizedTexture::new(texture_id, size));
                 }
 
+                // Scratch Pad
                 ui.vertical_centered(|ui| {
                     ui.heading("Scratch Pad");
                 });
-                if ui.button("clear").clicked() {
-                    ui_data.scratch_pad.clear();
-                }
+
+                // Scratch pad - mode switch
+                ui.horizontal(|ui| {
+                    ui.radio_value(
+                        &mut ui_data.scratch_pad_mode,
+                        ScratchPadMode::Drill,
+                        "Drill",
+                    );
+                    ui.radio_value(
+                        &mut ui_data.scratch_pad_mode,
+                        ScratchPadMode::Bounds,
+                        "Bounds",
+                    );
+                });
+
+                ui.horizontal(|ui| {
+                    // Scratch pad - clear button
+                    if ui.button("clear").clicked() {
+                        ui_data.scratch_pad.clear();
+                    }
+
+                    // space between buttons
+                    ui.add_space(10.0);
+
+                    // Scratch pad - copy button
+                    if ui.button("copy").clicked() {
+                        ui.output_mut(|out| {
+                            out.copied_text = ui_data.scratch_pad.clone();
+                        });
+                        info!("Copied scratch pad to clipboard");
+                    }
+                });
+
+                // Scratch pad - text area
                 egui::ScrollArea::vertical().show(ui, |ui| {
                     egui::TextEdit::multiline(&mut ui_data.scratch_pad)
                         .desired_width(ui.available_width())
@@ -684,7 +840,36 @@ fn ui_for_element_info(
                     element_info.drill_id,
                 )
             };
-            let toggle = ui.toggle_value(&mut selected, label);
+
+            // Update highlight colours if marked
+            let mut previous = None;
+            if data.mark == Some(element_info.drill_id.clone()) {
+                previous = Some((
+                    ui.style().visuals.selection.bg_fill,
+                    ui.style().visuals.widgets.hovered.weak_bg_fill,
+                ));
+
+                let mut visuals = &mut ui.style_mut().visuals;
+                visuals.selection.bg_fill = Color32::from_rgb(61, 42, 102);
+                visuals.widgets.hovered.weak_bg_fill = Color32::from_rgb(41, 22, 82);
+            }
+
+            // Draw the toggle
+            let mut toggle = ui.toggle_value(&mut selected, label);
+
+            // Restore previous colours
+            if let Some(previous) = previous {
+                let mut visuals = &mut ui.style_mut().visuals;
+                visuals.selection.bg_fill = previous.0;
+                visuals.widgets.hovered.weak_bg_fill = previous.1;
+            }
+
+            // Always apply highlight
+            if data.mark == Some(element_info.drill_id.clone()) {
+                toggle = toggle.highlight();
+            }
+
+            // Update selected
             if toggle.changed() {
                 data.selected = if selected {
                     Some(element_info.drill_id.clone())
@@ -692,6 +877,8 @@ fn ui_for_element_info(
                     None
                 };
             };
+
+            // Update hovered
             if toggle.hovered() {
                 data.hovered = Some(element_info.clone());
             }
@@ -742,8 +929,10 @@ fn hovered_click_listener(
             continue;
         };
         if way == &Way::Left {
+            // If the click event targets a hover indicator
             if game_hover_query.get(*target_id).is_ok() || host_hover_query.get(*target_id).is_ok()
             {
+                // Toggle the paused state
                 ui_data.paused ^= true;
                 info!("Hover indicator clicked, paused set to {}", ui_data.paused);
             }

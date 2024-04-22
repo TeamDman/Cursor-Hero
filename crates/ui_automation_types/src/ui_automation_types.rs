@@ -266,6 +266,14 @@ pub enum DrillId {
     #[default]
     Unknown,
 }
+impl DrillId {
+    pub fn as_child(&self) -> Option<&VecDeque<usize>> {
+        match self {
+            DrillId::Child(child) => Some(child),
+            _ => None,
+        }
+    }
+}
 impl FromIterator<usize> for DrillId {
     fn from_iter<T: IntoIterator<Item = usize>>(iter: T) -> Self {
         DrillId::Child(iter.into_iter().collect())
@@ -297,12 +305,12 @@ impl std::fmt::Display for DrillId {
             DrillId::Root => write!(f, "DrillId::Root"),
             DrillId::Child(drill_id) => write!(
                 f,
-                "DrillId::Child({})",
+                "DrillId::Child([{}])",
                 drill_id
                     .iter()
                     .map(|x| x.to_string())
                     .collect::<Vec<String>>()
-                    .join(",")
+                    .join(", ")
             ),
             DrillId::Unknown => write!(f, "DrillId::Unknown"),
         }
@@ -466,6 +474,14 @@ impl ElementInfo {
             }
         }
         descendents
+    }
+
+    pub fn as_identifier(&self) -> String {
+        format!(
+            "{}_{}",
+            self.name.replace(' ', "_").to_lowercase(),
+            self.class_name.to_lowercase()
+        )
     }
 }
 // test lookup_drill_id

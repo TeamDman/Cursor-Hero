@@ -14,7 +14,6 @@ impl EnvironmentKind {
     }
 }
 
-
 #[derive(Component, Debug, Reflect)]
 pub struct ShouldTrackEnvironment;
 

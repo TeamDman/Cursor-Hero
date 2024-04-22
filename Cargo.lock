@@ -1813,6 +1813,7 @@ name = "cursor_hero_calculator_app"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "bevy_xpbd_2d",
  "cursor_hero_bevy",
  "cursor_hero_calculator_app_types",
  "cursor_hero_cursor_types",
@@ -2671,6 +2672,7 @@ dependencies = [
  "bevy-inspector-egui",
  "bevy_egui",
  "cursor_hero_bevy",
+ "cursor_hero_calculator_app_types",
  "cursor_hero_cursor_types",
  "cursor_hero_screen",
  "cursor_hero_ui_automation",

@@ -10,10 +10,19 @@ pub struct PreviewImage {
     pub size: UVec2,
 }
 
+#[derive(Debug, Reflect, Default, Eq, PartialEq)]
+pub enum ScratchPadMode {
+    #[default]
+    Drill,
+    Bounds,
+}
+
 #[derive(Resource, Debug, Reflect, Default)]
 #[reflect(Resource)]
 pub struct UIData {
     pub scratch_pad: String,
+    pub scratch_pad_mode: ScratchPadMode,
+    pub mark: Option<DrillId>,
     pub start: ElementInfo,
     pub hovered: Option<ElementInfo>,
     pub ui_tree: ElementInfo,

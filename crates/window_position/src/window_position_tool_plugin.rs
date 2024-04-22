@@ -129,7 +129,7 @@ fn image_for_monitor_corner(
         ImageBuffer::from_pixel(icon_size.x, icon_size.y, Rgba([173u8, 216u8, 230u8, 255u8])); // Light blue background
 
     let scale = icon_size.as_vec2() / world.size().as_vec2();
-    let monitor_icon_region = monitor.info.rect.translate(&-world.min).scale(scale);
+    let monitor_icon_region = monitor.info.rect.translated(&-world.min).scale(scale);
     debug!(
         "Monitor icon region: {:?}, scale: {:?}",
         monitor_icon_region, scale
@@ -155,7 +155,7 @@ fn image_for_monitor(icon_size: UVec2, world: IRect, monitor: &Monitor) -> Image
         ImageBuffer::from_pixel(icon_size.x, icon_size.y, Rgba([173u8, 216u8, 230u8, 255u8])); // Light blue background
 
     let scale = icon_size.as_vec2() / world.size().as_vec2();
-    let monitor_icon_region = monitor.info.rect.translate(&-world.min).scale(scale);
+    let monitor_icon_region = monitor.info.rect.translated(&-world.min).scale(scale);
     debug!(
         "Monitor icon region: {:?}, scale: {:?}",
         monitor_icon_region, scale

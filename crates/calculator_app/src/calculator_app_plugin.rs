@@ -1,13 +1,26 @@
+use std::ops::Neg;
+
 use bevy::prelude::*;
+use bevy::text::TextLayoutInfo;
+use bevy_xpbd_2d::components::Collider;
+use bevy_xpbd_2d::components::RigidBody;
+use cursor_hero_bevy::prelude::NegativeYVec2;
 use cursor_hero_bevy::prelude::NegativeYVec3;
+use cursor_hero_bevy::prelude::TranslateVec2;
 use cursor_hero_calculator_app_types::calculator_app_types::Calculator;
 use cursor_hero_calculator_app_types::calculator_app_types::CalculatorButton;
 use cursor_hero_calculator_app_types::calculator_app_types::CalculatorDisplay;
+use cursor_hero_calculator_app_types::calculator_app_types::CalculatorElementKind;
 use cursor_hero_calculator_app_types::calculator_app_types::CalculatorExpression;
 use cursor_hero_calculator_app_types::calculator_app_types::CalculatorStartMenuPanelButton;
+use cursor_hero_calculator_app_types::calculator_app_types::CalculatorState;
+use cursor_hero_calculator_app_types::calculator_app_types::CalculatorTheme;
+use cursor_hero_calculator_app_types::calculator_app_types::CalculatorThemeKind;
 use cursor_hero_calculator_app_types::calculator_app_types::SpawnCalculatorRequestEvent;
 use cursor_hero_cursor_types::cursor_click_types::ClickEvent;
+use cursor_hero_cursor_types::cursor_click_types::Clickable;
 use cursor_hero_cursor_types::cursor_click_types::Way;
+use cursor_hero_cursor_types::cursor_hover_types::Hoverable;
 use cursor_hero_cursor_types::cursor_types::Cursor;
 use cursor_hero_environment_types::environment_types::TrackedEnvironment;
 use cursor_hero_start_menu_types::start_menu_types::StartMenuPanel;
@@ -83,8 +96,11 @@ fn handle_calculator_app_launcher_icon_clicks(
         let environment_id = cursor_environment.environment_id;
         calculator_events.send(SpawnCalculatorRequestEvent {
             environment_id,
-            display: "".to_string(),
-            expression: "".to_string(),
+            theme: CalculatorThemeKind::WindowsDark,
+            state: CalculatorState {
+                expression: "".to_string(),
+                value: "0".to_string(),
+            },
         });
     }
 }
@@ -119,53 +135,52 @@ fn handle_spawn_calculator_events(
                             color,
                             ..default()
                         },
-                        transform: Transform::from_translation((size/2.0).extend(1.0).neg_y()),
+                        transform: Transform::from_translation((size / 2.0).extend(1.0).neg_y()),
                         ..default()
                     },
                 ))
                 .with_children(|parent| {
-                    parent.spawn((
-                        CalculatorExpression,
-                        Text2dBundle {
-                            text: Text {
-                                sections: vec![TextSection {
-                                    value: "".to_string(),
+                    let theme = CalculatorThemeKind::WindowsDark;
+                    for elem_kind in CalculatorElementKind::variants() {
+                        let text = elem_kind
+                            .get_text_from_state(&event.state)
+                            .unwrap_or_else(|| elem_kind.get_default_text());
+
+                        // convert from top-left offset to center-offset
+                        let bounds = theme
+                            .get_bounds(&elem_kind)
+                            .translated(&(size / 2.0).neg().neg_y());
+                        let background_color = theme.get_background_color(&elem_kind);
+                        let text_style = theme.get_text_style(&elem_kind);
+                        parent
+                            .spawn((
+                                SpriteBundle {
+                                    sprite: Sprite {
+                                        custom_size: Some(bounds.size()),
+                                        color: background_color,
+                                        ..default()
+                                    },
+                                    transform: Transform::from_translation(
+                                        bounds.center().extend(2.0),
+                                    ),
+                                    ..Default::default()
+                                },
+                                Hoverable,
+                                Clickable,
+                                RigidBody::Static,
+                                Collider::cuboid(bounds.width(), bounds.height()),
+                                Name::new(elem_kind.get_name()),
+                            ))
+                            .with_children(|parent| {
+                                parent.spawn(Text2dBundle {
+                                    text: Text::from_section(text, text_style),
+                                    transform: Transform::from_translation(Vec3::new(
+                                        0.0, 0.0, 1.0,
+                                    )),
                                     ..default()
-                                }],
-                                ..default()
-                            },
-                            transform: Transform::from_translation(Vec3::new(0.0, 0.0, 1.0)),
-                            ..default()
-                        },
-                    ));
-                    parent.spawn((
-                        CalculatorDisplay,
-                        Text2dBundle {
-                            text: Text {
-                                sections: vec![TextSection {
-                                    value: "".to_string(),
-                                    ..default()
-                                }],
-                                ..default()
-                            },
-                            transform: Transform::from_translation(Vec3::new(0.0, 50.0, 2.0)),
-                            ..default()
-                        },
-                    ));
-                    parent.spawn((
-                        CalculatorButton,
-                        Text2dBundle {
-                            text: Text {
-                                sections: vec![TextSection {
-                                    value: "=".to_string(),
-                                    ..default()
-                                }],
-                                ..default()
-                            },
-                            transform: Transform::from_translation(Vec3::new(0.0, 100.0, 3.0)),
-                            ..default()
-                        },
-                    ));
+                                });
+                            });
+                    }
                 });
         });
     }

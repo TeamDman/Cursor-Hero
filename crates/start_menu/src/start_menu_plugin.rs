@@ -1,4 +1,5 @@
-use crate::{start_menu_button_plugin::StartMenuButtonPlugin, start_menu_panel_plugin::StartMenuPanelPlugin};
+use crate::start_menu_button_plugin::StartMenuButtonPlugin;
+use crate::start_menu_panel_plugin::StartMenuPanelPlugin;
 use bevy::prelude::*;
 
 pub struct StartMenuPlugin;
