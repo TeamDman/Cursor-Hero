@@ -57,7 +57,6 @@ impl Default for UIDataMemoryConfig {
     }
 }
 
-
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 struct DiskData {
     pub visible: bool,
@@ -146,6 +145,6 @@ fn restore(
     data.visible = false;
 
     *ui_data = data.into();
-    
+
     Ok(RestoreSuccess::Performed)
 }

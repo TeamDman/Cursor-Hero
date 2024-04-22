@@ -114,7 +114,6 @@ impl ClickToolAction {
         match self {
             Self::LeftClick => MouseButton::Left.into(),
             Self::RightClick => MouseButton::Right.into(),
-
         }
     }
     fn keyboard_wheel_gamepad_binding(&self) -> UserInput {

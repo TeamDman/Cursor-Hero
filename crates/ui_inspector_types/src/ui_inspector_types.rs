@@ -3,8 +3,8 @@ use bevy::utils::HashMap;
 use cursor_hero_ui_automation_types::prelude::DrillId;
 use cursor_hero_ui_automation_types::prelude::ElementInfo;
 use cursor_hero_ui_automation_types::prelude::RuntimeId;
-use serde::Serialize;
 use serde::Deserialize;
+use serde::Serialize;
 
 #[derive(Resource, Debug, Reflect, Default, Clone)]
 pub struct PreviewImage {

@@ -5,7 +5,6 @@ use bevy::math::Rect;
 use bevy::math::Vec2;
 use bevy::math::Vec3;
 
-
 // Vecs
 pub trait TranslateVec2 {
     fn translated(&self, translation: &Vec2) -> Self;
@@ -19,7 +18,6 @@ pub trait TranslateVec3 {
 pub trait TranslateIVec3 {
     fn translated(&self, translation: &IVec3) -> Self;
 }
-
 
 impl TranslateVec2 for Rect {
     fn translated(&self, translation: &Vec2) -> Rect {
