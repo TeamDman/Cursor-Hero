@@ -1,8 +1,10 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy::window::RawHandleWrapper;
+use cursor_hero_bevy::prelude::NegativeYVec2;
 use cursor_hero_camera::camera_plugin::FollowWithMainCamera;
 use cursor_hero_camera::camera_plugin::MainCamera;
+use cursor_hero_cursor_types::cursor_types::Cursor;
 use cursor_hero_winutils::win_mouse::set_cursor_position;
 use cursor_hero_winutils::win_window::get_window_title_bar_center_position;
 use leafwing_input_manager::prelude::*;
@@ -90,78 +92,165 @@ fn handle_input(
     movement_tool_query: Query<Entity, With<MovementTool>>,
     toolbelt_query: Query<(&Parent, &Children), With<Toolbelt>>,
     mut character_query: Query<
-        (Entity, &mut Transform, Option<&FollowWithMainCamera>),
+        (
+            Entity,
+            &mut Transform,
+            Option<&FollowWithMainCamera>,
+            &Children,
+        ),
         (With<Character>, Without<MainCamera>),
     >,
+    mut cursor_query: Query<&mut Cursor>,
     camera_query: Query<(Entity, &Transform), (With<MainCamera>, Without<Character>)>,
     window_query: Query<&RawHandleWrapper, With<PrimaryWindow>>,
     mut camera_events: EventWriter<CameraEvent>,
     mut movement_target_events: EventWriter<MovementTargetEvent>,
 ) {
+    // For each focus tool
     for tool in focus_tool_query.iter() {
         let (tool_actions, tool_parent) = tool;
 
         if tool_actions.just_pressed(FocusToolAction::ToggleFollowCharacter) {
+            // Announce acknowledgement
             info!("Toggle follow character");
+
+            // Get the toolbelt
             let Ok(toolbelt) = toolbelt_query.get(tool_parent.get()) else {
                 warn!("Toolbelt should have a parent");
                 continue;
             };
-
             let (toolbelt_parent, toolbelt_children) = toolbelt;
+
+            // Get the movement tools
             let movement_tool_ids = toolbelt_children
                 .iter()
                 .filter_map(|child| movement_tool_query.get(*child).ok());
 
+            // Get the character
             let Ok(character) = character_query.get_mut(toolbelt_parent.get()) else {
                 warn!("Toolbelt should have a character");
                 continue;
             };
-            let (character_id, mut character_transform, character_is_followed) = character;
+            let (character_id, mut character_transform, character_is_followed, character_children) =
+                character;
 
-            let camera = camera_query.single();
+            // Get the camera
+            let Ok(camera) = camera_query.get_single() else {
+                warn!("No main camera found");
+                continue;
+            };
             let (camera_id, camera_transform) = camera;
+
+            // If the character is not followed
             if character_is_followed.is_none() {
+                // Announce change
+                info!("Control and camera returning to character");
+
+                // Tell the camera to follow the character
                 camera_events.send(CameraEvent::BeginFollowing {
                     target_id: character_id,
                 });
+
+                // Tell the movement tools to manipulate the character
                 movement_tool_ids.for_each(|id| {
                     movement_target_events.send(MovementTargetEvent::SetTarget {
                         tool_id: id,
                         target: MovementTarget::Character,
                     });
                 });
-                info!("Sent follow events");
-                info!("Updating character to be at camera position");
+
+                // Snap the character to under wherever the camera has wandered
                 character_transform.translation = camera_transform.translation;
             } else {
+                // Announce change
+                info!("Camera now wandering from character");
+
+                // Tell the camera to stop following the character
                 camera_events.send(CameraEvent::StopFollowing {
                     target_id: character_id,
                 });
+
+                // Tell the movement tools to manipulate the camera
                 movement_tool_ids.for_each(|id| {
                     movement_target_events.send(MovementTargetEvent::SetTarget {
                         tool_id: id,
                         target: MovementTarget::Camera(camera_id),
                     });
                 });
-                info!("Sent unfollow events");
             }
         }
+
         if tool_actions.just_pressed(FocusToolAction::FocusMainWindow) {
+            // Announce acknowledgement
             info!("Focus main window");
+
+            // Get window entity
             let Ok(window_handle) = window_query.get_single() else {
                 error!("No primary window found");
                 return;
             };
+
+            // Get window handle
             let win32handle = match window_handle.window_handle {
                 raw_window_handle::RawWindowHandle::Win32(handle) => handle,
                 _ => panic!("Unsupported window handle"),
             };
+
+            // Focus the window
             focus_window(win32handle.hwnd as isize);
+
+            // Get the center of the window title bar
             if let Ok(position) = get_window_title_bar_center_position(win32handle.hwnd as isize) {
+                // Update host cursor
                 match set_cursor_position(position) {
                     Ok(_) => info!("Moved cursor to window title bar"),
                     Err(e) => error!("Failed to move cursor to window title bar: {:?}", e),
+                }
+
+                // Get toolbelt
+                let Ok(toolbelt) = toolbelt_query.get(tool_parent.get()) else {
+                    warn!("Toolbelt should have a parent");
+                    continue;
+                };
+                let (toolbelt_parent, _) = toolbelt;
+
+                // Get character
+                let Ok(character) = character_query.get_mut(toolbelt_parent.get()) else {
+                    warn!("Toolbelt should have a character");
+                    continue;
+                };
+                let (_, _, _, character_children) = character;
+
+                // For each cursor
+                for child in character_children.iter() {
+                    if let Ok(mut cursor) = cursor_query.get_mut(*child) {
+                        // Set the desired position
+                        info!("Set cursor position to window title bar center");
+                        cursor.desired_position = Some(position.clone().as_vec2().neg_y());
+                    }
+                }
+            }
+        } else if tool_actions.just_released(FocusToolAction::FocusMainWindow) {
+            // Get toolbelt
+            let Ok(toolbelt) = toolbelt_query.get(tool_parent.get()) else {
+                warn!("Toolbelt should have a parent");
+                continue;
+            };
+            let (toolbelt_parent, _) = toolbelt;
+
+            // Get character
+            let Ok(character) = character_query.get_mut(toolbelt_parent.get()) else {
+                warn!("Toolbelt should have a character");
+                continue;
+            };
+            let (_, _, _, character_children) = character;
+
+            // For each cursor
+            for child in character_children.iter() {
+                if let Ok(mut cursor) = cursor_query.get_mut(*child) {
+                    // Clear the desired position
+                    info!("Cleared cursor position");
+                    cursor.desired_position = None;
                 }
             }
         }

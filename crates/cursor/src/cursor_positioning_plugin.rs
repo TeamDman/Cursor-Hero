@@ -43,6 +43,7 @@ struct DecisionInfo {
     in_host_environment: bool,
     stick_in_use: bool,
     active_input_method: InputMethod,
+    desired_position: Option<Vec2>,
 }
 
 #[allow(clippy::type_complexity)]
@@ -56,9 +57,9 @@ fn update_cursor(
             &ActionState<CursorAction>,
             &mut Cursor,
             Option<&TrackedEnvironment>,
-            &Parent,
+            &Parent
         ),
-        (Without<Character>, With<Cursor>),
+        Without<Character>,
     >,
     mut character_query: Query<
         (Ref<GlobalTransform>, Option<&MainCharacter>),
@@ -74,6 +75,7 @@ fn update_cursor(
     mut last_known_cursor_position: Local<Option<Vec2>>,
     mut previous_update: Local<CursorUpdate>,
 ) {
+    // for each cursor
     for cursor in cursor_query.iter_mut() {
         let (
             mut cursor_transform,
@@ -85,38 +87,51 @@ fn update_cursor(
             cursor_parent,
         ) = cursor;
 
+        // Get controller state
         let stick_in_use = cursor_actions.pressed(CursorAction::Move);
+
+        // Get host environment presence
         let in_host_environment = cursor_environment
             .map(|e| environment_query.contains(e.environment_id))
             .unwrap_or(false);
 
+        // Get character
         let Ok(character) = character_query.get_mut(cursor_parent.get()) else {
             warn!("No character found");
             continue;
         };
         let (character_global_transform, is_main_character) = character;
 
+        // Get camera
         let Ok(camera) = camera_query.get_single() else {
             warn!("No camera found");
             return;
         };
         let (camera, camera_global_transform) = camera;
 
+        // Get window
         let Ok(window) = window_query.get_single() else {
             warn!("No window found");
             return;
         };
         let (window, window_handle) = window;
 
+        // Prepare decision info
         let decision_info = DecisionInfo {
             current_behaviour: cursor.movement_behaviour,
             is_main_character: is_main_character.is_some(),
             in_host_environment,
             stick_in_use,
             active_input_method: *input_method.get(),
+            desired_position: cursor.desired_position,
         };
 
+        // Determine behaviour
         let next_behaviour = match decision_info {
+            DecisionInfo {
+                desired_position: Some(ref _pos),
+                ..
+            } => CursorMovementBehaviour::SetBothToDesiredCoords,
             DecisionInfo {
                 is_main_character: true,
                 in_host_environment: true,
@@ -163,14 +178,19 @@ fn update_cursor(
             }
         };
 
+        // Update behaviour if changed
         if next_behaviour != cursor.movement_behaviour {
+            // Announce change
             info!(
                 "Switching to {:?} given {:?}",
                 next_behaviour, decision_info
             );
+
+            // Update behaviour
             cursor.movement_behaviour = next_behaviour;
         }
 
+        // Get cursor update
         let this_update = match cursor.movement_behaviour {
             CursorMovementBehaviour::None => {
                 // sync physics to render
@@ -248,6 +268,23 @@ fn update_cursor(
                         global_position: Some(global_target),
                         host_cursor: Some(host_target),
                     }
+                }
+            }
+            CursorMovementBehaviour::SetBothToDesiredCoords => {
+                // set both cursor and host cursor to desired position
+                if let Some(desired_position) = cursor.desired_position {
+                    let character_translation = character_global_transform.translation();
+                    let local_target = desired_position - character_translation.xy();
+                    let global_target = desired_position;
+                    let host_target = desired_position.neg_y().as_ivec2();
+                    CursorUpdate {
+                        local_transform: Some(local_target),
+                        global_position: Some(global_target),
+                        host_cursor: Some(host_target),
+                    }
+                } else {
+                    warn!("{} | No desired position found", cursor.movement_behaviour);
+                    CursorUpdate::default()
                 }
             }
             CursorMovementBehaviour::SetHostCursorFromWindowCoords => {

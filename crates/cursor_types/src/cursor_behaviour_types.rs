@@ -5,6 +5,7 @@ use std::fmt::Formatter;
 #[derive(Eq, PartialEq, Debug, Reflect, Clone, Copy)]
 pub enum CursorMovementBehaviour {
     None,
+    SetBothToDesiredCoords,
     SetHostCursorFromCursorWorldCoords,
     SetHostCursorFromWindowCoords,
     SetCursorFromHostCursorWindowCoords,
@@ -17,6 +18,8 @@ impl Display for CursorMovementBehaviour {
             "{}",
             match self {
                 CursorMovementBehaviour::None => "None",
+                CursorMovementBehaviour::SetBothToDesiredCoords =>
+                    "SetBothToDesiredCoords",
                 CursorMovementBehaviour::SetHostCursorFromCursorWorldCoords =>
                     "SetHostCursorFromCursorWorldCoords",
                 CursorMovementBehaviour::SetHostCursorFromWindowCoords =>

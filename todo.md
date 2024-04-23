@@ -2,12 +2,17 @@
 
 ## Active
 
+- don't make r3 teleport cursor
+- detach camera from character but still control character instead of freecam mode
+- investigate transparent windows :/
+
 ## Up Next
 
 
 
 ## Grab Bag
 
+- mode to detach mostly from controller when controlling apps that have controller support
 - UI Resolver for VSCode window
 - UI Resolver for a kanban board, move todo list to it. Mapping to GitHub project board?
 - UI Resolver for todo list, make it structured

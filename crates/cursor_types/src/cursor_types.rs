@@ -30,6 +30,7 @@ pub struct Cursor {
     pub sprint_reach: f32,
     pub movement_behaviour: CursorMovementBehaviour,
     pub log_behaviour: CursorLogBehaviour,
+    pub desired_position: Option<Vec2>,
 }
 impl Default for Cursor {
     fn default() -> Self {
@@ -44,6 +45,7 @@ impl Cursor {
             sprint_reach: 2000.0,
             movement_behaviour: CursorMovementBehaviour::None,
             log_behaviour: CursorLogBehaviour::Errors,
+            desired_position: None,
             // log_behaviour: CursorLogBehaviour::ErrorsAndPositionUpdates,
         }
     }
@@ -54,6 +56,7 @@ impl Cursor {
             sprint_reach: 2000.0,
             movement_behaviour: CursorMovementBehaviour::None,
             log_behaviour: CursorLogBehaviour::Errors,
+            desired_position: None,
             // log_behaviour: CursorLogBehaviour::ErrorsAndPositionUpdates,
         }
     }
@@ -64,6 +67,7 @@ impl Cursor {
             sprint_reach: 0.0,
             movement_behaviour: CursorMovementBehaviour::None,
             log_behaviour: CursorLogBehaviour::Errors,
+            desired_position: None,
             // log_behaviour: CursorLogBehaviour::ErrorsAndPositionUpdates,
         }
     }
