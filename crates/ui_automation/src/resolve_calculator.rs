@@ -10,6 +10,10 @@ pub(crate) fn resolve_calculator(
 ) -> Result<AppSnapshot> {
     let walker = automation.create_tree_walker()?;
     let root = elem;
+    let background = root
+        .drill(&walker, vec![1, 2, 1])
+        .context("_landmarktarget")?
+        .try_into()?;
     let expression = root
         .drill(&walker, vec![1, 2, 1, 0])
         .context("expression")?
@@ -188,6 +192,7 @@ pub(crate) fn resolve_calculator(
         .try_into()?;
 
     Ok(AppSnapshot::Calculator(CalculatorSnapshot {
+        background,
         expression,
         display,
         zero_button,

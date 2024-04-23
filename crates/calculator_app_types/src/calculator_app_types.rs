@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-#[derive(Debug, Reflect)]
+#[derive(Debug, Reflect, Eq, PartialEq)]
 pub enum CalculatorElementKind {
     ExpressionDisplay,
     ValueDisplay,
@@ -10,6 +10,7 @@ pub enum CalculatorElementKind {
     DivideButton,
     PlusButton,
     MinusButton,
+    Background,
 }
 impl CalculatorElementKind {
     pub fn variants() -> Vec<CalculatorElementKind> {
@@ -31,6 +32,7 @@ impl CalculatorElementKind {
             CalculatorElementKind::DivideButton,
             CalculatorElementKind::PlusButton,
             CalculatorElementKind::MinusButton,
+            CalculatorElementKind::Background,
         ]
     }
     pub fn get_default_text(&self) -> String {
@@ -43,6 +45,7 @@ impl CalculatorElementKind {
             CalculatorElementKind::DivideButton => "/".to_string(),
             CalculatorElementKind::PlusButton => "+".to_string(),
             CalculatorElementKind::MinusButton => "-".to_string(),
+            CalculatorElementKind::Background => "".to_string(),
         }
     }
     pub fn get_text_from_state(&self, state: &CalculatorState) -> Option<String> {
@@ -62,6 +65,7 @@ impl CalculatorElementKind {
             CalculatorElementKind::DivideButton => "DivideButton".to_string(),
             CalculatorElementKind::PlusButton => "PlusButton".to_string(),
             CalculatorElementKind::MinusButton => "MinusButton".to_string(),
+            CalculatorElementKind::Background => "Background".to_string(),
         }
     }
     pub fn from_identifier(name: &str) -> Option<CalculatorElementKind> {
@@ -81,6 +85,7 @@ impl CalculatorElementKind {
             "minus_button" => Some(CalculatorElementKind::MinusButton),
             "multiply_by_button" => Some(CalculatorElementKind::MultiplyButton),
             "divide_by_button" => Some(CalculatorElementKind::DivideButton),
+            "_landmarktarget" => Some(CalculatorElementKind::Background),
             x if x.starts_with("display_is_") => Some(CalculatorElementKind::ValueDisplay),
             x if x.starts_with("expression_is_") => Some(CalculatorElementKind::ExpressionDisplay),
             _ => None,
@@ -102,24 +107,26 @@ impl CalculatorTheme for CalculatorThemeKind {
     fn get_bounds(&self, element_kind: &CalculatorElementKind) -> Rect {
         let CalculatorThemeKind::WindowsDark = self;
         match element_kind {
-            CalculatorElementKind::ExpressionDisplay => Rect::new(168.0, -94.0, 284.0, 19.0),
-            CalculatorElementKind::ValueDisplay => Rect::new(168.0, -126.0, 320.0, 44.0),
-            CalculatorElementKind::DigitButton(0) => Rect::new(168.0, -481.0, 61.0, 32.0),
-            CalculatorElementKind::DigitButton(1) => Rect::new(105.0, -446.0, 61.0, 33.0),
-            CalculatorElementKind::DigitButton(2) => Rect::new(168.0, -446.0, 61.0, 33.0),
-            CalculatorElementKind::DigitButton(3) => Rect::new(231.0, -446.0, 61.0, 33.0),
-            CalculatorElementKind::DigitButton(4) => Rect::new(105.0, -412.0, 61.0, 32.0),
-            CalculatorElementKind::DigitButton(5) => Rect::new(168.0, -412.0, 61.0, 32.0),
-            CalculatorElementKind::DigitButton(6) => Rect::new(231.0, -412.0, 61.0, 32.0),
-            CalculatorElementKind::DigitButton(7) => Rect::new(105.0, -377.0, 61.0, 33.0),
-            CalculatorElementKind::DigitButton(8) => Rect::new(168.0, -377.0, 61.0, 33.0),
-            CalculatorElementKind::DigitButton(9) => Rect::new(231.0, -377.0, 61.0, 33.0),
+            CalculatorElementKind::Background => Rect::new(0.0, 0.0, 320.0, -456.0),
+            CalculatorElementKind::ExpressionDisplay => Rect::new(18.0, -44.0, 302.0, -63.0),
+            CalculatorElementKind::ValueDisplay => Rect::new(0.0, -63.0, 320.0, -107.0),
+            CalculatorElementKind::DivideButton => Rect::new(256.0, -286.0, 316.0, -318.0),
+            CalculatorElementKind::MultiplyButton => Rect::new(256.0, -320.0, 316.0, -353.0),
+            CalculatorElementKind::MinusButton => Rect::new(256.0, -355.0, 316.0, -387.0),
+            CalculatorElementKind::PlusButton => Rect::new(256.0, -389.0, 316.0, -422.0),
+            CalculatorElementKind::EqualsButton => Rect::new(256.0, -424.0, 316.0, -456.0),
+            CalculatorElementKind::DigitButton(0) => Rect::new(130.0, -424.0, 191.0, -456.0),
+            CalculatorElementKind::DigitButton(1) => Rect::new(67.0, -389.0, 128.0, -422.0),
+            CalculatorElementKind::DigitButton(2) => Rect::new(130.0, -389.0, 191.0, -422.0),
+            CalculatorElementKind::DigitButton(3) => Rect::new(193.0, -389.0, 254.0, -422.0),
+            CalculatorElementKind::DigitButton(4) => Rect::new(67.0, -355.0, 128.0, -387.0),
+            CalculatorElementKind::DigitButton(5) => Rect::new(130.0, -355.0, 191.0, -387.0),
+            CalculatorElementKind::DigitButton(6) => Rect::new(193.0, -355.0, 254.0, -387.0),
+            CalculatorElementKind::DigitButton(7) => Rect::new(67.0, -320.0, 128.0, -353.0),
+            CalculatorElementKind::DigitButton(8) => Rect::new(130.0, -320.0, 191.0, -353.0),
+            CalculatorElementKind::DigitButton(9) => Rect::new(193.0, -320.0, 254.0, -353.0),
+
             CalculatorElementKind::DigitButton(_) => Rect::new(0.0, 0.0, 0.0, 0.0),
-            CalculatorElementKind::PlusButton => Rect::new(294.0, -446.0, 60.0, 33.0),
-            CalculatorElementKind::MinusButton => Rect::new(294.0, -412.0, 60.0, 32.0),
-            CalculatorElementKind::MultiplyButton => Rect::new(294.0, -377.0, 60.0, 33.0),
-            CalculatorElementKind::DivideButton => Rect::new(294.0, -343.0, 60.0, 32.0),
-            CalculatorElementKind::EqualsButton => Rect::new(294.0, -481.0, 60.0, 32.0),
         }
     }
 

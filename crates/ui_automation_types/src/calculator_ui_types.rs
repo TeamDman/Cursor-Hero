@@ -6,6 +6,7 @@ use crate::prelude::ElementInfo;
 
 #[derive(Debug, Reflect, Default, Clone, Serialize, Deserialize, PartialEq)]
 pub struct CalculatorSnapshot {
+    pub background: ElementInfo,
     pub expression: ElementInfo,
     pub display: ElementInfo,
     pub zero_button: ElementInfo,

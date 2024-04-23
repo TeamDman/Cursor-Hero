@@ -111,7 +111,12 @@ fn handle_spawn_calculator_events(
             warn!("Couldn't find environment when processing {:?}", event);
             continue;
         };
-        let size = Vec2::new(320.0, 500.0);
+        let border = 4.0;
+        let size = event
+            .theme
+            .get_bounds(&CalculatorElementKind::Background)
+            .size()
+            + border * 2.0;
         let color = match get_start_color() {
             Ok(color) => color,
             Err(err) => {
@@ -125,13 +130,19 @@ fn handle_spawn_calculator_events(
                 .spawn((
                     Calculator,
                     Name::new("Calculator"),
+                    // SpatialBundle {
+                    //     transform: Transform::from_translation(Vec3::ZERO),
+                    //     ..default()
+                    // },
                     SpriteBundle {
                         sprite: Sprite {
                             custom_size: Some(size),
                             color,
                             ..default()
                         },
-                        transform: Transform::from_translation((size / 2.0).extend(1.0).neg_y()),
+                        transform: Transform::from_translation(
+                            ((size / 2.0) + border).neg_y().extend(1.0),
+                        ),
                         ..default()
                     },
                 ))
@@ -148,34 +159,34 @@ fn handle_spawn_calculator_events(
                             .translated(&(size / 2.0).neg().neg_y());
                         let background_color = theme.get_background_color(&elem_kind);
                         let text_style = theme.get_text_style(&elem_kind);
-                        parent
-                            .spawn((
-                                SpriteBundle {
-                                    sprite: Sprite {
-                                        custom_size: Some(bounds.size()),
-                                        color: background_color,
-                                        ..default()
-                                    },
-                                    transform: Transform::from_translation(
-                                        bounds.center().extend(2.0),
-                                    ),
-                                    ..Default::default()
+                        let mut elem_ent = parent.spawn((
+                            SpriteBundle {
+                                sprite: Sprite {
+                                    custom_size: Some(bounds.size()),
+                                    color: background_color,
+                                    ..default()
                                 },
+                                transform: Transform::from_translation(bounds.center().extend(2.0)),
+                                ..Default::default()
+                            },
+                            Name::new(elem_kind.get_name()),
+                        ));
+                        if elem_kind != CalculatorElementKind::Background {
+                            elem_ent.insert((
                                 Hoverable,
                                 Clickable,
                                 RigidBody::Static,
                                 Collider::cuboid(bounds.width(), bounds.height()),
-                                Name::new(elem_kind.get_name()),
-                            ))
-                            .with_children(|parent| {
-                                parent.spawn(Text2dBundle {
-                                    text: Text::from_section(text, text_style),
-                                    transform: Transform::from_translation(Vec3::new(
-                                        0.0, 0.0, 1.0,
-                                    )),
-                                    ..default()
-                                });
+                            ));
+                        }
+
+                        elem_ent.with_children(|parent| {
+                            parent.spawn(Text2dBundle {
+                                text: Text::from_section(text, text_style),
+                                transform: Transform::from_translation(Vec3::new(0.0, 0.0, 1.0)),
+                                ..default()
                             });
+                        });
                     }
                 });
         });

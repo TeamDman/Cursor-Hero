@@ -49,5 +49,6 @@ pub enum FetchingState {
 
 #[derive(Debug, Reflect, Event)]
 pub enum InspectorEvent {
-    PushScratchPad,
+    PushSelectedToScratchPad,
+    PushKnownToScratchPad,
 }
