@@ -28,6 +28,24 @@ impl Plugin for FocusToolPlugin {
         app.add_systems(Update, handle_input);
     }
 }
+
+#[derive(Component, Reflect, Default, Eq, PartialEq)]
+pub enum FocusMode {
+    #[default]
+    CameraFollowsCharacter,
+    CameraWanders,
+    CharacterWanders,
+}
+impl FocusMode {
+    pub fn next(&self) -> Self {
+        match self {
+            Self::CameraFollowsCharacter => Self::CameraWanders,
+            Self::CameraWanders => Self::CharacterWanders,
+            Self::CharacterWanders => Self::CameraFollowsCharacter,
+        }
+    }
+}
+
 #[derive(Component, Reflect, Default)]
 struct FocusTool;
 
@@ -53,7 +71,7 @@ fn toolbelt_events(
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
 enum FocusToolAction {
-    ToggleFollowCharacter,
+    CycleFollowTarget,
     FocusMainWindow,
 }
 // TODO: add an action to focus the character without teleporting it to the camera.
@@ -61,14 +79,14 @@ enum FocusToolAction {
 impl FocusToolAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
-            Self::ToggleFollowCharacter => GamepadButtonType::LeftThumb.into(),
+            Self::CycleFollowTarget => GamepadButtonType::LeftThumb.into(),
             Self::FocusMainWindow => GamepadButtonType::RightThumb.into(),
         }
     }
 
     fn default_mkb_binding(&self) -> UserInput {
         match self {
-            Self::ToggleFollowCharacter => KeyCode::Space.into(),
+            Self::CycleFollowTarget => KeyCode::Space.into(),
             Self::FocusMainWindow => KeyCode::Home.into(),
         }
     }
@@ -88,8 +106,11 @@ impl ToolAction for FocusToolAction {
 #[allow(clippy::type_complexity)]
 #[allow(clippy::too_many_arguments)]
 fn handle_input(
-    focus_tool_query: Query<(&ActionState<FocusToolAction>, &Parent), With<ActiveTool>>,
-    movement_tool_query: Query<Entity, With<MovementTool>>,
+    mut focus_tool_query: Query<
+        (&ActionState<FocusToolAction>, &Parent, &mut FocusTool),
+        With<ActiveTool>,
+    >,
+    movement_tool_query: Query<(Entity, &MovementTool)>,
     toolbelt_query: Query<(&Parent, &Children), With<Toolbelt>>,
     mut character_query: Query<
         (
@@ -108,11 +129,11 @@ fn handle_input(
 ) {
     // For each focus tool
     for tool in focus_tool_query.iter() {
-        let (tool_actions, tool_parent) = tool;
+        let (tool_actions, tool_parent, mut focus_tool) = tool;
 
-        if tool_actions.just_pressed(FocusToolAction::ToggleFollowCharacter) {
+        if tool_actions.just_pressed(FocusToolAction::CycleFollowTarget) {
             // Announce acknowledgement
-            info!("Toggle follow character");
+            info!("Cycle follow target");
 
             // Get the toolbelt
             let Ok(toolbelt) = toolbelt_query.get(tool_parent.get()) else {
@@ -121,10 +142,18 @@ fn handle_input(
             };
             let (toolbelt_parent, toolbelt_children) = toolbelt;
 
-            // Get the movement tools
-            let movement_tool_ids = toolbelt_children
-                .iter()
-                .filter_map(|child| movement_tool_query.get(*child).ok());
+            // Get the movement tool
+            let mut movement_tool = None;
+            for child in toolbelt_children.iter() {
+                if let Ok(tool) = movement_tool_query.get(*child) {
+                    movement_tool = Some(tool);
+                    break;
+                }
+            }
+            let Some((movement_tool_id, movement_tool)) = movement_tool else {
+                warn!("Toolbelt should have a movement tool");
+                continue;
+            };
 
             // Get the character
             let Ok(character) = character_query.get_mut(toolbelt_parent.get()) else {
@@ -141,42 +170,62 @@ fn handle_input(
             };
             let (camera_id, camera_transform) = camera;
 
-            // If the character is not followed
-            if character_is_followed.is_none() {
-                // Announce change
-                info!("Control and camera returning to character");
+            let derived_mode = match (movement_tool.target, character_is_followed) {
+                (MovementTarget::Character, Some(_)) => FocusMode::CameraFollowsCharacter,
+                (MovementTarget::Character, None) => FocusMode::CharacterWanders,
+                (MovementTarget::Camera(_), _) => FocusMode::CameraWanders,
+            };
+            let next_mode = derived_mode.next();
 
-                // Tell the camera to follow the character
-                camera_events.send(CameraEvent::BeginFollowing {
-                    target_id: character_id,
-                });
+            match next_mode {
+                FocusMode::CameraFollowsCharacter => {
+                    // Announce change
+                    info!("Control and camera returning to character");
 
-                // Tell the movement tools to manipulate the character
-                movement_tool_ids.for_each(|id| {
+                    // Tell the camera to follow the character
+                    camera_events.send(CameraEvent::BeginFollowing {
+                        target_id: character_id,
+                    });
+
+                    // Tell the movement tools to manipulate the character
                     movement_target_events.send(MovementTargetEvent::SetTarget {
-                        tool_id: id,
+                        tool_id: movement_tool_id,
                         target: MovementTarget::Character,
                     });
-                });
 
-                // Snap the character to under wherever the camera has wandered
-                character_transform.translation = camera_transform.translation;
-            } else {
-                // Announce change
-                info!("Camera now wandering from character");
+                    // Snap the character to under wherever the camera has wandered
+                    character_transform.translation = camera_transform.translation;
+                }
+                FocusMode::CameraWanders => {
+                    // Announce change
+                    info!("Camera now wandering from character");
 
-                // Tell the camera to stop following the character
-                camera_events.send(CameraEvent::StopFollowing {
-                    target_id: character_id,
-                });
+                    // Tell the camera to stop following the character
+                    camera_events.send(CameraEvent::StopFollowing {
+                        target_id: character_id,
+                    });
 
-                // Tell the movement tools to manipulate the camera
-                movement_tool_ids.for_each(|id| {
+                    // Tell the movement tools to manipulate the camera
                     movement_target_events.send(MovementTargetEvent::SetTarget {
-                        tool_id: id,
+                        tool_id: movement_tool_id,
                         target: MovementTarget::Camera(camera_id),
                     });
-                });
+                }
+                FocusMode::CharacterWanders => {
+                    // Announce change
+                    info!("Character now wandering from camera");
+
+                    // Tell the camera to stop following the character
+                    camera_events.send(CameraEvent::StopFollowing {
+                        target_id: character_id,
+                    });
+
+                    // Tell the movement tools to manipulate the character
+                    movement_target_events.send(MovementTargetEvent::SetTarget {
+                        tool_id: movement_tool_id,
+                        target: MovementTarget::Character,
+                    });
+                }
             }
         }
 

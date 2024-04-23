@@ -2,8 +2,6 @@
 
 ## Active
 
-- don't make r3 teleport cursor
-- detach camera from character but still control character instead of freecam mode
 - investigate transparent windows :/
 
 ## Up Next
