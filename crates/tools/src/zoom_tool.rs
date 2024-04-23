@@ -111,10 +111,10 @@ fn handle_input(
             let mut scale = camera_transform.scale;
             let diff = 0.1 * time.delta_seconds() * tool.speed;
             scale *= Vec3::splat(1.0) + Vec2::splat(diff).extend(0.0);
-            debug!(
-                "scale_min: {}, scale_max: {}",
-                tool.scale_min, tool.scale_max
-            );
+            // debug!(
+            //     "scale_min: {}, scale_max: {}",
+            //     tool.scale_min, tool.scale_max
+            // );
             scale = scale.clamp(Vec3::splat(tool.scale_min), Vec3::splat(tool.scale_max));
             camera_transform.scale = scale;
             if tool_actions.just_pressed(ZoomToolAction::Out) {
