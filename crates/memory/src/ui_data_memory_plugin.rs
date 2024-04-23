@@ -1,11 +1,5 @@
-use std::ops::Deref;
-
 use bevy::prelude::*;
-use cursor_hero_character_types::prelude::*;
-
 use cursor_hero_memory_types::prelude::*;
-use cursor_hero_toolbelt_types::toolbelt_types::Toolbelt;
-use cursor_hero_toolbelt_types::toolbelt_types::ToolbeltPopulateEvent;
 use cursor_hero_ui_automation_types::prelude::DrillId;
 use cursor_hero_ui_automation_types::prelude::ElementInfo;
 use cursor_hero_ui_inspector_types::prelude::ScratchPadMode;
@@ -102,7 +96,7 @@ impl From<&UIData> for DiskData {
             ui_tree: value.ui_tree.clone(),
             selected: value.selected.clone(),
             expanded: value.expanded.clone(),
-            paused: value.paused.clone(),
+            paused: value.paused,
         }
     }
 }

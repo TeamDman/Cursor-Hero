@@ -1,5 +1,4 @@
 use bevy::input::common_conditions::input_just_pressed;
-use bevy::input::common_conditions::input_toggle_active;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy_egui::egui;
@@ -66,29 +65,17 @@ impl Plugin for UiInspectorPlugin {
         );
         app.add_systems(
             Update,
-            trigger_tree_update_for_hovered.run_if(visible_condition.clone()),
+            trigger_tree_update_for_hovered.run_if(visible_condition),
         );
         app.add_systems(
             Update,
-            trigger_gather_children_request.run_if(visible_condition.clone()),
+            trigger_gather_children_request.run_if(visible_condition),
         );
-        app.add_systems(
-            Update,
-            handle_gamebound_messages.run_if(visible_condition.clone()),
-        );
-        app.add_systems(Update, gui.run_if(visible_condition.clone()));
-        app.add_systems(
-            Update,
-            handle_inspector_events.run_if(visible_condition.clone()),
-        );
-        app.add_systems(
-            Update,
-            update_preview_image.run_if(visible_condition.clone()),
-        );
-        app.add_systems(
-            Update,
-            hovered_click_listener.run_if(visible_condition.clone()),
-        );
+        app.add_systems(Update, handle_gamebound_messages.run_if(visible_condition));
+        app.add_systems(Update, gui.run_if(visible_condition));
+        app.add_systems(Update, handle_inspector_events.run_if(visible_condition));
+        app.add_systems(Update, update_preview_image.run_if(visible_condition));
+        app.add_systems(Update, hovered_click_listener.run_if(visible_condition));
     }
 }
 
@@ -420,7 +407,7 @@ fn update_preview_image(
     if *debounce == ui_data.selected {
         return;
     }
-    *debounce = ui_data.selected.clone();
+    debounce.clone_from(&ui_data.selected);
     let image = (|| {
         // Determine what to preview
         let (info, parent_info) = match ui_data.selected.clone() {
@@ -672,7 +659,7 @@ fn gui(
                 inspector.ui_for_reflect_readonly(&drill_id, ui);
                 if ui.button("copy").clicked() {
                     ui.output_mut(|out| {
-                        out.copied_text = drill_id.clone();
+                        out.copied_text.clone_from(&drill_id);
                     });
                     info!("Copied drill_id {} to clipboard", drill_id);
                 }
@@ -683,7 +670,7 @@ fn gui(
                 inspector.ui_for_reflect_readonly(&runtime_id, ui);
                 if ui.button("copy").clicked() {
                     ui.output_mut(|out| {
-                        out.copied_text = runtime_id.clone();
+                        out.copied_text.clone_from(&runtime_id);
                     });
                     info!("Copied runtime_id {} to clipboard", runtime_id);
                 }
@@ -694,7 +681,7 @@ fn gui(
                 inspector.ui_for_reflect_readonly(&bounds_size, ui);
                 if ui.button("copy").clicked() {
                     ui.output_mut(|out| {
-                        out.copied_text = bounds_size.clone();
+                        out.copied_text.clone_from(&bounds_size);
                     });
                     info!("Copied bounds size {} to clipboard", bounds_size);
                 }
@@ -738,7 +725,7 @@ fn gui(
                 // Render copy button
                 if ui.button("copy").clicked() {
                     ui.output_mut(|out| {
-                        out.copied_text = bounds_relative_str.clone();
+                        out.copied_text.clone_from(&bounds_relative_str);
                     });
                     info!(
                         "Copied bounds relative {} to clipboard",
@@ -795,7 +782,7 @@ fn gui(
                     // Scratch pad - copy button
                     if ui.button("copy").clicked() {
                         ui.output_mut(|out| {
-                            out.copied_text = ui_data.scratch_pad.clone();
+                            out.copied_text.clone_from(&ui_data.scratch_pad);
                         });
                         info!("Copied scratch pad to clipboard");
                     }
@@ -882,7 +869,7 @@ fn ui_for_element_info(
                     ui.style().visuals.widgets.hovered.weak_bg_fill,
                 ));
 
-                let mut visuals = &mut ui.style_mut().visuals;
+                let visuals = &mut ui.style_mut().visuals;
                 visuals.selection.bg_fill = Color32::from_rgb(61, 42, 102);
                 visuals.widgets.hovered.weak_bg_fill = Color32::from_rgb(41, 22, 82);
             }
@@ -892,7 +879,7 @@ fn ui_for_element_info(
 
             // Restore previous colours
             if let Some(previous) = previous {
-                let mut visuals = &mut ui.style_mut().visuals;
+                let visuals = &mut ui.style_mut().visuals;
                 visuals.selection.bg_fill = previous.0;
                 visuals.widgets.hovered.weak_bg_fill = previous.1;
             }

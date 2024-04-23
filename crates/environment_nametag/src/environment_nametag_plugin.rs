@@ -93,7 +93,7 @@ fn handle_nametag_update_event(
             if let Ok(environment_children) = environment_query.get(*environment_id) {
                 for child in environment_children.iter() {
                     if let Ok((mut nametag_text, _)) = nametag_query.get_mut(*child) {
-                        nametag_text.sections[0].value = name.clone();
+                        nametag_text.sections[0].value.clone_from(name);
                     }
                 }
             }

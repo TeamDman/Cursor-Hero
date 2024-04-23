@@ -126,7 +126,7 @@ fn handle_chat_input_events(
                             let chat_input_children = chat_input;
                             for child in chat_input_children.iter() {
                                 if let Ok(mut text) = text_query.get_mut(*child) {
-                                    text.sections[0].value = new_text.clone();
+                                    text.sections[0].value.clone_from(&new_text);
                                 }
                             }
                         }

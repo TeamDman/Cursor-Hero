@@ -1,17 +1,13 @@
 use std::ops::Neg;
 
 use bevy::prelude::*;
-use bevy::text::TextLayoutInfo;
 use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
 use cursor_hero_bevy::prelude::NegativeYVec2;
 use cursor_hero_bevy::prelude::NegativeYVec3;
 use cursor_hero_bevy::prelude::TranslateVec2;
 use cursor_hero_calculator_app_types::calculator_app_types::Calculator;
-use cursor_hero_calculator_app_types::calculator_app_types::CalculatorButton;
-use cursor_hero_calculator_app_types::calculator_app_types::CalculatorDisplay;
 use cursor_hero_calculator_app_types::calculator_app_types::CalculatorElementKind;
-use cursor_hero_calculator_app_types::calculator_app_types::CalculatorExpression;
 use cursor_hero_calculator_app_types::calculator_app_types::CalculatorStartMenuPanelButton;
 use cursor_hero_calculator_app_types::calculator_app_types::CalculatorState;
 use cursor_hero_calculator_app_types::calculator_app_types::CalculatorTheme;

@@ -154,7 +154,7 @@ fn update_screens(
             // update the texture
             metrics.begin("texture");
             if let Some(t) = textures.get_mut(texture) {
-                t.data = frame.data.clone();
+                t.data.clone_from(&frame.data);
             }
             metrics.end("texture");
         }

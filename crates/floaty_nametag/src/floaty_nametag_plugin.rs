@@ -68,7 +68,7 @@ fn update_nametags(
         if !owner_transform.is_changed() && !owner_floaty_name.is_changed() {
             continue;
         }
-        text.sections[0].value = owner_floaty_name.text.clone();
+        text.sections[0].value.clone_from(&owner_floaty_name.text);
         transform.translation =
             owner_transform.translation() + Vec3::new(0.0, owner_floaty_name.vertical_offset, 0.0);
     }

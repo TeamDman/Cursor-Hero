@@ -14,16 +14,21 @@ pub(crate) fn resolve_app(
     automation: &UIAutomation,
     focused: bool,
 ) -> Result<AppSnapshot> {
+    // turning this off for now
+    let should_resolve_vscode = false;
+
     match (
         elem.get_name(),
         elem.get_control_type(),
         elem.get_classname(),
     ) {
-        // (Ok(name), Ok(ControlType::Pane), Ok(class_name))
-        //     if name.ends_with("Visual Studio Code") && class_name == "Chrome_WidgetWin_1" =>
-        // {
-        //     resolve_vscode(elem, automation, focused).context("resolving vscode")
-        // }
+        (Ok(name), Ok(ControlType::Pane), Ok(class_name))
+            if name.ends_with("Visual Studio Code")
+                && class_name == "Chrome_WidgetWin_1"
+                && should_resolve_vscode =>
+        {
+            resolve_vscode(elem, automation, focused).context("resolving vscode")
+        }
         (Ok(name), Ok(ControlType::Window), Ok(class_name))
             if name == "Calculator" && class_name == "ApplicationFrameWindow" =>
         {

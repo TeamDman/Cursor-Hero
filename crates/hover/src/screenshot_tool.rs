@@ -1,17 +1,11 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
-use bevy_egui::egui;
-use bevy_egui::egui::Pos2;
 use bevy_egui::EguiContext;
-use bevy_egui::EguiContexts;
-use bevy_inspector_egui::reflect_inspector::Context;
-use bevy_inspector_egui::reflect_inspector::InspectorUi;
 use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
 use crossbeam_channel::Sender;
 use cursor_hero_bevy::prelude::NegativeYIVec3;
 use cursor_hero_bevy::prelude::NegativeYVec2;
-use cursor_hero_camera::camera_plugin::MainCamera;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_cursor_types::prelude::*;
 use cursor_hero_environment_types::prelude::ShouldTrackEnvironment;
@@ -480,184 +474,184 @@ fn spawn_brick(
     ));
 }
 
-fn ui(
-    mut commands: Commands,
-    screen_access: ScreensToImageParam,
-    asset_server: Res<AssetServer>,
-    mut contexts: EguiContexts,
-    mut brick_query: Query<(
-        Entity,
-        &mut ScreenshotBrick,
-        &Sprite,
-        &Name,
-        &GlobalTransform,
-    )>,
-    camera_query: Query<(&GlobalTransform, &Camera), With<MainCamera>>,
-    type_registry: Res<AppTypeRegistry>,
-) {
-    let Ok(camera) = camera_query.get_single() else {
-        warn!("No camera found");
-        return;
-    };
-    let (camera_transform, camera) = camera;
+// fn ui(
+//     mut commands: Commands,
+//     screen_access: ScreensToImageParam,
+//     asset_server: Res<AssetServer>,
+//     mut contexts: EguiContexts,
+//     mut brick_query: Query<(
+//         Entity,
+//         &mut ScreenshotBrick,
+//         &Sprite,
+//         &Name,
+//         &GlobalTransform,
+//     )>,
+//     camera_query: Query<(&GlobalTransform, &Camera), With<MainCamera>>,
+//     type_registry: Res<AppTypeRegistry>,
+// ) {
+//     let Ok(camera) = camera_query.get_single() else {
+//         warn!("No camera found");
+//         return;
+//     };
+//     let (camera_transform, camera) = camera;
 
-    let ctx = contexts.ctx_mut();
-    // let scale = (camera_transform.compute_transform().scale.x * 1.0).round();
-    // debug!("Scale: {}", scale);
-    // ctx.set_zoom_factor(scale);
+//     let ctx = contexts.ctx_mut();
+//     // let scale = (camera_transform.compute_transform().scale.x * 1.0).round();
+//     // debug!("Scale: {}", scale);
+//     // ctx.set_zoom_factor(scale);
 
-    if brick_query.is_empty() {
-        return;
-    }
+//     if brick_query.is_empty() {
+//         return;
+//     }
 
-    let mut cx = Context {
-        world: None,
-        queue: None,
-    };
+//     let mut cx = Context {
+//         world: None,
+//         queue: None,
+//     };
 
-    let type_registry = type_registry.0.clone();
-    let type_registry = type_registry.read();
+//     let type_registry = type_registry.0.clone();
+//     let type_registry = type_registry.read();
 
-    let mut inspector = InspectorUi::for_bevy(&type_registry, &mut cx);
+//     let mut inspector = InspectorUi::for_bevy(&type_registry, &mut cx);
 
-    for brick in brick_query.iter_mut() {
-        let (brick_id, mut brick, brick_sprite, brick_name, brick_global_transform) = brick;
-        let brick_global_translation = brick_global_transform.translation();
-        let popout_pos = brick_global_translation
-            + Vec3::new(
-                brick_sprite.custom_size.unwrap_or_default().x + 50.0,
-                0.0,
-                0.0,
-            );
-        let egui_pos = camera
-            .world_to_viewport(camera_transform, brick_global_translation)
-            .unwrap_or_default();
+//     for brick in brick_query.iter_mut() {
+//         let (brick_id, mut brick, brick_sprite, brick_name, brick_global_transform) = brick;
+//         let brick_global_translation = brick_global_transform.translation();
+//         let popout_pos = brick_global_translation
+//             + Vec3::new(
+//                 brick_sprite.custom_size.unwrap_or_default().x + 50.0,
+//                 0.0,
+//                 0.0,
+//             );
+//         let egui_pos = camera
+//             .world_to_viewport(camera_transform, brick_global_translation)
+//             .unwrap_or_default();
 
-        let id = egui::Id::new(brick_id);
+//         let id = egui::Id::new(brick_id);
 
-        egui::Window::new(brick_name.chars().take(64).collect::<String>())
-            .id(id)
-            .fixed_pos(Pos2::new(egui_pos.x, egui_pos.y))
-            .default_width(1200.0)
-            // .resizable(true)
-            .show(ctx, |ui| {
-                egui::SidePanel::left(id.with("tree"))
-                    .resizable(true)
-                    .width_range(100.0..=4000.0)
-                    .default_width(600.0)
-                    .show_inside(ui, |ui| {
-                        ui.vertical_centered(|ui| {
-                            ui.heading("UI Tree");
-                        });
-                        egui::ScrollArea::both().show(ui, |ui| {
-                            let id = id.with(brick.ui_tree.runtime_id.clone());
+//         egui::Window::new(brick_name.chars().take(64).collect::<String>())
+//             .id(id)
+//             .fixed_pos(Pos2::new(egui_pos.x, egui_pos.y))
+//             .default_width(1200.0)
+//             // .resizable(true)
+//             .show(ctx, |ui| {
+//                 egui::SidePanel::left(id.with("tree"))
+//                     .resizable(true)
+//                     .width_range(100.0..=4000.0)
+//                     .default_width(600.0)
+//                     .show_inside(ui, |ui| {
+//                         ui.vertical_centered(|ui| {
+//                             ui.heading("UI Tree");
+//                         });
+//                         egui::ScrollArea::both().show(ui, |ui| {
+//                             let id = id.with(brick.ui_tree.runtime_id.clone());
 
-                            let mut temp_egui_state = std::mem::take(&mut brick.egui_state);
-                            let mut temp_info = std::mem::take(&mut brick.ui_tree);
-                            ui_for_element_info(
-                                &mut temp_egui_state,
-                                id,
-                                &mut commands,
-                                &screen_access,
-                                &asset_server,
-                                ui,
-                                &mut temp_info,
-                                &mut inspector,
-                                &popout_pos,
-                            );
-                            brick.egui_state = temp_egui_state;
-                            brick.ui_tree = temp_info;
+//                             let mut temp_egui_state = std::mem::take(&mut brick.egui_state);
+//                             let mut temp_info = std::mem::take(&mut brick.ui_tree);
+//                             ui_for_element_info(
+//                                 &mut temp_egui_state,
+//                                 id,
+//                                 &mut commands,
+//                                 &screen_access,
+//                                 &asset_server,
+//                                 ui,
+//                                 &mut temp_info,
+//                                 &mut inspector,
+//                                 &popout_pos,
+//                             );
+//                             brick.egui_state = temp_egui_state;
+//                             brick.ui_tree = temp_info;
 
-                            ui.allocate_space(ui.available_size());
-                        });
-                    });
+//                             ui.allocate_space(ui.available_size());
+//                         });
+//                     });
 
-                egui::TopBottomPanel::bottom(id.with("invisible bottom panel"))
-                    .show_separator_line(false)
-                    .show_inside(ui, |_| ());
+//                 egui::TopBottomPanel::bottom(id.with("invisible bottom panel"))
+//                     .show_separator_line(false)
+//                     .show_inside(ui, |_| ());
 
-                egui::CentralPanel::default().show_inside(ui, |ui| {
-                    ui.heading("AHOY!");
-                    let id = brick.egui_state.selected.clone();
-                    if let Some(id) = id
-                        && let Some(x) = brick.ui_tree.lookup_drill_id_mut(id)
-                    {
-                        inspector.ui_for_reflect(x, ui);
-                    }
-                    // inspector.ui_for_reflect_readonly(&data, ui);
-                });
-            });
-    }
-}
+//                 egui::CentralPanel::default().show_inside(ui, |ui| {
+//                     ui.heading("AHOY!");
+//                     let id = brick.egui_state.selected.clone();
+//                     if let Some(id) = id
+//                         && let Some(x) = brick.ui_tree.lookup_drill_id_mut(id)
+//                     {
+//                         inspector.ui_for_reflect(x, ui);
+//                     }
+//                     // inspector.ui_for_reflect_readonly(&data, ui);
+//                 });
+//             });
+//     }
+// }
 
-#[derive(Reflect, Debug)]
-struct ElementUIData {
-    runtime_id: String,
-    frick: String,
-}
+// #[derive(Reflect, Debug)]
+// struct ElementUIData {
+//     runtime_id: String,
+//     frick: String,
+// }
 
-#[allow(clippy::too_many_arguments)]
-fn ui_for_element_info(
-    state: &mut ScreenshotBrickEguiState,
-    id: egui::Id,
-    _commands: &mut Commands,
-    _screen_access: &ScreensToImageParam,
-    _asset_server: &Res<AssetServer>,
-    ui: &mut egui::Ui,
-    element_info: &mut ElementInfo,
-    _inspector: &mut InspectorUi,
-    _popout_pos: &Vec3,
-) {
-    egui::collapsing_header::CollapsingState::load_with_default_open(
-        ui.ctx(),
-        id,
-        state.expanded.contains(&element_info.drill_id),
-    )
-    .show_header(ui, |ui| {
-        let mut selected = state.selected == Some(element_info.drill_id.clone());
-        if ui
-            .toggle_value(
-                &mut selected,
-                format!(
-                    "{:?} | {}",
-                    element_info.name, element_info.localized_control_type
-                ),
-            )
-            .changed()
-        {
-            state.selected = if selected {
-                Some(element_info.drill_id.clone())
-            } else {
-                None
-            };
-        };
-    })
-    .body(|ui| {
-        // if ui.button("Popout").clicked() {
-        //     spawn_brick(
-        //         commands,
-        //         element_info,
-        //         element_info.bounding_rect.size(),
-        //         *popout_pos,
-        //         screen_access,
-        //         asset_server,
-        //     )
-        // }
+// #[allow(clippy::too_many_arguments)]
+// fn ui_for_element_info(
+//     state: &mut ScreenshotBrickEguiState,
+//     id: egui::Id,
+//     _commands: &mut Commands,
+//     _screen_access: &ScreensToImageParam,
+//     _asset_server: &Res<AssetServer>,
+//     ui: &mut egui::Ui,
+//     element_info: &mut ElementInfo,
+//     _inspector: &mut InspectorUi,
+//     _popout_pos: &Vec3,
+// ) {
+//     egui::collapsing_header::CollapsingState::load_with_default_open(
+//         ui.ctx(),
+//         id,
+//         state.expanded.contains(&element_info.drill_id),
+//     )
+//     .show_header(ui, |ui| {
+//         let mut selected = state.selected == Some(element_info.drill_id.clone());
+//         if ui
+//             .toggle_value(
+//                 &mut selected,
+//                 format!(
+//                     "{:?} | {}",
+//                     element_info.name, element_info.localized_control_type
+//                 ),
+//             )
+//             .changed()
+//         {
+//             state.selected = if selected {
+//                 Some(element_info.drill_id.clone())
+//             } else {
+//                 None
+//             };
+//         };
+//     })
+//     .body(|ui| {
+//         // if ui.button("Popout").clicked() {
+//         //     spawn_brick(
+//         //         commands,
+//         //         element_info,
+//         //         element_info.bounding_rect.size(),
+//         //         *popout_pos,
+//         //         screen_access,
+//         //         asset_server,
+//         //     )
+//         // }
 
-        if let Some(children) = &mut element_info.children {
-            for child in children.iter_mut() {
-                ui_for_element_info(
-                    state,
-                    id.with(child.runtime_id.clone()),
-                    _commands,
-                    _screen_access,
-                    _asset_server,
-                    ui,
-                    child,
-                    _inspector,
-                    _popout_pos,
-                );
-            }
-        }
-    });
-}
+//         if let Some(children) = &mut element_info.children {
+//             for child in children.iter_mut() {
+//                 ui_for_element_info(
+//                     state,
+//                     id.with(child.runtime_id.clone()),
+//                     _commands,
+//                     _screen_access,
+//                     _asset_server,
+//                     ui,
+//                     child,
+//                     _inspector,
+//                     _popout_pos,
+//                 );
+//             }
+//         }
+//     });
+// }
