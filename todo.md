@@ -2,14 +2,16 @@
 
 ## Active
 
-- investigate transparent windows :/
+- add drill id to calculator element kinds
+  - ensure tree is fully populated when pulling all elements into scratch pad
+  - reuse element list when performing ui watcher gathering
 
 ## Up Next
 
 
-
 ## Grab Bag
 
+- investigate transparent windows :/
 - mode to detach mostly from controller when controlling apps that have controller support
 - UI Resolver for VSCode window
 - UI Resolver for a kanban board, move todo list to it. Mapping to GitHub project board?
