@@ -141,7 +141,7 @@ fn handle_spawn_calculator_events(
                             ..default()
                         },
                         transform: Transform::from_translation(
-                            ((size / 2.0) + border).neg_y().extend(1.0),
+                            (size / 2.0).neg_y().extend(1.0),
                         ),
                         ..default()
                     },
@@ -166,7 +166,7 @@ fn handle_spawn_calculator_events(
                                     color: background_color,
                                     ..default()
                                 },
-                                transform: Transform::from_translation(bounds.center().extend(2.0)),
+                                transform: Transform::from_translation((bounds.center() + Vec2::new(border,-border)).extend(2.0)),
                                 ..Default::default()
                             },
                             Name::new(elem_kind.get_name()),
