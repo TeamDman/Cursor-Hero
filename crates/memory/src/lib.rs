@@ -1,3 +1,4 @@
+pub mod app_memory_plugin;
 mod agent_observation_memory_plugin;
 mod main_camera_memory_plugin;
 mod main_character_memory_plugin;

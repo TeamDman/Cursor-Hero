@@ -12,6 +12,7 @@ pub struct MemoryConfig {
 
 #[derive(Reflect, Default)]
 pub struct MemoryPluginBuildConfig {
+    pub app_memory_enabled: bool,
     pub main_character_memory_enabled: bool,
     pub primary_window_memory_enabled: bool,
     pub main_camera_memory_enabled: bool,
@@ -23,6 +24,7 @@ pub struct MemoryPluginBuildConfig {
 impl MemoryPluginBuildConfig {
     pub fn all_enabled() -> Self {
         Self {
+            app_memory_enabled: true,
             main_character_memory_enabled: true,
             primary_window_memory_enabled: true,
             main_camera_memory_enabled: true,

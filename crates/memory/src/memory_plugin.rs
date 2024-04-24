@@ -8,7 +8,7 @@ use crate::main_character_memory_plugin::MainCharacterMemoryPlugin;
 use crate::primary_window_memory_plugin::PrimaryWindowMemoryPlugin;
 use crate::ui_data_memory_plugin::UIDataMemoryPlugin;
 use crate::voice_to_text_memory_plugin::VoiceToTextMemoryPlugin;
-
+use crate::app_memory_plugin::AppMemoryPlugin;
 pub struct MemoryPlugin {
     pub config: MemoryConfig,
     pub build_config: MemoryPluginBuildConfig,
@@ -34,6 +34,9 @@ impl Plugin for MemoryPlugin {
         }
         if self.build_config.ui_data_memory_enabled {
             app.add_plugins(UIDataMemoryPlugin);
+        }
+        if self.build_config.app_memory_enabled {
+            app.add_plugins(AppMemoryPlugin);
         }
     }
 }

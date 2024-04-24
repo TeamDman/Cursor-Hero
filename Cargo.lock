@@ -2158,8 +2158,10 @@ name = "cursor_hero_memory"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "cursor_hero_calculator_app_types",
  "cursor_hero_camera",
  "cursor_hero_character_types",
+ "cursor_hero_environment_types",
  "cursor_hero_memory_types",
  "cursor_hero_observation_types",
  "cursor_hero_secret_types",

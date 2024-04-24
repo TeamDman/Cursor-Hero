@@ -4,7 +4,6 @@ use bevy::prelude::*;
 use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
 use cursor_hero_bevy::prelude::NegativeYVec2;
-use cursor_hero_bevy::prelude::NegativeYVec3;
 use cursor_hero_bevy::prelude::TranslateVec2;
 use cursor_hero_calculator_app_types::calculator_app_types::Calculator;
 use cursor_hero_calculator_app_types::calculator_app_types::CalculatorElementKind;
@@ -97,6 +96,7 @@ fn handle_calculator_app_launcher_icon_clicks(
                 expression: "".to_string(),
                 value: "0".to_string(),
             },
+            position: Vec2::new(300.0,-300.0),
         });
     }
 }
@@ -140,9 +140,7 @@ fn handle_spawn_calculator_events(
                             color,
                             ..default()
                         },
-                        transform: Transform::from_translation(
-                            (size / 2.0).neg_y().extend(1.0),
-                        ),
+                        transform: Transform::from_translation(event.position.extend(1.0)),
                         ..default()
                     },
                 ))
@@ -166,7 +164,9 @@ fn handle_spawn_calculator_events(
                                     color: background_color,
                                     ..default()
                                 },
-                                transform: Transform::from_translation((bounds.center() + Vec2::new(border,-border)).extend(2.0)),
+                                transform: Transform::from_translation(
+                                    (bounds.center() + Vec2::new(border, -border)).extend(2.0),
+                                ),
                                 ..Default::default()
                             },
                             Name::new(elem_kind.get_name()),

@@ -16,7 +16,7 @@ def gather_variables(text: str) -> dict[str,str]:
     before_memory_plugin, remaining = text[:index],text[index:]
 
     # existing_stuff
-    find = "    }"
+    find = "\n    }"
     include = False
     index = remaining.find(find)
     assert index != -1, f"Coult not find `{find}`"

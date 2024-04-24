@@ -1,6 +1,5 @@
 #![feature(let_chains)]
 
-pub mod hover_frame;
 pub mod tool_activation;
 pub mod tool_color;
 pub mod tool_help_activate;

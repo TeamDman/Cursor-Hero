@@ -157,12 +157,21 @@ pub struct CalculatorState {
     pub expression: String,
     pub value: String,
 }
+impl Default for CalculatorState {
+    fn default() -> Self {
+        Self {
+            expression: "".to_string(),
+            value: "0".to_string(),
+        }
+    }
+}
 
 #[derive(Event, Debug, Reflect)]
 pub struct SpawnCalculatorRequestEvent {
     pub environment_id: Entity,
     pub theme: CalculatorThemeKind,
     pub state: CalculatorState,
+    pub position: Vec2,
 }
 
 #[derive(Component, Debug, Reflect, Default, Clone, PartialEq)]
