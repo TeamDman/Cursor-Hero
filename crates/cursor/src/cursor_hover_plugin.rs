@@ -21,10 +21,10 @@ pub fn hover_detection(
         // find out what the cursor is touching
         let mut still_touching = vec![];
         for touching_id in cursor_touching.iter() {
-            let Ok((target_id, target_visible, target_hovered)) = target_query.get(*touching_id)
-            else {
+            let Ok(target) = target_query.get(*touching_id) else {
                 continue;
             };
+            let (target_id, target_visible, target_hovered) = target;
             if target_visible == Visibility::Hidden {
                 continue;
             }

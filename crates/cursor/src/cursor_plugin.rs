@@ -7,6 +7,7 @@ use crate::cursor_mirroring_plugin::CursorMirroringPlugin;
 use crate::cursor_positioning_plugin::CursorPositioningPlugin;
 use crate::cursor_reach_plugin::CursorReachPlugin;
 use crate::cursor_spawning_plugin::CursorSpawningPlugin;
+use crate::hover_frame_plugin::HoverFramePlugin;
 
 pub struct CursorPlugin;
 impl Plugin for CursorPlugin {
@@ -19,6 +20,7 @@ impl Plugin for CursorPlugin {
             CursorSpawningPlugin,
             CursorActionPlugin,
             CursorMirroringPlugin,
+            HoverFramePlugin,
         ));
     }
 }

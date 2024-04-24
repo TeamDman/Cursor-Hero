@@ -1,8 +1,17 @@
 use bevy::prelude::*;
 use cursor_hero_cursor_types::prelude::*;
 
+pub struct HoverFramePlugin;
+
+impl Plugin for HoverFramePlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Update, insert_hover_frame);
+        app.add_systems(Update, remove_hover_frame);
+    }
+}
+
 #[derive(Component, Debug)]
-pub struct ToolFrame;
+pub struct HoverFrame;
 
 #[allow(clippy::type_complexity)]
 pub fn insert_hover_frame(
@@ -39,7 +48,7 @@ pub fn insert_hover_frame(
                         texture: asset_server.load("textures/wood frame.png"),
                         ..default()
                     },
-                    ToolFrame,
+                    HoverFrame,
                 ));
             });
         }
@@ -50,7 +59,7 @@ pub fn remove_hover_frame(
     mut reader: EventReader<HoverEvent>,
     mut commands: Commands,
     tool_query: Query<&Children>,
-    frame_query: Query<Entity, With<ToolFrame>>,
+    frame_query: Query<Entity, With<HoverFrame>>,
 ) {
     for event in reader.read() {
         if let HoverEvent::End {

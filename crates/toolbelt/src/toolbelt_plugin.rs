@@ -1,8 +1,6 @@
 use bevy::prelude::*;
 use leafwing_input_manager::prelude::*;
 
-use crate::hover_frame::insert_hover_frame;
-use crate::hover_frame::remove_hover_frame;
 use crate::tool_activation::tool_activation;
 use crate::tool_color::tool_color;
 use crate::tool_help_activate::tool_help_activation;
@@ -26,8 +24,6 @@ impl Plugin for ToolbeltPlugin {
         app.add_plugins(ToolbeltTaskbarLayoutPlugin);
         app.add_plugins(InputManagerPlugin::<ToolbeltAction>::default());
         app.add_systems(Update, help_click_listener);
-        app.add_systems(Update, insert_hover_frame);
-        app.add_systems(Update, remove_hover_frame);
         app.add_systems(Update, tool_color);
         app.add_systems(Update, tool_activation);
         app.add_systems(Update, tool_help_cleanup);
