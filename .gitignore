@@ -3,3 +3,4 @@ __pycache__
 **/*.json
 Cursor Hero Memory*
 **/*.txt
+*.tracy

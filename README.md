@@ -68,3 +68,19 @@ I am continuously exploring many different trajectories for this project.
 See [`./todo.md`](./todo.md) for brainstorming on potential features to add.
 
 See [`./research_notes.md`](./research_notes.md) for links to internet resources that could be helpful.
+
+## Performance Profiling
+
+[Bevy docs](https://github.com/bevyengine/bevy/blob/main/docs/profiling.md#tracy-profiler)
+
+tl;dr
+
+```
+capture.exe -o my_capture.tracy
+cargo run --release --features bevy/trace_tracy
+tracy .\my_capture.tracy
+```
+
+`capture` and `cargo run` need to be ran in separate terminals.
+
+Tracy will take a while to open the resulting file.
