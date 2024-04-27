@@ -1,10 +1,9 @@
 use bevy::prelude::*;
 use leafwing_input_manager::prelude::*;
-use leafwing_input_manager::user_input::InputKind;
 
 use bevy_inspector_egui::prelude::ReflectInspectorOptions;
 use bevy_inspector_egui::InspectorOptions;
-use cursor_hero_input::active_input_state_plugin::ActiveInput;
+use cursor_hero_input::active_input_state_plugin::InputMethod;
 use cursor_hero_toolbelt_types::prelude::*;
 
 #[derive(Component, Reflect, Debug, InspectorOptions)]
@@ -13,9 +12,9 @@ pub struct {{crate_name_pascal}}Tool;
 
 impl Default for {{crate_name_pascal}}Tool {
     fn default() -> Self {
-        match ActiveInput::default() {
-            ActiveInput::MouseAndKeyboard => Self::default_mnk(),
-            ActiveInput::Gamepad => Self::default_gamepad(),
+        match InputMethod::default() {
+            InputMethod::MouseAndKeyboard => Self::default_mnk(),
+            InputMethod::Gamepad => Self::default_gamepad(),
         }
     }
 }
