@@ -94,10 +94,14 @@ use cursor_hero_window_swap_tool_types::prelude::*;
 use itertools::Itertools;
 use cursor_hero_explorer_tool::prelude::*;
 use cursor_hero_explorer_tool_types::prelude::*;
+use cursor_hero_explorer_app::prelude::*;
+use cursor_hero_explorer_app_types::prelude::*;
 pub struct DefaultLaunchModePlugin;
 
 impl Plugin for DefaultLaunchModePlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(ExplorerAppTypesPlugin);
+        app.add_plugins(ExplorerAppPlugin);
         app.add_plugins(ExplorerToolPlugin);
         app.add_plugins(ExplorerToolTypesPlugin);
         app.add_plugins(UiHoverTypesPlugin);
@@ -196,11 +200,12 @@ impl Plugin for DefaultLaunchModePlugin {
             filter: "
                 wgpu=error
                 cursor_hero=debug
-                cursor_hero_ollama::ollama_status_worker_plugin=info
-                cursor_hero_voice_to_text::voice_to_text_ping_plugin=info
-                cursor_hero_voice_to_text::voice_to_text_worker_plugin=info
-                cursor_hero_glados_tts::glados_tts_status_worker_plugin=info
-                cursor_hero_tools::click_tool=info
+                // cursor_hero_ollama::ollama_status_worker_plugin=info
+                // cursor_hero_voice_to_text::voice_to_text_ping_plugin=info
+                // cursor_hero_voice_to_text::voice_to_text_worker_plugin=info
+                // cursor_hero_glados_tts::glados_tts_status_worker_plugin=info
+                // cursor_hero_tools::click_tool=info
+
                 // cursor_hero_memory=info
                 // cursor_hero_ui_automation_types=trace
             "

@@ -26,7 +26,7 @@ fn handle_toggle(
                 };
                 info!("ExplorerTool activated.");
             }
-            ToolActivationEvent::Deactivate(tool_id) {
+            ToolActivationEvent::Deactivate(tool_id) =>{
                 let Ok(tool) = tool_query.get(*tool_id) else {
                     warn!("ExplorerTool with id {tool_id:?} not found.");
                     continue;

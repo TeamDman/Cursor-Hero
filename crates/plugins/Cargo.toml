@@ -7,6 +7,8 @@ edition = "2021"
 
 
 [dependencies]
+cursor_hero_explorer_app = { workspace = true }
+cursor_hero_explorer_app_types = { workspace = true }
 cursor_hero_explorer_tool = { workspace = true }
 cursor_hero_explorer_tool_types = { workspace = true }
 cursor_hero_ui_hover = { workspace = true }

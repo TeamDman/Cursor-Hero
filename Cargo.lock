@@ -1968,6 +1968,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "cursor_hero_explorer_app"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy_xpbd_2d",
+ "cursor_hero_bevy",
+ "cursor_hero_cursor_types",
+ "cursor_hero_environment_types",
+ "cursor_hero_explorer_app_types",
+ "cursor_hero_start_menu_types",
+ "cursor_hero_winutils",
+]
+
+[[package]]
+name = "cursor_hero_explorer_app_types"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+]
+
+[[package]]
 name = "cursor_hero_explorer_tool"
 version = "0.1.0"
 dependencies = [
@@ -2346,6 +2367,8 @@ dependencies = [
  "cursor_hero_environment",
  "cursor_hero_environment_nametag",
  "cursor_hero_environment_types",
+ "cursor_hero_explorer_app",
+ "cursor_hero_explorer_app_types",
  "cursor_hero_explorer_tool",
  "cursor_hero_explorer_tool_types",
  "cursor_hero_floaty_nametag",

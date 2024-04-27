@@ -979,7 +979,7 @@ fn ui_for_element_info(
             if let Some(ref mut children) = element_info.children {
                 for child in children.iter_mut() {
                     ui_for_element_info(
-                        id.with(child.runtime_id.clone()),
+                        id.with(child.drill_id.clone()),
                         ui,
                         data,
                         child,

@@ -30,6 +30,7 @@ where
     pub tag: T,
     pub name: Option<String>,
     pub texture: Handle<Image>,
+    pub position: Vec2,
     pub size: Vec2,
 }
 
@@ -49,6 +50,7 @@ where
             name: None,
             texture: Handle::default(),
             size: Vec2::new(100.0, 100.0),
+            position: Vec2::ZERO,
         }
     }
 
@@ -64,6 +66,10 @@ where
 
     pub fn with_size(mut self, size: Vec2) -> Self {
         self.size = size;
+        self
+    }
+    pub fn with_position(mut self, position: Vec2) -> Self {
+        self.position = position;
         self
     }
 
@@ -88,7 +94,7 @@ where
                         ..Default::default()
                     },
                     texture,
-                    transform: Transform::from_translation(Vec3::new(0.0, 0.0, 1.0)),
+                    transform: Transform::from_translation(self.position.extend(1.0)),
                     ..Default::default()
                 },
                 Name::new(name),
