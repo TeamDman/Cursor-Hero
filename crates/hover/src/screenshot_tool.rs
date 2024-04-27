@@ -10,7 +10,7 @@ use cursor_hero_character_types::prelude::*;
 use cursor_hero_cursor_types::prelude::*;
 use cursor_hero_environment_types::prelude::ShouldTrackEnvironment;
 use cursor_hero_physics::damping_plugin::MovementDamping;
-use cursor_hero_screen::get_image::get_image;
+use cursor_hero_screen::get_image::ImageHolder;
 use cursor_hero_screen::get_image::ScreensToImageParam;
 use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_tools::cube_tool::CubeToolInteractable;
@@ -425,7 +425,7 @@ fn spawn_brick(
     screen_access: &ScreensToImageParam,
     asset_server: &Res<AssetServer>,
 ) {
-    let Ok(image) = get_image(texture_region, screen_access) else {
+    let Ok(image) = screen_access.get_image(texture_region) else {
         return;
     };
     let texture_handle = asset_server.add(image);

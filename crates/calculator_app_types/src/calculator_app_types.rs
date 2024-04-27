@@ -57,15 +57,15 @@ impl CalculatorElementKind {
     }
     pub fn get_name(&self) -> String {
         match self {
-            CalculatorElementKind::ExpressionDisplay => "ExpressionDisplay".to_string(),
-            CalculatorElementKind::ValueDisplay => "ValueDisplay".to_string(),
-            CalculatorElementKind::DigitButton(digit) => format!("DigitButton({})", digit),
-            CalculatorElementKind::EqualsButton => "EqualsButton".to_string(),
-            CalculatorElementKind::MultiplyButton => "MultiplyButton".to_string(),
-            CalculatorElementKind::DivideButton => "DivideButton".to_string(),
-            CalculatorElementKind::PlusButton => "PlusButton".to_string(),
-            CalculatorElementKind::MinusButton => "MinusButton".to_string(),
-            CalculatorElementKind::Background => "Background".to_string(),
+            CalculatorElementKind::ExpressionDisplay => "CalculatorElementKind::ExpressionDisplay".to_string(),
+            CalculatorElementKind::ValueDisplay => "CalculatorElementKind::ValueDisplay".to_string(),
+            CalculatorElementKind::DigitButton(digit) => format!("CalculatorElementKind::DigitButton({})", digit),
+            CalculatorElementKind::EqualsButton => "CalculatorElementKind::EqualsButton".to_string(),
+            CalculatorElementKind::MultiplyButton => "CalculatorElementKind::MultiplyButton".to_string(),
+            CalculatorElementKind::DivideButton => "CalculatorElementKind::DivideButton".to_string(),
+            CalculatorElementKind::PlusButton => "CalculatorElementKind::PlusButton".to_string(),
+            CalculatorElementKind::MinusButton => "CalculatorElementKind::MinusButton".to_string(),
+            CalculatorElementKind::Background => "CalculatorElementKind::Background".to_string(),
         }
     }
     pub fn from_identifier(name: &str) -> Option<CalculatorElementKind> {

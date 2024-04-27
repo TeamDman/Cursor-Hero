@@ -1,5 +1,6 @@
 use bevy::input::common_conditions::input_just_pressed;
 use bevy::prelude::*;
+use bevy::utils::HashMap;
 use bevy::window::PrimaryWindow;
 use bevy_egui::egui;
 use bevy_egui::egui::collapsing_header::CollapsingState;
@@ -15,7 +16,9 @@ use cursor_hero_bevy::prelude::TranslateIVec2;
 use cursor_hero_calculator_app_types::calculator_app_types::CalculatorElementKind;
 use cursor_hero_cursor_types::prelude::ClickEvent;
 use cursor_hero_cursor_types::prelude::Way;
-use cursor_hero_screen::get_image::get_image;
+use cursor_hero_explorer_app_types::prelude::ExplorerElementKind;
+use cursor_hero_screen::get_image::AsBevyColor;
+use cursor_hero_screen::get_image::ImageHolder;
 use cursor_hero_screen::get_image::ScreensToImageParam;
 use cursor_hero_ui_automation::prelude::*;
 use cursor_hero_ui_hover_types::prelude::GameHoverIndicator;
@@ -36,6 +39,7 @@ use cursor_hero_worker::prelude::WorkerMessage;
 use cursor_hero_worker::prelude::WorkerPlugin;
 use image::DynamicImage;
 use image::ImageBuffer;
+use image::Rgb;
 use image::Rgba;
 use image::RgbaImage;
 use itertools::Itertools;
@@ -334,6 +338,7 @@ fn handle_gamebound_messages(
 fn handle_inspector_events(
     mut inspector_events: EventReader<InspectorEvent>,
     mut ui_data: ResMut<UIData>,
+    screen_access: ScreensToImageParam,
 ) {
     for event in inspector_events.read() {
         // get selected info
@@ -356,16 +361,30 @@ fn handle_inspector_events(
                     return;
                 };
 
-                vec![selected_info]
+                vec![(selected_info, selected_info.as_identifier())]
             }
             InspectorEvent::PushKnownToScratchPad => {
                 if window.name == "Calculator" {
                     window
                         .get_descendents()
                         .into_iter()
-                        .filter(|info| {
+                        .filter_map(|info| {
                             CalculatorElementKind::from_identifier(info.as_identifier().as_str())
-                                .is_some()
+                                .map(|x| (info, x.get_name()))
+                        })
+                        .collect()
+                } else if window.class_name == "CabinetWClass" {
+                    std::iter::once(window)
+                        .chain(window.get_descendents().into_iter())
+                        .filter_map(|info| {
+                            ExplorerElementKind::from_window_relative_drill_id(
+                                &info.drill_id.relative_to(&window.drill_id),
+                            )
+                            .map(|x| (info, x.get_name()))
+                        })
+                        .sorted_by_key(|e| {
+                            let pos = e.0.bounding_rect.top_left();
+                            pos.y * 10000 + pos.x
                         })
                         .collect()
                 } else {
@@ -376,76 +395,115 @@ fn handle_inspector_events(
                         return;
                     };
 
-                    vec![selected_info]
+                    vec![(selected_info, selected_info.as_identifier())]
                 }
             }
         };
         let mut content = String::new();
-        for push_info in push_infos {
-            // get identifier
-            let mut identifier = push_info.as_identifier();
+        for (push_info, mut identifier) in push_infos {
+            content.push_str(
+                match ui_data.scratch_pad_mode {
+                    ScratchPadMode::Drill => {
+                        // get drill id
+                        let drill_id = push_info
+                            .drill_id
+                            .as_child()
+                            .map(|d| d.iter().skip(1).map(|x| x.to_string()).join(", "))
+                            .unwrap_or_default();
 
-            content.push_str(match ui_data.scratch_pad_mode {
-                ScratchPadMode::Drill => {
-                    // get drill id
-                    let drill_id = push_info
-                        .drill_id
-                        .as_child()
-                        .map(|d| d.iter().skip(1).map(|x| x.to_string()).join(", "))
-                        .unwrap_or_default();
-
-                    // build content
-                    let content = format!(
+                        // build content
+                        let content = format!(
                         "let {0} = root.drill(&walker, vec![{1}]).context(\"{0}\")?.try_into()?;\n",
                         identifier, drill_id
                     );
 
-                    content
-                }
-                ScratchPadMode::Bounds => {
-                    // Use mark if present, window otherwise
-                    let compare_drill_id = ui_data
-                        .mark
-                        .clone()
-                        .or_else(|| {
-                            selected_drill_id
-                                .as_child()
-                                .map(|inner| inner.iter().take(1).cloned().collect())
-                        })
-                        .unwrap_or(DrillId::Root);
-
-                    // Look up the comparison element
-                    let compare = ui_data
-                        .ui_tree
-                        .lookup_drill_id(compare_drill_id)
-                        .unwrap_or(&ui_data.ui_tree);
-
-                    // Get the bounds of the selected element relative to the comparison element
-                    let bounds_relative = push_info
-                        .bounding_rect
-                        .translated(&-compare.bounding_rect.top_left());
-
-                    // Use known identifiers based on window
-
-                    if window.name == "Calculator"
-                        && let Some(calc_elem) = CalculatorElementKind::from_identifier(&identifier)
-                    {
-                        identifier = format!("CalculatorElementKind::{}", calc_elem.get_name());
+                        content
                     }
+                    ScratchPadMode::Bounds => {
+                        // Use mark if present, window otherwise
+                        let compare_drill_id = ui_data
+                            .mark
+                            .clone()
+                            .or_else(|| {
+                                selected_drill_id
+                                    .as_child()
+                                    .map(|inner| inner.iter().take(1).cloned().collect())
+                            })
+                            .unwrap_or(DrillId::Root);
 
-                    // Format as string
-                    format!(
-                        "{} => Rect::new({:.1},{:.1},{:.1},{:.1}),\n",
-                        identifier,
-                        bounds_relative.top_left().x as f32,
-                        -bounds_relative.top_left().y as f32,
-                        bounds_relative.bottom_right().x as f32,
-                        -bounds_relative.bottom_right().y as f32
-                    )
+                        // Look up the comparison element
+                        let compare = ui_data
+                            .ui_tree
+                            .lookup_drill_id(compare_drill_id)
+                            .unwrap_or(&ui_data.ui_tree);
+
+                        // Get the bounds of the selected element relative to the comparison element
+                        let bounds_relative = push_info
+                            .bounding_rect
+                            .translated(&-compare.bounding_rect.top_left());
+
+                        // Use known identifiers based on window
+
+                        if window.name == "Calculator"
+                            && let Some(calc_elem_kind) =
+                                CalculatorElementKind::from_identifier(&identifier)
+                        {
+                            identifier = calc_elem_kind.get_name();
+                        } else if window.class_name == "CabinetWClass"
+                            && let Some(explorer_elem_kind) =
+                                ExplorerElementKind::from_window_relative_drill_id(
+                                    &push_info.drill_id,
+                                )
+                        {
+                            identifier = explorer_elem_kind.get_name();
+                        }
+
+                        // Format as string
+                        format!(
+                            "{} => Rect::new({:.1},{:.1},{:.1},{:.1}),\n",
+                            identifier,
+                            bounds_relative.top_left().x as f32,
+                            -bounds_relative.top_left().y as f32,
+                            bounds_relative.bottom_right().x as f32,
+                            -bounds_relative.bottom_right().y as f32
+                        )
+                    }
+                    ScratchPadMode::Color => {
+                        let image = screen_access.get_image_buffer(push_info.bounding_rect);
+                        let color = match image {
+                            Ok(image) => {
+                                // find the most common colour
+                                let mut color_counts = HashMap::new();
+                                for (_, _, pixel) in image.enumerate_pixels() {
+                                    *color_counts.entry(pixel).or_insert(0) += 1;
+                                }
+                                color_counts
+                                    .into_iter()
+                                    .max_by_key(|(_, count)| *count)
+                                    .map(|(image_color, _)| image_color.as_bevy_color())
+                                    .unwrap_or(Color::BLACK)
+                            }
+                            Err(e) => {
+                                warn!(
+                                    "Failed to get image for region {:?}",
+                                    push_info.bounding_rect
+                                );
+                                Color::BLACK
+                            }
+                        };
+                        format!(
+                            "{} => Color::rgb({:.1},{:.1},{:.1}),\n",
+                            identifier,
+                            color.r(),
+                            color.g(),
+                            color.b()
+                        )
+                    }
                 }
-            }.as_str());
+                .as_str(),
+            );
         }
-        
+
         // append to scratch pad
         // make new rows show at the top by adding to the front
         ui_data.scratch_pad.insert_str(0, content.as_str());
@@ -549,40 +607,24 @@ fn update_preview_image(
         }
 
         // Get the texture of the element
-        let Ok(image) = get_image(world_capture_region, &screen_access) else {
+        let Ok(mut image) = screen_access.get_image_buffer(world_capture_region) else {
             warn!("Failed to get image for region {:?}", world_capture_region);
-            return None;
-        };
-        if image.size() != size {
-            warn!(
-                "Image size mismatch: expected {:?}, got {:?}",
-                size,
-                image.size()
-            );
-        }
-
-        // Convert to an image buffer for manipulation
-        let Some(mut image) =
-            ImageBuffer::from_raw(size.x, size.y, image.data) as Option<RgbaImage>
-        else {
-            warn!("Failed to convert image to buffer");
             return None;
         };
 
         // Apply the highlight
         for (x, y, pixel) in image.enumerate_pixels_mut() {
             if texture_highlight_region.contains(IVec2::new(x as i32, y as i32)) {
-                *pixel = Rgba([
+                *pixel = Rgb([
                     pixel.0[0].saturating_add(50),
                     pixel.0[1].saturating_add(50),
                     pixel.0[2],
-                    pixel.0[3],
                 ]);
             }
         }
 
         // Convert back to Bevy image
-        let image = Image::from_dynamic(DynamicImage::ImageRgba8(image), true);
+        let image = Image::from_dynamic(DynamicImage::ImageRgb8(image), true);
         Some((image, size))
     })();
     if let Some((image, size)) = image {
@@ -722,6 +764,22 @@ fn gui(
                         info!("Copied drill_id {} to clipboard", drill_id);
                     }
 
+                    if let Some(mark) = &ui_data.mark {
+                        ui.label("drill_id relative to mark");
+                        let relative_drill_id =
+                            selected_info.drill_id.relative_to(&mark).to_string();
+                        inspector.ui_for_reflect_readonly(&relative_drill_id, ui);
+                        if ui.button("copy").clicked() {
+                            ui.output_mut(|out| {
+                                out.copied_text.clone_from(&relative_drill_id);
+                            });
+                            info!(
+                                "Copied drill_id relative to mark {} to clipboard",
+                                relative_drill_id
+                            );
+                        }
+                    }
+
                     // Runtime ID
                     ui.label("runtime_id");
                     let runtime_id = selected_info.runtime_id.to_string();
@@ -770,7 +828,7 @@ fn gui(
 
                     // Format as string
                     let bounds_relative_str = format!(
-                        "({:.1},{:.1},{:.1},{:.1})",
+                        "Rect::new({:.1},{:.1},{:.1},{:.1})",
                         bounds_relative.top_left().x as f32,
                         -bounds_relative.top_left().y as f32,
                         bounds_relative.bottom_right().x as f32,
@@ -814,18 +872,38 @@ fn gui(
                         ui.heading("Scratch Pad");
                     });
 
+                    let window_drill_id = selected_drill_id
+                        .as_child()
+                        .map(|inner| inner.iter().take(1).cloned().collect())
+                        .unwrap_or(DrillId::Root);
+
                     // Scratch pad - mode switch
+                    ui.label("changing mode clears scratch pad");
                     ui.horizontal(|ui| {
-                        ui.radio_value(
-                            &mut ui_data.scratch_pad_mode,
-                            ScratchPadMode::Drill,
-                            "Drill",
-                        );
-                        ui.radio_value(
-                            &mut ui_data.scratch_pad_mode,
-                            ScratchPadMode::Bounds,
-                            "Bounds",
-                        );
+                        let changed = ui
+                            .radio_value(
+                                &mut ui_data.scratch_pad_mode,
+                                ScratchPadMode::Drill,
+                                "Drill",
+                            )
+                            .changed()
+                            || ui
+                                .radio_value(
+                                    &mut ui_data.scratch_pad_mode,
+                                    ScratchPadMode::Bounds,
+                                    "Bounds",
+                                )
+                                .changed()
+                            || ui
+                                .radio_value(
+                                    &mut ui_data.scratch_pad_mode,
+                                    ScratchPadMode::Color,
+                                    "Color",
+                                )
+                                .changed();
+                        if changed {
+                            ui_data.scratch_pad.clear();
+                        }
                     });
 
                     ui.horizontal(|ui| {
@@ -858,6 +936,11 @@ fn gui(
                         if ui.button("push all").clicked() {
                             inspector_events.send(InspectorEvent::PushKnownToScratchPad);
                             info!("Sent push all event");
+                        }
+
+                        // Mark - set to window
+                        if ui.button("mark window").clicked() {
+                            ui_data.mark = Some(window_drill_id);
                         }
                     });
 

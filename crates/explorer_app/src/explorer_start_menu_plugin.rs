@@ -83,7 +83,10 @@ fn handle_explorer_app_launcher_icon_clicks(
             environment_id,
             theme: ExplorerThemeKind::WindowsDark,
             state: ExplorerState {
-                path: PathBuf::new(),
+                path: PathBuf::from(file!())
+                    .parent()
+                    .map(|x| x.to_path_buf())
+                    .unwrap_or_default(),
             },
             position: Vec2::new(660.0, -300.0),
         });

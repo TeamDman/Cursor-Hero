@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_xpbd_2d::components::Position;
 use cursor_hero_bevy::prelude::NegativeYVec2;
-use cursor_hero_screen::get_image::get_image;
+use cursor_hero_screen::get_image::ImageHolder;
 use cursor_hero_screen::get_image::ScreensToImageParam;
 use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_tools::prelude::*;
@@ -55,7 +55,7 @@ fn toolbelt_events(
                     continue;
                 };
                 for entry in taskbar.entries {
-                    let Ok(image) = get_image(entry.bounds, &access) else {
+                    let Ok(image) = access.get_image(entry.bounds) else {
                         warn!("Failed to get image for {:?}", &entry);
                         continue;
                     };

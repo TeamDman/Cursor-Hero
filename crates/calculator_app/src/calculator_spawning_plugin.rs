@@ -99,14 +99,17 @@ fn handle_spawn_calculator_events(
                                 Collider::cuboid(bounds.width(), bounds.height()),
                             ));
                         }
-
-                        elem_ent.with_children(|parent| {
-                            parent.spawn(Text2dBundle {
-                                text: Text::from_section(text, text_style),
-                                transform: Transform::from_translation(Vec3::new(0.0, 0.0, 1.0)),
-                                ..default()
+                        if !text.is_empty() {
+                            elem_ent.with_children(|parent| {
+                                parent.spawn(Text2dBundle {
+                                    text: Text::from_section(text, text_style),
+                                    transform: Transform::from_translation(Vec3::new(
+                                        0.0, 0.0, 1.0,
+                                    )),
+                                    ..default()
+                                });
                             });
-                        });
+                        }
                     }
                 });
         });

@@ -17,6 +17,7 @@ pub enum ScratchPadMode {
     #[default]
     Drill,
     Bounds,
+    Color,
 }
 
 #[derive(Resource, Debug, Reflect, Default)]

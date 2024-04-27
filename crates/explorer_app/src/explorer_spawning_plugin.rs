@@ -3,13 +3,13 @@ use bevy_xpbd_2d::components::Collider;
 use bevy_xpbd_2d::components::RigidBody;
 use cursor_hero_bevy::prelude::NegativeYVec2;
 use cursor_hero_bevy::prelude::TranslateVec2;
+use cursor_hero_cursor_types::cursor_click_types::Clickable;
+use cursor_hero_cursor_types::cursor_hover_types::Hoverable;
 use cursor_hero_explorer_app_types::prelude::Explorer;
 use cursor_hero_explorer_app_types::prelude::ExplorerElementKind;
 use cursor_hero_explorer_app_types::prelude::ExplorerTheme;
 use cursor_hero_explorer_app_types::prelude::ExplorerThemeKind;
 use cursor_hero_explorer_app_types::prelude::SpawnExplorerRequestEvent;
-use cursor_hero_cursor_types::cursor_click_types::Clickable;
-use cursor_hero_cursor_types::cursor_hover_types::Hoverable;
 use cursor_hero_winutils::win_colors::get_start_color;
 use std::ops::Neg;
 
@@ -24,6 +24,7 @@ impl Plugin for ExplorerSpawningPlugin {
 fn handle_spawn_explorer_events(
     mut commands: Commands,
     mut events: EventReader<SpawnExplorerRequestEvent>,
+    asset_server: Res<AssetServer>,
 ) {
     for event in events.read() {
         let SpawnExplorerRequestEvent { environment_id, .. } = event;
@@ -32,11 +33,7 @@ fn handle_spawn_explorer_events(
             continue;
         };
         let border = 4.0;
-        let size = event
-            .theme
-            .get_bounds(&ExplorerElementKind::Background)
-            .size()
-            + border * 2.0;
+        let size = event.theme.get_bounds(&ExplorerElementKind::Window).size() + border * 2.0;
         let color = match get_start_color() {
             Ok(color) => color,
             Err(err) => {
@@ -65,14 +62,14 @@ fn handle_spawn_explorer_events(
                     for elem_kind in ExplorerElementKind::variants() {
                         let text = elem_kind
                             .get_text_from_state(&event.state)
-                            .unwrap_or_else(|| elem_kind.get_default_text());
+                            .unwrap_or_else(|| elem_kind.get_default_text().unwrap_or_default());
 
                         // convert from top-left offset to center-offset
                         let bounds = theme
                             .get_bounds(&elem_kind)
                             .translated(&(size / 2.0).neg().neg_y());
                         let background_color = theme.get_background_color(&elem_kind);
-                        let text_style = theme.get_text_style(&elem_kind);
+                        let text_style = theme.get_text_style(&elem_kind, asset_server.as_ref());
                         let mut elem_ent = parent.spawn((
                             SpriteBundle {
                                 sprite: Sprite {
@@ -87,7 +84,7 @@ fn handle_spawn_explorer_events(
                             },
                             Name::new(elem_kind.get_name()),
                         ));
-                        if elem_kind != ExplorerElementKind::Background {
+                        if elem_kind == ExplorerElementKind::AddressBox {
                             elem_ent.insert((
                                 Hoverable,
                                 Clickable,
@@ -95,14 +92,17 @@ fn handle_spawn_explorer_events(
                                 Collider::cuboid(bounds.width(), bounds.height()),
                             ));
                         }
-
-                        elem_ent.with_children(|parent| {
-                            parent.spawn(Text2dBundle {
-                                text: Text::from_section(text, text_style),
-                                transform: Transform::from_translation(Vec3::new(0.0, 0.0, 1.0)),
-                                ..default()
+                        if !text.is_empty() {
+                            elem_ent.with_children(|parent| {
+                                parent.spawn(Text2dBundle {
+                                    text: Text::from_section(text, text_style),
+                                    transform: Transform::from_translation(Vec3::new(
+                                        0.0, 0.0, 1.0,
+                                    )),
+                                    ..default()
+                                });
                             });
-                        });
+                        }
                     }
                 });
         });
