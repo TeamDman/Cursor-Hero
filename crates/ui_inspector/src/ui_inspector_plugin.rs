@@ -1,6 +1,5 @@
 use bevy::input::common_conditions::input_just_pressed;
 use bevy::prelude::*;
-use bevy::utils::hashbrown::HashSet;
 use bevy::window::PrimaryWindow;
 use bevy_egui::egui;
 use bevy_egui::egui::collapsing_header::CollapsingState;

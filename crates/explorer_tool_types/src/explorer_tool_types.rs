@@ -8,9 +8,9 @@ use cursor_hero_toolbelt_types::prelude::*;
 
 #[derive(Component, Reflect, Debug, InspectorOptions)]
 #[reflect(Component, InspectorOptions)]
-pub struct {{crate_name_pascal}}Tool;
+pub struct ExplorerTool;
 
-impl Default for {{crate_name_pascal}}Tool {
+impl Default for ExplorerTool {
     fn default() -> Self {
         match InputMethod::default() {
             InputMethod::MouseAndKeyboard | InputMethod::Keyboard => Self::default_mnk(),
@@ -18,21 +18,21 @@ impl Default for {{crate_name_pascal}}Tool {
         }
     }
 }
-impl {{crate_name_pascal}}Tool {
-    pub fn default_mnk() -> {{crate_name_pascal}}Tool {
-        {{crate_name_pascal}}Tool
+impl ExplorerTool {
+    pub fn default_mnk() -> ExplorerTool {
+        ExplorerTool
     }
-    pub fn default_gamepad() -> {{crate_name_pascal}}Tool {
-        {{crate_name_pascal}}Tool
+    pub fn default_gamepad() -> ExplorerTool {
+        ExplorerTool
     }
 }
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
-pub enum {{crate_name_pascal}}ToolAction {
+pub enum ExplorerToolAction {
     Use,
 }
 
-impl {{crate_name_pascal}}ToolAction {
+impl ExplorerToolAction {
     fn default_gamepad_binding(&self) -> UserInput {
         match self {
             Self::Use => GamepadButtonType::South.into(),
@@ -45,11 +45,11 @@ impl {{crate_name_pascal}}ToolAction {
         }
     }
 }
-impl ToolAction for {{crate_name_pascal}}ToolAction {
-    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<{{crate_name_pascal}}ToolAction>> {
+impl ToolAction for ExplorerToolAction {
+    fn default_input_map(_event: &ToolbeltPopulateEvent) -> Option<InputMap<ExplorerToolAction>> {
         let mut input_map = InputMap::default();
 
-        for variant in {{crate_name_pascal}}ToolAction::variants() {
+        for variant in ExplorerToolAction::variants() {
             input_map.insert(variant.default_mkb_binding(), variant);
             input_map.insert(variant.default_gamepad_binding(), variant);
         }

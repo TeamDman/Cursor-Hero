@@ -1,11 +1,11 @@
 use bevy::prelude::*;
-use cursor_hero_{{crate_name}}_tool_types::prelude::*;
+use cursor_hero_explorer_tool_types::prelude::*;
 use cursor_hero_toolbelt_types::prelude::*;
-use cursor_hero_tools::tool_spawning::ToolSpawnConfig;
+use cursor_hero_tools::tool_spawning::{StartingState, ToolSpawnConfig};
 
-pub struct {{crate_name_pascal}}ToolPopulatePlugin;
+pub struct ExplorerToolPopulatePlugin;
 
-impl Plugin for {{crate_name_pascal}}ToolPopulatePlugin {
+impl Plugin for ExplorerToolPopulatePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, handle_toolbelt_events);
     }
@@ -24,15 +24,16 @@ fn handle_toolbelt_events(
         else {
             continue;
         };
-        ToolSpawnConfig::<_, {{crate_name_pascal}}ToolAction>::new(
-            {{crate_name_pascal}}Tool::default(),
+        ToolSpawnConfig::<_, ExplorerToolAction>::new(
+            ExplorerTool::default(),
             event.id,
             event,
         )
         .with_src_path(file!().into())
         .guess_name(file!())
         .guess_image(file!(), &asset_server, "webp")
-        .with_description("REPLACE THIS DESCRIPTION!!!")
+        .with_description("Helps you explore the workspace.")
+        .with_starting_state(StartingState::Inactive)
         .spawn(&mut commands);
     }
 }

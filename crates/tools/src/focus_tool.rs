@@ -106,9 +106,9 @@ impl ToolAction for FocusToolAction {
 #[allow(clippy::type_complexity)]
 #[allow(clippy::too_many_arguments)]
 fn handle_input(
-    mut focus_tool_query: Query<
-        (&ActionState<FocusToolAction>, &Parent, &mut FocusTool),
-        With<ActiveTool>,
+    focus_tool_query: Query<
+        (&ActionState<FocusToolAction>, &Parent),
+        (With<ActiveTool>, With<FocusTool>),
     >,
     movement_tool_query: Query<(Entity, &MovementTool)>,
     toolbelt_query: Query<(&Parent, &Children), With<Toolbelt>>,
@@ -129,7 +129,7 @@ fn handle_input(
 ) {
     // For each focus tool
     for tool in focus_tool_query.iter() {
-        let (tool_actions, tool_parent, mut focus_tool) = tool;
+        let (tool_actions, tool_parent) = tool;
 
         if tool_actions.just_pressed(FocusToolAction::CycleFollowTarget) {
             // Announce acknowledgement
@@ -160,7 +160,7 @@ fn handle_input(
                 warn!("Toolbelt should have a character");
                 continue;
             };
-            let (character_id, mut character_transform, character_is_followed, character_children) =
+            let (character_id, mut character_transform, character_is_followed, _) =
                 character;
 
             // Get the camera
