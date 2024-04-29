@@ -2,9 +2,7 @@
 
 ## Active
 
-- add drill id to calculator element kinds
-  - ensure tree is fully populated when pulling all elements into scratch pad
-  - reuse element list when performing ui watcher gathering
+- graceful worker shutdown message
 
 ## Up Next
 
