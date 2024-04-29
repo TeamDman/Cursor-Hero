@@ -188,8 +188,8 @@ fn handle_threadbound_message(
                 .context("drilling")?;
 
             // Validate parent
-            let id = parent.get_runtime_id()?;
-            if id != parent_runtime_id.0 {
+            let id = RuntimeId(parent.get_runtime_id()?);
+            if id != *parent_runtime_id {
                 error!(
                     "Parent runtime_id mismatch: expected {:?}, got {:?}",
                     parent_runtime_id, id
