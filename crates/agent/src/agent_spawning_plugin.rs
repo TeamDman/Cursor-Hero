@@ -45,6 +45,9 @@ fn spawn_agent(
                     },
                     Character,
                     AgentCharacter,
+                    TrackedEnvironment {
+                        environment_id: event.environment_id,
+                    },
                     Name::new("Character - (Agent) Ithia Tig"),
                     FloatyName {
                         text: "Ithia Tig".to_string(),

@@ -5,6 +5,7 @@ use image::RgbImage;
 
 use crate::screen_plugin::Screen;
 
+#[derive(Debug)]
 pub enum GetImageError {
     ElementEmpty,
 }

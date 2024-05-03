@@ -1,6 +1,7 @@
+use bevy::ecs::system::EntityCommands;
 use bevy::prelude::*;
 
-#[derive(Debug, Reflect, Eq, PartialEq)]
+#[derive(Debug, Reflect, Eq, PartialEq, Component, Clone, Copy)]
 pub enum CalculatorElementKind {
     ExpressionDisplay,
     ValueDisplay,
@@ -13,6 +14,14 @@ pub enum CalculatorElementKind {
     Background,
 }
 impl CalculatorElementKind {
+    pub fn populate(&self, commands: &mut EntityCommands) {
+        commands.insert(*self);
+        if let CalculatorElementKind::ExpressionDisplay = self {
+            commands.insert(CalculatorExpression);
+        } else if let CalculatorElementKind::ValueDisplay = self {
+            commands.insert(CalculatorDisplay);
+        }
+    }
     pub fn variants() -> Vec<CalculatorElementKind> {
         vec![
             CalculatorElementKind::ExpressionDisplay,
@@ -35,17 +44,17 @@ impl CalculatorElementKind {
             CalculatorElementKind::Background,
         ]
     }
-    pub fn get_default_text(&self) -> String {
+    pub fn get_default_text(&self) -> Option<String> {
         match self {
-            CalculatorElementKind::ExpressionDisplay => "".to_string(),
-            CalculatorElementKind::ValueDisplay => "0".to_string(),
-            CalculatorElementKind::DigitButton(digit) => digit.to_string(),
-            CalculatorElementKind::EqualsButton => "=".to_string(),
-            CalculatorElementKind::MultiplyButton => "*".to_string(),
-            CalculatorElementKind::DivideButton => "/".to_string(),
-            CalculatorElementKind::PlusButton => "+".to_string(),
-            CalculatorElementKind::MinusButton => "-".to_string(),
-            CalculatorElementKind::Background => "".to_string(),
+            CalculatorElementKind::ExpressionDisplay => Some("".to_string()),
+            CalculatorElementKind::ValueDisplay => Some("0".to_string()),
+            CalculatorElementKind::DigitButton(digit) => Some(digit.to_string()),
+            CalculatorElementKind::EqualsButton => Some("=".to_string()),
+            CalculatorElementKind::MultiplyButton => Some("*".to_string()),
+            CalculatorElementKind::DivideButton => Some("/".to_string()),
+            CalculatorElementKind::PlusButton => Some("+".to_string()),
+            CalculatorElementKind::MinusButton => Some("-".to_string()),
+            CalculatorElementKind::Background => None,
         }
     }
     pub fn get_text_from_state(&self, state: &CalculatorState) -> Option<String> {
@@ -55,17 +64,20 @@ impl CalculatorElementKind {
             _ => None,
         }
     }
+    pub fn get_full_name(&self) -> String {
+        format!("CalculatorElementKind::{}", self.get_name())
+    }
     pub fn get_name(&self) -> String {
         match self {
-            CalculatorElementKind::ExpressionDisplay => "CalculatorElementKind::ExpressionDisplay".to_string(),
-            CalculatorElementKind::ValueDisplay => "CalculatorElementKind::ValueDisplay".to_string(),
-            CalculatorElementKind::DigitButton(digit) => format!("CalculatorElementKind::DigitButton({})", digit),
-            CalculatorElementKind::EqualsButton => "CalculatorElementKind::EqualsButton".to_string(),
-            CalculatorElementKind::MultiplyButton => "CalculatorElementKind::MultiplyButton".to_string(),
-            CalculatorElementKind::DivideButton => "CalculatorElementKind::DivideButton".to_string(),
-            CalculatorElementKind::PlusButton => "CalculatorElementKind::PlusButton".to_string(),
-            CalculatorElementKind::MinusButton => "CalculatorElementKind::MinusButton".to_string(),
-            CalculatorElementKind::Background => "CalculatorElementKind::Background".to_string(),
+            CalculatorElementKind::ExpressionDisplay => "ExpressionDisplay".to_string(),
+            CalculatorElementKind::ValueDisplay => "ValueDisplay".to_string(),
+            CalculatorElementKind::DigitButton(digit) => format!("DigitButton({})", digit),
+            CalculatorElementKind::EqualsButton => "EqualsButton".to_string(),
+            CalculatorElementKind::MultiplyButton => "MultiplyButton".to_string(),
+            CalculatorElementKind::DivideButton => "DivideButton".to_string(),
+            CalculatorElementKind::PlusButton => "PlusButton".to_string(),
+            CalculatorElementKind::MinusButton => "MinusButton".to_string(),
+            CalculatorElementKind::Background => "Background".to_string(),
         }
     }
     pub fn from_identifier(name: &str) -> Option<CalculatorElementKind> {

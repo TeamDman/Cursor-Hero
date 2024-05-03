@@ -38,10 +38,7 @@ use cursor_hero_worker::prelude::WorkerConfig;
 use cursor_hero_worker::prelude::WorkerMessage;
 use cursor_hero_worker::prelude::WorkerPlugin;
 use image::DynamicImage;
-use image::ImageBuffer;
 use image::Rgb;
-use image::Rgba;
-use image::RgbaImage;
 use itertools::Itertools;
 use std::time::Duration;
 use uiautomation::UIAutomation;
@@ -370,7 +367,7 @@ fn handle_inspector_events(
                         .into_iter()
                         .filter_map(|info| {
                             CalculatorElementKind::from_identifier(info.as_identifier().as_str())
-                                .map(|x| (info, x.get_name()))
+                                .map(|x| (info, x.get_full_name()))
                         })
                         .collect()
                 } else if window.class_name == "CabinetWClass" {
@@ -448,7 +445,7 @@ fn handle_inspector_events(
                             && let Some(calc_elem_kind) =
                                 CalculatorElementKind::from_identifier(&identifier)
                         {
-                            identifier = calc_elem_kind.get_name();
+                            identifier = calc_elem_kind.get_full_name();
                         } else if window.class_name == "CabinetWClass"
                             && let Some(explorer_elem_kind) =
                                 ExplorerElementKind::from_window_relative_drill_id(
@@ -485,7 +482,7 @@ fn handle_inspector_events(
                             }
                             Err(e) => {
                                 warn!(
-                                    "Failed to get image for region {:?}",
+                                    "Failed to get image for region {:?}: {e:?}",
                                     push_info.bounding_rect
                                 );
                                 Color::BLACK

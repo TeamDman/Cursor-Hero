@@ -10,6 +10,7 @@ use cursor_hero_calculator_app_types::calculator_app_types::CalculatorThemeKind;
 use cursor_hero_calculator_app_types::calculator_app_types::SpawnCalculatorRequestEvent;
 use cursor_hero_cursor_types::cursor_click_types::Clickable;
 use cursor_hero_cursor_types::cursor_hover_types::Hoverable;
+use cursor_hero_environment_types::environment_types::TrackedEnvironment;
 use cursor_hero_winutils::win_colors::get_start_color;
 use std::ops::Neg;
 
@@ -49,6 +50,9 @@ fn handle_spawn_calculator_events(
             parent
                 .spawn((
                     Calculator,
+                    TrackedEnvironment {
+                        environment_id: *environment_id
+                    },
                     Name::new("Calculator"),
                     // SpatialBundle {
                     //     transform: Transform::from_translation(Vec3::ZERO),
@@ -69,7 +73,7 @@ fn handle_spawn_calculator_events(
                     for elem_kind in CalculatorElementKind::variants() {
                         let text = elem_kind
                             .get_text_from_state(&event.state)
-                            .unwrap_or_else(|| elem_kind.get_default_text());
+                            .or_else(|| elem_kind.get_default_text());
 
                         // convert from top-left offset to center-offset
                         let bounds = theme
@@ -91,6 +95,7 @@ fn handle_spawn_calculator_events(
                             },
                             Name::new(elem_kind.get_name()),
                         ));
+                        elem_kind.populate(&mut elem_ent);
                         if elem_kind != CalculatorElementKind::Background {
                             elem_ent.insert((
                                 Hoverable,
@@ -99,7 +104,7 @@ fn handle_spawn_calculator_events(
                                 Collider::cuboid(bounds.width(), bounds.height()),
                             ));
                         }
-                        if !text.is_empty() {
+                        if let Some(text) = text {
                             elem_ent.with_children(|parent| {
                                 parent.spawn(Text2dBundle {
                                     text: Text::from_section(text, text_style),

@@ -2,13 +2,17 @@
 
 ## Active
 
-- graceful worker shutdown message
+- calculator buttons to transition state
+- framework for gathering golden data
 
 ## Up Next
 
+- make existing buttons only respond to clicks from host environment
+- add possession mode to control the agent body to test environment restrictions
 
 ## Grab Bag
 
+- graceful worker shutdown message
 - investigate transparent windows :/
 - mode to detach mostly from controller when controlling apps that have controller support
 - UI Resolver for VSCode window

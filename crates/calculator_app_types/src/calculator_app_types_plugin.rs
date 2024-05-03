@@ -8,6 +8,7 @@ impl Plugin for CalculatorAppTypesPlugin {
         app.add_event::<SpawnCalculatorRequestEvent>();
         app.register_type::<SpawnCalculatorRequestEvent>();
         app.register_type::<Calculator>();
+        app.register_type::<CalculatorElementKind>();
         app.register_type::<CalculatorStartMenuPanelButton>();
         app.register_type::<CalculatorDisplay>();
         app.register_type::<CalculatorExpression>();

@@ -200,11 +200,11 @@ impl Plugin for DefaultLaunchModePlugin {
             filter: "
                 wgpu=error
                 cursor_hero=debug
-                // cursor_hero_ollama::ollama_status_worker_plugin=info
-                // cursor_hero_voice_to_text::voice_to_text_ping_plugin=info
-                // cursor_hero_voice_to_text::voice_to_text_worker_plugin=info
-                // cursor_hero_glados_tts::glados_tts_status_worker_plugin=info
-                // cursor_hero_tools::click_tool=info
+                cursor_hero_ollama::ollama_status_worker_plugin=info
+                cursor_hero_voice_to_text::voice_to_text_ping_plugin=info
+                cursor_hero_voice_to_text::voice_to_text_worker_plugin=info
+                cursor_hero_glados_tts::glados_tts_status_worker_plugin=info
+                cursor_hero_tools::click_tool=info
 
                 // cursor_hero_memory=info
                 // cursor_hero_ui_automation_types=trace

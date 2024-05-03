@@ -33,7 +33,6 @@ fn handle_toggle(
                 };
                 info!("ExplorerTool deactivated.");
             }
-            _ => {}
         }
     }
 }
