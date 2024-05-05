@@ -126,29 +126,80 @@ fn handle_clicks(
         };
 
         // Transition the state
-        let (new_expression, new_value) = calculator_state_transition(
+        calculator_state_transition(
             button_kind,
-            expression.value.as_str(),
-            value.value.as_str(),
+            &mut expression.value,
+            &mut value.value,
         );
-
-        // Update the expression and value
-        expression.value = new_expression;
-        value.value = new_value;
     }
+}
+
+/// Evaluate an expression. Return the string representation of the answer
+/// 
+/// Illegal operations like log(0) should return "Invalid input"
+/// 
+/// f128 should be used for all calculations.
+/// 
+/// e.g.,
+/// 1 / 1.1 = 0.90909090909090909090909090909091
+fn evaluate_expression(expression: &str) -> String {
+    let x:f64 = 0.0;
+    todo!()
 }
 
 fn calculator_state_transition(
     button_kind: &CalculatorElementKind,
-    expression: &str,
-    value: &str,
-) -> (String, String) {
+    expression: &mut String,
+    value: &mut String,
+) {
     match button_kind {
         CalculatorElementKind::DigitButton(digit) => {
-            let mut new_expression = expression.to_string();
-            new_expression.push_str(&digit.to_string());
-            (new_expression, value.to_string())
+            value.push_str(&digit.to_string());
         }
-        _ => (expression.to_string(), value.to_string()),
+        CalculatorElementKind::PlusButton => {
+            expression.push_str(&format!("{} + ", value));
+            value.clear();
+        }
+        CalculatorElementKind::EqualsButton => {
+            expression.push_str(&format!("{}=", value));
+            // let result = 
+        }
+        _ => {},
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn digit_buttons() {
+        let mut expression = String::new();
+        let mut value = String::new();
+
+        calculator_state_transition(&CalculatorElementKind::DigitButton(1), &mut expression, &mut value);
+        assert_eq!(expression, "");
+        assert_eq!(value, "1");
+
+        calculator_state_transition(&CalculatorElementKind::DigitButton(2), &mut expression, &mut value);
+        assert_eq!(expression, "");
+        assert_eq!(value, "12");
+
+        calculator_state_transition(&CalculatorElementKind::DigitButton(3), &mut expression, &mut value);
+        assert_eq!(expression, "");
+        assert_eq!(value, "123");
+    }
+
+    #[test]
+    fn one_plus_two_equals() {
+        let mut expression = String::new();
+        let mut value = String::new();
+
+        calculator_state_transition(&CalculatorElementKind::DigitButton(1), &mut expression, &mut value);
+        calculator_state_transition(&CalculatorElementKind::PlusButton, &mut expression, &mut value);
+        calculator_state_transition(&CalculatorElementKind::DigitButton(2), &mut expression, &mut value);
+        calculator_state_transition(&CalculatorElementKind::EqualsButton, &mut expression, &mut value);
+        assert_eq!(expression, "1 + 2=");
+        assert_eq!(value, "3");
     }
 }

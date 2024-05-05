@@ -109,6 +109,12 @@ pub trait CalculatorTheme {
     fn get_bounds(&self, element_kind: &CalculatorElementKind) -> Rect;
     fn get_background_color(&self, element_kind: &CalculatorElementKind) -> Color;
     fn get_text_style(&self, element_kind: &CalculatorElementKind) -> TextStyle;
+    fn get_z_offset(&self, element_kind: &CalculatorElementKind) -> f32 {
+        match element_kind {
+            CalculatorElementKind::Background => 0.0,
+            _ => 1.0,
+        }
+    }
 }
 
 #[derive(Debug, Reflect)]
@@ -162,6 +168,39 @@ impl CalculatorTheme for CalculatorThemeKind {
             ..default()
         }
     }
+}
+
+/// When you hit a symbol (+-*/), the expression is updated
+/// 
+/// ```
+/// format!("{existing}{value}{symbol}")
+/// ```
+/// and the value is simultaneously updated to
+/// 
+/// ```
+/// format!("{}", eval(format!("{existing}{value}")))
+/// ```
+/// 
+/// # Example
+/// 
+/// ```
+/// let expression = "1+"
+/// let value = "3"
+/// let hidden_state = CalculatorHiddenState::Appending
+/// let pressed = &CalculatorElementKind::PlusButton
+/// 
+/// let (new_expression, new_value, new_hidden_state) = calculator_state_transition(pressed, expression, value)
+/// assert_eq!(new_expression, "1+3+")
+/// assert_eq!(new_value, "4")
+/// assert_eq!(new_hidden_state, CalculatorHiddenState::Previewing)
+/// ```
+/// 
+/// The value is now showing "4", but the next time a digit is pressed,
+/// the value will be clobbered with the digit and the hidden state will become `Appending`
+#[derive(Debug, Reflect)]
+pub enum CalculatorHiddenState {
+    Appending,
+    Previewing,
 }
 
 #[derive(Debug, Reflect)]

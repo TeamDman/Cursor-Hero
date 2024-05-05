@@ -2,6 +2,9 @@
 
 ## Active
 
+- progress video
+
+
 - calculator buttons to transition state
 - framework for gathering golden data
 
@@ -12,6 +15,7 @@
 
 ## Grab Bag
 
+- clean up todos
 - graceful worker shutdown message
 - investigate transparent windows :/
 - mode to detach mostly from controller when controlling apps that have controller support
@@ -163,46 +167,9 @@ add a binding to the voice tool for hitting the enter button.Add a binding.for t
 - llm inference for arbitrary string payloads
 - rebind hotkey tool that analyzes project for keybinding defaults in code and edits the code in place to change the default
 - todo tool that reads top 3 todo.md entries and top 3 git log into LLM to suggest the next thing to work on
-- TTS (glados)
 - more real time voice 2 text
 - indicator out of bounds when OBS is not recording / status lights for OBS
 - detect periods of waiting and replace progress spinners / cargo build logs / chatgpt still typing a response with a video from my watch later, my move in a chess game, a chess puzzle, an email -- predict the length of the time spinning to pick a thing to that will take that amount of time, 
 - point at program and open the source code - mapping from program to disk location
 - automate bevy cloning and dependency update to point at local clones of the repos
-
-# use case
-
-select multiple files from vscode, tool read the contents of those files and format in markdown code blocks including file path 
-
-```main.rs
-pub mod other;
-
-fn main() {
-    println!("hello world");
-}
-```
-
-```other.rs
-pub fn other() {
-    println!("other");
-}
-```
-
-to be combined in non-conflicting keys
-
-- left click
-- enter
-- voice2text
-- copy to clipboard
-- append to selection
-- remove from selection
-
-# use case - slider hub
-
-volume slider hub
-
-Master slider
-Audio mixer slider per app
-App slider - game master volume slider, music/sfx slider; youtube video slider, mpv volume slider
-control all from single location - can use browser extension to control youtube without bringing the video to the front
 

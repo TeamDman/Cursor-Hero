@@ -81,6 +81,7 @@ fn handle_spawn_calculator_events(
                             .translated(&(size / 2.0).neg().neg_y());
                         let background_color = theme.get_background_color(&elem_kind);
                         let text_style = theme.get_text_style(&elem_kind);
+                        let z = theme.get_z_offset(&elem_kind);
                         let mut elem_ent = parent.spawn((
                             SpriteBundle {
                                 sprite: Sprite {
@@ -89,7 +90,7 @@ fn handle_spawn_calculator_events(
                                     ..default()
                                 },
                                 transform: Transform::from_translation(
-                                    (bounds.center() + Vec2::new(border, -border)).extend(2.0),
+                                    (bounds.center() + Vec2::new(border, -border)).extend(1.0 + z),
                                 ),
                                 ..Default::default()
                             },
