@@ -19,14 +19,14 @@ fn handle_toggle(
 ) {
     for event in tool_events.read() {
         match event {
-            ToolActivationEvent::Activate(tool_id)=> {
+            ToolActivationEvent::Activate(tool_id) => {
                 let Ok(tool) = tool_query.get(*tool_id) else {
                     warn!("ExplorerTool with id {tool_id:?} not found.");
                     continue;
                 };
                 info!("ExplorerTool activated.");
             }
-            ToolActivationEvent::Deactivate(tool_id) =>{
+            ToolActivationEvent::Deactivate(tool_id) => {
                 let Ok(tool) = tool_query.get(*tool_id) else {
                     warn!("ExplorerTool with id {tool_id:?} not found.");
                     continue;

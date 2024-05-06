@@ -57,7 +57,7 @@ fn update_cursor(
             &ActionState<CursorAction>,
             &mut Cursor,
             Option<&TrackedEnvironment>,
-            &Parent
+            &Parent,
         ),
         Without<Character>,
     >,

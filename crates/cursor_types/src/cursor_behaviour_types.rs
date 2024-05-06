@@ -18,8 +18,7 @@ impl Display for CursorMovementBehaviour {
             "{}",
             match self {
                 CursorMovementBehaviour::None => "None",
-                CursorMovementBehaviour::SetBothToDesiredCoords =>
-                    "SetBothToDesiredCoords",
+                CursorMovementBehaviour::SetBothToDesiredCoords => "SetBothToDesiredCoords",
                 CursorMovementBehaviour::SetHostCursorFromCursorWorldCoords =>
                     "SetHostCursorFromCursorWorldCoords",
                 CursorMovementBehaviour::SetHostCursorFromWindowCoords =>

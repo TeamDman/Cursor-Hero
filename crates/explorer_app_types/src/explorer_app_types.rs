@@ -104,29 +104,29 @@ pub enum ExplorerThemeKind {
 impl ExplorerTheme for ExplorerThemeKind {
     fn get_bounds(&self, element_kind: &ExplorerElementKind) -> Rect {
         match element_kind {
-            ExplorerElementKind::Window => Rect::new(0.0,0.0,908.0,-782.0),
-            ExplorerElementKind::TitleBar => Rect::new(24.0,-3.0,900.0,-34.0),
-            ExplorerElementKind::Ribbon => Rect::new(8.0,-31.0,900.0,-147.0),
-            ExplorerElementKind::TopBar => Rect::new(8.0,-147.0,900.0,-182.0),
-            ExplorerElementKind::Body => Rect::new(8.0,-182.0,900.0,-774.0),
-            ExplorerElementKind::NavigationPane => Rect::new(8.0,-182.0,221.0,-751.0),
-            ExplorerElementKind::Main => Rect::new(225.0,-182.0,900.0,-751.0),
-            
-            _ => Rect::new(0.0,0.0,0.0,0.0),
+            ExplorerElementKind::Window => Rect::new(0.0, 0.0, 908.0, -782.0),
+            ExplorerElementKind::TitleBar => Rect::new(24.0, -3.0, 900.0, -34.0),
+            ExplorerElementKind::Ribbon => Rect::new(8.0, -31.0, 900.0, -147.0),
+            ExplorerElementKind::TopBar => Rect::new(8.0, -147.0, 900.0, -182.0),
+            ExplorerElementKind::Body => Rect::new(8.0, -182.0, 900.0, -774.0),
+            ExplorerElementKind::NavigationPane => Rect::new(8.0, -182.0, 221.0, -751.0),
+            ExplorerElementKind::Main => Rect::new(225.0, -182.0, 900.0, -751.0),
+
+            _ => Rect::new(0.0, 0.0, 0.0, 0.0),
         }
     }
 
     fn get_background_color(&self, element_kind: &ExplorerElementKind) -> Color {
         match element_kind {
-            ExplorerElementKind::Window => Color::rgb(0.1,0.1,0.1),
-            ExplorerElementKind::TitleBar => Color::rgb(0.2,0.2,0.2),
-            ExplorerElementKind::Ribbon => Color::rgb(0.1,0.1,0.1),
-            ExplorerElementKind::TopBar => Color::rgb(0.1,0.1,0.1),
-            ExplorerElementKind::Body => Color::rgb(0.1,0.1,0.1),
-            ExplorerElementKind::NavigationPane => Color::rgb(0.1,0.1,0.1),
-            ExplorerElementKind::Main => Color::rgb(0.1,0.1,0.1),
-                
-            _ => Color::PINK,      
+            ExplorerElementKind::Window => Color::rgb(0.1, 0.1, 0.1),
+            ExplorerElementKind::TitleBar => Color::rgb(0.2, 0.2, 0.2),
+            ExplorerElementKind::Ribbon => Color::rgb(0.1, 0.1, 0.1),
+            ExplorerElementKind::TopBar => Color::rgb(0.1, 0.1, 0.1),
+            ExplorerElementKind::Body => Color::rgb(0.1, 0.1, 0.1),
+            ExplorerElementKind::NavigationPane => Color::rgb(0.1, 0.1, 0.1),
+            ExplorerElementKind::Main => Color::rgb(0.1, 0.1, 0.1),
+
+            _ => Color::PINK,
         }
     }
 

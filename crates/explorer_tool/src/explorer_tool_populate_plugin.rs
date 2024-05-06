@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 use cursor_hero_explorer_tool_types::prelude::*;
 use cursor_hero_toolbelt_types::prelude::*;
-use cursor_hero_tools::tool_spawning::{StartingState, ToolSpawnConfig};
+use cursor_hero_tools::tool_spawning::StartingState;
+use cursor_hero_tools::tool_spawning::ToolSpawnConfig;
 
 pub struct ExplorerToolPopulatePlugin;
 
@@ -24,16 +25,12 @@ fn handle_toolbelt_events(
         else {
             continue;
         };
-        ToolSpawnConfig::<_, ExplorerToolAction>::new(
-            ExplorerTool::default(),
-            event.id,
-            event,
-        )
-        .with_src_path(file!().into())
-        .guess_name(file!())
-        .guess_image(file!(), &asset_server, "webp")
-        .with_description("Helps you explore the workspace.")
-        .with_starting_state(StartingState::Inactive)
-        .spawn(&mut commands);
+        ToolSpawnConfig::<_, ExplorerToolAction>::new(ExplorerTool::default(), event.id, event)
+            .with_src_path(file!().into())
+            .guess_name(file!())
+            .guess_image(file!(), &asset_server, "webp")
+            .with_description("Helps you explore the workspace.")
+            .with_starting_state(StartingState::Inactive)
+            .spawn(&mut commands);
     }
 }

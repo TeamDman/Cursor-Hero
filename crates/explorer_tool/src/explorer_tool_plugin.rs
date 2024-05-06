@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use crate::explorer_tool_populate_plugin::ExplorerToolPopulatePlugin;
+use bevy::prelude::*;
 
 pub struct ExplorerToolPlugin;
 

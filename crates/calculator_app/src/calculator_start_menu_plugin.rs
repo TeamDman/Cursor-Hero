@@ -1,8 +1,16 @@
 use bevy::prelude::*;
-use cursor_hero_calculator_app_types::calculator_app_types::{CalculatorStartMenuPanelButton, CalculatorState, CalculatorThemeKind, SpawnCalculatorRequestEvent};
-use cursor_hero_cursor_types::{cursor_click_types::{ClickEvent, Way}, cursor_types::Cursor};
+use cursor_hero_calculator_app_types::calculator_app_types::CalculatorStartMenuPanelButton;
+use cursor_hero_calculator_app_types::calculator_app_types::CalculatorState;
+use cursor_hero_calculator_app_types::calculator_app_types::CalculatorThemeKind;
+use cursor_hero_calculator_app_types::calculator_app_types::SpawnCalculatorRequestEvent;
+use cursor_hero_cursor_types::cursor_click_types::ClickEvent;
+use cursor_hero_cursor_types::cursor_click_types::Way;
+use cursor_hero_cursor_types::cursor_types::Cursor;
 use cursor_hero_environment_types::environment_types::TrackedEnvironment;
-use cursor_hero_start_menu_types::start_menu_types::{StartMenuPanel, StartMenuPanelAppLauncherIconBuilder, StartMenuPanelVisibilityChangeRequestEvent, StartMenuPopulateEvent};
+use cursor_hero_start_menu_types::start_menu_types::StartMenuPanel;
+use cursor_hero_start_menu_types::start_menu_types::StartMenuPanelAppLauncherIconBuilder;
+use cursor_hero_start_menu_types::start_menu_types::StartMenuPanelVisibilityChangeRequestEvent;
+use cursor_hero_start_menu_types::start_menu_types::StartMenuPopulateEvent;
 
 pub struct CalculatorStartMenuPlugin;
 
@@ -10,7 +18,6 @@ impl Plugin for CalculatorStartMenuPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, populate_start_menu_panels);
         app.add_systems(Update, handle_calculator_app_launcher_icon_clicks);
-
     }
 }
 
@@ -77,7 +84,7 @@ fn handle_calculator_app_launcher_icon_clicks(
                 expression: "".to_string(),
                 value: "0".to_string(),
             },
-            position: Vec2::new(300.0,-300.0),
+            position: Vec2::new(300.0, -300.0),
         });
     }
 }

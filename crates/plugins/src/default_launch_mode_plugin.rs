@@ -52,6 +52,10 @@ use cursor_hero_character_types::character_types_plugin::CharacterTypesPlugin;
 use cursor_hero_chat::chat_plugin::ChatPlugin;
 use cursor_hero_chat_types::chat_types_plugin::ChatTypesPlugin;
 use cursor_hero_environment_types::environment_types_plugin::EnvironmentTypesPlugin;
+use cursor_hero_explorer_app::prelude::*;
+use cursor_hero_explorer_app_types::prelude::*;
+use cursor_hero_explorer_tool::prelude::*;
+use cursor_hero_explorer_tool_types::prelude::*;
 use cursor_hero_floaty_nametag::prelude::*;
 use cursor_hero_floaty_nametag_types::prelude::*;
 use cursor_hero_fullscreen_tool::prelude::*;
@@ -92,10 +96,6 @@ use cursor_hero_window_position_types::prelude::*;
 use cursor_hero_window_swap_tool::prelude::*;
 use cursor_hero_window_swap_tool_types::prelude::*;
 use itertools::Itertools;
-use cursor_hero_explorer_tool::prelude::*;
-use cursor_hero_explorer_tool_types::prelude::*;
-use cursor_hero_explorer_app::prelude::*;
-use cursor_hero_explorer_app_types::prelude::*;
 pub struct DefaultLaunchModePlugin;
 
 impl Plugin for DefaultLaunchModePlugin {

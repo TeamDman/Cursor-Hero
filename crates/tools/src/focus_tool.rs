@@ -160,8 +160,7 @@ fn handle_input(
                 warn!("Toolbelt should have a character");
                 continue;
             };
-            let (character_id, mut character_transform, character_is_followed, _) =
-                character;
+            let (character_id, mut character_transform, character_is_followed, _) = character;
 
             // Get the camera
             let Ok(camera) = camera_query.get_single() else {
