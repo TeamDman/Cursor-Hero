@@ -1,5 +1,6 @@
 use bevy::ecs::system::EntityCommands;
 use bevy::prelude::*;
+use bevy::sprite::Anchor;
 
 #[derive(Debug, Reflect, Eq, PartialEq, Component, Clone, Copy)]
 pub enum CalculatorElementKind {
@@ -123,6 +124,7 @@ pub trait CalculatorTheme {
     fn get_bounds(&self, element_kind: &CalculatorElementKind) -> Rect;
     fn get_background_color(&self, element_kind: &CalculatorElementKind) -> Color;
     fn get_text_style(&self, element_kind: &CalculatorElementKind) -> TextStyle;
+    fn get_text_anchor(&self, element_kind: &CalculatorElementKind) -> Anchor;
     fn get_z_offset(&self, element_kind: &CalculatorElementKind) -> f32 {
         match element_kind {
             CalculatorElementKind::Background => 0.0,
@@ -157,8 +159,8 @@ impl CalculatorTheme for CalculatorThemeKind {
             CalculatorElementKind::DigitButton(7) => Rect::new(67.0, -320.0, 128.0, -353.0),
             CalculatorElementKind::DigitButton(8) => Rect::new(130.0, -320.0, 191.0, -353.0),
             CalculatorElementKind::DigitButton(9) => Rect::new(193.0, -320.0, 254.0, -353.0),
-            CalculatorElementKind::ClearEntryButton => Rect::new(201.0,-259.0,262.0,-291.0),
-            CalculatorElementKind::ClearButton => Rect::new(201.0,-259.0,262.0,-291.0),
+            CalculatorElementKind::ClearEntryButton => Rect::new(201.0, -259.0, 262.0, -291.0),
+            CalculatorElementKind::ClearButton => Rect::new(201.0, -259.0, 262.0, -291.0),
             CalculatorElementKind::DigitButton(_) => Rect::new(0.0, 0.0, 0.0, 0.0),
         }
     }
@@ -174,42 +176,58 @@ impl CalculatorTheme for CalculatorThemeKind {
 
     fn get_text_style(&self, element_kind: &CalculatorElementKind) -> TextStyle {
         let CalculatorThemeKind::WindowsDark = self;
-        TextStyle {
-            font_size: 32.0,
-            color: match element_kind {
-                CalculatorElementKind::EqualsButton => Color::rgb(0.227, 0.106, 0.18),
-                _ => Color::WHITE,
+        match element_kind {
+            CalculatorElementKind::ExpressionDisplay => TextStyle {
+                font_size: 20.0,
+                color: Color::GRAY,
+                ..default()
             },
-            ..default()
+            CalculatorElementKind::EqualsButton => TextStyle {
+                font_size: 32.0,
+                color: Color::rgb(0.227, 0.106, 0.18),
+                ..default()
+            },
+            _ => TextStyle {
+                font_size: 32.0,
+                color: Color::WHITE,
+                ..default()
+            },
+        }
+    }
+
+    fn get_text_anchor(&self, element_kind: &CalculatorElementKind) -> Anchor {
+        match element_kind {
+            CalculatorElementKind::ExpressionDisplay => Anchor::CenterRight,
+            _ => Anchor::Center,
         }
     }
 }
 
 /// When you hit a symbol (+-*/), the expression is updated
-/// 
+///
 /// ```
 /// format!("{existing}{value}{symbol}")
 /// ```
 /// and the value is simultaneously updated to
-/// 
+///
 /// ```
 /// format!("{}", eval(format!("{existing}{value}")))
 /// ```
-/// 
+///
 /// # Example
-/// 
+///
 /// ```
 /// let expression = "1+"
 /// let value = "3"
 /// let hidden_state = CalculatorHiddenState::Appending
 /// let pressed = &CalculatorElementKind::PlusButton
-/// 
+///
 /// let (new_expression, new_value, new_hidden_state) = calculator_state_transition(pressed, expression, value)
 /// assert_eq!(new_expression, "1+3+")
 /// assert_eq!(new_value, "4")
 /// assert_eq!(new_hidden_state, CalculatorHiddenState::Previewing)
 /// ```
-/// 
+///
 /// The value is now showing "4", but the next time a digit is pressed,
 /// the value will be clobbered with the digit and the hidden state will become `Appending`
 #[derive(Debug, Reflect, Default, Clone, Eq, PartialEq)]

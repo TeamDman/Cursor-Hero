@@ -51,7 +51,7 @@ fn handle_spawn_calculator_events(
                 .spawn((
                     Calculator::default(),
                     TrackedEnvironment {
-                        environment_id: *environment_id
+                        environment_id: *environment_id,
                     },
                     Name::new("Calculator"),
                     // SpatialBundle {
@@ -71,26 +71,20 @@ fn handle_spawn_calculator_events(
                 .with_children(|parent| {
                     let theme = CalculatorThemeKind::WindowsDark;
                     for elem_kind in CalculatorElementKind::variants() {
-                        let text = elem_kind
-                            .get_text_from_state(&event.state)
-                            .or_else(|| elem_kind.get_default_text());
-
                         // convert from top-left offset to center-offset
                         let bounds = theme
                             .get_bounds(&elem_kind)
                             .translated(&(size / 2.0).neg().neg_y());
-                        let background_color = theme.get_background_color(&elem_kind);
-                        let text_style = theme.get_text_style(&elem_kind);
-                        let z = theme.get_z_offset(&elem_kind);
                         let mut elem_ent = parent.spawn((
                             SpriteBundle {
                                 sprite: Sprite {
                                     custom_size: Some(bounds.size()),
-                                    color: background_color,
+                                    color: theme.get_background_color(&elem_kind),
                                     ..default()
                                 },
                                 transform: Transform::from_translation(
-                                    (bounds.center() + Vec2::new(border, -border)).extend(1.0 + z),
+                                    (bounds.center() + Vec2::new(border, -border))
+                                        .extend(1.0 + theme.get_z_offset(&elem_kind)),
                                 ),
                                 ..Default::default()
                             },
@@ -105,13 +99,24 @@ fn handle_spawn_calculator_events(
                                 Collider::cuboid(bounds.width(), bounds.height()),
                             ));
                         }
-                        if let Some(text) = text {
+
+                        if let Some(text) = elem_kind
+                            .get_text_from_state(&event.state)
+                            .or_else(|| elem_kind.get_default_text())
+                        {
+                            let hq_scaling = 2.0;
+                            let mut style = theme.get_text_style(&elem_kind);
+                            style.font_size = style.font_size * hq_scaling;
                             elem_ent.with_children(|parent| {
                                 parent.spawn(Text2dBundle {
-                                    text: Text::from_section(text, text_style),
-                                    transform: Transform::from_translation(Vec3::new(
-                                        0.0, 0.0, 1.0,
-                                    )),
+                                    text: Text::from_section(text, style),
+                                    transform: Transform::from_translation(
+                                        (bounds.size()
+                                            * theme.get_text_anchor(&elem_kind).as_vec())
+                                        .extend(1.0),
+                                    )
+                                    .with_scale(Vec2::splat(1.0 / hq_scaling).extend(1.0)),
+                                    text_anchor: theme.get_text_anchor(&elem_kind),
                                     ..default()
                                 });
                             });

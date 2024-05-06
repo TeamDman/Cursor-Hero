@@ -22,8 +22,20 @@ impl Plugin for CalculatorImplPlugin {
 
 fn handle_clear_button_visibility(
     calculator_query: Query<(&Calculator, &Children)>,
-    mut clear_button_query: Query<&mut Visibility, (With<CalculatorClearButton>, Without<CalculatorClearEntryButton>)>,
-    mut clear_entry_button_query: Query<&mut Visibility, (With<CalculatorClearEntryButton>, Without<CalculatorClearButton>)>,
+    mut clear_button_query: Query<
+        &mut Visibility,
+        (
+            With<CalculatorClearButton>,
+            Without<CalculatorClearEntryButton>,
+        ),
+    >,
+    mut clear_entry_button_query: Query<
+        &mut Visibility,
+        (
+            With<CalculatorClearEntryButton>,
+            Without<CalculatorClearButton>,
+        ),
+    >,
 ) {
     for calculator in calculator_query.iter() {
         let (calculator, calculator_children) = calculator;
@@ -39,7 +51,7 @@ fn handle_clear_button_visibility(
                         *visibility = Visibility::Hidden;
                     }
                 }
-            },
+            }
             CalculatorHiddenState::Previewing => {
                 // show only clear button
                 for child in calculator_children.iter() {
@@ -51,7 +63,7 @@ fn handle_clear_button_visibility(
                         *visibility = Visibility::Visible;
                     }
                 }
-            },
+            }
         }
     }
 }
@@ -210,16 +222,16 @@ pub fn calculator_state_transition(
             *hidden_state = CalculatorHiddenState::Appending;
         }
         CalculatorElementKind::PlusButton => {
-            expression.push_str(&format!("{} + ", value));
+            expression.push_str(&format!("{}+", value));
             value.clear();
             value.push_str("0");
         }
         CalculatorElementKind::EqualsButton => {
             expression.push_str(&format!("{}=", value));
             value.clear();
-            // let result = 
+            // let result =
         }
-        _ => {},
+        _ => {}
     }
 }
 
@@ -233,17 +245,32 @@ mod tests {
         let mut value = String::new();
         let mut hidden_state = CalculatorHiddenState::Previewing;
 
-        calculator_state_transition(&CalculatorElementKind::DigitButton(1), &mut hidden_state, &mut expression, &mut value);
+        calculator_state_transition(
+            &CalculatorElementKind::DigitButton(1),
+            &mut hidden_state,
+            &mut expression,
+            &mut value,
+        );
         assert_eq!(expression, "");
         assert_eq!(value, "1");
         assert_eq!(hidden_state, CalculatorHiddenState::Appending);
 
-        calculator_state_transition(&CalculatorElementKind::DigitButton(2), &mut hidden_state, &mut expression, &mut value);
+        calculator_state_transition(
+            &CalculatorElementKind::DigitButton(2),
+            &mut hidden_state,
+            &mut expression,
+            &mut value,
+        );
         assert_eq!(expression, "");
         assert_eq!(value, "12");
         assert_eq!(hidden_state, CalculatorHiddenState::Appending);
 
-        calculator_state_transition(&CalculatorElementKind::DigitButton(3), &mut hidden_state, &mut expression, &mut value);
+        calculator_state_transition(
+            &CalculatorElementKind::DigitButton(3),
+            &mut hidden_state,
+            &mut expression,
+            &mut value,
+        );
         assert_eq!(expression, "");
         assert_eq!(value, "123");
         assert_eq!(hidden_state, CalculatorHiddenState::Appending);
@@ -255,11 +282,31 @@ mod tests {
         let mut value = String::new();
         let mut hidden_state = CalculatorHiddenState::Previewing;
 
-        calculator_state_transition(&CalculatorElementKind::DigitButton(1), &mut hidden_state, &mut expression, &mut value);
+        calculator_state_transition(
+            &CalculatorElementKind::DigitButton(1),
+            &mut hidden_state,
+            &mut expression,
+            &mut value,
+        );
         assert_eq!(hidden_state, CalculatorHiddenState::Appending);
-        calculator_state_transition(&CalculatorElementKind::PlusButton, &mut hidden_state, &mut expression, &mut value);
-        calculator_state_transition(&CalculatorElementKind::DigitButton(2), &mut hidden_state, &mut expression, &mut value);
-        calculator_state_transition(&CalculatorElementKind::EqualsButton, &mut hidden_state, &mut expression, &mut value);
+        calculator_state_transition(
+            &CalculatorElementKind::PlusButton,
+            &mut hidden_state,
+            &mut expression,
+            &mut value,
+        );
+        calculator_state_transition(
+            &CalculatorElementKind::DigitButton(2),
+            &mut hidden_state,
+            &mut expression,
+            &mut value,
+        );
+        calculator_state_transition(
+            &CalculatorElementKind::EqualsButton,
+            &mut hidden_state,
+            &mut expression,
+            &mut value,
+        );
         assert_eq!(expression, "1 + 2=");
         assert_eq!(value, "3");
         assert_eq!(hidden_state, CalculatorHiddenState::Previewing);
