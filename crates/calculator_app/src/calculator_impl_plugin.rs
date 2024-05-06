@@ -1,8 +1,11 @@
 use bevy::prelude::*;
 use cursor_hero_calculator_app_types::calculator_app_types::Calculator;
+use cursor_hero_calculator_app_types::calculator_app_types::CalculatorClearButton;
+use cursor_hero_calculator_app_types::calculator_app_types::CalculatorClearEntryButton;
 use cursor_hero_calculator_app_types::calculator_app_types::CalculatorDisplay;
 use cursor_hero_calculator_app_types::calculator_app_types::CalculatorElementKind;
 use cursor_hero_calculator_app_types::calculator_app_types::CalculatorExpression;
+use cursor_hero_calculator_app_types::calculator_app_types::CalculatorHiddenState;
 use cursor_hero_cursor_types::cursor_click_types::ClickEvent;
 use cursor_hero_cursor_types::cursor_click_types::Way;
 use cursor_hero_cursor_types::cursor_types::Cursor;
@@ -13,12 +16,49 @@ pub struct CalculatorImplPlugin;
 impl Plugin for CalculatorImplPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, handle_clicks);
+        app.add_systems(Update, handle_clear_button_visibility);
+    }
+}
+
+fn handle_clear_button_visibility(
+    calculator_query: Query<(&Calculator, &Children)>,
+    mut clear_button_query: Query<&mut Visibility, (With<CalculatorClearButton>, Without<CalculatorClearEntryButton>)>,
+    mut clear_entry_button_query: Query<&mut Visibility, (With<CalculatorClearEntryButton>, Without<CalculatorClearButton>)>,
+) {
+    for calculator in calculator_query.iter() {
+        let (calculator, calculator_children) = calculator;
+        match calculator.hidden_state {
+            CalculatorHiddenState::Appending => {
+                // show only clear entry button
+                for child in calculator_children.iter() {
+                    if clear_entry_button_query.contains(*child) {
+                        let mut visibility = clear_entry_button_query.get_mut(*child).unwrap();
+                        *visibility = Visibility::Visible;
+                    } else if clear_button_query.contains(*child) {
+                        let mut visibility = clear_button_query.get_mut(*child).unwrap();
+                        *visibility = Visibility::Hidden;
+                    }
+                }
+            },
+            CalculatorHiddenState::Previewing => {
+                // show only clear button
+                for child in calculator_children.iter() {
+                    if clear_entry_button_query.contains(*child) {
+                        let mut visibility = clear_entry_button_query.get_mut(*child).unwrap();
+                        *visibility = Visibility::Hidden;
+                    } else if clear_button_query.contains(*child) {
+                        let mut visibility = clear_button_query.get_mut(*child).unwrap();
+                        *visibility = Visibility::Visible;
+                    }
+                }
+            },
+        }
     }
 }
 
 fn handle_clicks(
     mut click_events: EventReader<ClickEvent>,
-    calculator_query: Query<(&TrackedEnvironment, &Children), With<Calculator>>,
+    mut calculator_query: Query<(&TrackedEnvironment, &Children, &mut Calculator)>,
     button_query: Query<(&CalculatorElementKind, &Parent)>,
     cursor_query: Query<&TrackedEnvironment, With<Cursor>>,
     calculator_expression_query: Query<
@@ -50,10 +90,10 @@ fn handle_clicks(
 
         // Get the calculator
         let calculator_id = button_parent.get();
-        let Ok(calculator) = calculator_query.get(calculator_id) else {
+        let Ok(calculator) = calculator_query.get_mut(calculator_id) else {
             continue;
         };
-        let (calculator_environment, calculator_children) = calculator;
+        let (calculator_environment, calculator_children, mut calculator) = calculator;
 
         // Get the cursor
         let Ok(cursor) = cursor_query.get(*cursor_id) else {
@@ -128,40 +168,55 @@ fn handle_clicks(
         // Transition the state
         calculator_state_transition(
             button_kind,
+            &mut calculator.hidden_state,
             &mut expression.value,
             &mut value.value,
         );
     }
 }
 
-/// Evaluate an expression. Return the string representation of the answer
-/// 
-/// Illegal operations like log(0) should return "Invalid input"
-/// 
-/// f128 should be used for all calculations.
-/// 
-/// e.g.,
-/// 1 / 1.1 = 0.90909090909090909090909090909091
-fn evaluate_expression(expression: &str) -> String {
-    let x:f64 = 0.0;
+pub enum CalculatorEvaluationResult {
+    Numeric(f64),
+    InvalidInput,
+}
+
+pub fn evaluate_expression(expression: &str) -> CalculatorEvaluationResult {
     todo!()
 }
 
-fn calculator_state_transition(
+pub fn calculator_state_transition(
     button_kind: &CalculatorElementKind,
+    hidden_state: &mut CalculatorHiddenState,
     expression: &mut String,
     value: &mut String,
 ) {
     match button_kind {
+        CalculatorElementKind::ClearButton => {
+            expression.clear();
+            value.clear();
+            value.push_str("0");
+            *hidden_state = CalculatorHiddenState::Previewing;
+        }
+        CalculatorElementKind::ClearEntryButton => {
+            value.clear();
+            value.push_str("0");
+            *hidden_state = CalculatorHiddenState::Previewing;
+        }
         CalculatorElementKind::DigitButton(digit) => {
+            if value == "0" {
+                value.clear();
+            }
             value.push_str(&digit.to_string());
+            *hidden_state = CalculatorHiddenState::Appending;
         }
         CalculatorElementKind::PlusButton => {
             expression.push_str(&format!("{} + ", value));
             value.clear();
+            value.push_str("0");
         }
         CalculatorElementKind::EqualsButton => {
             expression.push_str(&format!("{}=", value));
+            value.clear();
             // let result = 
         }
         _ => {},
@@ -176,30 +231,44 @@ mod tests {
     fn digit_buttons() {
         let mut expression = String::new();
         let mut value = String::new();
+        let mut hidden_state = CalculatorHiddenState::Previewing;
 
-        calculator_state_transition(&CalculatorElementKind::DigitButton(1), &mut expression, &mut value);
+        calculator_state_transition(&CalculatorElementKind::DigitButton(1), &mut hidden_state, &mut expression, &mut value);
         assert_eq!(expression, "");
         assert_eq!(value, "1");
+        assert_eq!(hidden_state, CalculatorHiddenState::Appending);
 
-        calculator_state_transition(&CalculatorElementKind::DigitButton(2), &mut expression, &mut value);
+        calculator_state_transition(&CalculatorElementKind::DigitButton(2), &mut hidden_state, &mut expression, &mut value);
         assert_eq!(expression, "");
         assert_eq!(value, "12");
+        assert_eq!(hidden_state, CalculatorHiddenState::Appending);
 
-        calculator_state_transition(&CalculatorElementKind::DigitButton(3), &mut expression, &mut value);
+        calculator_state_transition(&CalculatorElementKind::DigitButton(3), &mut hidden_state, &mut expression, &mut value);
         assert_eq!(expression, "");
         assert_eq!(value, "123");
+        assert_eq!(hidden_state, CalculatorHiddenState::Appending);
     }
 
     #[test]
     fn one_plus_two_equals() {
         let mut expression = String::new();
         let mut value = String::new();
+        let mut hidden_state = CalculatorHiddenState::Previewing;
 
-        calculator_state_transition(&CalculatorElementKind::DigitButton(1), &mut expression, &mut value);
-        calculator_state_transition(&CalculatorElementKind::PlusButton, &mut expression, &mut value);
-        calculator_state_transition(&CalculatorElementKind::DigitButton(2), &mut expression, &mut value);
-        calculator_state_transition(&CalculatorElementKind::EqualsButton, &mut expression, &mut value);
+        calculator_state_transition(&CalculatorElementKind::DigitButton(1), &mut hidden_state, &mut expression, &mut value);
+        assert_eq!(hidden_state, CalculatorHiddenState::Appending);
+        calculator_state_transition(&CalculatorElementKind::PlusButton, &mut hidden_state, &mut expression, &mut value);
+        calculator_state_transition(&CalculatorElementKind::DigitButton(2), &mut hidden_state, &mut expression, &mut value);
+        calculator_state_transition(&CalculatorElementKind::EqualsButton, &mut hidden_state, &mut expression, &mut value);
         assert_eq!(expression, "1 + 2=");
         assert_eq!(value, "3");
+        assert_eq!(hidden_state, CalculatorHiddenState::Previewing);
     }
+
+    // #[test]
+    // fn invalid() {
+    //     let mut expression = String::new();
+    //     let mut value = "0".to_string();
+
+    // }
 }

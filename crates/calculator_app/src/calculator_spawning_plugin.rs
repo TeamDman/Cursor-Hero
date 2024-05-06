@@ -49,7 +49,7 @@ fn handle_spawn_calculator_events(
         environment.with_children(|parent| {
             parent
                 .spawn((
-                    Calculator,
+                    Calculator::default(),
                     TrackedEnvironment {
                         environment_id: *environment_id
                     },

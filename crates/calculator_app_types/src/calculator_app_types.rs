@@ -5,6 +5,8 @@ use bevy::prelude::*;
 pub enum CalculatorElementKind {
     ExpressionDisplay,
     ValueDisplay,
+    ClearButton,
+    ClearEntryButton,
     DigitButton(u8),
     EqualsButton,
     MultiplyButton,
@@ -20,6 +22,10 @@ impl CalculatorElementKind {
             commands.insert(CalculatorExpression);
         } else if let CalculatorElementKind::ValueDisplay = self {
             commands.insert(CalculatorDisplay);
+        } else if let CalculatorElementKind::ClearButton = self {
+            commands.insert(CalculatorClearButton);
+        } else if let CalculatorElementKind::ClearEntryButton = self {
+            commands.insert(CalculatorClearEntryButton);
         }
     }
     pub fn variants() -> Vec<CalculatorElementKind> {
@@ -42,6 +48,8 @@ impl CalculatorElementKind {
             CalculatorElementKind::PlusButton,
             CalculatorElementKind::MinusButton,
             CalculatorElementKind::Background,
+            CalculatorElementKind::ClearButton,
+            CalculatorElementKind::ClearEntryButton,
         ]
     }
     pub fn get_default_text(&self) -> Option<String> {
@@ -54,6 +62,8 @@ impl CalculatorElementKind {
             CalculatorElementKind::DivideButton => Some("/".to_string()),
             CalculatorElementKind::PlusButton => Some("+".to_string()),
             CalculatorElementKind::MinusButton => Some("-".to_string()),
+            CalculatorElementKind::ClearButton => Some("C".to_string()),
+            CalculatorElementKind::ClearEntryButton => Some("CE".to_string()),
             CalculatorElementKind::Background => None,
         }
     }
@@ -78,6 +88,8 @@ impl CalculatorElementKind {
             CalculatorElementKind::PlusButton => "PlusButton".to_string(),
             CalculatorElementKind::MinusButton => "MinusButton".to_string(),
             CalculatorElementKind::Background => "Background".to_string(),
+            CalculatorElementKind::ClearButton => "ClearButton".to_string(),
+            CalculatorElementKind::ClearEntryButton => "ClearExpressionButton".to_string(),
         }
     }
     pub fn from_identifier(name: &str) -> Option<CalculatorElementKind> {
@@ -97,6 +109,8 @@ impl CalculatorElementKind {
             "minus_button" => Some(CalculatorElementKind::MinusButton),
             "multiply_by_button" => Some(CalculatorElementKind::MultiplyButton),
             "divide_by_button" => Some(CalculatorElementKind::DivideButton),
+            "clear_button" => Some(CalculatorElementKind::ClearButton),
+            "clear_entry_button" => Some(CalculatorElementKind::ClearEntryButton),
             "_landmarktarget" => Some(CalculatorElementKind::Background),
             x if x.starts_with("display_is_") => Some(CalculatorElementKind::ValueDisplay),
             x if x.starts_with("expression_is_") => Some(CalculatorElementKind::ExpressionDisplay),
@@ -143,7 +157,8 @@ impl CalculatorTheme for CalculatorThemeKind {
             CalculatorElementKind::DigitButton(7) => Rect::new(67.0, -320.0, 128.0, -353.0),
             CalculatorElementKind::DigitButton(8) => Rect::new(130.0, -320.0, 191.0, -353.0),
             CalculatorElementKind::DigitButton(9) => Rect::new(193.0, -320.0, 254.0, -353.0),
-
+            CalculatorElementKind::ClearEntryButton => Rect::new(201.0,-259.0,262.0,-291.0),
+            CalculatorElementKind::ClearButton => Rect::new(201.0,-259.0,262.0,-291.0),
             CalculatorElementKind::DigitButton(_) => Rect::new(0.0, 0.0, 0.0, 0.0),
         }
     }
@@ -197,8 +212,9 @@ impl CalculatorTheme for CalculatorThemeKind {
 /// 
 /// The value is now showing "4", but the next time a digit is pressed,
 /// the value will be clobbered with the digit and the hidden state will become `Appending`
-#[derive(Debug, Reflect)]
+#[derive(Debug, Reflect, Default, Clone, Eq, PartialEq)]
 pub enum CalculatorHiddenState {
+    #[default]
     Appending,
     Previewing,
 }
@@ -226,7 +242,9 @@ pub struct SpawnCalculatorRequestEvent {
 }
 
 #[derive(Component, Debug, Reflect, Default, Clone, PartialEq)]
-pub struct Calculator;
+pub struct Calculator {
+    pub hidden_state: CalculatorHiddenState,
+}
 #[derive(Component, Debug, Reflect, Default, Clone, PartialEq)]
 pub struct CalculatorStartMenuPanelButton;
 
@@ -236,3 +254,7 @@ pub struct CalculatorDisplay;
 pub struct CalculatorExpression;
 #[derive(Component, Debug, Reflect, Default)]
 pub struct CalculatorButton;
+#[derive(Component, Debug, Reflect, Default)]
+pub struct CalculatorClearButton;
+#[derive(Component, Debug, Reflect, Default)]
+pub struct CalculatorClearEntryButton;
