@@ -59,6 +59,10 @@
   - [UIAutomation not catching all elements - Microsoft Q&A](https://learn.microsoft.com/en-us/answers/questions/545180/uiautomation-not-catching-all-elements)
   - [Caching UI Automation Properties and Control Patterns - Win32 apps | Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/winauto/uiauto-cachingforclients)
   - [IUIAutomationElement::FindAllBuildCache (uiautomationclient.h) - Win32 apps | Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/api/uiautomationclient/nf-uiautomationclient-iuiautomationelement-findallbuildcache)
+- [Writing a UI Automation Provider for a Win32-based Custom Control (codemag.com)](https://www.codemag.com/article/0810112/Writing-a-UI-Automation-Provider-for-a-Win32-based-Custom-Control)
+- [Incorrect BoundingRectangle value - Issue #129 - yinkaisheng/Python-UIAutomation-for-Windows (github.com)](https://github.com/yinkaisheng/Python-UIAutomation-for-Windows/issues/129)
+  - the UI Automation tree has bounding boxes for windows that include a padding and IDK why, found this issue which is probably unrelated lol
+- [microsoft/accessibility-insights-windows: Accessibility Insights for Windows (github.com)](https://github.com/microsoft/accessibility-insights-windows)
 
 ## Win32
 
@@ -70,6 +74,11 @@
 - [(1) Building 25+ years of SysInternals: Exploring ZoomIt | BRK200H - YouTube](https://www.youtube.com/watch?v=W2bNgFrj3Iw)
 - [c# - Getting icon of "modern" Windows app from a desktop application? - Stack Overflow](https://stackoverflow.com/questions/32122679/getting-icon-of-modern-windows-app-from-a-desktop-application)
 - [DLL Export Viewer - view exported functions list in Windows DLL (nirsoft.net)](https://www.nirsoft.net/utils/dll_export_viewer.html)
+
+### OneDrive
+
+- [How can I check status of files/folders in OneDrive folder whether it is synced or not using c# or PowerShell?](https://stackoverflow.com/a/72857799/11141271)
+- [rodneyviana/ODSyncService: OneDrive service/DLL for Sync State (github.com)](https://github.com/rodneyviana/ODSyncService)
 
 ## RL
 
@@ -89,6 +98,17 @@
 - [LlamaIndex 🦙 v0.10.6](https://docs.llamaindex.ai/en/stable/)
 - [Supercharge Your RAG with Contextualized Late Interactions (youtube.com)](https://www.youtube.com/watch?v=xTzUn3G9YA0)
   - [bclavie/RAGatouille](https://github.com/bclavie/RAGatouille)
+- [PromtEngineer/YoutTube-Tutorial: This repo contains codes covered in the youtube tutorials. (github.com)](https://github.com/PromtEngineer/YoutTube-Tutorial)
+  - [How Good is Phi-3-Mini for RAG, Routing, Agents (youtube.com)](https://www.youtube.com/watch?v=_4hFNzY1iMA)
+  - [Advanced RAG with ColBERT in LangChain and LlamaIndex (youtube.com)](https://www.youtube.com/watch?v=kEgeegk9iqo)
+  - [Supercharge Your RAG with Contextualized Late Interactions (youtube.com)](https://www.youtube.com/watch?v=xTzUn3G9YA0)
+  - [Feature Test for Phi-3-mini-4k-instruct - LlamaIndex](https://docs.llamaindex.ai/en/latest/examples/benchmarks/phi-3-mini-4k-instruct/)
+
+## Database
+
+- [Quickstart | Get Started | EdgeDB Docs](https://docs.edgedb.com/get-started/quickstart)
+- [bclavie/RAGatouille: Easily use and train state of the art late-interaction retrieval methods (ColBERT) in any RAG pipeline. Designed for modularity and ease-of-use, backed by research. (github.com)](https://github.com/bclavie/RAGatouille)
+
 
 ## Sandboxing
 
@@ -106,6 +126,7 @@
 ## Multiplayer
 
 - [Veilid: open-source, peer-to-peer, mobile-ﬁrst, networked application framework.](https://veilid.com/)
+- [stillonearth/bevy\_veilid: Build two-player turn-based p2p games with Bevy and Veilid (github.com)](https://github.com/stillonearth/bevy_veilid)
 
 ## Impl
 
@@ -120,14 +141,19 @@
 - [Kenney Fonts](https://kenney.nl/assets/kenney-fonts)
 - [Fira Mono - Google Fonts](https://fonts.google.com/specimen/Fira+Mono)
 - [Xelu's FREE Controller Prompts (thoseawesomeguys.com)](https://thoseawesomeguys.com/prompts/)
+- [\[DIVIDE BY ZERO\] Fonts : 1998-infinity (tom7.com)](http://fonts.tom7.com/fonts98.html)
+- [\[DIVIDE BY ZERO\] Fonts : 1993-1997 (tom7.com)](http://fonts.tom7.com/fonts93.html)
 
 ## Bevy stuff
 
 - [janhohenheim/foxtrot: The all-in-one Bevy 3D game template for desktop. (github.com)](https://github.com/janhohenheim/foxtrot)
 - [StarArawn/bevy\_ecs\_tilemap: A tilemap rendering crate for bevy which is more ECS friendly. (github.com)](https://github.com/StarArawn/bevy_ecs_tilemap)
 - [djeedai/bevy\_hanabi: 🎆 Hanabi --- a GPU particle system plugin for the Bevy game engine. (github.com)](https://github.com/djeedai/bevy_hanabi)
-- [Added Audio Input Support by bushrat011899 - Pull Request #10072 - bevyengine/bevy (github.com)](https://github.com/bevyengine/bevy/pull/10072)
-
+- [QueryLens in bevy::ecs::system - Rust (docs.rs)](https://docs.rs/bevy/latest/bevy/ecs/system/struct.QueryLens.html)
+  - keywords for when I am trying to find this later: telescope, queryparams, systemparams
+- [Entity-entity relations 🌈 - Issue #3742 - bevyengine/bevy (github.com)](https://github.com/bevyengine/bevy/issues/3742)
+  - [Flecs: Relationships](https://www.flecs.dev/flecs/md_docs_2Relationships.html#symmetric-property)
+  - [iiYese/aery: A plugin that enables a subset of entity relationship features for bevy (github.com)](https://github.com/iiYese/aery)
 ## Game inspiration
 
 - [The Last Clockwinder](https://store.steampowered.com/app/1755100/The_Last_Clockwinder/)
@@ -159,3 +185,76 @@
 ## Evolutionary Algorithms
 
 - [bones-ai/rust-snake-ai: Training a Neural Network to play snake, uses genetic algorithm for neuro-evolution (github.com)](https://github.com/bones-ai/rust-snake-ai)
+
+## Hot Reloading
+
+- [Hot Reloading Rust --- for Fun and Faster Feedback Cycles | Robert Krahn](https://robert.kra.hn/posts/hot-reloading-rust/)
+- [draivin/rust-hotswap: Easily hotswap functions in running executables (github.com)](https://github.com/draivin/rust-hotswap)
+- [Hot Reloading Rust: Windows and Linux --- John Austin](https://johnaustin.io/articles/2022/hot-reloading-rust)
+
+## Docs
+
+- [tbillington/bevy\_game\_docs: Generate documentation for Bevy games (github.com)](https://github.com/tbillington/bevy_game_docs)
+  - [bevy\_game\_docs/src/main.rs at main - tbillington/bevy\_game\_docs (github.com)](https://github.com/tbillington/bevy_game_docs/blob/main/src/main.rs)
+  - [Motion Blur, Visualizations, and Beautiful Renders - This Week in Bevy Engine](https://youtu.be/M55pVZ6a8yk?t=286)
+
+## Permissions
+
+- [Open Policy Agent | Policy Language](https://www.openpolicyagent.org/docs/latest/policy-language/)
+
+## Audio
+
+- [Added Audio Input Support by bushrat011899 - Pull Request #10072 - bevyengine/bevy (github.com)](https://github.com/bevyengine/bevy/pull/10072)
+- [VB-Audio VoiceMeeter Banana](https://vb-audio.com/Voicemeeter/banana.htm)
+- [Virtual Audio Device/Card/Adapter - help - The Rust Programming Language Forum (rust-lang.org)](https://users.rust-lang.org/t/virtual-audio-device-card-adapter/58934)
+- [c++ - How to create a virtual audio input device to simulate a microphone on windows? - Stack Overflow](https://stackoverflow.com/questions/74907682/how-to-create-a-virtual-audio-input-device-to-simulate-a-microphone-on-windows)
+- [Windows-driver-samples/audio/simpleaudiosample at main - microsoft/Windows-driver-samples (github.com)](https://github.com/microsoft/Windows-driver-samples/tree/main/audio/simpleaudiosample)
+- [wdmaudiodev Mailing List Archive (freelists.org)](https://www.freelists.org/archive/wdmaudiodev/)
+
+## Animations
+
+- [rive-app/rive-bevy (github.com)](https://github.com/rive-app/rive-bevy)
+  - [How Duolingo Animates Its World Characters](https://blog.duolingo.com/world-character-visemes/)
+
+
+## Models
+
+- [mxbai-embed-large (ollama.com)](https://ollama.com/library/mxbai-embed-large)
+- [starcoder2 (ollama.com)](https://ollama.com/library/starcoder2)
+- [dolphincoder (ollama.com)](https://ollama.com/library/dolphincoder)
+- [Function Calling in Ollama vs OpenAI (youtube.com)](https://www.youtube.com/watch?v=RXDWkiuXtG0&t=1s)
+
+## Transparent windows not working
+
+- [Bevy Transparent Window not working - Issue #10929 - bevyengine/bevy (github.com)](https://github.com/bevyengine/bevy/issues/10929)
+- [Window transparency broken on Windows - Issue #7544 - bevyengine/bevy (github.com)](https://github.com/bevyengine/bevy/issues/7544)
+- [Transparent example not working - Issue #2502 - rust-windowing/winit (github.com)](https://github.com/rust-windowing/winit/issues/2502)
+- [Issues - rust-windowing/winit (github.com)](https://github.com/rust-windowing/winit/issues?q=is%3Aissue+is%3Aopen+transparency)
+- [transparent example doesn't work because softbuffer doesn't support transparency - Issue #2960 - rust-windowing/winit (github.com)](https://github.com/rust-windowing/winit/issues/2960)
+- [Transparent example not working - Issue #2502 - rust-windowing/winit (github.com)](https://github.com/rust-windowing/winit/issues/2502)
+- [On Windows, improve support for undecorated windows by msiglreith - Pull Request #2419 - rust-windowing/winit (github.com)](https://github.com/rust-windowing/winit/pull/2419/files)
+- [fixed window transparency by mgalos999 - Pull Request #2503 - rust-windowing/winit (github.com)](https://github.com/rust-windowing/winit/pull/2503)
+- [rust-windowing/glutin: A low-level library for OpenGL context creation, written in pure Rust. (github.com)](https://github.com/rust-windowing/glutin)
+- [Issues - rust-windowing/glutin (github.com)](https://github.com/rust-windowing/glutin/issues?q=is%3Aissue+transparent+is%3Aclosed)
+- [X11 Window is always transparent with 0.30 - Issue #1559 - rust-windowing/glutin (github.com)](https://github.com/rust-windowing/glutin/issues/1559)
+- [Transparency broken on X11 - Issue #1191 - rust-windowing/glutin (github.com)](https://github.com/rust-windowing/glutin/issues/1191)
+- [Triangle example fails - cargo.toml problem? - Issue #32 - coderedart/egui\_overlay (github.com)](https://github.com/coderedart/egui_overlay/issues/32)
+- [winit::changelog::v0\_30 - Rust (docs.rs)](https://docs.rs/winit/latest/winit/changelog/v0_30/index.html)
+
+## Reference - AI Agents
+
+- [SysCV/sam-hq: Segment Anything in High Quality \[NeurIPS 2023\] (github.com)](https://github.com/SysCV/sam-hq)
+- [OpenAdaptAI/OpenAdapt: AI-First Process Automation with Large (\[Language (LLMs) / Action (LAMs) / Multimodal (LMMs)\] / Visual Language (VLMs)) Models (github.com)](https://github.com/OpenAdaptAI/OpenAdapt)
+  - [OpenAdapt.AI](https://openadapt.ai/)
+  - [(12) Richard Abrich on X: "Check out the latest from @OpenAdaptAI. Now you can quickly and easily automate repetitive tasks in desktop apps for free! Compatible with @OpenAI, @Anthropic, @GoogleAI, and more. Go to https://t.co/7WzHcDRrRH to get started. https://t.co/KkC24CxJFK" / X (twitter.com)](https://twitter.com/abrichr/status/1784307190062342237)
+- [OpenInterpreter/open-interpreter: A natural language interface for computers (github.com)](https://github.com/OpenInterpreter/open-interpreter)
+  - [Open Interpreter - YouTube](https://www.youtube.com/@OpenInterpreter)
+  - [George Kedenburg III on X: "ai pin 🤝 open interpreter https://t.co/cUU2zGoCfd" / X (twitter.com)](https://twitter.com/GK3/status/1773159515258495257)
+- [Techfrens AI Agents Rubrik - Google Drive](https://docs.google.com/spreadsheets/u/0/d/19uE7EzGv-uqH7JyjG0FpC4mD21HPTeP6SWXpVhvNcxI/htmlview#)
+- [jordan singer on X: "✨ talk to your computer remotely from your phone i call it Teleport https://t.co/EvktAB1Lrz" / X (twitter.com)](https://twitter.com/jsngr/status/1774110742070882478)
+- [princeton-nlp/SWE-agent: SWE-agent takes a GitHub issue and tries to automatically fix it, using GPT-4, or your LM of choice. It solves 12.29% of bugs in the SWE-bench evaluation set and takes just 1.5 minutes to run.](https://github.com/princeton-nlp/SWE-agent)
+  - [John Yang @ ICLR 🇦🇹 on X: "SWE-agent is our new system for autonomously solving issues in GitHub repos. It gets similar accuracy to Devin on SWE-bench, takes 93 seconds on avg + it's open source! We designed a new agent-computer interface to make it easy for GPT-4 to edit+run code https://t.co/CTzMxDiouH https://t.co/VW9FuZGIUf" / X (twitter.com)](https://twitter.com/jyangballin/status/1775114444370051582)
+
+## Articles
+
+- [Why it is time to start thinking of games as databases | by Sander Mertens | Medium](https://ajmmertens.medium.com/why-it-is-time-to-start-thinking-of-games-as-databases-e7971da33ac3)
