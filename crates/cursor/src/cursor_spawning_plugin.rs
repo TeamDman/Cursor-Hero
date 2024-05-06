@@ -38,7 +38,7 @@ fn insert_cursor(
                 },
                 ShouldTrackEnvironment,
                 RigidBody::Dynamic,
-                Collider::cuboid(10.0, 10.0),
+                Collider::cuboid(-2.5, -2.5), // use negative dimensions to make the freaking hitboxes visually accurate
                 Sensor,
             ));
             match (is_main_character.is_some(), is_agent_character.is_some()) {
