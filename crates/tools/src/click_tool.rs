@@ -56,6 +56,7 @@ fn toolbelt_events(
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
 enum ClickToolAction {
     LeftClick,
+    MiddleClick,
     RightClick,
 }
 impl ClickToolAction {
@@ -63,6 +64,8 @@ impl ClickToolAction {
         match (self, motion) {
             (Self::LeftClick, Motion::Down) => "sounds/mouse1down.ogg",
             (Self::LeftClick, Motion::Up) => "sounds/mouse1up.ogg",
+            (Self::MiddleClick, Motion::Down) => "sounds/mouse1down.ogg",
+            (Self::MiddleClick, Motion::Up) => "sounds/mouse1up.ogg",
             (Self::RightClick, Motion::Down) => "sounds/mouse2down.ogg",
             (Self::RightClick, Motion::Up) => "sounds/mouse2up.ogg",
         }
@@ -71,6 +74,8 @@ impl ClickToolAction {
         match (self, motion) {
             (Self::LeftClick, Motion::Down) => ClickThreadMessage::LeftMouse(Motion::Down),
             (Self::LeftClick, Motion::Up) => ClickThreadMessage::LeftMouse(Motion::Up),
+            (Self::MiddleClick, Motion::Down) => ClickThreadMessage::LeftMouse(Motion::Down),
+            (Self::MiddleClick, Motion::Up) => ClickThreadMessage::LeftMouse(Motion::Up),
             (Self::RightClick, Motion::Down) => ClickThreadMessage::RightMouse(Motion::Down),
             (Self::RightClick, Motion::Up) => ClickThreadMessage::RightMouse(Motion::Up),
         }
@@ -80,6 +85,7 @@ impl From<ClickToolAction> for Way {
     fn from(action: ClickToolAction) -> Self {
         match action {
             ClickToolAction::LeftClick => Way::Left,
+            ClickToolAction::MiddleClick => Way::Middle,
             ClickToolAction::RightClick => Way::Right,
         }
     }
@@ -107,6 +113,7 @@ impl ClickToolAction {
         match self {
             Self::LeftClick => GamepadButtonType::RightTrigger.into(),
             Self::RightClick => GamepadButtonType::LeftTrigger.into(),
+            Self::MiddleClick => GamepadButtonType::DPadRight.into(),
         }
     }
 
@@ -114,12 +121,14 @@ impl ClickToolAction {
         match self {
             Self::LeftClick => MouseButton::Left.into(),
             Self::RightClick => MouseButton::Right.into(),
+            Self::MiddleClick => MouseButton::Middle.into(),
         }
     }
     fn keyboard_wheel_gamepad_binding(&self) -> UserInput {
         match self {
             Self::LeftClick => GamepadButtonType::RightThumb.into(),
             Self::RightClick => GamepadButtonType::LeftThumb.into(),
+            Self::MiddleClick => GamepadButtonType::Select.into(),
         }
     }
 
@@ -127,6 +136,7 @@ impl ClickToolAction {
         match self {
             Self::LeftClick => MouseButton::Left.into(),
             Self::RightClick => MouseButton::Right.into(),
+            Self::MiddleClick => MouseButton::Middle.into(),
         }
     }
 }
