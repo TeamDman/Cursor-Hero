@@ -470,5 +470,3 @@ fn ui_for_element_info(
             }
         });
 }
-
-

@@ -29,7 +29,6 @@ impl Plugin for UiInspectorWorkerPlugin {
         let visible_condition = |ui_data: Res<UIData>| ui_data.visible;
 
         app.add_systems(Update, handle_gamebound_messages.run_if(visible_condition));
-
     }
 }
 fn handle_threadbound_message_error_handler(

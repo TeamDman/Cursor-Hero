@@ -8,7 +8,6 @@ use cursor_hero_ui_inspector_types::prelude::ThreadboundUISnapshotMessage;
 use cursor_hero_ui_inspector_types::prelude::UIData;
 use std::time::Duration;
 
-
 pub struct UiInspectorTreeUpdatePlugin;
 
 impl Plugin for UiInspectorTreeUpdatePlugin {
@@ -18,11 +17,9 @@ impl Plugin for UiInspectorTreeUpdatePlugin {
         app.add_systems(
             Update,
             trigger_tree_update_for_hovered.run_if(visible_condition),
-        );        
+        );
     }
 }
-
-
 
 fn trigger_tree_update_for_hovered(
     mut ui_data: ResMut<UIData>,

@@ -6,7 +6,6 @@ use cursor_hero_ui_hover_types::prelude::HostHoverIndicator;
 use cursor_hero_ui_inspector_types::prelude::InspectorEvent;
 use cursor_hero_ui_inspector_types::prelude::UIData;
 
-
 pub struct UiInspectorHoverIndicatorClickPlugin;
 
 impl Plugin for UiInspectorHoverIndicatorClickPlugin {
@@ -14,7 +13,6 @@ impl Plugin for UiInspectorHoverIndicatorClickPlugin {
         let visible_condition = |ui_data: Res<UIData>| ui_data.visible;
 
         app.add_systems(Update, hovered_click_listener.run_if(visible_condition));
-        
     }
 }
 
