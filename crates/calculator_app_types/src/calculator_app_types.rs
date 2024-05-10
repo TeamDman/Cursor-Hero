@@ -1,6 +1,7 @@
 use bevy::ecs::system::EntityCommands;
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
+use cursor_hero_ui_automation_types::prelude::ElementInfo;
 
 #[derive(Debug, Reflect, Eq, PartialEq, Component, Clone, Copy)]
 pub enum CalculatorElementKind {
@@ -75,7 +76,7 @@ impl CalculatorElementKind {
             _ => None,
         }
     }
-    pub fn get_full_name(&self) -> String {
+    pub fn get_qualified_name(&self) -> String {
         format!("CalculatorElementKind::{}", self.get_name())
     }
     pub fn get_name(&self) -> String {
@@ -91,6 +92,35 @@ impl CalculatorElementKind {
             CalculatorElementKind::Background => "Background".to_string(),
             CalculatorElementKind::ClearButton => "ClearButton".to_string(),
             CalculatorElementKind::ClearEntryButton => "ClearExpressionButton".to_string(),
+        }
+    }
+    pub fn top_level_info_matches_window_kind(window: &ElementInfo) -> bool {
+        window.name == "Calculator"
+    }
+    #[rustfmt::skip]
+    pub fn from_info(info: &ElementInfo) -> Option<CalculatorElementKind> {
+        match info {
+            info if info.name == "one" && info.class_name == "button" => Some(CalculatorElementKind::DigitButton(1)),
+            info if info.name == "two" && info.class_name == "button" => Some(CalculatorElementKind::DigitButton(2)),
+            info if info.name == "three" && info.class_name == "button" => Some(CalculatorElementKind::DigitButton(3)),
+            info if info.name == "four" && info.class_name == "button" => Some(CalculatorElementKind::DigitButton(4)),
+            info if info.name == "five" && info.class_name == "button" => Some(CalculatorElementKind::DigitButton(5)),
+            info if info.name == "six" && info.class_name == "button" => Some(CalculatorElementKind::DigitButton(6)),
+            info if info.name == "seven" && info.class_name == "button" => Some(CalculatorElementKind::DigitButton(7)),
+            info if info.name == "eight" && info.class_name == "button" => Some(CalculatorElementKind::DigitButton(8)),
+            info if info.name == "nine" && info.class_name == "button" => Some(CalculatorElementKind::DigitButton(9)),
+            info if info.name == "zero" && info.class_name == "button" => Some(CalculatorElementKind::DigitButton(0)),
+            info if info.name == "equals" && info.class_name == "button" => Some(CalculatorElementKind::EqualsButton),
+            info if info.name == "plus" && info.class_name == "button" => Some(CalculatorElementKind::PlusButton),
+            info if info.name == "minus" && info.class_name == "button" => Some(CalculatorElementKind::MinusButton),
+            info if info.name == "multiply" && info.class_name == "by_button" => Some(CalculatorElementKind::MultiplyButton),
+            info if info.name == "divide" && info.class_name == "by_button" => Some(CalculatorElementKind::DivideButton),
+            info if info.name == "clear" && info.class_name == "button" => Some(CalculatorElementKind::ClearButton),
+            info if info.name == "clear" && info.class_name == "entry_button" => Some(CalculatorElementKind::ClearEntryButton),
+            info if info.name == "" && info.class_name == "landmarktarget" => Some(CalculatorElementKind::Background),
+            info if info.automation_id == "CalculatorExpression" => Some(CalculatorElementKind::ValueDisplay),
+            info if info.automation_id == "CalculatorResults" => Some(CalculatorElementKind::ExpressionDisplay),
+            _ => None,
         }
     }
     pub fn from_identifier(name: &str) -> Option<CalculatorElementKind> {

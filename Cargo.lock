@@ -1827,6 +1827,7 @@ name = "cursor_hero_calculator_app_types"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "cursor_hero_ui_automation_types",
 ]
 
 [[package]]
@@ -2744,7 +2745,9 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy_egui",
+ "cursor_hero_cursor_types",
  "cursor_hero_ui_automation_types",
+ "cursor_hero_worker",
  "serde",
 ]
 

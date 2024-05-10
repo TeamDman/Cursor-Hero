@@ -7,18 +7,18 @@ edition = "2021"
 
 [dependencies]
 bevy = { workspace = true }
-cursor_hero_ui_inspector_types = { workspace = true }
-cursor_hero_bevy = { workspace = true }
-cursor_hero_ui_automation = { workspace = true }
 bevy_egui = {workspace = true}
 bevy-inspector-egui = { workspace = true }
-cursor_hero_worker = { workspace = true }
-uiautomation = { workspace = true }
-itertools = { workspace = true }
-cursor_hero_winutils = { workspace = true }
-cursor_hero_ui_hover_types = { workspace = true }
-cursor_hero_screen = { workspace = true}
-cursor_hero_cursor_types = { workspace = true }
-image = {workspace = true}
+cursor_hero_bevy = { workspace = true }
 cursor_hero_calculator_app_types = {workspace=true}
+cursor_hero_cursor_types = { workspace = true }
 cursor_hero_explorer_app_types = {workspace=true}
+cursor_hero_screen = { workspace = true}
+cursor_hero_ui_automation = { workspace = true }
+cursor_hero_ui_hover_types = { workspace = true }
+cursor_hero_ui_inspector_types = { workspace = true }
+cursor_hero_winutils = { workspace = true }
+cursor_hero_worker = { workspace = true }
+image = {workspace = true}
+itertools = { workspace = true }
+uiautomation = { workspace = true }

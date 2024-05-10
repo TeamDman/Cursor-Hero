@@ -10,5 +10,9 @@ impl Plugin for UIInspectorTypesPlugin {
         app.register_type::<FetchingState>();
         app.add_event::<InspectorEvent>();
         app.register_type::<InspectorEvent>();
+        app.add_event::<ThreadboundUISnapshotMessage>();
+        app.register_type::<ThreadboundUISnapshotMessage>();
+        app.add_event::<GameboundUISnapshotMessage>();
+        app.register_type::<GameboundUISnapshotMessage>();
     }
 }

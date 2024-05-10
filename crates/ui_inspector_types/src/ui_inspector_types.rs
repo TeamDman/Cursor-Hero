@@ -43,7 +43,7 @@ pub struct UIData {
 
 #[derive(Debug, Reflect, Clone)]
 pub enum FetchingState {
-    FetchRequest,
+    RequestingFetch,
     FetchDispatched,
     Fetched(Vec<ElementInfo>),
 }
@@ -52,4 +52,5 @@ pub enum FetchingState {
 pub enum InspectorEvent {
     PushSelectedToScratchPad,
     PushKnownToScratchPad,
+    ClickSelected,
 }
