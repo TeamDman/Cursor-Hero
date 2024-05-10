@@ -1,6 +1,8 @@
 #![feature(let_chains, trivial_bounds)]
 mod ui_inspector_children_fetcher_plugin;
 mod ui_inspector_egui_plugin;
+mod ui_inspector_egui_properties_panel;
+mod ui_inspector_egui_tree_panel;
 mod ui_inspector_events_plugin;
 mod ui_inspector_hover_indicator_click_plugin;
 pub mod ui_inspector_plugin;
