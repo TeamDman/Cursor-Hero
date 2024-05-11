@@ -11,7 +11,7 @@ use cursor_hero_screen::get_image::AsBevyColor;
 use cursor_hero_screen::get_image::ImageHolder;
 use cursor_hero_screen::get_image::ScreensToImageParam;
 use cursor_hero_ui_automation::prelude::*;
-use cursor_hero_ui_inspector_types::prelude::InspectorEvent;
+use cursor_hero_ui_inspector_types::prelude::InspectorScratchPadEvent;
 use cursor_hero_ui_inspector_types::prelude::ScratchPadMode;
 use cursor_hero_ui_inspector_types::prelude::ThreadboundUISnapshotMessage;
 use cursor_hero_ui_inspector_types::prelude::UIData;
@@ -26,15 +26,11 @@ impl Plugin for UiInspectorEventsPlugin {
             Update,
             handle_inspector_scratchpad_events.run_if(visible_condition),
         );
-        app.add_systems(
-            Update,
-            handle_inspector_click_events.run_if(visible_condition),
-        );
     }
 }
 
 fn handle_inspector_scratchpad_events(
-    mut inspector_events: EventReader<InspectorEvent>,
+    mut inspector_events: EventReader<InspectorScratchPadEvent>,
     mut ui_data: ResMut<UIData>,
     screen_access: ScreensToImageParam,
 ) {
@@ -54,7 +50,7 @@ fn handle_inspector_scratchpad_events(
         };
 
         let push_infos = match event {
-            InspectorEvent::ScratchPadAppendSelected => {
+            InspectorScratchPadEvent::ScratchPadAppendSelected => {
                 let Some(selected_info) =
                     ui_data.ui_tree.lookup_drill_id(selected_drill_id.clone())
                 else {
@@ -63,14 +59,14 @@ fn handle_inspector_scratchpad_events(
 
                 vec![(selected_info, selected_info.as_identifier())]
             }
-            InspectorEvent::ScratchPadAppendByDrillId { drill_id } => {
+            InspectorScratchPadEvent::ScratchPadAppendByDrillId { drill_id } => {
                 let Some(selected_info) = ui_data.ui_tree.lookup_drill_id(drill_id.clone()) else {
                     return;
                 };
 
                 vec![(selected_info, selected_info.as_identifier())]
             }
-            InspectorEvent::ScratchPadAppendAllKnown => {
+            InspectorScratchPadEvent::ScratchPadAppendAllKnown => {
                 match CursorHeroAppKind::from_window(&window) {
                     Some(CursorHeroAppKind::Calculator) => window
                         .get_descendents()
@@ -105,7 +101,6 @@ fn handle_inspector_scratchpad_events(
                     }
                 }
             }
-            _ => continue,
         };
         let mut content = String::new();
         for (push_info, mut identifier) in push_infos {
@@ -220,42 +215,5 @@ fn handle_inspector_scratchpad_events(
         // append to scratch pad
         // make new rows show at the top by adding to the front
         ui_data.scratch_pad.insert_str(0, content.as_str());
-    }
-}
-
-fn handle_inspector_click_events(
-    mut inspector_events: EventReader<InspectorEvent>,
-    ui_data: ResMut<UIData>,
-    mut threadbound_events: EventWriter<ThreadboundUISnapshotMessage>,
-) {
-    for event in inspector_events.read() {
-        // get the target from the event
-        let pos_to_click = match event {
-            // TODO: move selected getting logic into the sender and remove this variant
-            InspectorEvent::HostClickSelected => {
-                let Some(target_id) = &ui_data.selected else {
-                    return;
-                };
-                let Some(found_info) = ui_data.ui_tree.lookup_drill_id(target_id.to_owned()) else {
-                    return;
-                };
-                found_info.bounding_rect.center()
-            }
-            InspectorEvent::HostClickByDrillId {
-                drill_id: target_id,
-            } => {
-                let Some(found_info) = ui_data.ui_tree.lookup_drill_id(target_id.to_owned()) else {
-                    return;
-                };
-                found_info.bounding_rect.center()
-            }
-            _ => continue,
-        };
-
-        // send click task to worker
-        threadbound_events.send(ThreadboundUISnapshotMessage::ClickPos {
-            pos: pos_to_click,
-            way: Way::Left,
-        });
     }
 }

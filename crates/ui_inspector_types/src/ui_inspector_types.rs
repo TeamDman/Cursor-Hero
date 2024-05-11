@@ -49,10 +49,8 @@ pub enum FetchingState {
 }
 
 #[derive(Debug, Reflect, Event)]
-pub enum InspectorEvent {
+pub enum InspectorScratchPadEvent {
     ScratchPadAppendSelected,
     ScratchPadAppendByDrillId { drill_id: DrillId },
     ScratchPadAppendAllKnown,
-    HostClickSelected,
-    HostClickByDrillId { drill_id: DrillId },
 }

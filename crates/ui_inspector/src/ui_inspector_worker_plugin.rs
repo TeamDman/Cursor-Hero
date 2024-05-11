@@ -140,7 +140,7 @@ fn handle_threadbound_message(
                     warn!("Middle click not supported")
                 } 
             }
-            sleep(Duration::from_millis(500));
+            // sleep(Duration::from_millis(500));
             set_host_cursor_position(restore_point)?;
         }
         ThreadboundUISnapshotMessage::Click { drill_id, way } => {
@@ -179,7 +179,7 @@ fn handle_threadbound_message(
                     warn!("Middle click not supported")
                 } 
             }
-            sleep(Duration::from_millis(500));
+            // sleep(Duration::from_millis(500));
             set_host_cursor_position(restore_point)?;
         }
     }

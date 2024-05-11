@@ -89,6 +89,7 @@ fn handle_clicks(
             target_id,
             cursor_id,
             way: Way::Left,
+            ..
         } = event
         else {
             continue;

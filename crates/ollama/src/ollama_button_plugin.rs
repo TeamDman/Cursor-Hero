@@ -210,8 +210,8 @@ fn status_click_listener(
     for event in click_events.read() {
         let ClickEvent::Clicked {
             target_id,
-            cursor_id: _,
             way,
+            ..
         } = event
         else {
             continue;
@@ -252,8 +252,8 @@ fn terminal_click_listener(
     for event in click_events.read() {
         let ClickEvent::Clicked {
             target_id,
-            cursor_id: _,
             way,
+            ..
         } = event
         else {
             continue;

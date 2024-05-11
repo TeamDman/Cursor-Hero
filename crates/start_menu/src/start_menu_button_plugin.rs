@@ -72,8 +72,8 @@ fn click_listener(
     for event in click_events.read() {
         let ClickEvent::Clicked {
             target_id,
-            cursor_id: _,
             way,
+            ..
         } = event
         else {
             continue;

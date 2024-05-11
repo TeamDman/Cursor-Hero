@@ -18,11 +18,14 @@ pub fn press_detection(
     mut commands: Commands,
     mut tool_click_events: EventReader<ToolClickEvent>,
     mut click_events: EventWriter<ClickEvent>,
-    mut cursor_query: Query<(&CollidingEntities, Option<&mut Pressing>), With<Cursor>>,
+    mut cursor_query: Query<
+        (&GlobalTransform, &CollidingEntities, Option<&mut Pressing>),
+        With<Cursor>,
+    >,
     mut target_query: Query<(Entity, &Visibility, Option<&mut Pressed>), With<Clickable>>,
 ) {
-    let mut cursor_target_ways: Vec<(Entity, Entity, Way)> = vec![];
-    let mut target_cursor_ways: Vec<(Entity, Entity, Way)> = vec![];
+    let mut cursor_target_ways: Vec<(Entity, Entity, Way, IVec2)> = vec![];
+    let mut target_cursor_ways: Vec<(Entity, Entity, Way, IVec2)> = vec![];
     for tool_click_event in tool_click_events.read() {
         // only check pressed events
         let ToolClickEvent::Pressed { cursor_id, way } = tool_click_event else {
@@ -30,10 +33,13 @@ pub fn press_detection(
         };
 
         // find the cursor for the event
-        let Ok((cursor_touching, cursor_pressing)) = cursor_query.get_mut(*cursor_id) else {
+        let Ok((cursor_global_transform, cursor_touching, cursor_pressing)) =
+            cursor_query.get_mut(*cursor_id)
+        else {
             warn!("Cursor {:?} not found", cursor_id);
             continue;
         };
+        let cursor_global_position = cursor_global_transform.translation().truncate().as_ivec2();
 
         let mut pressed = vec![];
 
@@ -55,7 +61,7 @@ pub fn press_detection(
             // track in the element what is pressing it
             if target_pressed.is_none() {
                 // nothing is pressing this element yet
-                target_cursor_ways.push((*touching_id, *cursor_id, *way));
+                target_cursor_ways.push((*touching_id, *cursor_id, *way, cursor_global_position));
             } else if let Some(mut target_pressed) = target_pressed {
                 // something is already pressing this element
                 if target_pressed
@@ -68,6 +74,7 @@ pub fn press_detection(
                     target_pressed.presses.push(CursorPress {
                         cursor_id: *cursor_id,
                         way: *way,
+                        start_position: cursor_global_position,
                     });
                 }
             }
@@ -78,6 +85,7 @@ pub fn press_detection(
                 target_id,
                 cursor_id: *cursor_id,
                 way: *way,
+                start_position: cursor_global_position,
             });
 
             pressed.push(target_id);
@@ -94,6 +102,7 @@ pub fn press_detection(
                         warn!("Cursor {:?} already pressing {:?}", cursor_id, target_id);
                     } else {
                         cursor_pressing.pressing.push(TargetPress {
+                            start_position: cursor_global_position,
                             target_id,
                             way: *way,
                         });
@@ -102,7 +111,7 @@ pub fn press_detection(
             }
             None => {
                 for target_id in pressed.into_iter() {
-                    cursor_target_ways.push((*cursor_id, target_id, *way));
+                    cursor_target_ways.push((*cursor_id, target_id, *way, cursor_global_position));
                 }
             }
         }
@@ -115,7 +124,11 @@ pub fn press_detection(
         commands.entity(cursor_id).insert(Pressing {
             pressing: target_presses
                 .into_iter()
-                .map(|(target_id, way)| TargetPress { target_id, way })
+                .map(|(target_id, way, cursor_global_position)| TargetPress {
+                    target_id,
+                    way,
+                    start_position: cursor_global_position,
+                })
                 .collect(),
         });
     }
@@ -124,20 +137,26 @@ pub fn press_detection(
         commands.entity(target_id).insert(Pressed {
             presses: cursor_presses
                 .into_iter()
-                .map(|(cursor_id, way)| CursorPress { cursor_id, way })
+                .map(|(cursor_id, way, cursor_global_position)| CursorPress {
+                    cursor_id,
+                    way,
+                    start_position: cursor_global_position,
+                })
                 .collect(),
         });
     }
 }
 
-fn group_by_entity(ways: Vec<(Entity, Entity, Way)>) -> HashMap<Entity, Vec<(Entity, Way)>> {
-    let mut groups: HashMap<Entity, Vec<(Entity, Way)>> = HashMap::new();
+fn group_by_entity(
+    ways: Vec<(Entity, Entity, Way, IVec2)>,
+) -> HashMap<Entity, Vec<(Entity, Way, IVec2)>> {
+    let mut groups: HashMap<Entity, Vec<(Entity, Way, IVec2)>> = HashMap::new();
 
-    for (cursor, target, way) in ways {
+    for (cursor, target, way, cursor_global_position) in ways {
         groups
             .entry(cursor)
             .or_insert_with(Vec::new)
-            .push((target, way));
+            .push((target, way, cursor_global_position));
     }
 
     groups
@@ -148,7 +167,10 @@ fn release_detection(
     mut commands: Commands,
     mut tool_click_events: EventReader<ToolClickEvent>,
     mut click_events: EventWriter<ClickEvent>,
-    mut cursor_query: Query<(&CollidingEntities, Option<&mut Pressing>), With<Cursor>>,
+    mut cursor_query: Query<
+        (&GlobalTransform, &CollidingEntities, Option<&mut Pressing>),
+        With<Cursor>,
+    >,
     mut target_query: Query<(Entity, &Visibility, Option<&mut Pressed>), With<Clickable>>,
 ) {
     for tool_click_event in tool_click_events.read() {
@@ -158,16 +180,19 @@ fn release_detection(
         };
 
         // find the cursor for the event
-        let Ok((cursor_touching, cursor_pressing)) = cursor_query.get_mut(*cursor_id) else {
+        let Ok((cursor_global_transform, cursor_touching, cursor_pressing)) =
+            cursor_query.get_mut(*cursor_id)
+        else {
             warn!("Cursor {:?} not found", cursor_id);
             continue;
         };
+        let cursor_global_position = cursor_global_transform.translation().truncate().as_ivec2();
 
         // each element the cursor has tracked as pressing now needs to be released
         // if the cursor is still touching that element, also send a click event
 
         // for each element the cursor is touching
-        let mut clicked: Vec<Entity> = vec![];
+        let mut clicked = vec![];
         for touching_id in cursor_touching.iter() {
             // ensure it is a clickable element
             let Ok((target_id, target_visible, target_pressed)) =
@@ -207,50 +232,56 @@ fn release_detection(
             clicked.push(target_id);
         }
 
-        match cursor_pressing {
-            Some(mut pressing) => {
-                // send release events
-                let mut remove = HashSet::new();
-                pressing
-                    .pressing
-                    .iter()
-                    .filter(|press| press.way == *way)
-                    .for_each(|press: &TargetPress| {
-                        debug!("Cursor {cursor_id:?} click released {way:?} on {:?}", press.target_id);
-                        click_events.send(ClickEvent::Released {
-                            target_id: press.target_id,
-                            cursor_id: *cursor_id,
-                            way: *way,
-                        });
-                        remove.insert(*press);
-                    });
-                pressing.pressing.retain(|press| !remove.contains(press));
-                if pressing.pressing.is_empty() {
-                    commands.entity(*cursor_id).remove::<Pressing>();
-                }
-                // ensure all clicked are present in remove
-                for target_id in clicked.iter() {
-                    if !remove.contains(&TargetPress {
-                        target_id: *target_id,
-                        way: *way,
-                    }) {
-                        warn!(
-                            "Cursor {:?} didn't know it was clicking {:?}",
-                            cursor_id, target_id
-                        );
-                    } else {
-                        debug!("Cursor {cursor_id:?} clicked {way:?} on {target_id:?}");
-                        click_events.send(ClickEvent::Clicked {
-                            target_id: *target_id,
-                            cursor_id: *cursor_id,
-                            way: *way,
-                        });
-                    }
-                }
-            }
-            None => {
-                debug!("Cursor {:?} wasn't pressing anything", cursor_id);
-            }
+        let Some(mut pressing) = cursor_pressing else {
+            warn!("Cursor {:?} wasn't pressing anything", cursor_id);
+            continue;
+        };
+
+        // send release events
+        let mut remove = HashSet::new();
+        pressing
+            .pressing
+            .iter()
+            .filter(|press| press.way == *way)
+            .for_each(|press: &TargetPress| {
+                debug!(
+                    "Cursor {cursor_id:?} click released {way:?} on {:?}",
+                    press.target_id
+                );
+                click_events.send(ClickEvent::Released {
+                    start_position: press.start_position,
+                    end_position: cursor_global_position,
+                    target_id: press.target_id,
+                    cursor_id: *cursor_id,
+                    way: *way,
+                });
+                remove.insert(*press);
+            });
+        pressing.pressing.retain(|press| !remove.contains(press));
+
+        if pressing.pressing.is_empty() {
+            commands.entity(*cursor_id).remove::<Pressing>();
+        }
+        // only perform full clicked event for released presses
+        for target_id in clicked.iter() {
+            let press = remove
+                .iter()
+                .find(|press| press.target_id == *target_id && press.way == *way);
+            let Some(press) = press else {
+                warn!(
+                    "Cursor {:?} didn't know it was clicking {:?}",
+                    cursor_id, target_id
+                );
+                continue;
+            };
+            debug!("Cursor {cursor_id:?} clicked {way:?} on {target_id:?}");
+            click_events.send(ClickEvent::Clicked {
+                target_id: *target_id,
+                cursor_id: *cursor_id,
+                start_position: press.start_position,
+                end_position: cursor_global_position,
+                way: *way,
+            });
         }
     }
 }

@@ -5,7 +5,7 @@ use bevy_egui::EguiContexts;
 use bevy_inspector_egui::reflect_inspector::InspectorUi;
 use cursor_hero_ui_hover_types::prelude::HoverInfo;
 use cursor_hero_ui_hover_types::prelude::InspectorHoverIndicator;
-use cursor_hero_ui_inspector_types::prelude::InspectorEvent;
+use cursor_hero_ui_inspector_types::prelude::InspectorScratchPadEvent;
 use cursor_hero_ui_inspector_types::prelude::ThreadboundUISnapshotMessage;
 use cursor_hero_ui_inspector_types::prelude::UIData;
 
@@ -27,7 +27,7 @@ fn gui(
     type_registry: Res<AppTypeRegistry>,
     mut hover_info: ResMut<HoverInfo>,
     mut threadbound_events: EventWriter<ThreadboundUISnapshotMessage>,
-    mut inspector_events: EventWriter<InspectorEvent>,
+    mut inspector_events: EventWriter<InspectorScratchPadEvent>,
 ) {
     if !ui_data.visible {
         return;

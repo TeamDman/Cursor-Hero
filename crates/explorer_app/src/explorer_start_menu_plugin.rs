@@ -53,6 +53,7 @@ fn handle_explorer_app_launcher_icon_clicks(
             target_id,
             cursor_id,
             way: Way::Left,
+            ..
         } = event
         else {
             continue;

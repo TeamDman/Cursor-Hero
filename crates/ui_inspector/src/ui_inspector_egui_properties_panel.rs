@@ -8,7 +8,7 @@ use cursor_hero_bevy::prelude::BottomRightI;
 use cursor_hero_bevy::prelude::TopLeftI;
 use cursor_hero_bevy::prelude::TranslateIVec2;
 use cursor_hero_ui_automation::prelude::DrillId;
-use cursor_hero_ui_inspector_types::prelude::InspectorEvent;
+use cursor_hero_ui_inspector_types::prelude::InspectorScratchPadEvent;
 use cursor_hero_ui_inspector_types::prelude::ScratchPadMode;
 use cursor_hero_ui_inspector_types::prelude::ThreadboundUISnapshotMessage;
 use cursor_hero_ui_inspector_types::prelude::UIData;
@@ -19,7 +19,7 @@ pub fn do_properties_panel(
     ui_data: &mut UIData,
     preview: Option<(egui::TextureId, (f32, f32))>,
     threadbound_events: &mut EventWriter<ThreadboundUISnapshotMessage>,
-    inspector_events: &mut EventWriter<InspectorEvent>,
+    inspector_events: &mut EventWriter<InspectorScratchPadEvent>,
 ) {
     // Ensure something is selected
     let Some(selected_drill_id) = ui_data.selected.clone() else {
@@ -230,13 +230,13 @@ pub fn do_properties_panel(
 
         // Scratch pad - push button
         if ui.button("push").clicked() {
-            inspector_events.send(InspectorEvent::ScratchPadAppendSelected);
+            inspector_events.send(InspectorScratchPadEvent::ScratchPadAppendSelected);
             info!("Sent push event");
         }
 
         // Scratch pad - push button
         if ui.button("push all").clicked() {
-            inspector_events.send(InspectorEvent::ScratchPadAppendAllKnown);
+            inspector_events.send(InspectorScratchPadEvent::ScratchPadAppendAllKnown);
             info!("Sent push all event");
         }
 

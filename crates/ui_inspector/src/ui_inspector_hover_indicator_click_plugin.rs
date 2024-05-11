@@ -1,9 +1,11 @@
 use bevy::prelude::*;
+use cursor_hero_bevy::prelude::NegativeYIVec2;
 use cursor_hero_cursor_types::prelude::ClickEvent;
 use cursor_hero_cursor_types::prelude::Way;
 use cursor_hero_ui_hover_types::prelude::GameHoverIndicator;
 use cursor_hero_ui_hover_types::prelude::HostHoverIndicator;
-use cursor_hero_ui_inspector_types::prelude::InspectorEvent;
+use cursor_hero_ui_inspector_types::prelude::InspectorScratchPadEvent;
+use cursor_hero_ui_inspector_types::prelude::ThreadboundUISnapshotMessage;
 use cursor_hero_ui_inspector_types::prelude::UIData;
 
 pub struct UiInspectorHoverIndicatorClickPlugin;
@@ -21,13 +23,15 @@ fn hovered_click_listener(
     game_hover_query: Query<&GameHoverIndicator>,
     host_hover_query: Query<&HostHoverIndicator>,
     mut ui_data: ResMut<UIData>,
-    mut inspector_events: EventWriter<InspectorEvent>,
+    mut inspector_events: EventWriter<InspectorScratchPadEvent>,
+    mut threadbound_events: EventWriter<ThreadboundUISnapshotMessage>,
 ) {
     for event in click_events.read() {
         let ClickEvent::Clicked {
             target_id,
-            cursor_id: _,
             way,
+            end_position,
+            ..
         } = event
         else {
             continue;
@@ -41,10 +45,13 @@ fn hovered_click_listener(
                 info!("Hover indicator clicked, paused set to {}", ui_data.paused);
             }
         } else if way == &Way::Right {
-            inspector_events.send(InspectorEvent::ScratchPadAppendSelected);
+            inspector_events.send(InspectorScratchPadEvent::ScratchPadAppendSelected);
         } else if way == &Way::Middle {
             info!("Sending click event!");
-            inspector_events.send(InspectorEvent::HostClickSelected);
+            threadbound_events.send(ThreadboundUISnapshotMessage::ClickPos {
+                pos: end_position.to_owned().neg_y(),
+                way: Way::Left,
+            });
         }
     }
 }

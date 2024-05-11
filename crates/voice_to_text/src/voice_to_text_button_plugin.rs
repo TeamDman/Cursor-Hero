@@ -240,8 +240,8 @@ fn status_button_click(
     for event in click_events.read() {
         let ClickEvent::Clicked {
             target_id,
-            cursor_id: _,
             way,
+            ..
         } = event
         else {
             continue;
@@ -282,8 +282,8 @@ fn vscode_button_click(
     for event in click_events.read() {
         let ClickEvent::Clicked {
             target_id,
-            cursor_id: _,
             way,
+            ..
         } = event
         else {
             continue;

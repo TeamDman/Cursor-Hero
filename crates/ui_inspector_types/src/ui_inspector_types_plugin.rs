@@ -8,8 +8,8 @@ impl Plugin for UIInspectorTypesPlugin {
         app.init_resource::<UIData>();
         app.register_type::<UIData>();
         app.register_type::<FetchingState>();
-        app.add_event::<InspectorEvent>();
-        app.register_type::<InspectorEvent>();
+        app.add_event::<InspectorScratchPadEvent>();
+        app.register_type::<InspectorScratchPadEvent>();
         app.add_event::<ThreadboundUISnapshotMessage>();
         app.register_type::<ThreadboundUISnapshotMessage>();
         app.add_event::<GameboundUISnapshotMessage>();
