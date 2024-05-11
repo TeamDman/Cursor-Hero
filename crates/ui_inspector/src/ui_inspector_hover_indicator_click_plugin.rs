@@ -41,10 +41,10 @@ fn hovered_click_listener(
                 info!("Hover indicator clicked, paused set to {}", ui_data.paused);
             }
         } else if way == &Way::Right {
-            inspector_events.send(InspectorEvent::PushSelectedToScratchPad);
+            inspector_events.send(InspectorEvent::ScratchPadAppendSelected);
         } else if way == &Way::Middle {
             info!("Sending click event!");
-            inspector_events.send(InspectorEvent::ClickSelected);
+            inspector_events.send(InspectorEvent::HostClickSelected);
         }
     }
 }

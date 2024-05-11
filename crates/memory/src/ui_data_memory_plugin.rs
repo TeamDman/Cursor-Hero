@@ -77,7 +77,7 @@ impl From<DiskData> for UIData {
             hovered: value.hovered,
             ui_tree: value.ui_tree,
             selected: value.selected,
-            expanded: value.expanded,
+            default_expanded: value.expanded,
             paused: value.paused,
             ..default()
         }
@@ -95,7 +95,7 @@ impl From<&UIData> for DiskData {
             hovered: value.hovered.clone(),
             ui_tree: value.ui_tree.clone(),
             selected: value.selected.clone(),
-            expanded: value.expanded.clone(),
+            expanded: value.default_expanded.clone(),
             paused: value.paused,
         }
     }

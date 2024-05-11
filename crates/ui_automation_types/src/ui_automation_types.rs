@@ -89,17 +89,78 @@ pub fn all_of(
     Ok(current)
 }
 
-pub trait ToBevyIRect {
-    fn to_bevy_irect(&self) -> IRect;
+
+
+pub trait FromBevyIRect {
+    fn from_bevy_irect(rect: IRect) -> Self;
 }
-impl ToBevyIRect for uiautomation::types::Rect {
-    fn to_bevy_irect(&self) -> IRect {
-        IRect {
-            min: IVec2::new(self.get_left(), self.get_top()),
-            max: IVec2::new(self.get_right(), self.get_bottom()),
-        }
+impl FromBevyIRect for uiautomation::types::Rect {
+    fn from_bevy_irect(rect: IRect) -> Self {
+        uiautomation::types::Rect::new(rect.min.x, rect.min.y, rect.max.x, rect.max.y)
     }
 }
+
+pub trait IntoBevyIRect {
+    fn to_bevy_irect(&self) -> IRect;
+}
+
+impl IntoBevyIRect for uiautomation::types::Rect {
+    fn to_bevy_irect(&self) -> IRect {
+        IRect::new(self.get_left(), self.get_top(), self.get_right(), self.get_bottom())
+    }
+}
+
+pub trait IntoUiRect {
+    fn to_ui_irect(&self) -> uiautomation::types::Rect;
+}
+impl IntoUiRect for IRect {
+    fn to_ui_irect(&self) -> uiautomation::types::Rect {
+        uiautomation::types::Rect::new(self.min.x, self.min.y, self.max.x, self.max.y)
+    }
+}
+
+pub trait IntoUiPoint {
+    fn to_ui_point(&self) -> uiautomation::types::Point;
+}
+impl IntoUiPoint for IVec2 {
+    fn to_ui_point(&self) -> uiautomation::types::Point {
+        uiautomation::types::Point::new(self.x, self.y)
+    }
+}
+
+pub trait IntoBevyIVec2 {
+    fn to_bevy_ivec2(&self) -> IVec2;
+}
+impl IntoBevyIVec2 for uiautomation::types::Point {
+    fn to_bevy_ivec2(&self) -> IVec2 {
+        IVec2::new(self.get_x(), self.get_y())
+    }
+}
+
+
+// pub trait ToBevyIRect {
+//     fn to_bevy_irect(&self) -> IRect;
+// }
+// impl ToBevyIRect for uiautomation::types::Rect {
+//     fn to_bevy_irect(&self) -> IRect {
+//         IRect {
+//             min: IVec2::new(self.get_left(), self.get_top()),
+//             max: IVec2::new(self.get_right(), self.get_bottom()),
+//         }
+//     }
+// }
+// pub trait ToUIRect {
+//     fn to_ui_irect(&self) -> uiautomation::types::Rect;
+// }
+// impl ToUIRect for IRect {
+//     fn to_ui_irect(&self) -> uiautomation::types::Rect {
+//         uiautomation::types::Rect {
+
+//             min: IVec2::new(self.get_left(), self.get_top()),
+//             max: IVec2::new(self.get_right(), self.get_bottom()),
+//         }
+//     }
+// }
 
 /// Defines enum for `windows::Win32::UI::Accessibility::UIA_CONTROLTYPE_ID`.
 ///
@@ -496,6 +557,16 @@ impl ElementInfo {
             }
         }
         None
+    }
+
+    /// Get the direct child this that is an ancestor of the given drill ID.
+    pub fn find_first_child(&self, drill_id: &DrillId) -> Option<&ElementInfo> {
+        let window_drill_id = match drill_id {
+            DrillId::Root => return None,
+            DrillId::Unknown => return None,
+            DrillId::Child(inner) => inner.iter().take(1).cloned().collect(),
+        };
+        self.lookup_drill_id(window_drill_id)
     }
 
     pub fn get_descendents(&self) -> Vec<&ElementInfo> {

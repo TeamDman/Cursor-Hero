@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 use cursor_hero_cursor_types::prelude::*;
-use cursor_hero_winutils::win_mouse::get_cursor_position;
+use cursor_hero_winutils::win_mouse::get_host_cursor_position;
 use cursor_hero_worker::prelude::anyhow::Result;
 use cursor_hero_worker::prelude::Sender;
 use cursor_hero_worker::prelude::WorkerConfig;
@@ -48,7 +48,7 @@ fn handle_threadbound_message(
     _state: &mut (),
 ) -> Result<()> {
     let ThreadboundCursorMessage::CaptureCursorPosition = msg;
-    let pos = get_cursor_position()?;
+    let pos = get_host_cursor_position()?;
     reply_tx.send(GameboundCursorMessage::HostCursorPosition(pos))?;
     Ok(())
 }

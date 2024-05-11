@@ -33,7 +33,7 @@ pub struct UIData {
     pub ui_tree: ElementInfo,
     pub selected: Option<DrillId>,
     pub selected_preview: Option<PreviewImage>,
-    pub expanded: Vec<DrillId>,
+    pub default_expanded: Vec<DrillId>,
     pub fresh: bool,
     pub in_flight: bool,
     pub paused: bool,
@@ -50,7 +50,9 @@ pub enum FetchingState {
 
 #[derive(Debug, Reflect, Event)]
 pub enum InspectorEvent {
-    PushSelectedToScratchPad,
-    PushKnownToScratchPad,
-    ClickSelected,
+    ScratchPadAppendSelected,
+    ScratchPadAppendByDrillId { drill_id: DrillId },
+    ScratchPadAppendAllKnown,
+    HostClickSelected,
+    HostClickByDrillId { drill_id: DrillId },
 }

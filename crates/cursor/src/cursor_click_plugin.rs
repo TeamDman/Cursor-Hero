@@ -73,6 +73,7 @@ pub fn press_detection(
             }
 
             // send pressed event
+            debug!("Cursor {cursor_id:?} click pressed {way:?} on {target_id:?}");
             click_events.send(ClickEvent::Pressed {
                 target_id,
                 cursor_id: *cursor_id,
@@ -215,6 +216,7 @@ fn release_detection(
                     .iter()
                     .filter(|press| press.way == *way)
                     .for_each(|press: &TargetPress| {
+                        debug!("Cursor {cursor_id:?} click released {way:?} on {:?}", press.target_id);
                         click_events.send(ClickEvent::Released {
                             target_id: press.target_id,
                             cursor_id: *cursor_id,
@@ -237,6 +239,7 @@ fn release_detection(
                             cursor_id, target_id
                         );
                     } else {
+                        debug!("Cursor {cursor_id:?} clicked {way:?} on {target_id:?}");
                         click_events.send(ClickEvent::Clicked {
                             target_id: *target_id,
                             cursor_id: *cursor_id,

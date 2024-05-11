@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy::utils::HashMap;
+use cursor_hero_app_types::app_types::CursorHeroAppKind;
 use cursor_hero_bevy::prelude::BottomRightI;
 use cursor_hero_bevy::prelude::TopLeftI;
 use cursor_hero_bevy::prelude::TranslateIVec2;
@@ -21,31 +22,39 @@ pub struct UiInspectorEventsPlugin;
 impl Plugin for UiInspectorEventsPlugin {
     fn build(&self, app: &mut App) {
         let visible_condition = |ui_data: Res<UIData>| ui_data.visible;
-        app.add_systems(Update, handle_inspector_events.run_if(visible_condition));
+        app.add_systems(
+            Update,
+            handle_inspector_scratchpad_events.run_if(visible_condition),
+        );
+        app.add_systems(
+            Update,
+            handle_inspector_click_events.run_if(visible_condition),
+        );
     }
 }
 
-fn handle_inspector_events(
+fn handle_inspector_scratchpad_events(
     mut inspector_events: EventReader<InspectorEvent>,
     mut ui_data: ResMut<UIData>,
-    mut threadbound_events: EventWriter<ThreadboundUISnapshotMessage>,
     screen_access: ScreensToImageParam,
 ) {
     for event in inspector_events.read() {
         // get selected info
-        let Some(selected_drill_id) = ui_data.selected.clone() else {
+        let Some(selected_drill_id) = &ui_data.selected else {
             return;
         };
 
         // get window
-        let window = selected_drill_id
-            .as_child()
-            .map(|inner| inner.iter().take(1).cloned().collect())
-            .and_then(|window_drill_id| ui_data.ui_tree.lookup_drill_id(window_drill_id))
-            .unwrap_or(&ui_data.ui_tree);
+        let Some(window) = ui_data.ui_tree.find_first_child(&selected_drill_id) else {
+            warn!(
+                "Selected drill id not found in tree: {:?}",
+                selected_drill_id
+            );
+            return;
+        };
 
         let push_infos = match event {
-            InspectorEvent::PushSelectedToScratchPad => {
+            InspectorEvent::ScratchPadAppendSelected => {
                 let Some(selected_info) =
                     ui_data.ui_tree.lookup_drill_id(selected_drill_id.clone())
                 else {
@@ -54,27 +63,24 @@ fn handle_inspector_events(
 
                 vec![(selected_info, selected_info.as_identifier())]
             }
-            InspectorEvent::ClickSelected => {
-                if let Some(selected) = ui_data.selected.clone() {
-                    threadbound_events.send(ThreadboundUISnapshotMessage::Click {
-                        drill_id: selected,
-                        way: Way::Left,
-                    });
-                }
-                return;
+            InspectorEvent::ScratchPadAppendByDrillId { drill_id } => {
+                let Some(selected_info) = ui_data.ui_tree.lookup_drill_id(drill_id.clone()) else {
+                    return;
+                };
+
+                vec![(selected_info, selected_info.as_identifier())]
             }
-            InspectorEvent::PushKnownToScratchPad => {
-                if CalculatorElementKind::top_level_info_matches_window_kind(&window) {
-                    window
+            InspectorEvent::ScratchPadAppendAllKnown => {
+                match CursorHeroAppKind::from_window(&window) {
+                    Some(CursorHeroAppKind::Calculator) => window
                         .get_descendents()
                         .into_iter()
                         .filter_map(|info| {
                             CalculatorElementKind::from_info(info)
                                 .map(|x| (info, x.get_qualified_name()))
                         })
-                        .collect()
-                } else if window.class_name == "CabinetWClass" {
-                    std::iter::once(window)
+                        .collect(),
+                    Some(CursorHeroAppKind::Explorer) => std::iter::once(window)
                         .chain(window.get_descendents().into_iter())
                         .filter_map(|info| {
                             ExplorerElementKind::from_window_relative_drill_id(
@@ -86,18 +92,20 @@ fn handle_inspector_events(
                             let pos = e.0.bounding_rect.top_left();
                             pos.y * 10000 + pos.x
                         })
-                        .collect()
-                } else {
-                    // Unknown window, just do selected
-                    let Some(selected_info) =
-                        ui_data.ui_tree.lookup_drill_id(selected_drill_id.clone())
-                    else {
-                        return;
-                    };
+                        .collect(),
+                    _ => {
+                        // Unknown window, just do selected
+                        let Some(selected_info) =
+                            ui_data.ui_tree.lookup_drill_id(selected_drill_id.clone())
+                        else {
+                            return;
+                        };
 
-                    vec![(selected_info, selected_info.as_identifier())]
+                        vec![(selected_info, selected_info.as_identifier())]
+                    }
                 }
             }
+            _ => continue,
         };
         let mut content = String::new();
         for (push_info, mut identifier) in push_infos {
@@ -143,19 +151,24 @@ fn handle_inspector_events(
                             .translated(&-compare.bounding_rect.top_left());
 
                         // Use known identifiers based on window
-
-                        if CalculatorElementKind::top_level_info_matches_window_kind(&window)
-                            && let Some(calc_elem_kind) =
-                                CalculatorElementKind::from_identifier(&identifier)
-                        {
-                            identifier = calc_elem_kind.get_qualified_name();
-                        } else if window.class_name == "CabinetWClass"
-                            && let Some(explorer_elem_kind) =
-                                ExplorerElementKind::from_window_relative_drill_id(
-                                    &push_info.drill_id,
-                                )
-                        {
-                            identifier = explorer_elem_kind.get_name();
+                        match CursorHeroAppKind::from_window(window) {
+                            Some(CursorHeroAppKind::Calculator) => {
+                                if let Some(calc_elem_kind) =
+                                    CalculatorElementKind::from_identifier(&identifier)
+                                {
+                                    identifier = calc_elem_kind.get_qualified_name();
+                                }
+                            }
+                            Some(CursorHeroAppKind::Explorer) => {
+                                if let Some(explorer_elem_kind) =
+                                    ExplorerElementKind::from_window_relative_drill_id(
+                                        &push_info.drill_id,
+                                    )
+                                {
+                                    identifier = explorer_elem_kind.get_name();
+                                }
+                            }
+                            _ => {}
                         }
 
                         // Format as string
@@ -207,5 +220,42 @@ fn handle_inspector_events(
         // append to scratch pad
         // make new rows show at the top by adding to the front
         ui_data.scratch_pad.insert_str(0, content.as_str());
+    }
+}
+
+fn handle_inspector_click_events(
+    mut inspector_events: EventReader<InspectorEvent>,
+    ui_data: ResMut<UIData>,
+    mut threadbound_events: EventWriter<ThreadboundUISnapshotMessage>,
+) {
+    for event in inspector_events.read() {
+        // get the target from the event
+        let pos_to_click = match event {
+            // TODO: move selected getting logic into the sender and remove this variant
+            InspectorEvent::HostClickSelected => {
+                let Some(target_id) = &ui_data.selected else {
+                    return;
+                };
+                let Some(found_info) = ui_data.ui_tree.lookup_drill_id(target_id.to_owned()) else {
+                    return;
+                };
+                found_info.bounding_rect.center()
+            }
+            InspectorEvent::HostClickByDrillId {
+                drill_id: target_id,
+            } => {
+                let Some(found_info) = ui_data.ui_tree.lookup_drill_id(target_id.to_owned()) else {
+                    return;
+                };
+                found_info.bounding_rect.center()
+            }
+            _ => continue,
+        };
+
+        // send click task to worker
+        threadbound_events.send(ThreadboundUISnapshotMessage::ClickPos {
+            pos: pos_to_click,
+            way: Way::Left,
+        });
     }
 }

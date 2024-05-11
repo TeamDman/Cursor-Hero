@@ -1,3 +1,6 @@
+use std::thread::sleep;
+use std::time::Duration;
+
 use bevy::prelude::*;
 use bevy_egui::EguiContexts;
 use cursor_hero_cursor_types::cursor_click_types::Way;
@@ -6,12 +9,15 @@ use cursor_hero_ui_inspector_types::prelude::FetchingState;
 use cursor_hero_ui_inspector_types::prelude::GameboundUISnapshotMessage;
 use cursor_hero_ui_inspector_types::prelude::ThreadboundUISnapshotMessage;
 use cursor_hero_ui_inspector_types::prelude::UIData;
+use cursor_hero_winutils::win_mouse::get_host_cursor_position;
+use cursor_hero_winutils::win_mouse::set_host_cursor_position;
 use cursor_hero_worker::prelude::anyhow::Context;
 use cursor_hero_worker::prelude::anyhow::Error;
 use cursor_hero_worker::prelude::anyhow::Result;
 use cursor_hero_worker::prelude::Sender;
 use cursor_hero_worker::prelude::WorkerConfig;
 use cursor_hero_worker::prelude::WorkerPlugin;
+use uiautomation::inputs::Mouse;
 use uiautomation::UIAutomation;
 pub struct UiInspectorWorkerPlugin;
 
@@ -121,16 +127,60 @@ fn handle_threadbound_message(
                 error!("Failed to send snapshot: {:?}", e);
             }
         }
+        ThreadboundUISnapshotMessage::ClickPos { pos, way } => {
+            let mouse = Mouse::new().auto_move(false);
+            info!("Clicking at {:?}", pos);
+            // Mark current position, teleport the mouse, click, then teleport back
+            let restore_point = get_host_cursor_position()?;
+            set_host_cursor_position(*pos)?;
+            match way {
+                Way::Left => mouse.click(pos.to_ui_point())?,
+                Way::Right => mouse.right_click(pos.to_ui_point())?,
+                Way::Middle => {
+                    warn!("Middle click not supported")
+                } 
+            }
+            sleep(Duration::from_millis(500));
+            set_host_cursor_position(restore_point)?;
+        }
         ThreadboundUISnapshotMessage::Click { drill_id, way } => {
             let automation = UIAutomation::new().context("creating automation")?;
             let walker = automation.create_tree_walker().context("creating walker")?;
             let root = automation.get_root_element().context("getting root")?;
             let element = root.drill(&walker, drill_id.clone()).context("drilling")?;
+
+            let click_point = match element.get_clickable_point() {
+                Ok(Some(point)) => point,
+                Err(_) | Ok(None) => {
+                    match element.get_bounding_rectangle() {
+                        Ok(rect) => {
+                            debug!("No clickable point found, using bounding rectangle");
+                            let bevy_rect = rect.to_bevy_irect();
+                            let center = bevy_rect.center();
+                            center.to_ui_point()
+                        }
+                        _ => {
+                            warn!("No clickable point or bounding rectangle found for {element}");
+                            return Ok(());
+                        }
+                    }
+                }
+            };
+
+            let mouse = Mouse::new().auto_move(false);
+            info!("Clicking {drill_id} at {:?}", click_point);
+            // Mark current position, teleport the mouse, click, then teleport back
+            let restore_point = get_host_cursor_position()?;
+            set_host_cursor_position(click_point.to_bevy_ivec2())?;
             match way {
-                Way::Left => element.click().context("left click")?,
-                Way::Right => element.right_click().context("right click")?,
-                Way::Middle => warn!("Middle click not supported"),
+                Way::Left => mouse.click(click_point)?,
+                Way::Right => mouse.right_click(click_point)?,
+                Way::Middle => {
+                    warn!("Middle click not supported")
+                } 
             }
+            sleep(Duration::from_millis(500));
+            set_host_cursor_position(restore_point)?;
         }
     }
     Ok(())
@@ -151,7 +201,7 @@ fn handle_gamebound_messages(
                 ui_data.ui_tree = ui_tree.clone();
                 ui_data.start = start.clone();
                 ui_data.selected = Some(start.drill_id.clone());
-                ui_data.expanded = ui_tree
+                ui_data.default_expanded = ui_tree
                     .get_descendents()
                     .iter()
                     .chain(std::iter::once(&ui_tree))

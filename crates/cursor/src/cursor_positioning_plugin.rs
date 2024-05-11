@@ -9,7 +9,7 @@ use cursor_hero_cursor_types::cursor_behaviour_types::CursorMovementBehaviour;
 use cursor_hero_cursor_types::prelude::*;
 use cursor_hero_environment_types::prelude::*;
 use cursor_hero_input::active_input_state_plugin::InputMethod;
-use cursor_hero_winutils::win_mouse::set_cursor_position;
+use cursor_hero_winutils::win_mouse::set_host_cursor_position;
 use cursor_hero_winutils::win_window::get_window_bounds;
 use cursor_hero_winutils::win_window::get_window_inner_offset;
 use leafwing_input_manager::prelude::*;
@@ -431,7 +431,7 @@ fn update_cursor(
         if this_update.host_cursor != previous_update.host_cursor
             && let Some(host_target) = this_update.host_cursor
         {
-            match set_cursor_position(host_target) {
+            match set_host_cursor_position(host_target) {
                 Ok(_) => {
                     if cursor.log_behaviour == CursorLogBehaviour::ErrorsAndPositionUpdates {
                         debug!(

@@ -230,13 +230,13 @@ pub fn do_properties_panel(
 
         // Scratch pad - push button
         if ui.button("push").clicked() {
-            inspector_events.send(InspectorEvent::PushSelectedToScratchPad);
+            inspector_events.send(InspectorEvent::ScratchPadAppendSelected);
             info!("Sent push event");
         }
 
         // Scratch pad - push button
         if ui.button("push all").clicked() {
-            inspector_events.send(InspectorEvent::PushKnownToScratchPad);
+            inspector_events.send(InspectorEvent::ScratchPadAppendAllKnown);
             info!("Sent push all event");
         }
 

@@ -16,7 +16,8 @@ use cursor_hero_ui_hover_types::prelude::HoverIndicator;
 use cursor_hero_ui_hover_types::prelude::HoverInfo;
 use cursor_hero_ui_hover_types::prelude::InspectorHoverIndicator;
 use cursor_hero_ui_hover_types::prelude::ThreadboundHoverMessage;
-use cursor_hero_winutils::win_mouse::get_cursor_position;
+use cursor_hero_winutils::win_mouse::get_host_cursor_position;
+use cursor_hero_worker::prelude::anyhow::Context;
 use cursor_hero_worker::prelude::anyhow::Error;
 use cursor_hero_worker::prelude::anyhow::Result;
 use cursor_hero_worker::prelude::Sender;
@@ -70,23 +71,23 @@ fn handle_threadbound_message(
 ) -> Result<()> {
     let reply = match msg {
         ThreadboundHoverMessage::AtPositionFromGame(cursor_pos) => {
-            let root = find_element_at(*cursor_pos)?;
-            let info = gather_single_element_info(&root)?;
+            let element = find_element_at(*cursor_pos).context("finding element at position")?;
+            let info = gather_single_element_info(&element).context("gathering element info")?;
             GameboundHoverMessage::GameHoverInfo {
                 info,
                 cursor_pos: *cursor_pos,
             }
         }
         ThreadboundHoverMessage::AtHostCursorPosition => {
-            let cursor_pos = get_cursor_position()?;
-            let root = find_element_at(cursor_pos)?;
-            let info = gather_single_element_info(&root)?;
+            let cursor_pos = get_host_cursor_position().context("getting cursor position")?;
+            let root = find_element_at(cursor_pos).context("finding element at cursor position")?;
+            let info = gather_single_element_info(&root).context("gathering element info")?;
             GameboundHoverMessage::HostHoverInfo { info, cursor_pos }
         }
         ThreadboundHoverMessage::ClearHost => GameboundHoverMessage::ClearHostHoverInfo,
         ThreadboundHoverMessage::ClearGame => GameboundHoverMessage::ClearGameHoverInfo,
     };
-    reply_tx.send(reply)?;
+    reply_tx.send(reply).context("sending reply")?;
     Ok(())
 }
 

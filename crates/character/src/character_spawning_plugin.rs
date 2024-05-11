@@ -10,7 +10,7 @@ use cursor_hero_physics::damping_plugin::MovementDamping;
 use cursor_hero_toolbelt_types::toolbelt_types::ToolbeltBundle;
 use cursor_hero_toolbelt_types::toolbelt_types::ToolbeltLoadout;
 use cursor_hero_toolbelt_types::toolbelt_types::ToolbeltPopulateEvent;
-use cursor_hero_winutils::win_mouse::get_cursor_position;
+use cursor_hero_winutils::win_mouse::get_host_cursor_position;
 pub struct CharacterSpawningPlugin;
 
 impl Plugin for CharacterSpawningPlugin {
@@ -25,7 +25,7 @@ fn spawn_character(
     mut camera_events: EventWriter<CameraEvent>,
     mut writer: EventWriter<ToolbeltPopulateEvent>,
 ) {
-    let os_cursor_pos = match get_cursor_position() {
+    let os_cursor_pos = match get_host_cursor_position() {
         Ok(pos) => pos,
         Err(e) => {
             error!(

@@ -94,9 +94,6 @@ impl CalculatorElementKind {
             CalculatorElementKind::ClearEntryButton => "ClearExpressionButton".to_string(),
         }
     }
-    pub fn top_level_info_matches_window_kind(window: &ElementInfo) -> bool {
-        window.name == "Calculator"
-    }
     #[rustfmt::skip]
     pub fn from_info(info: &ElementInfo) -> Option<CalculatorElementKind> {
         match info {

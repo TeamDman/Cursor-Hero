@@ -5,7 +5,7 @@ use cursor_hero_bevy::prelude::NegativeYVec2;
 use cursor_hero_camera::camera_plugin::FollowWithMainCamera;
 use cursor_hero_camera::camera_plugin::MainCamera;
 use cursor_hero_cursor_types::cursor_types::Cursor;
-use cursor_hero_winutils::win_mouse::set_cursor_position;
+use cursor_hero_winutils::win_mouse::set_host_cursor_position;
 use cursor_hero_winutils::win_window::get_window_title_bar_center_position;
 use leafwing_input_manager::prelude::*;
 
@@ -250,7 +250,7 @@ fn handle_input(
             // Get the center of the window title bar
             if let Ok(position) = get_window_title_bar_center_position(win32handle.hwnd as isize) {
                 // Update host cursor
-                match set_cursor_position(position) {
+                match set_host_cursor_position(position) {
                     Ok(_) => info!("Moved cursor to window title bar"),
                     Err(e) => error!("Failed to move cursor to window title bar: {:?}", e),
                 }

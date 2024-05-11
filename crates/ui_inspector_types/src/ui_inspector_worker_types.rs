@@ -20,6 +20,10 @@ pub enum ThreadboundUISnapshotMessage {
         drill_id: DrillId,
         way: Way,
     },
+    ClickPos {
+        pos: IVec2,
+        way: Way,
+    },
 }
 
 #[derive(Debug, Reflect, Clone, Event)]

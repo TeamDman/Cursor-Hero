@@ -206,6 +206,7 @@ impl Plugin for DefaultLaunchModePlugin {
                 cursor_hero_glados_tts::glados_tts_status_worker_plugin=info
                 cursor_hero_tools::click_tool=info
                 cursor_hero_cursor::cursor_hover_plugin=info
+                cursor_hero_ui_inspector::ui_inspector_worker_plugin=info
 
                 // cursor_hero_memory=info
                 // cursor_hero_ui_automation_types=trace

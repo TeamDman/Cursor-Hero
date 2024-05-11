@@ -18,7 +18,7 @@ use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
 use windows::Win32::UI::WindowsAndMessaging::SetCursorPos;
 use windows::Win32::UI::WindowsAndMessaging::WHEEL_DELTA;
 
-pub fn get_cursor_position() -> Result<IVec2, windows::core::Error> {
+pub fn get_host_cursor_position() -> Result<IVec2, windows::core::Error> {
     unsafe {
         let mut point = POINT::default();
         GetCursorPos(&mut point)?;
@@ -26,7 +26,7 @@ pub fn get_cursor_position() -> Result<IVec2, windows::core::Error> {
     }
 }
 
-pub fn set_cursor_position(position: IVec2) -> Result<(), windows::core::Error> {
+pub fn set_host_cursor_position(position: IVec2) -> Result<(), windows::core::Error> {
     unsafe {
         SetCursorPos(position.x, position.y)?;
         Ok(())

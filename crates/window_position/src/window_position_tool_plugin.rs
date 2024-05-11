@@ -17,7 +17,7 @@ use cursor_hero_tools::tool_spawning::StartingState;
 use cursor_hero_window_position_types::prelude::HostWindowPosition;
 use cursor_hero_window_position_types::prelude::WindowPositionTool;
 use cursor_hero_window_position_types::window_position_types::WindowPositionCommand;
-use cursor_hero_winutils::win_mouse::set_cursor_position;
+use cursor_hero_winutils::win_mouse::set_host_cursor_position;
 use cursor_hero_winutils::win_screen_capture::get_all_monitors;
 use cursor_hero_winutils::win_screen_capture::get_monitor_infos;
 use cursor_hero_winutils::win_screen_capture::Monitor;
@@ -216,7 +216,7 @@ fn do_position(
                     )),
                     mode: Some(WindowMode::Windowed),
                 });
-                if let Err(e) = set_cursor_position(dest_bounds.center()) {
+                if let Err(e) = set_host_cursor_position(dest_bounds.center()) {
                     warn!("Failed to set cursor position: {}", e);
                 }
                 commands.entity(tool_id).remove::<ActiveTool>();
@@ -253,7 +253,7 @@ fn do_position(
                 };
                 window_commands.send(cmd);
 
-                if let Err(e) = set_cursor_position(monitor.work_area.center()) {
+                if let Err(e) = set_host_cursor_position(monitor.work_area.center()) {
                     warn!("Failed to set cursor position: {}", e);
                 }
                 commands.entity(tool_id).remove::<ActiveTool>();
