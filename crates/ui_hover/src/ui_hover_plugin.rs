@@ -135,7 +135,7 @@ fn trigger_game_hover_info_update(
         .map(|ctx| ctx.clone().get_mut().is_pointer_over_area())
         .unwrap_or(false)
     {
-        hover_info.game_hover_indicator = None;
+        // hover_info.game_hover_indicator = None;
         return;
     }
 
@@ -149,9 +149,9 @@ fn trigger_game_hover_info_update(
     };
 
     // Clear game hover indicator when cursor is outside of window
-    if window.cursor_position().is_none() {
-        hover_info.game_hover_indicator = None;
-    }
+    // if window.cursor_position().is_none() {
+    //     hover_info.game_hover_indicator = None;
+    // }
 
     // Delay between updates
     let Some(cooldown) = cooldown.as_mut() else {
