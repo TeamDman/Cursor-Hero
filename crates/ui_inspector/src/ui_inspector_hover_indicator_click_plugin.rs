@@ -12,9 +12,7 @@ pub struct UiInspectorHoverIndicatorClickPlugin;
 
 impl Plugin for UiInspectorHoverIndicatorClickPlugin {
     fn build(&self, app: &mut App) {
-        let visible_condition = |ui_data: Res<UIData>| ui_data.visible;
-
-        app.add_systems(Update, hovered_click_listener.run_if(visible_condition));
+        app.add_systems(Update, hovered_click_listener);
     }
 }
 
@@ -36,7 +34,7 @@ fn hovered_click_listener(
         else {
             continue;
         };
-        if way == &Way::Left {
+        if way == &Way::Left && ui_data.visible {
             // If the click event targets a hover indicator
             if game_hover_query.get(*target_id).is_ok() || host_hover_query.get(*target_id).is_ok()
             {
@@ -44,7 +42,7 @@ fn hovered_click_listener(
                 ui_data.paused ^= true;
                 info!("Hover indicator clicked, paused set to {}", ui_data.paused);
             }
-        } else if way == &Way::Right {
+        } else if way == &Way::Right && ui_data.visible {
             inspector_events.send(InspectorScratchPadEvent::ScratchPadAppendSelected);
         } else if way == &Way::Middle {
             info!("Sending click event!");
