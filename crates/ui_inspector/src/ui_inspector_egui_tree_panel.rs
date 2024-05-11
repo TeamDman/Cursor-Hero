@@ -4,6 +4,9 @@ use bevy_egui::egui::Id;
 use bevy_egui::egui::ScrollArea;
 use bevy_egui::egui::Ui;
 use bevy_inspector_egui::reflect_inspector::InspectorUi;
+use cursor_hero_app_types::app_types::CursorHeroAppKind;
+use cursor_hero_calculator_app_types::calculator_app_types::CalculatorElementKind;
+use cursor_hero_explorer_app_types::prelude::ExplorerElementKind;
 use cursor_hero_ui_automation::prelude::*;
 use cursor_hero_ui_inspector_types::prelude::FetchingState;
 use cursor_hero_ui_inspector_types::prelude::UIData;
@@ -69,6 +72,12 @@ fn ui_for_element_info(
         });
 }
 
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
+enum HighlightReason {
+    Marked(Color32, Color32),
+    Known(Color32, Color32),
+}
+
 fn do_header(ui: &mut Ui, data: &mut UIData, element_info: &mut ElementInfo) {
     // Get selected state
     let mut selected = data.selected == Some(element_info.drill_id.clone());
@@ -95,35 +104,69 @@ fn do_header(ui: &mut Ui, data: &mut UIData, element_info: &mut ElementInfo) {
     };
 
     // Update highlight colours if marked
-    let mut previous = None;
+    let mut highlight_reason = None;
     if data.mark == Some(element_info.drill_id.clone()) {
-        previous = Some((
+        highlight_reason = Some(HighlightReason::Marked(
             ui.style().visuals.selection.bg_fill,
             ui.style().visuals.widgets.hovered.weak_bg_fill,
         ));
-
         let visuals = &mut ui.style_mut().visuals;
         visuals.selection.bg_fill = Color32::from_rgb(61, 42, 102);
         visuals.widgets.hovered.weak_bg_fill = Color32::from_rgb(41, 22, 82);
     }
 
     // Update highlight colour if known
-    if previous.is_none() && false {
-        todo!();
+    if highlight_reason.is_none() {
+        if let Some(window) = data.ui_tree.find_first_child(&element_info.drill_id) {
+            if let Some(app_kind) = CursorHeroAppKind::from_window(&window) {
+                let is_known = match app_kind {
+                    CursorHeroAppKind::Calculator => {
+                        CalculatorElementKind::from_info(&element_info).is_some()
+                    }
+                    CursorHeroAppKind::Explorer => {
+                        ExplorerElementKind::from_window_relative_drill_id(
+                            &element_info.drill_id.relative_to(&window.drill_id),
+                        )
+                        .is_some()
+                    }
+                    _ => false,
+                };
+
+                if is_known
+                {
+                    highlight_reason = Some(HighlightReason::Known(
+                        ui.style().visuals.selection.bg_fill,
+                        ui.style().visuals.widgets.hovered.weak_bg_fill,
+                    ));
+
+                    let visuals = &mut ui.style_mut().visuals;
+                    visuals.selection.bg_fill = Color32::from_rgb(40, 100, 15);
+                    visuals.widgets.hovered.weak_bg_fill = Color32::from_rgb(10, 40, 5);
+                }
+            }
+        }
     }
 
     // Draw the toggle
     let mut toggle = ui.toggle_value(&mut selected, label);
 
     // Restore previous colours
-    if let Some(previous) = previous {
+    if let Some(reason) = highlight_reason {
         let visuals = &mut ui.style_mut().visuals;
-        visuals.selection.bg_fill = previous.0;
-        visuals.widgets.hovered.weak_bg_fill = previous.1;
+        match reason {
+            HighlightReason::Known(a, b) => {
+                visuals.selection.bg_fill = a;
+                visuals.widgets.hovered.weak_bg_fill = b;
+            }
+            HighlightReason::Marked(a, b) => {
+                visuals.selection.bg_fill = a;
+                visuals.widgets.hovered.weak_bg_fill = b;
+            }
+        }
     }
 
-    // Always apply highlight
-    if data.mark == Some(element_info.drill_id.clone()) {
+    // Tell egui to do highlight box
+    if highlight_reason.is_some() {
         toggle = toggle.highlight();
     }
 
