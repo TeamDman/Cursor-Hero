@@ -76,14 +76,26 @@ impl CalculatorElementKind {
             _ => None,
         }
     }
-    pub fn get_qualified_name(&self) -> String {
-        format!("CalculatorElementKind::{}", self.get_name())
-    }
-    pub fn get_name(&self) -> String {
+    pub fn get_enum_variant_instance(&self) -> String {
         match self {
             CalculatorElementKind::ExpressionDisplay => "ExpressionDisplay".to_string(),
             CalculatorElementKind::ValueDisplay => "ValueDisplay".to_string(),
             CalculatorElementKind::DigitButton(digit) => format!("DigitButton({})", digit),
+            CalculatorElementKind::EqualsButton => "EqualsButton".to_string(),
+            CalculatorElementKind::MultiplyButton => "MultiplyButton".to_string(),
+            CalculatorElementKind::DivideButton => "DivideButton".to_string(),
+            CalculatorElementKind::PlusButton => "PlusButton".to_string(),
+            CalculatorElementKind::MinusButton => "MinusButton".to_string(),
+            CalculatorElementKind::Background => "Background".to_string(),
+            CalculatorElementKind::ClearButton => "ClearButton".to_string(),
+            CalculatorElementKind::ClearEntryButton => "ClearExpressionButton".to_string(),
+        }
+    }
+    pub fn get_enum_variant_declaration(&self) -> String {
+        match self {
+            CalculatorElementKind::ExpressionDisplay => "ExpressionDisplay".to_string(),
+            CalculatorElementKind::ValueDisplay => "ValueDisplay".to_string(),
+            CalculatorElementKind::DigitButton(_) => "DigitButton(u8)".to_string(),
             CalculatorElementKind::EqualsButton => "EqualsButton".to_string(),
             CalculatorElementKind::MultiplyButton => "MultiplyButton".to_string(),
             CalculatorElementKind::DivideButton => "DivideButton".to_string(),
@@ -117,31 +129,6 @@ impl CalculatorElementKind {
             info if info.name == "" && info.class_name == "LandmarkTarget" => Some(CalculatorElementKind::Background),
             info if info.automation_id == "CalculatorExpression" => Some(CalculatorElementKind::ValueDisplay),
             info if info.automation_id == "CalculatorResults" => Some(CalculatorElementKind::ExpressionDisplay),
-            _ => None,
-        }
-    }
-    pub fn from_identifier(name: &str) -> Option<CalculatorElementKind> {
-        match name {
-            "one_button" => Some(CalculatorElementKind::DigitButton(1)),
-            "two_button" => Some(CalculatorElementKind::DigitButton(2)),
-            "three_button" => Some(CalculatorElementKind::DigitButton(3)),
-            "four_button" => Some(CalculatorElementKind::DigitButton(4)),
-            "five_button" => Some(CalculatorElementKind::DigitButton(5)),
-            "six_button" => Some(CalculatorElementKind::DigitButton(6)),
-            "seven_button" => Some(CalculatorElementKind::DigitButton(7)),
-            "eight_button" => Some(CalculatorElementKind::DigitButton(8)),
-            "nine_button" => Some(CalculatorElementKind::DigitButton(9)),
-            "zero_button" => Some(CalculatorElementKind::DigitButton(0)),
-            "equals_button" => Some(CalculatorElementKind::EqualsButton),
-            "plus_button" => Some(CalculatorElementKind::PlusButton),
-            "minus_button" => Some(CalculatorElementKind::MinusButton),
-            "multiply_by_button" => Some(CalculatorElementKind::MultiplyButton),
-            "divide_by_button" => Some(CalculatorElementKind::DivideButton),
-            "clear_button" => Some(CalculatorElementKind::ClearButton),
-            "clear_entry_button" => Some(CalculatorElementKind::ClearEntryButton),
-            "_landmarktarget" => Some(CalculatorElementKind::Background),
-            x if x.starts_with("display_is_") => Some(CalculatorElementKind::ValueDisplay),
-            x if x.starts_with("expression_is_") => Some(CalculatorElementKind::ExpressionDisplay),
             _ => None,
         }
     }

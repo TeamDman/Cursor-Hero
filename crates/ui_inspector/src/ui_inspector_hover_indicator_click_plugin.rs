@@ -19,7 +19,6 @@ impl Plugin for UiInspectorHoverIndicatorClickPlugin {
 fn hovered_click_listener(
     mut click_events: EventReader<ClickEvent>,
     game_hover_query: Query<&GameHoverIndicator>,
-    host_hover_query: Query<&HostHoverIndicator>,
     mut ui_data: ResMut<UIData>,
     mut inspector_events: EventWriter<InspectorScratchPadEvent>,
     mut threadbound_events: EventWriter<ThreadboundUISnapshotMessage>,
@@ -36,14 +35,24 @@ fn hovered_click_listener(
         };
         if way == &Way::Left && ui_data.visible {
             // If the click event targets a hover indicator
-            if game_hover_query.get(*target_id).is_ok() || host_hover_query.get(*target_id).is_ok()
-            {
+            if game_hover_query.contains(*target_id) {
                 // Toggle the paused state
                 ui_data.paused ^= true;
                 info!("Hover indicator clicked, paused set to {}", ui_data.paused);
             }
         } else if way == &Way::Right && ui_data.visible {
-            inspector_events.send(InspectorScratchPadEvent::ScratchPadAppendSelected);
+            // Get the hover indicator
+            let Ok(game_hover) = game_hover_query.get(*target_id) else {
+                continue;
+            };
+            // The hover indicator has an unknown DrillID.
+            // We can populate it by assuming it matches the selected id.
+            let mut info = game_hover.info.clone();
+            if let Some(selected) = &ui_data.selected {
+                info.drill_id = selected.clone();
+            }
+            // Append the info to the scratch pad
+            inspector_events.send(InspectorScratchPadEvent::ScratchPadAppendInfo { info });
         } else if way == &Way::Middle {
             info!("Sending click event!");
             threadbound_events.send(ThreadboundUISnapshotMessage::ClickPos {

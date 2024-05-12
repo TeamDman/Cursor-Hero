@@ -5,7 +5,7 @@ use cursor_hero_worker::prelude::WorkerMessage;
 
 #[derive(Debug, Reflect, Clone, Event)]
 pub enum ThreadboundUISnapshotMessage {
-    UIDataUpdate {
+    TreeUpdate {
         pos: IVec2,
     },
     GatherChildren {
@@ -13,6 +13,10 @@ pub enum ThreadboundUISnapshotMessage {
         parent_runtime_id: RuntimeId,
     },
     TreeClipboard {
+        parent_drill_id: DrillId,
+        parent_runtime_id: RuntimeId,
+    },
+    TreePatch {
         parent_drill_id: DrillId,
         parent_runtime_id: RuntimeId,
     },
@@ -28,9 +32,12 @@ pub enum ThreadboundUISnapshotMessage {
 
 #[derive(Debug, Reflect, Clone, Event)]
 pub enum GameboundUISnapshotMessage {
-    UpdateUIData {
+    SetUITree {
         ui_tree: ElementInfo,
         start: ElementInfo,
+    },
+    PatchUITree {
+        patch: ElementInfo,
     },
     GatherChildrenResponse {
         drill_id: DrillId,

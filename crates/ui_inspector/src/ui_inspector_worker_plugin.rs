@@ -52,9 +52,9 @@ fn handle_threadbound_message(
     reply_tx: &Sender<GameboundUISnapshotMessage>,
     _state: &mut (),
 ) -> Result<()> {
+    debug!("Handling {msg:?}");
     match msg {
-        ThreadboundUISnapshotMessage::UIDataUpdate { pos } => {
-            debug!("taking snapshot");
+        ThreadboundUISnapshotMessage::TreeUpdate { pos } => {
             // Find element at position
             let start = find_element_at(*pos)?;
 
@@ -62,7 +62,7 @@ fn handle_threadbound_message(
             let gathered = gather_info_tree_ancestry_filtered(start)?;
 
             // Send reply
-            if let Err(e) = reply_tx.send(GameboundUISnapshotMessage::UpdateUIData {
+            if let Err(e) = reply_tx.send(GameboundUISnapshotMessage::SetUITree {
                 ui_tree: gathered.ui_tree,
                 start: gathered.start_info,
             }) {
@@ -73,7 +73,6 @@ fn handle_threadbound_message(
             parent_drill_id,
             parent_runtime_id,
         } => {
-            debug!("fetching children for {:?}", parent_drill_id);
             // Get parent
             let automation = UIAutomation::new().context("creating automation")?;
             let walker = automation.create_tree_walker().context("creating walker")?;
@@ -98,7 +97,6 @@ fn handle_threadbound_message(
             parent_drill_id,
             parent_runtime_id,
         } => {
-            debug!("fetching tree for {:?}", parent_drill_id);
             // Get parent
             let automation = UIAutomation::new().context("creating automation")?;
             let walker = automation.create_tree_walker().context("creating walker")?;
@@ -127,9 +125,40 @@ fn handle_threadbound_message(
                 error!("Failed to send snapshot: {:?}", e);
             }
         }
+        ThreadboundUISnapshotMessage::TreePatch {
+            parent_drill_id,
+            parent_runtime_id,
+        } => {
+            // Get parent
+            let automation = UIAutomation::new().context("creating automation")?;
+            let walker = automation.create_tree_walker().context("creating walker")?;
+            let root = automation.get_root_element().context("getting root")?;
+            let parent = root
+                .drill(&walker, parent_drill_id.clone())
+                .context("drilling")?;
+
+            // Validate parent
+            let id = RuntimeId(parent.get_runtime_id()?);
+            if id != *parent_runtime_id {
+                error!(
+                    "Parent runtime_id mismatch: expected {:?}, got {:?}",
+                    parent_runtime_id, id
+                );
+                return Ok(());
+            }
+
+            // Get tree
+            debug!("Gathering tree");
+            let tree = gather_info_tree(parent)?;
+
+            // Update data
+            debug!("Sending patch");
+            if let Err(e) = reply_tx.send(GameboundUISnapshotMessage::PatchUITree { patch: tree }) {
+                error!("Failed to send patch: {:?}", e);
+            }
+        }
         ThreadboundUISnapshotMessage::ClickPos { pos, way } => {
             let mouse = Mouse::new().auto_move(false);
-            info!("Clicking at {:?}", pos);
             // Mark current position, teleport the mouse, click, then teleport back
             let restore_point = get_host_cursor_position()?;
             set_host_cursor_position(*pos)?;
@@ -138,7 +167,7 @@ fn handle_threadbound_message(
                 Way::Right => mouse.right_click(pos.to_ui_point())?,
                 Way::Middle => {
                     warn!("Middle click not supported")
-                } 
+                }
             }
             // sleep(Duration::from_millis(500));
             set_host_cursor_position(restore_point)?;
@@ -151,20 +180,18 @@ fn handle_threadbound_message(
 
             let click_point = match element.get_clickable_point() {
                 Ok(Some(point)) => point,
-                Err(_) | Ok(None) => {
-                    match element.get_bounding_rectangle() {
-                        Ok(rect) => {
-                            debug!("No clickable point found, using bounding rectangle");
-                            let bevy_rect = rect.to_bevy_irect();
-                            let center = bevy_rect.center();
-                            center.to_ui_point()
-                        }
-                        _ => {
-                            warn!("No clickable point or bounding rectangle found for {element}");
-                            return Ok(());
-                        }
+                Err(_) | Ok(None) => match element.get_bounding_rectangle() {
+                    Ok(rect) => {
+                        debug!("No clickable point found, using bounding rectangle");
+                        let bevy_rect = rect.to_bevy_irect();
+                        let center = bevy_rect.center();
+                        center.to_ui_point()
                     }
-                }
+                    _ => {
+                        warn!("No clickable point or bounding rectangle found for {element}");
+                        return Ok(());
+                    }
+                },
             };
 
             let mouse = Mouse::new().auto_move(false);
@@ -177,7 +204,7 @@ fn handle_threadbound_message(
                 Way::Right => mouse.right_click(click_point)?,
                 Way::Middle => {
                     warn!("Middle click not supported")
-                } 
+                }
             }
             // sleep(Duration::from_millis(500));
             set_host_cursor_position(restore_point)?;
@@ -196,7 +223,7 @@ fn handle_gamebound_messages(
             GameboundUISnapshotMessage::Error => {
                 ui_data.in_flight = false;
             }
-            GameboundUISnapshotMessage::UpdateUIData { ui_tree, start } => {
+            GameboundUISnapshotMessage::SetUITree { ui_tree, start } => {
                 ui_data.in_flight = false;
                 ui_data.ui_tree = ui_tree.clone();
                 ui_data.start = start.clone();
@@ -210,6 +237,15 @@ fn handle_gamebound_messages(
                     .collect();
                 ui_data.fresh = true;
                 debug!("Received snapshot");
+            }
+            GameboundUISnapshotMessage::PatchUITree { patch } => {
+                ui_data.in_flight = false;
+                debug!("Applying tree patch");
+                let Some(elem) = ui_data.ui_tree.lookup_drill_id_mut(patch.drill_id.clone()) else {
+                    warn!("Patch drill_id not found: {}", patch.drill_id);
+                    continue;
+                };
+                *elem = patch.clone();
             }
             GameboundUISnapshotMessage::GatherChildrenResponse {
                 drill_id,

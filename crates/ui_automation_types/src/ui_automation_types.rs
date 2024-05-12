@@ -89,8 +89,6 @@ pub fn all_of(
     Ok(current)
 }
 
-
-
 pub trait FromBevyIRect {
     fn from_bevy_irect(rect: IRect) -> Self;
 }
@@ -106,7 +104,12 @@ pub trait IntoBevyIRect {
 
 impl IntoBevyIRect for uiautomation::types::Rect {
     fn to_bevy_irect(&self) -> IRect {
-        IRect::new(self.get_left(), self.get_top(), self.get_right(), self.get_bottom())
+        IRect::new(
+            self.get_left(),
+            self.get_top(),
+            self.get_right(),
+            self.get_bottom(),
+        )
     }
 }
 
@@ -136,7 +139,6 @@ impl IntoBevyIVec2 for uiautomation::types::Point {
         IVec2::new(self.get_x(), self.get_y())
     }
 }
-
 
 // pub trait ToBevyIRect {
 //     fn to_bevy_irect(&self) -> IRect;
@@ -422,7 +424,7 @@ pub struct ElementInfo {
     pub automation_id: String,
     #[reflect(ignore)]
     pub runtime_id: RuntimeId,
-    #[reflect(ignore)]
+    // #[reflect(ignore)]
     pub drill_id: DrillId,
     #[reflect(ignore)]
     pub children: Option<Vec<ElementInfo>>,
@@ -586,6 +588,19 @@ impl ElementInfo {
             self.name.replace(' ', "_").to_lowercase(),
             self.class_name.to_lowercase()
         )
+    }
+    pub fn as_pascal(&self) -> String {
+        self.name
+            .split_ascii_whitespace()
+            .chain(self.class_name.split_ascii_whitespace())
+            .map(|chunk| {
+                let mut chunk = chunk.chars();
+                match chunk.next() {
+                    None => String::new(),
+                    Some(first) => first.to_uppercase().chain(chunk).collect(),
+                }
+            })
+            .join("")
     }
 }
 // test lookup_drill_id

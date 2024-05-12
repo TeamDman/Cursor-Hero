@@ -82,7 +82,7 @@ fn handle_spawn_explorer_events(
                                 ),
                                 ..Default::default()
                             },
-                            Name::new(elem_kind.get_name()),
+                            Name::new(elem_kind.get_qualified_name()),
                         ));
                         if elem_kind == ExplorerElementKind::AddressBox {
                             elem_ent.insert((

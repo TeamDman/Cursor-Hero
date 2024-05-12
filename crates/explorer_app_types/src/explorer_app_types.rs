@@ -72,7 +72,7 @@ impl ExplorerElementKind {
             _ => None,
         }
     }
-    pub fn get_name(&self) -> String {
+    pub fn get_qualified_name(&self) -> String {
         match self {
             Self::Window => "ExplorerElementKind::Window".to_string(),
             Self::AddressBox => "ExplorerElementKind::AddressBox".to_string(),

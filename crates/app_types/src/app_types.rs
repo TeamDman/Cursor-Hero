@@ -21,4 +21,11 @@ impl CursorHeroAppKind {
             _ => None,
         }
     }
+    pub fn element_kind_enum_name(&self) -> &str {
+        match self {
+            CursorHeroAppKind::Calculator => "CalculatorElementKind",
+            CursorHeroAppKind::Explorer => "ExplorerElementKind",
+            CursorHeroAppKind::VSCode => "VSCodeElementKind",
+        }
+    }
 }

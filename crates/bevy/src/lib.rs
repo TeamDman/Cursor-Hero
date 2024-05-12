@@ -7,6 +7,7 @@ mod rect_scaled;
 mod rect_with_properties;
 mod translate;
 mod vec_into_rect;
+mod reflect;
 
 pub mod prelude {
     pub use crate::area::*;
@@ -18,4 +19,5 @@ pub mod prelude {
     pub use crate::rect_with_properties::*;
     pub use crate::translate::*;
     pub use crate::vec_into_rect::*;
+    pub use crate::reflect::*;
 }

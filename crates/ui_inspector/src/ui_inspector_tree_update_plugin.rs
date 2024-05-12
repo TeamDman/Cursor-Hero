@@ -79,6 +79,6 @@ fn trigger_tree_update_for_hovered(
     }
 
     // Send snapshot request
-    events.send(ThreadboundUISnapshotMessage::UIDataUpdate { pos });
+    events.send(ThreadboundUISnapshotMessage::TreeUpdate { pos });
     ui_data.in_flight = true;
 }

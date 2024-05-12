@@ -1,6 +1,6 @@
 use crate::ui_inspector_children_fetcher_plugin::UiInspectorChildrenFetcherPlugin;
 use crate::ui_inspector_egui_plugin::UiInspectorEguiPlugin;
-use crate::ui_inspector_events_plugin::UiInspectorEventsPlugin;
+use crate::ui_inspector_scratch_pad_events_plugin::UiInspectorScratchPadEventsPlugin;
 use crate::ui_inspector_hover_indicator_click_plugin::UiInspectorHoverIndicatorClickPlugin;
 use crate::ui_inspector_preview_image_plugin::UiInspectorPreviewImagePlugin;
 use crate::ui_inspector_toggle_plugin::UiInspectorTogglePlugin;
@@ -16,7 +16,7 @@ impl Plugin for UiInspectorPlugin {
         app.add_plugins(UiInspectorWorkerPlugin);
         app.add_plugins(UiInspectorChildrenFetcherPlugin);
         app.add_plugins(UiInspectorTreeUpdatePlugin);
-        app.add_plugins(UiInspectorEventsPlugin);
+        app.add_plugins(UiInspectorScratchPadEventsPlugin);
         app.add_plugins(UiInspectorHoverIndicatorClickPlugin);
         app.add_plugins(UiInspectorEguiPlugin);
         app.add_plugins(UiInspectorTogglePlugin);

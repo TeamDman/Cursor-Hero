@@ -34,13 +34,28 @@ pub fn do_properties_panel(
     // Properties header
     let mut mark_clicked = false;
     ui.vertical_centered(|ui| {
-        ui.heading("Properties");
+        ui.heading("Properties"); 
+    });
+    ui.horizontal(|ui| {
         if ui.button("copy tree from here").clicked() {
-            threadbound_events.send(ThreadboundUISnapshotMessage::TreeClipboard {
+            let msg = ThreadboundUISnapshotMessage::TreeClipboard {
                 parent_drill_id: selected_info.drill_id.clone(),
                 parent_runtime_id: selected_info.runtime_id.clone(),
-            });
+            };
+            debug!("Sending {msg:?}");
+            threadbound_events.send(msg);
         }
+
+        if ui.button("populate tree from here").clicked() {
+            let msg = ThreadboundUISnapshotMessage::TreePatch {
+                parent_drill_id: selected_info.drill_id.clone(),
+                parent_runtime_id: selected_info.runtime_id.clone(),
+            };
+            debug!("Sending {msg:?}");
+            threadbound_events.send(msg);
+            // ui_data.in_flight = true;
+        }
+
         let change_mark_button_text = match (&ui_data.mark, &selected_info.drill_id) {
             (Some(ref mark), drill_id) if mark == drill_id => "clear mark",
             _ => "set mark",
@@ -49,12 +64,6 @@ pub fn do_properties_panel(
             mark_clicked = true;
         }
     });
-
-    // Properties
-    inspector.ui_for_reflect_readonly(selected_info, ui);
-
-    // Derived properties
-    ui.separator();
 
     // Drill ID
     ui.label("drill_id");
@@ -154,11 +163,13 @@ pub fn do_properties_panel(
     // We can borrow ui_data as mut now since this is
     // the last time selected_info is borrowed
     if mark_clicked {
+        let old = ui_data.mark.take();
         ui_data.mark = if ui_data.mark.is_none() {
             Some(selected_info.drill_id.clone())
         } else {
             None
         };
+        debug!("Updated mark from {:?} to {:?}", old, ui_data.mark);
     }
 
     // Preview image if possible
@@ -180,29 +191,15 @@ pub fn do_properties_panel(
         .unwrap_or(DrillId::Root);
 
     // Scratch pad - mode switch
-    ui.label("changing mode clears scratch pad");
+    ui.label("(changing mode will clear scratch pad)");
     ui.horizontal(|ui| {
-        let changed = ui
-            .radio_value(
-                &mut ui_data.scratch_pad_mode,
-                ScratchPadMode::Drill,
-                "Drill",
-            )
-            .changed()
-            || ui
-                .radio_value(
-                    &mut ui_data.scratch_pad_mode,
-                    ScratchPadMode::Bounds,
-                    "Bounds",
-                )
-                .changed()
-            || ui
-                .radio_value(
-                    &mut ui_data.scratch_pad_mode,
-                    ScratchPadMode::Color,
-                    "Color",
-                )
+        let mut changed = false;
+        for mode in ScratchPadMode::variants() {
+            let text = mode.to_string();
+            changed |= ui
+                .radio_value(&mut ui_data.scratch_pad_mode, mode, text)
                 .changed();
+        }
         if changed {
             ui_data.scratch_pad.clear();
         }
@@ -230,13 +227,20 @@ pub fn do_properties_panel(
 
         // Scratch pad - push button
         if ui.button("push").clicked() {
-            inspector_events.send(InspectorScratchPadEvent::ScratchPadAppendSelected);
+            inspector_events.send(InspectorScratchPadEvent::ScratchPadAppendInfo {
+                info: selected_info.clone(),
+            });
             info!("Sent push event");
         }
 
         // Scratch pad - push button
-        if ui.button("push all").clicked() {
+        if ui.button("push known").clicked() {
             inspector_events.send(InspectorScratchPadEvent::ScratchPadAppendAllKnown);
+            info!("Sent push all event");
+        }
+        // Scratch pad - push button
+        if ui.button("push all").clicked() {
+            inspector_events.send(InspectorScratchPadEvent::ScratchPadAppendAll);
             info!("Sent push all event");
         }
 
@@ -250,4 +254,8 @@ pub fn do_properties_panel(
     egui::TextEdit::multiline(&mut ui_data.scratch_pad)
         .desired_width(ui.available_width())
         .show(ui);
+
+    // Properties
+    ui.separator();
+    inspector.ui_for_reflect_readonly(selected_info, ui);
 }

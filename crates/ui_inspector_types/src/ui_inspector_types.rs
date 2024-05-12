@@ -15,9 +15,36 @@ pub struct PreviewImage {
 #[derive(Debug, Reflect, Default, Eq, PartialEq, Clone, Serialize, Deserialize)]
 pub enum ScratchPadMode {
     #[default]
-    Drill,
-    Bounds,
-    Color,
+    Identify,
+    MapIdentify,
+    PerformDrill,
+    MapDrill,
+    MapBounds,
+    MapColor,
+}
+impl ScratchPadMode {
+    pub fn variants() -> Vec<Self> {
+        vec![
+            Self::Identify,
+            Self::MapIdentify,
+            Self::PerformDrill,
+            Self::MapDrill,
+            Self::MapBounds,
+            Self::MapColor,
+        ]
+    }
+}
+impl std::fmt::Display for ScratchPadMode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Identify => write!(f, "Identify"),
+            Self::MapIdentify => write!(f, "Map Identify"),
+            Self::PerformDrill => write!(f, "Perform Drill"),
+            Self::MapDrill => write!(f, "Map Drill"),
+            Self::MapBounds => write!(f, "Map Bounds"),
+            Self::MapColor => write!(f, "Map Color"),
+        }
+    }
 }
 
 #[derive(Resource, Debug, Reflect, Default)]
@@ -50,7 +77,7 @@ pub enum FetchingState {
 
 #[derive(Debug, Reflect, Event)]
 pub enum InspectorScratchPadEvent {
-    ScratchPadAppendSelected,
-    ScratchPadAppendByDrillId { drill_id: DrillId },
+    ScratchPadAppendInfo { info: ElementInfo },
     ScratchPadAppendAllKnown,
+    ScratchPadAppendAll,
 }

@@ -88,7 +88,7 @@ fn handle_spawn_calculator_events(
                                 ),
                                 ..Default::default()
                             },
-                            Name::new(elem_kind.get_name()),
+                            Name::new(elem_kind.get_enum_variant_instance()),
                         ));
                         elem_kind.populate(&mut elem_ent);
                         if elem_kind != CalculatorElementKind::Background {
