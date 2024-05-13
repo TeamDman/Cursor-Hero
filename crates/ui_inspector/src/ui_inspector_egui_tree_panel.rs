@@ -121,7 +121,7 @@ fn do_header(ui: &mut Ui, data: &mut UIData, element_info: &mut ElementInfo) {
             if let Some(app_kind) = CursorHeroAppKind::from_window(window) {
                 let is_known = match app_kind {
                     CursorHeroAppKind::Calculator => {
-                        CalculatorElementKind::from_info(&element_info).is_some()
+                        CalculatorElementKind::from_info(element_info).is_some()
                     }
                     CursorHeroAppKind::Explorer => {
                         ExplorerElementKind::from_window_relative_drill_id(

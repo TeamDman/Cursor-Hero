@@ -46,7 +46,7 @@ fn get_content(
 ) -> String {
     let map_enhanced_thing = |transform: fn(&dyn Reflect) -> Option<String>| match app_kind {
         Some(CursorHeroAppKind::Calculator)
-            if let Some(calc_elem_kind) = CalculatorElementKind::from_info(&info) =>
+            if let Some(calc_elem_kind) = CalculatorElementKind::from_info(info) =>
         {
             transform(calc_elem_kind.as_reflect())
         }
@@ -187,7 +187,7 @@ fn handle_append_all_known_scratch_pad_events(
         };
 
         // get window
-        let Some(window) = ui_data.ui_tree.find_first_child(&selected_drill_id) else {
+        let Some(window) = ui_data.ui_tree.find_first_child(selected_drill_id) else {
             warn!(
                 "Selected drill id not found in tree: {:?}",
                 selected_drill_id
@@ -195,7 +195,7 @@ fn handle_append_all_known_scratch_pad_events(
             return;
         };
 
-        let app_kind = CursorHeroAppKind::from_window(&window);
+        let app_kind = CursorHeroAppKind::from_window(window);
         let mut push_infos = match app_kind {
             Some(CursorHeroAppKind::Calculator) => window
                 .get_descendents()
@@ -231,7 +231,7 @@ fn handle_append_all_known_scratch_pad_events(
             .into_iter()
             .map(|info| {
                 get_content(
-                    &info,
+                    info,
                     &ui_data.scratch_pad_mode,
                     &app_kind,
                     &ui_data,
@@ -263,7 +263,7 @@ fn handle_append_all_scratch_pad_events(
         };
 
         // get window
-        let Some(window) = ui_data.ui_tree.find_first_child(&selected_drill_id) else {
+        let Some(window) = ui_data.ui_tree.find_first_child(selected_drill_id) else {
             warn!(
                 "Selected drill id not found in tree: {:?}",
                 selected_drill_id
@@ -271,7 +271,7 @@ fn handle_append_all_scratch_pad_events(
             return;
         };
 
-        let app_kind = CursorHeroAppKind::from_window(&window);
+        let app_kind = CursorHeroAppKind::from_window(window);
         let mut push_infos = window.get_descendents();
 
         push_infos.sort_by_key(|info| {
@@ -283,7 +283,7 @@ fn handle_append_all_scratch_pad_events(
             .into_iter()
             .map(|info| {
                 get_content(
-                    &info,
+                    info,
                     &ui_data.scratch_pad_mode,
                     &app_kind,
                     &ui_data,
@@ -319,9 +319,9 @@ fn handle_append_single_info_scratch_pad_events(
         let content = format!(
             "{}\n",
             get_content(
-                &info,
+                info,
                 &ui_data.scratch_pad_mode,
-                &CursorHeroAppKind::from_window(&window),
+                &CursorHeroAppKind::from_window(window),
                 &ui_data,
                 &screen_access,
             )
