@@ -83,15 +83,19 @@ fn handle_input(
     winit_windows: NonSend<WinitWindows>,
     egui_context_query: Query<&EguiContext, With<PrimaryWindow>>,
 ) {
-    let Ok(egui_context) = egui_context_query.get_single() else {
+    if tool_query.is_empty() {
         return;
-    };
-    let hovering_over_egui = egui_context.clone().get_mut().is_pointer_over_area();
+    }
+    let egui_wants_pointer = egui_context_query
+        .get_single()
+        .ok()
+        .map(|egui_context| egui_context.clone().get_mut().wants_pointer_input())
+        .unwrap_or(false);
+    if egui_wants_pointer {
+        return;
+    }
     for action_state in tool_query.iter() {
         if action_state.just_pressed(WindowDragToolAction::Drag) {
-            if hovering_over_egui {
-                continue;
-            }
             let Ok(window_id) = window_query.get_single() else {
                 error!("No primary window found");
                 return;

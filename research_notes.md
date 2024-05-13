@@ -271,3 +271,10 @@
 - [Show HN: I made an open-source Loom alternative | Hacker News (ycombinator.com)](https://news.ycombinator.com/item?id=40338275)
   - [Capture/Desktop -- FFmpeg](https://trac.ffmpeg.org/wiki/Capture/Desktop)
   - [Cap --- Effortless, instant screen sharing. Open source and cross-platform.](https://cap.so/)
+
+## Controlling Controllers
+
+- TODO: add links about steam controller chords
+  - meta+rstick move mouse
+  - meta+r1 click
+  - meta+y turn off (doesn't work? haven't restarted since installing extended xbox support)

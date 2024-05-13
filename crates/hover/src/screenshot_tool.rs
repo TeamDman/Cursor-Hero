@@ -163,6 +163,17 @@ fn handle_input(
     mut bridge: EventWriter<ThreadboundMessage>,
     egui_context_query: Query<&EguiContext, With<PrimaryWindow>>,
 ) {
+    if tools.is_empty() {
+        return;
+    }
+    let egui_wants_pointer = egui_context_query
+        .get_single()
+        .ok()
+        .map(|egui_context| egui_context.clone().get_mut().wants_pointer_input())
+        .unwrap_or(false);
+    if egui_wants_pointer {
+        return;
+    }
     for tool in tools.iter() {
         let (tool_actions, tool_parent) = tool;
 
@@ -190,14 +201,6 @@ fn handle_input(
         };
         let cursor_transform = cursor;
         let cursor_translation = cursor_transform.translation();
-        let hovering_over_egui = egui_context_query
-            .get_single()
-            .ok()
-            .map(|egui_context| egui_context.clone().get_mut().is_pointer_over_area())
-            .unwrap_or(false);
-        if hovering_over_egui {
-            continue;
-        }
         if tool_actions.just_pressed(ScreenshotToolAction::Capture) {
             info!("Capture");
             let msg = ThreadboundMessage::Capture {

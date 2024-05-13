@@ -36,11 +36,12 @@ fn trigger_tree_update_for_hovered(
     }
 
     // Do nothing when hovering over egui
-    if egui_context_query
+    let egui_wants_pointer = egui_context_query
         .get_single()
-        .map(|ctx| ctx.clone().get_mut().is_pointer_over_area())
-        .unwrap_or(false)
-    {
+        .ok()
+        .map(|egui_context| egui_context.clone().get_mut().wants_pointer_input())
+        .unwrap_or(false);
+    if egui_wants_pointer {
         return;
     }
 

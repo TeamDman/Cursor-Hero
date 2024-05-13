@@ -2,7 +2,6 @@
 
 ## Active
 
-- switch from using `is_pointer_over_area` to `wants_pointer_input`
 - make clippy happy
   - warning: `cursor_hero_explorer_tool` (lib) generated 4 warnings (run `cargo fix --lib -p cursor_hero_explorer_tool` to apply 1 suggestion)
 - remove sleep from workers that don't loop specially
