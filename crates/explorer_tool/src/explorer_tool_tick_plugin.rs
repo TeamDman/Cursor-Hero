@@ -13,21 +13,21 @@ impl Plugin for ExplorerToolTickPlugin {
 }
 
 fn handle_toggle(
-    commands: Commands,
+    _commands: Commands,
     tool_query: Query<&ExplorerTool>,
     mut tool_events: EventReader<ToolActivationEvent>,
 ) {
     for event in tool_events.read() {
         match event {
             ToolActivationEvent::Activate(tool_id) => {
-                let Ok(tool) = tool_query.get(*tool_id) else {
+                let Ok(_tool) = tool_query.get(*tool_id) else {
                     warn!("ExplorerTool with id {tool_id:?} not found.");
                     continue;
                 };
                 info!("ExplorerTool activated.");
             }
             ToolActivationEvent::Deactivate(tool_id) => {
-                let Ok(tool) = tool_query.get(*tool_id) else {
+                let Ok(_tool) = tool_query.get(*tool_id) else {
                     warn!("ExplorerTool with id {tool_id:?} not found.");
                     continue;
                 };

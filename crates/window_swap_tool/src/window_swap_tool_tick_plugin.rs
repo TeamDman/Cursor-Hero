@@ -16,7 +16,7 @@ fn tick(
     tool_query: Query<(&ActionState<WindowSwapToolAction>, &WindowSwapTool), With<ActiveTool>>,
 ) {
     for tool in tool_query.iter() {
-        let (tool_actions, tool) = tool;
+        let (tool_actions, _tool) = tool;
         if !tool_actions.pressed(WindowSwapToolAction::Use) {
             continue;
         }
