@@ -21,12 +21,7 @@ pub fn insert_hover_frame(
     hovered_query: Query<&Sprite>,
 ) {
     for event in reader.read() {
-        if let HoverEvent::Start {
-            target_id,
-            ..
-
-        } = event
-        {
+        if let HoverEvent::Start { target_id, .. } = event {
             // Ensure the entity hasn't despawned since the event was sent
             if commands.get_entity(*target_id).is_none() {
                 warn!("Hovered entity {:?} has despawned", target_id);
@@ -63,11 +58,7 @@ pub fn remove_hover_frame(
     frame_query: Query<Entity, With<HoverFrame>>,
 ) {
     for event in reader.read() {
-        if let HoverEvent::End {
-            target_id,
-            ..
-        } = event
-        {
+        if let HoverEvent::End { target_id, .. } = event {
             if let Ok(tool_children) = tool_query.get(*target_id) {
                 for tool_child in tool_children.iter() {
                     if let Ok(frame_id) = frame_query.get(*tool_child) {

@@ -132,8 +132,7 @@ fn do_header(ui: &mut Ui, data: &mut UIData, element_info: &mut ElementInfo) {
                     _ => false,
                 };
 
-                if is_known
-                {
+                if is_known {
                     highlight_reason = Some(HighlightReason::Known(
                         ui.style().visuals.selection.bg_fill,
                         ui.style().visuals.widgets.hovered.weak_bg_fill,

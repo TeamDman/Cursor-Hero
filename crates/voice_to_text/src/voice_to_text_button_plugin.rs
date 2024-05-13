@@ -238,12 +238,7 @@ fn status_button_click(
     mut command_events: EventWriter<VoiceToTextCommandEvent>,
 ) {
     for event in click_events.read() {
-        let ClickEvent::Clicked {
-            target_id,
-            way,
-            ..
-        } = event
-        else {
+        let ClickEvent::Clicked { target_id, way, .. } = event else {
             continue;
         };
         if way != &Way::Left {
@@ -280,12 +275,7 @@ fn vscode_button_click(
     mut vscode_events: EventWriter<VoiceToTextVscodeEvent>,
 ) {
     for event in click_events.read() {
-        let ClickEvent::Clicked {
-            target_id,
-            way,
-            ..
-        } = event
-        else {
+        let ClickEvent::Clicked { target_id, way, .. } = event else {
             continue;
         };
         if way != &Way::Left {

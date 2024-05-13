@@ -61,10 +61,10 @@ pub fn update_camera_zoom(
         return;
     }
     let egui_wants_pointer = egui_context_query
-            .get_single()
-            .ok()
-            .map(|egui_context| egui_context.clone().get_mut().wants_pointer_input())
-            .unwrap_or(false);
+        .get_single()
+        .ok()
+        .map(|egui_context| egui_context.clone().get_mut().wants_pointer_input())
+        .unwrap_or(false);
     if egui_wants_pointer {
         scroll_events.clear();
         return;

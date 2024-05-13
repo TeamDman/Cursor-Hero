@@ -34,7 +34,7 @@ pub fn do_properties_panel(
     // Properties header
     let mut mark_clicked = false;
     ui.vertical_centered(|ui| {
-        ui.heading("Properties"); 
+        ui.heading("Properties");
     });
     ui.horizontal(|ui| {
         if ui.button("copy tree from here").clicked() {

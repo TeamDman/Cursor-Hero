@@ -73,7 +73,11 @@ fn get_content(
                 info.name,
                 info.class_name,
                 map_enhanced_thing(display_enum_qualified_variant_instance)
-                    .or_else(|| app_kind.as_ref().map(|k| format!("{}::{}", k.element_kind_enum_name(), info.as_pascal())))
+                    .or_else(|| app_kind.as_ref().map(|k| format!(
+                        "{}::{}",
+                        k.element_kind_enum_name(),
+                        info.as_pascal()
+                    )))
                     .unwrap_or_else(|| info.as_pascal())
             )
         }

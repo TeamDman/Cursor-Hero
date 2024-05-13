@@ -1,5 +1,6 @@
+use crate::click_tool_populate_plugin::ClickToolPopulatePlugin;
+use crate::click_tool_tick_plugin::ClickToolTickPlugin;
 use bevy::prelude::*;
-use crate::{click_tool_populate_plugin::ClickToolPopulatePlugin, click_tool_tick_plugin::ClickToolTickPlugin};
 
 pub struct ClickToolPlugin;
 

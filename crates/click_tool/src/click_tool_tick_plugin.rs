@@ -72,9 +72,9 @@ fn handle_input(
 ) {
     // Do nothing when clicking over egui
     let egui_wants_pointer = egui_context_query
-    .get_single()
-    .map(|ctx| ctx.clone().get_mut().wants_pointer_input())
-    .unwrap_or(false);
+        .get_single()
+        .map(|ctx| ctx.clone().get_mut().wants_pointer_input())
+        .unwrap_or(false);
 
     for tool in tools.iter() {
         let (tool_actions, tool_parent) = tool;

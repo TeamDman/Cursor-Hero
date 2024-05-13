@@ -24,15 +24,11 @@ fn handle_toolbelt_events(
         else {
             continue;
         };
-        ToolSpawnConfig::<_, ClickToolAction>::new(
-            ClickTool::default(),
-            event.id,
-            event,
-        )
-        .with_src_path(file!().into())
-        .guess_name(file!())
-        .guess_image(file!(), &asset_server, "png")
-        .with_description("Send mouse clicks")
-        .spawn(&mut commands);
+        ToolSpawnConfig::<_, ClickToolAction>::new(ClickTool::default(), event.id, event)
+            .with_src_path(file!().into())
+            .guess_name(file!())
+            .guess_image(file!(), &asset_server, "png")
+            .with_description("Send mouse clicks")
+            .spawn(&mut commands);
     }
 }

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
-use cursor_hero_zoom_tool_types::prelude::*;
 use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_tools::tool_spawning::ToolSpawnConfig;
+use cursor_hero_zoom_tool_types::prelude::*;
 
 pub struct ZoomToolPopulatePlugin;
 
@@ -24,15 +24,11 @@ fn handle_toolbelt_events(
         else {
             continue;
         };
-        ToolSpawnConfig::<_, ZoomToolAction>::new(
-            ZoomTool::default(),
-            event.id,
-            event,
-        )
-        .with_src_path(file!().into())
-        .guess_name(file!())
-        .guess_image(file!(), &asset_server, "png")
-        .with_description("Send scroll events")
-        .spawn(&mut commands);
+        ToolSpawnConfig::<_, ZoomToolAction>::new(ZoomTool::default(), event.id, event)
+            .with_src_path(file!().into())
+            .guess_name(file!())
+            .guess_image(file!(), &asset_server, "png")
+            .with_description("Send scroll events")
+            .spawn(&mut commands);
     }
 }

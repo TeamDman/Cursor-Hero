@@ -46,7 +46,6 @@ impl From<ClickToolAction> for Way {
     }
 }
 
-
 #[derive(Debug, Reflect, Clone, Event, Eq, PartialEq)]
 pub enum ThreadboundClickMessage {
     LeftMouse(Motion, IVec2),
@@ -55,10 +54,8 @@ pub enum ThreadboundClickMessage {
 impl WorkerMessage for ThreadboundClickMessage {}
 
 #[derive(Debug, Reflect, Clone, Event, Eq, PartialEq)]
-pub enum GameboundClickMessage {
-}
+pub enum GameboundClickMessage {}
 impl WorkerMessage for GameboundClickMessage {}
-
 
 #[derive(Debug, Reflect, Clone, Eq, PartialEq)]
 pub enum Motion {
@@ -79,11 +76,17 @@ impl ClickToolAction {
     }
     pub fn get_thread_message(&self, motion: Motion, pos: IVec2) -> ThreadboundClickMessage {
         match (self, motion) {
-            (Self::LeftClick, Motion::Down) => ThreadboundClickMessage::LeftMouse(Motion::Down, pos),
+            (Self::LeftClick, Motion::Down) => {
+                ThreadboundClickMessage::LeftMouse(Motion::Down, pos)
+            }
             (Self::LeftClick, Motion::Up) => ThreadboundClickMessage::LeftMouse(Motion::Up, pos),
-            (Self::MiddleClick, Motion::Down) => ThreadboundClickMessage::LeftMouse(Motion::Down, pos),
+            (Self::MiddleClick, Motion::Down) => {
+                ThreadboundClickMessage::LeftMouse(Motion::Down, pos)
+            }
             (Self::MiddleClick, Motion::Up) => ThreadboundClickMessage::LeftMouse(Motion::Up, pos),
-            (Self::RightClick, Motion::Down) => ThreadboundClickMessage::RightMouse(Motion::Down, pos),
+            (Self::RightClick, Motion::Down) => {
+                ThreadboundClickMessage::RightMouse(Motion::Down, pos)
+            }
             (Self::RightClick, Motion::Up) => ThreadboundClickMessage::RightMouse(Motion::Up, pos),
         }
     }
@@ -92,7 +95,10 @@ impl ClickToolAction {
             Self::LeftClick => GamepadButtonType::RightTrigger.into(),
             Self::RightClick => GamepadButtonType::LeftTrigger.into(),
             // Self::MiddleClick => GamepadButtonType::DPadRight.into(),
-            Self::MiddleClick => UserInput::Chord(vec![GamepadButtonType::LeftTrigger2.into(), GamepadButtonType::RightTrigger.into()]),
+            Self::MiddleClick => UserInput::Chord(vec![
+                GamepadButtonType::LeftTrigger2.into(),
+                GamepadButtonType::RightTrigger.into(),
+            ]),
         }
     }
 

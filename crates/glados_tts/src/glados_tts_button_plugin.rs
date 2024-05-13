@@ -213,12 +213,7 @@ fn status_button_click(
     mut status_events: EventWriter<GladosTtsStatusEvent>,
 ) {
     for event in click_events.read() {
-        let ClickEvent::Clicked {
-            target_id,
-            way,
-            ..
-        } = event
-        else {
+        let ClickEvent::Clicked { target_id, way, .. } = event else {
             continue;
         };
         if way != &Way::Left {
@@ -255,12 +250,7 @@ fn vscode_button_click(
     mut vscode_events: EventWriter<GladosTtsVscodeEvent>,
 ) {
     for event in click_events.read() {
-        let ClickEvent::Clicked {
-            target_id,
-            way,
-            ..
-        } = event
-        else {
+        let ClickEvent::Clicked { target_id, way, .. } = event else {
             continue;
         };
         if way != &Way::Left {

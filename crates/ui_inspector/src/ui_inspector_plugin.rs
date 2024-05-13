@@ -1,8 +1,8 @@
 use crate::ui_inspector_children_fetcher_plugin::UiInspectorChildrenFetcherPlugin;
 use crate::ui_inspector_egui_plugin::UiInspectorEguiPlugin;
-use crate::ui_inspector_scratch_pad_events_plugin::UiInspectorScratchPadEventsPlugin;
 use crate::ui_inspector_hover_indicator_click_plugin::UiInspectorHoverIndicatorClickPlugin;
 use crate::ui_inspector_preview_image_plugin::UiInspectorPreviewImagePlugin;
+use crate::ui_inspector_scratch_pad_events_plugin::UiInspectorScratchPadEventsPlugin;
 use crate::ui_inspector_toggle_plugin::UiInspectorTogglePlugin;
 use crate::ui_inspector_tree_update_plugin::UiInspectorTreeUpdatePlugin;
 use crate::ui_inspector_worker_plugin::UiInspectorWorkerPlugin;

@@ -148,9 +148,8 @@ fn trigger_game_hover_info_update(
 
     // Clear game hover indicator when cursor is outside of window
     if window.cursor_position().is_none() {
-        let timer = out_of_window_timer.get_or_insert_with(|| {
-            Timer::from_seconds(1.0, TimerMode::Once)
-        });
+        let timer =
+            out_of_window_timer.get_or_insert_with(|| Timer::from_seconds(1.0, TimerMode::Once));
         if timer.tick(time.delta()).just_finished() {
             hover_info.game_hover_indicator = None;
         }
@@ -159,9 +158,8 @@ fn trigger_game_hover_info_update(
     }
 
     // Delay between updates
-    let cooldown_timer = cooldown.get_or_insert_with(|| {
-        Timer::from_seconds(0.1, TimerMode::Repeating)
-    });
+    let cooldown_timer =
+        cooldown.get_or_insert_with(|| Timer::from_seconds(0.1, TimerMode::Repeating));
     if !cooldown_timer.tick(time.delta()).just_finished() {
         return;
     }

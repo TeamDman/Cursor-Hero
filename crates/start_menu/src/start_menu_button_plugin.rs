@@ -70,12 +70,7 @@ fn click_listener(
     mut start_menu_events: EventWriter<StartMenuPanelVisibilityChangeRequestEvent>,
 ) {
     for event in click_events.read() {
-        let ClickEvent::Clicked {
-            target_id,
-            way,
-            ..
-        } = event
-        else {
+        let ClickEvent::Clicked { target_id, way, .. } = event else {
             continue;
         };
         if way != &Way::Left {

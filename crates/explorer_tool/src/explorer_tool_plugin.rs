@@ -1,4 +1,5 @@
-use crate::{explorer_tool_populate_plugin::ExplorerToolPopulatePlugin, explorer_tool_tick_plugin::ExplorerToolTickPlugin};
+use crate::explorer_tool_populate_plugin::ExplorerToolPopulatePlugin;
+use crate::explorer_tool_tick_plugin::ExplorerToolTickPlugin;
 use bevy::prelude::*;
 
 pub struct ExplorerToolPlugin;

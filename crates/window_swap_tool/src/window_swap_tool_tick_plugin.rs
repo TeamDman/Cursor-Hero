@@ -1,6 +1,6 @@
 use bevy::prelude::*;
-use cursor_hero_window_swap_tool_types::prelude::*;
 use cursor_hero_toolbelt_types::prelude::*;
+use cursor_hero_window_swap_tool_types::prelude::*;
 use leafwing_input_manager::prelude::*;
 
 pub struct WindowSwapToolTickPlugin;

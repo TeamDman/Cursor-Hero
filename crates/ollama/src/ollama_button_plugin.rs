@@ -208,12 +208,7 @@ fn status_click_listener(
     mut status_events: EventWriter<OllamaStatusEvent>,
 ) {
     for event in click_events.read() {
-        let ClickEvent::Clicked {
-            target_id,
-            way,
-            ..
-        } = event
-        else {
+        let ClickEvent::Clicked { target_id, way, .. } = event else {
             continue;
         };
         if way != &Way::Left {
@@ -250,12 +245,7 @@ fn terminal_click_listener(
     mut terminal_events: EventWriter<OllamaTerminalEvent>,
 ) {
     for event in click_events.read() {
-        let ClickEvent::Clicked {
-            target_id,
-            way,
-            ..
-        } = event
-        else {
+        let ClickEvent::Clicked { target_id, way, .. } = event else {
             continue;
         };
         if way != &Way::Left {
