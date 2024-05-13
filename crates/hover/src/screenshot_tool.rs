@@ -156,14 +156,14 @@ fn toolbelt_events(
 }
 
 fn handle_input(
-    tools: Query<(&ActionState<ScreenshotToolAction>, &Parent), With<ActiveTool>>,
-    toolbelts: Query<&Parent, With<Toolbelt>>,
-    characters: Query<&Children, With<Character>>,
-    cursors: Query<&GlobalTransform, With<Cursor>>,
-    mut bridge: EventWriter<ThreadboundMessage>,
+    tool_query: Query<(&ActionState<ScreenshotToolAction>, &Parent), With<ActiveTool>>,
+    toolbelt_query: Query<&Parent, With<Toolbelt>>,
+    character_query: Query<&Children, With<Character>>,
+    cursor_query: Query<&GlobalTransform, With<Cursor>>,
+    mut threadbound_events: EventWriter<ThreadboundMessage>,
     egui_context_query: Query<&EguiContext, With<PrimaryWindow>>,
 ) {
-    if tools.is_empty() {
+    if tool_query.is_empty() {
         return;
     }
     let egui_wants_pointer = egui_context_query
@@ -174,16 +174,16 @@ fn handle_input(
     if egui_wants_pointer {
         return;
     }
-    for tool in tools.iter() {
+    for tool in tool_query.iter() {
         let (tool_actions, tool_parent) = tool;
 
-        let Ok(toolbelt) = toolbelts.get(tool_parent.get()) else {
+        let Ok(toolbelt) = toolbelt_query.get(tool_parent.get()) else {
             warn!("Tool not inside a toolbelt?");
             continue;
         };
         let toolbelt_parent = toolbelt;
 
-        let Ok(character) = characters.get(toolbelt_parent.get()) else {
+        let Ok(character) = character_query.get(toolbelt_parent.get()) else {
             warn!("Toolbelt parent not a character?");
             continue;
         };
@@ -191,7 +191,7 @@ fn handle_input(
 
         let Some(cursor) = character_children
             .iter()
-            .filter_map(|x| cursors.get(*x).ok())
+            .filter_map(|x| cursor_query.get(*x).ok())
             .next()
         else {
             //TODO: warn if more than one cursor found
@@ -206,28 +206,28 @@ fn handle_input(
             let msg = ThreadboundMessage::Capture {
                 world_position: cursor_translation,
             };
-            bridge.send(msg);
+            threadbound_events.send(msg);
         }
         if tool_actions.just_pressed(ScreenshotToolAction::CaptureBrick) {
             info!("CaptureBrick");
             let msg = ThreadboundMessage::CaptureBrick {
                 world_position: cursor_translation,
             };
-            bridge.send(msg);
+            threadbound_events.send(msg);
         }
         if tool_actions.just_pressed(ScreenshotToolAction::Print) {
             info!("Print");
             let msg = ThreadboundMessage::Print {
                 world_position: cursor_translation,
             };
-            bridge.send(msg);
+            threadbound_events.send(msg);
         }
         if tool_actions.just_pressed(ScreenshotToolAction::Fracture) {
             info!("Fracture");
             let msg = ThreadboundMessage::Fracture {
                 world_position: cursor_translation,
             };
-            bridge.send(msg);
+            threadbound_events.send(msg);
         }
     }
 }

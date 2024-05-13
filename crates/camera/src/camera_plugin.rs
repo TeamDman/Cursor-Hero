@@ -53,11 +53,11 @@ pub enum CameraEvent {
 }
 
 pub fn update_camera_zoom(
-    mut cam: Query<&mut Transform, With<MainCamera>>,
-    mut scroll: EventReader<MouseWheel>,
+    mut camera_query: Query<&mut Transform, With<MainCamera>>,
+    mut scroll_events: EventReader<MouseWheel>,
     egui_context_query: Query<&EguiContext, With<PrimaryWindow>>,
 ) {
-    if scroll.is_empty() {
+    if scroll_events.is_empty() {
         return;
     }
     let egui_wants_pointer = egui_context_query
@@ -66,14 +66,14 @@ pub fn update_camera_zoom(
             .map(|egui_context| egui_context.clone().get_mut().wants_pointer_input())
             .unwrap_or(false);
     if egui_wants_pointer {
-        scroll.clear();
+        scroll_events.clear();
         return;
     }
-    for event in scroll.read() {
-        let mut scale = cam.single_mut().scale;
+    for event in scroll_events.read() {
+        let mut scale = camera_query.single_mut().scale;
         scale *= Vec2::splat(1.0 - event.y / 10.0).extend(1.0);
         scale = scale.clamp(Vec3::splat(0.1), Vec3::splat(10.0));
-        cam.single_mut().scale = scale;
+        camera_query.single_mut().scale = scale;
     }
 }
 
