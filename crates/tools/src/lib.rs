@@ -1,6 +1,5 @@
 #![feature(let_chains)]
 
-pub mod click_tool;
 pub mod cube_tool;
 pub mod default_wheel_tool;
 pub mod focus_tool;
@@ -14,7 +13,6 @@ pub mod talk_tool;
 pub mod tool_plugin;
 pub mod tool_spawning;
 pub mod window_drag_tool;
-pub mod zoom_tool;
 
 pub use crate::tool_plugin::ToolPlugin;
 

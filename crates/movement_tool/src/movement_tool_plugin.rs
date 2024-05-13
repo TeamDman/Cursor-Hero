@@ -12,8 +12,8 @@ impl Plugin for MovementToolPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(MovementSpeedPlugin);
         app.add_plugins(MovementSprintPlugin);
-        app.add_plugins(MovementToolTickPlugin);
         app.add_plugins(MovementTargetPlugin);
         app.add_plugins(MovementToolPopulatePlugin);
+        app.add_plugins(MovementToolTickPlugin);
     }
 }

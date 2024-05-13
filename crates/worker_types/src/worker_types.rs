@@ -69,7 +69,7 @@ impl<T: WorkerMessage, G: WorkerMessage, S: WorkerState> Default for WorkerConfi
         WorkerConfig {
             name: "Unknown Worker".to_string(),
             is_ui_automation_thread: false,
-            sleep_duration: std::time::Duration::from_millis(100),
+            sleep_duration: std::time::Duration::ZERO,
             handle_threadbound_message: |_, _, _| Ok(()),
             handle_threadbound_message_error_handler: |_, _, _, _| Ok(()),
             threadbound_message_receiver: |thread_rx, _state| {
