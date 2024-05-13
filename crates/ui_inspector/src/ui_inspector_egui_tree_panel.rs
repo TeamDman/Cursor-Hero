@@ -118,7 +118,7 @@ fn do_header(ui: &mut Ui, data: &mut UIData, element_info: &mut ElementInfo) {
     // Update highlight colour if known
     if highlight_reason.is_none() {
         if let Some(window) = data.ui_tree.find_first_child(&element_info.drill_id) {
-            if let Some(app_kind) = CursorHeroAppKind::from_window(&window) {
+            if let Some(app_kind) = CursorHeroAppKind::from_window(window) {
                 let is_known = match app_kind {
                     CursorHeroAppKind::Calculator => {
                         CalculatorElementKind::from_info(&element_info).is_some()

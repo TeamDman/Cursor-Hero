@@ -126,7 +126,7 @@ impl CalculatorElementKind {
             info if info.name == "Divide" && info.class_name == "Button" => Some(CalculatorElementKind::DivideButton),
             info if info.name == "Clear" && info.class_name == "Button" => Some(CalculatorElementKind::ClearButton),
             info if info.name == "Clear entry" && info.class_name == "Button" => Some(CalculatorElementKind::ClearEntryButton),
-            info if info.name == "" && info.class_name == "LandmarkTarget" => Some(CalculatorElementKind::Background),
+            info if info.name.is_empty() && info.class_name == "LandmarkTarget" => Some(CalculatorElementKind::Background),
             info if info.automation_id == "CalculatorExpression" => Some(CalculatorElementKind::ValueDisplay),
             info if info.automation_id == "CalculatorResults" => Some(CalculatorElementKind::ExpressionDisplay),
             _ => None,

@@ -1,6 +1,3 @@
-use std::thread::sleep;
-use std::time::Duration;
-
 use bevy::prelude::*;
 use bevy_egui::EguiContexts;
 use cursor_hero_cursor_types::cursor_click_types::Way;

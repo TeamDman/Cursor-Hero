@@ -188,14 +188,14 @@ fn handle_clicks(
     }
 }
 
-pub enum CalculatorEvaluationResult {
-    Numeric(f64),
-    InvalidInput,
-}
+// pub enum CalculatorEvaluationResult {
+//     Numeric(f64),
+//     InvalidInput,
+// }
 
-pub fn evaluate_expression(expression: &str) -> CalculatorEvaluationResult {
-    todo!()
-}
+// pub fn evaluate_expression(expression: &str) -> CalculatorEvaluationResult {
+//     todo!()
+// }
 
 pub fn calculator_state_transition(
     button_kind: &CalculatorElementKind,
@@ -207,12 +207,12 @@ pub fn calculator_state_transition(
         CalculatorElementKind::ClearButton => {
             expression.clear();
             value.clear();
-            value.push_str("0");
+            value.push('0');
             *hidden_state = CalculatorHiddenState::Previewing;
         }
         CalculatorElementKind::ClearEntryButton => {
             value.clear();
-            value.push_str("0");
+            value.push('0');
             *hidden_state = CalculatorHiddenState::Previewing;
         }
         CalculatorElementKind::DigitButton(digit) => {
@@ -225,7 +225,7 @@ pub fn calculator_state_transition(
         CalculatorElementKind::PlusButton => {
             expression.push_str(&format!("{}+", value));
             value.clear();
-            value.push_str("0");
+            value.push('0');
         }
         CalculatorElementKind::EqualsButton => {
             expression.push_str(&format!("{}=", value));

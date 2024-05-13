@@ -1,13 +1,11 @@
 use bevy::prelude::*;
-use cursor_hero_cursor_types::cursor_click_types::Way;
-use leafwing_input_manager::prelude::*;
-
 use bevy_inspector_egui::prelude::ReflectInspectorOptions;
 use bevy_inspector_egui::InspectorOptions;
+use cursor_hero_cursor_types::cursor_click_types::Way;
 use cursor_hero_input::active_input_state_plugin::InputMethod;
 use cursor_hero_toolbelt_types::prelude::*;
 use cursor_hero_worker_types::prelude::WorkerMessage;
-use leafwing_input_manager::user_input::InputKind;
+use leafwing_input_manager::prelude::*;
 
 #[derive(Component, Reflect, Debug, InspectorOptions)]
 #[reflect(Component, InspectorOptions)]

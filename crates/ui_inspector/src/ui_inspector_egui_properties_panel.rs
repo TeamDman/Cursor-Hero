@@ -78,7 +78,7 @@ pub fn do_properties_panel(
 
     if let Some(mark) = &ui_data.mark {
         ui.label("drill_id relative to mark");
-        let relative_drill_id = selected_info.drill_id.relative_to(&mark).to_string();
+        let relative_drill_id = selected_info.drill_id.relative_to(mark).to_string();
         inspector.ui_for_reflect_readonly(&relative_drill_id, ui);
         if ui.button("copy").clicked() {
             ui.output_mut(|out| {

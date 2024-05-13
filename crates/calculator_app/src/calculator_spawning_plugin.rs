@@ -106,7 +106,7 @@ fn handle_spawn_calculator_events(
                         {
                             let hq_scaling = 2.0;
                             let mut style = theme.get_text_style(&elem_kind);
-                            style.font_size = style.font_size * hq_scaling;
+                            style.font_size *= hq_scaling;
                             elem_ent.with_children(|parent| {
                                 parent.spawn(Text2dBundle {
                                     text: Text::from_section(text, style),

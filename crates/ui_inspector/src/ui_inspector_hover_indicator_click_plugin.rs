@@ -3,7 +3,6 @@ use cursor_hero_bevy::prelude::NegativeYIVec2;
 use cursor_hero_cursor_types::prelude::ClickEvent;
 use cursor_hero_cursor_types::prelude::Way;
 use cursor_hero_ui_hover_types::prelude::GameHoverIndicator;
-use cursor_hero_ui_hover_types::prelude::HostHoverIndicator;
 use cursor_hero_ui_inspector_types::prelude::InspectorScratchPadEvent;
 use cursor_hero_ui_inspector_types::prelude::ThreadboundUISnapshotMessage;
 use cursor_hero_ui_inspector_types::prelude::UIData;
