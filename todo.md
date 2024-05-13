@@ -2,6 +2,7 @@
 
 ## Active
 
+- separate tools from tools crate
 - separate debug eguis
   - tilde to show wheel for toggling visibility of each
 - default to no character; action to spawn character; toolbelt live outside of character; rename toolbelt to actionspace
