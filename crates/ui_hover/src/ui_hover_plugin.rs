@@ -59,7 +59,6 @@ fn handle_threadbound_message_error_handler(
         ThreadboundHoverMessage::AtPositionFromGame(_) => {
             reply_tx.send(GameboundHoverMessage::ClearGameHoverInfo)?;
         }
-        _ => (),
     }
     Ok(())
 }
@@ -84,8 +83,6 @@ fn handle_threadbound_message(
             let info = gather_single_element_info(&root).context("gathering element info")?;
             GameboundHoverMessage::HostHoverInfo { info, cursor_pos }
         }
-        ThreadboundHoverMessage::ClearHost => GameboundHoverMessage::ClearHostHoverInfo,
-        ThreadboundHoverMessage::ClearGame => GameboundHoverMessage::ClearGameHoverInfo,
     };
     reply_tx.send(reply).context("sending reply")?;
     Ok(())
@@ -123,6 +120,7 @@ fn trigger_game_hover_info_update(
     mut cooldown: Local<Option<Timer>>,
     time: Res<Time>,
     egui_context_query: Query<&EguiContext, With<PrimaryWindow>>,
+    mut out_of_window_timer: Local<Option<Timer>>,
 ) {
     // Do nothing when disabled
     if !hover_info.enabled {
@@ -149,16 +147,22 @@ fn trigger_game_hover_info_update(
     };
 
     // Clear game hover indicator when cursor is outside of window
-    // if window.cursor_position().is_none() {
-    //     hover_info.game_hover_indicator = None;
-    // }
+    if window.cursor_position().is_none() {
+        let timer = out_of_window_timer.get_or_insert_with(|| {
+            Timer::from_seconds(1.0, TimerMode::Once)
+        });
+        if timer.tick(time.delta()).just_finished() {
+            hover_info.game_hover_indicator = None;
+        }
+    } else if out_of_window_timer.is_some() {
+        out_of_window_timer.take();
+    }
 
     // Delay between updates
-    let Some(cooldown) = cooldown.as_mut() else {
-        cooldown.replace(Timer::from_seconds(0.1, TimerMode::Repeating));
-        return;
-    };
-    if !cooldown.tick(time.delta()).just_finished() {
+    let cooldown_timer = cooldown.get_or_insert_with(|| {
+        Timer::from_seconds(0.1, TimerMode::Repeating)
+    });
+    if !cooldown_timer.tick(time.delta()).just_finished() {
         return;
     }
 

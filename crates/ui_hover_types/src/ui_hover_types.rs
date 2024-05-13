@@ -74,7 +74,5 @@ impl WorkerMessage for GameboundHoverMessage {}
 pub enum ThreadboundHoverMessage {
     AtPositionFromGame(IVec2),
     AtHostCursorPosition,
-    ClearHost,
-    ClearGame,
 }
 impl WorkerMessage for ThreadboundHoverMessage {}
