@@ -3,6 +3,7 @@
 ## Inference
 
 - [LM Studio](https://lmstudio.ai/)
+- [microsoft/monitors4codegen: Code and Data artifact for NeurIPS 2023 paper - "Monitor-Guided Decoding of Code LMs with Static Analysis of Repository Context". \`multispy\` is a lsp client library in Python intended to be used to build applications around language servers. (github.com)](https://github.com/microsoft/monitors4codegen)
 
 ## Fine Tuning
 
@@ -24,6 +25,8 @@
 
 - [Template Matching by Correlation | Image Processing I - YouTube](https://www.youtube.com/watch?v=1_hwFc8PXVE)
 - [Seam Carving Algorithm in Python | Liquid Resizing - YouTube](https://www.youtube.com/watch?v=g2FAonk6bss&feature=youtu.be)
+- [Using Generative AI to Organize Video Game Screenshots (raymondcamden.com)](https://www.raymondcamden.com/2024/02/19/using-generative-ai-to-organize-video-game-screenshots)
+- [Page dewarping (mzucker.github.io)](https://mzucker.github.io/2016/08/15/page-dewarping.html)
 
 ## RPA
 
@@ -63,6 +66,10 @@
 - [Incorrect BoundingRectangle value - Issue #129 - yinkaisheng/Python-UIAutomation-for-Windows (github.com)](https://github.com/yinkaisheng/Python-UIAutomation-for-Windows/issues/129)
   - the UI Automation tree has bounding boxes for windows that include a padding and IDK why, found this issue which is probably unrelated lol
 - [microsoft/accessibility-insights-windows: Accessibility Insights for Windows (github.com)](https://github.com/microsoft/accessibility-insights-windows)
+
+### PowerAutomate
+
+- [🤖 How to use Microsoft Power Automate Desktop - Full tutorial - YouTube](https://www.youtube.com/watch?v=IQ_KpBC8fwo&feature=youtu.be)
 
 ## Win32
 
@@ -258,3 +265,9 @@
 ## Articles
 
 - [Why it is time to start thinking of games as databases | by Sander Mertens | Medium](https://ajmmertens.medium.com/why-it-is-time-to-start-thinking-of-games-as-databases-e7971da33ac3)
+
+## Screen Capturing / Recording
+
+- [Show HN: I made an open-source Loom alternative | Hacker News (ycombinator.com)](https://news.ycombinator.com/item?id=40338275)
+  - [Capture/Desktop -- FFmpeg](https://trac.ffmpeg.org/wiki/Capture/Desktop)
+  - [Cap --- Effortless, instant screen sharing. Open source and cross-platform.](https://cap.so/)
