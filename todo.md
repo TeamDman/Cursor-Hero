@@ -2,9 +2,6 @@
 
 ## Active
 
-- make clippy happy
-  - warning: `cursor_hero_explorer_tool` (lib) generated 4 warnings (run `cargo fix --lib -p cursor_hero_explorer_tool` to apply 1 suggestion)
-- remove sleep from workers that don't loop specially
 - separate tools from tools crate
 - separate debug eguis
   - tilde to show wheel for toggling visibility of each

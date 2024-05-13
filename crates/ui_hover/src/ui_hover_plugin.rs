@@ -35,7 +35,6 @@ impl Plugin for UiHoverPlugin {
                 name: "hover".to_string(),
                 handle_threadbound_message,
                 handle_threadbound_message_error_handler,
-                sleep_duration: std::time::Duration::from_millis(10),
                 ..default()
             },
         });
