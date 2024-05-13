@@ -105,7 +105,7 @@ fn restore(
                 environment_id,
                 state: CalculatorState::default(),
                 theme: CalculatorThemeKind::WindowsDark,
-                position: position.clone(),
+                position: *position,
             });
         }
     }
