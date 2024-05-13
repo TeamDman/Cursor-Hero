@@ -2439,6 +2439,8 @@ dependencies = [
  "cursor_hero_worker",
  "cursor_hero_worker_types",
  "cursor_hero_xelu_prompts",
+ "cursor_hero_zoom_tool",
+ "cursor_hero_zoom_tool_types",
  "itertools 0.12.0",
 ]
 
@@ -2922,6 +2924,34 @@ name = "cursor_hero_xelu_prompts"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "leafwing-input-manager",
+]
+
+[[package]]
+name = "cursor_hero_zoom_tool"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy-inspector-egui",
+ "cursor_hero_camera",
+ "cursor_hero_character_types",
+ "cursor_hero_math",
+ "cursor_hero_sprint_tool_types",
+ "cursor_hero_toolbelt_types",
+ "cursor_hero_tools",
+ "cursor_hero_zoom_tool_types",
+ "itertools 0.12.0",
+ "leafwing-input-manager",
+]
+
+[[package]]
+name = "cursor_hero_zoom_tool_types"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy-inspector-egui",
+ "cursor_hero_input",
+ "cursor_hero_toolbelt_types",
  "leafwing-input-manager",
 ]
 

@@ -96,10 +96,14 @@ use cursor_hero_window_position_types::prelude::*;
 use cursor_hero_window_swap_tool::prelude::*;
 use cursor_hero_window_swap_tool_types::prelude::*;
 use itertools::Itertools;
+use cursor_hero_zoom_tool::prelude::*;
+use cursor_hero_zoom_tool_types::prelude::*;
 pub struct DefaultLaunchModePlugin;
 
 impl Plugin for DefaultLaunchModePlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(ZoomToolPlugin);
+        app.add_plugins(ZoomToolTypesPlugin);
         app.add_plugins(ExplorerAppTypesPlugin);
         app.add_plugins(ExplorerAppPlugin);
         app.add_plugins(ExplorerToolPlugin);
