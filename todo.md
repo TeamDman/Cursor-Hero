@@ -2,19 +2,18 @@
 
 ## Active
 
-- progress video
-
-
-- calculator buttons to transition state
-- framework for gathering golden data
+- separate debug eguis
+  - tilde to show wheel for toggling visibility of each
+- default to no character; action to spawn character; toolbelt live outside of character; rename toolbelt to actionspace
 
 ## Up Next
 
+- annotations in host environment
 - make existing buttons only respond to clicks from host environment
-- add possession mode to control the agent body to test environment restrictions
 
 ## Grab Bag
 
+- add possession mode to control the agent body to test environment restrictions
 - clean up todos
 - graceful worker shutdown message
 - investigate transparent windows :/
