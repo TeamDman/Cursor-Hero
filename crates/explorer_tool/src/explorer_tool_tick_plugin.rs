@@ -13,7 +13,7 @@ impl Plugin for ExplorerToolTickPlugin {
 }
 
 fn handle_toggle(
-    mut commands: Commands,
+    commands: Commands,
     tool_query: Query<&ExplorerTool>,
     mut tool_events: EventReader<ToolActivationEvent>,
 ) {

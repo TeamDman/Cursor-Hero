@@ -1,7 +1,4 @@
-use crate::prelude::*;
 use bevy::prelude::*;
-use bevy_inspector_egui::prelude::ReflectInspectorOptions;
-use bevy_inspector_egui::InspectorOptions;
 use cursor_hero_camera::camera_plugin::MainCamera;
 use cursor_hero_character_types::prelude::*;
 use cursor_hero_math::prelude::Lerp;
