@@ -32,14 +32,14 @@ fn hovered_click_listener(
         else {
             continue;
         };
-        if way == &Way::Left && ui_data.opened.global_toggle {
+        if way == &Way::Left && ui_data.windows.global_toggle {
             // If the click event targets a hover indicator
             if game_hover_query.contains(*target_id) {
                 // Toggle the paused state
                 ui_data.paused ^= true;
                 info!("Hover indicator clicked, paused set to {}", ui_data.paused);
             }
-        } else if way == &Way::Right && ui_data.opened.global_toggle {
+        } else if way == &Way::Right && ui_data.windows.global_toggle {
             // Get the hover indicator
             let Ok(game_hover) = game_hover_query.get(*target_id) else {
                 continue;

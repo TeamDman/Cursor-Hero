@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_egui::egui;
+use bevy_egui::egui::collapsing_header::CollapsingState;
 use bevy_egui::EguiContexts;
 use cursor_hero_ui_automation::prelude::DrillId;
 use cursor_hero_ui_inspector_types::prelude::InspectorScratchPadEvent;
@@ -12,7 +13,7 @@ impl Plugin for UiInspectorScratchPadEguiPlugin {
         app.add_systems(
             Update,
             gui.run_if(|ui_data: Res<UIData>| {
-                ui_data.opened.global_toggle && ui_data.opened.scratch_pad
+                ui_data.windows.global_toggle && ui_data.windows.scratch_pad
             }),
         );
     }
@@ -34,7 +35,7 @@ fn gui(
         // .default_pos((5.0, 5.0))
         // .default_width(1200.0)
         // .default_height(1000.0)
-        // .default_open(ui_data.open)
+        .default_open(ui_data.windows.scratch_pad_header_open)
         .show(ctx, |ui| {
             egui::ScrollArea::vertical().show(ui, |ui| {
                 let window_drill_id = ui_data
@@ -85,7 +86,7 @@ fn gui(
                     if ui.button("push").clicked()
                         && let Some(ref selected_drill_id) = ui_data.selected
                         && let Some(selected_info) =
-                            ui_data.ui_tree.lookup_drill_id(selected_drill_id.clone())
+                            ui_data.tree.lookup_drill_id(selected_drill_id.clone())
                     {
                         inspector_events.send(InspectorScratchPadEvent::ScratchPadAppendInfo {
                             info: selected_info.clone(),
@@ -121,4 +122,10 @@ fn gui(
                     .show(ui);
             });
         });
+
+    // Track window collapsed state
+    ui_data.windows.scratch_pad_header_open =
+        CollapsingState::load(ctx, window_id.with("collapsing"))
+            .map(|x| x.is_open())
+            .unwrap_or(ui_data.windows.scratch_pad_header_open);
 }

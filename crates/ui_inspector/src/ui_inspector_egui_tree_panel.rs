@@ -24,14 +24,14 @@ pub fn do_tree_panel(
 
     // Tree
     ScrollArea::both().show(ui, |ui| {
-        let id = window_id.with(ui_data.ui_tree.runtime_id.clone());
-        let mut elem = ui_data.ui_tree.clone();
+        let id = window_id.with(ui_data.tree.runtime_id.clone());
+        let mut elem = ui_data.tree.clone();
 
         // resets each frame before being set when drawing expandos
         ui_data.hovered = None;
 
         ui_for_element_info(id, ui, ui_data, &mut elem, inspector);
-        ui_data.ui_tree = elem;
+        ui_data.tree = elem;
         ui.allocate_space(ui.available_size());
     });
 }
@@ -54,7 +54,7 @@ fn ui_for_element_info(
     let expando_is_open = expando.is_open();
 
     // Logic for when new data has arrived
-    if data.fresh {
+    if data.tree_is_fresh {
         // Force expanded
         expando.set_open(default_open);
 
@@ -83,7 +83,7 @@ fn do_header(ui: &mut Ui, data: &mut UIData, element_info: &mut ElementInfo) {
     let mut selected = data.selected == Some(element_info.drill_id.clone());
 
     // Scroll to selected when fresh
-    if selected && data.fresh {
+    if selected && data.tree_is_fresh {
         ui.scroll_to_cursor(Some(egui::Align::Center));
     }
 
@@ -117,7 +117,7 @@ fn do_header(ui: &mut Ui, data: &mut UIData, element_info: &mut ElementInfo) {
 
     // Update highlight colour if known
     if highlight_reason.is_none() {
-        if let Some(window) = data.ui_tree.find_first_child(&element_info.drill_id) {
+        if let Some(window) = data.tree.find_first_child(&element_info.drill_id) {
             if let Some(app_kind) = CursorHeroAppKind::from_window(window) {
                 let is_known = match app_kind {
                     CursorHeroAppKind::Calculator => {

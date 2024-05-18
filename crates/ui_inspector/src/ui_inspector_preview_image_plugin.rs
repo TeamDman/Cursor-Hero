@@ -17,8 +17,9 @@ impl Plugin for UiInspectorPreviewImagePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            update_preview_image
-                .run_if(|ui_data: Res<UIData>| ui_data.opened.global_toggle && ui_data.opened.tree),
+            update_preview_image.run_if(|ui_data: Res<UIData>| {
+                ui_data.windows.global_toggle && ui_data.windows.tree
+            }),
         );
     }
 }
@@ -48,7 +49,7 @@ fn update_preview_image(
                 };
 
                 // Look up info for parent
-                let Some(parent_info) = ui_data.ui_tree.lookup_drill_id(parent_drill_id.clone())
+                let Some(parent_info) = ui_data.tree.lookup_drill_id(parent_drill_id.clone())
                 else {
                     warn!("Failed to find parent info for {:?}", parent_drill_id);
                     return None;
@@ -67,8 +68,8 @@ fn update_preview_image(
                 (info, parent_info)
             }
             Some(DrillId::Root) => {
-                let info = &ui_data.ui_tree;
-                let parent_info = &ui_data.ui_tree;
+                let info = &ui_data.tree;
+                let parent_info = &ui_data.tree;
                 (info, parent_info)
             }
             Some(DrillId::Unknown) => {

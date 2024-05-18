@@ -1,4 +1,3 @@
-use bevy::core_pipeline::core_2d::graph::input;
 use bevy::input::common_conditions::input_just_pressed;
 use bevy::input::common_conditions::input_pressed;
 use bevy::prelude::*;
@@ -24,9 +23,9 @@ impl Plugin for UiInspectorTogglePlugin {
 }
 
 fn toggle_global(mut ui_data: ResMut<UIData>) {
-    ui_data.opened.global_toggle ^= true;
+    ui_data.windows.global_toggle ^= true;
 }
 fn toggle_each(mut ui_data: ResMut<UIData>) {
-    let new = !ui_data.opened.global_toggle;
-    ui_data.opened.set_all(new);
+    let new = !ui_data.windows.global_toggle;
+    ui_data.windows.set_all(new);
 }

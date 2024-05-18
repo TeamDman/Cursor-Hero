@@ -47,16 +47,21 @@ impl std::fmt::Display for ScratchPadMode {
     }
 }
 
-#[derive(Debug, Reflect, Default, Serialize, Deserialize, PartialEq, Clone)]
-pub struct WindowOpenness {
+#[derive(Debug, Reflect, Serialize, Deserialize, PartialEq, Clone)]
+pub struct InspectorWindows {
     pub global_toggle: bool,
     pub world: bool,
+    // pub world_collapsed: bool,
     pub state: bool,
+    // pub state_collapsed: bool,
     pub tree: bool,
+    pub tree_header_open: bool,
     pub properties: bool,
+    pub properties_header_open: bool,
     pub scratch_pad: bool,
+    pub scratch_pad_header_open: bool,
 }
-impl WindowOpenness {
+impl InspectorWindows {
     pub fn set_all(&mut self, value: bool) {
         self.global_toggle = value;
         self.world = value;
@@ -66,21 +71,36 @@ impl WindowOpenness {
         self.scratch_pad = value;
     }
 }
+impl Default for InspectorWindows {
+    fn default() -> Self {
+        Self {
+            global_toggle: false,
+            world: true,
+            state: true,
+            tree: true,
+            tree_header_open: true,
+            properties: true,
+            properties_header_open: true,
+            scratch_pad: true,
+            scratch_pad_header_open: true,
+        }
+    }
+}
 
 #[derive(Resource, Debug, Reflect, Default)]
 #[reflect(Resource)]
 pub struct UIData {
-    pub opened: WindowOpenness,
+    pub windows: InspectorWindows,
     pub scratch_pad: String,
     pub scratch_pad_mode: ScratchPadMode,
     pub mark: Option<DrillId>,
     pub start: ElementInfo,
     pub hovered: Option<ElementInfo>,
-    pub ui_tree: ElementInfo,
+    pub tree: ElementInfo,
     pub selected: Option<DrillId>,
     pub selected_preview: Option<PreviewImage>,
     pub default_expanded: Vec<DrillId>,
-    pub fresh: bool,
+    pub tree_is_fresh: bool,
     pub in_flight: bool,
     pub paused: bool,
     // Include runtime id in case tree changes and we quickly fetch something with the same drill_id before the first request comes back

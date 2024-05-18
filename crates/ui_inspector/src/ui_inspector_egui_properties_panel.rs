@@ -24,7 +24,7 @@ pub fn do_properties_panel(
     };
 
     // Ensure the thing selected is in the tree
-    let Some(selected_info) = ui_data.ui_tree.lookup_drill_id(selected_drill_id.clone()) else {
+    let Some(selected_info) = ui_data.tree.lookup_drill_id(selected_drill_id.clone()) else {
         return;
     };
 
@@ -125,9 +125,9 @@ pub fn do_properties_panel(
 
     // Look up the comparison element
     let compare = ui_data
-        .ui_tree
+        .tree
         .lookup_drill_id(compare_drill_id)
-        .unwrap_or(&ui_data.ui_tree);
+        .unwrap_or(&ui_data.tree);
 
     // Get the bounds of the selected element relative to the comparison element
     let bounds_relative = selected_info

@@ -22,7 +22,7 @@ pub struct UiInspectorScratchPadEventsPlugin;
 impl Plugin for UiInspectorScratchPadEventsPlugin {
     fn build(&self, app: &mut App) {
         let condition =
-            |ui_data: Res<UIData>| ui_data.opened.global_toggle && ui_data.opened.scratch_pad;
+            |ui_data: Res<UIData>| ui_data.windows.global_toggle && ui_data.windows.scratch_pad;
         app.add_systems(
             Update,
             handle_append_all_known_scratch_pad_events.run_if(condition),
@@ -117,13 +117,13 @@ fn get_content(
             let compare = ui_data
                 .mark
                 .as_ref()
-                .and_then(|mark_drill_id| ui_data.ui_tree.lookup_drill_id(mark_drill_id.clone()))
+                .and_then(|mark_drill_id| ui_data.tree.lookup_drill_id(mark_drill_id.clone()))
                 .or_else(|| {
                     ui_data.selected.as_ref().and_then(|selected_drill_id| {
-                        ui_data.ui_tree.find_first_child(selected_drill_id)
+                        ui_data.tree.find_first_child(selected_drill_id)
                     })
                 })
-                .unwrap_or(&ui_data.ui_tree);
+                .unwrap_or(&ui_data.tree);
 
             // Get the bounds of the selected element relative to the comparison element
             let bounds_relative = info
@@ -192,7 +192,7 @@ fn handle_append_all_known_scratch_pad_events(
         };
 
         // get window
-        let Some(window) = ui_data.ui_tree.find_first_child(selected_drill_id) else {
+        let Some(window) = ui_data.tree.find_first_child(selected_drill_id) else {
             warn!(
                 "Selected drill id not found in tree: {:?}",
                 selected_drill_id
@@ -219,7 +219,7 @@ fn handle_append_all_known_scratch_pad_events(
             _ => {
                 // Unknown window, just do selected
                 let Some(selected_info) =
-                    ui_data.ui_tree.lookup_drill_id(selected_drill_id.clone())
+                    ui_data.tree.lookup_drill_id(selected_drill_id.clone())
                 else {
                     return;
                 };
@@ -268,7 +268,7 @@ fn handle_append_all_unknown_scratch_pad_events(
         };
 
         // get window
-        let Some(window) = ui_data.ui_tree.find_first_child(selected_drill_id) else {
+        let Some(window) = ui_data.tree.find_first_child(selected_drill_id) else {
             warn!(
                 "Selected drill id not found in tree: {:?}",
                 selected_drill_id
@@ -295,7 +295,7 @@ fn handle_append_all_unknown_scratch_pad_events(
             _ => {
                 // Unknown window, just do selected
                 let Some(selected_info) =
-                    ui_data.ui_tree.lookup_drill_id(selected_drill_id.clone())
+                    ui_data.tree.lookup_drill_id(selected_drill_id.clone())
                 else {
                     return;
                 };
@@ -344,7 +344,7 @@ fn handle_append_all_scratch_pad_events(
         };
 
         // get window
-        let Some(window) = ui_data.ui_tree.find_first_child(selected_drill_id) else {
+        let Some(window) = ui_data.tree.find_first_child(selected_drill_id) else {
             warn!(
                 "Selected drill id not found in tree: {:?}",
                 selected_drill_id
@@ -392,7 +392,7 @@ fn handle_append_single_info_scratch_pad_events(
         };
 
         // get window
-        let Some(window) = ui_data.ui_tree.find_first_child(&info.drill_id) else {
+        let Some(window) = ui_data.tree.find_first_child(&info.drill_id) else {
             warn!("Info drill id not found in tree: {:?}", info.drill_id);
             return;
         };

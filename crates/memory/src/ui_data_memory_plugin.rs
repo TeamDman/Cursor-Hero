@@ -2,9 +2,9 @@ use bevy::prelude::*;
 use cursor_hero_memory_types::prelude::*;
 use cursor_hero_ui_automation_types::prelude::DrillId;
 use cursor_hero_ui_automation_types::prelude::ElementInfo;
+use cursor_hero_ui_inspector_types::prelude::InspectorWindows;
 use cursor_hero_ui_inspector_types::prelude::ScratchPadMode;
 use cursor_hero_ui_inspector_types::prelude::UIData;
-use cursor_hero_ui_inspector_types::prelude::WindowOpenness;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -54,7 +54,7 @@ impl Default for UIDataMemoryConfig {
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 struct DiskData {
-    pub opened: WindowOpenness,
+    pub opened: InspectorWindows,
     pub scratch_pad: String,
     pub scratch_pad_mode: ScratchPadMode,
     pub mark: Option<DrillId>,
@@ -68,13 +68,13 @@ struct DiskData {
 impl From<DiskData> for UIData {
     fn from(value: DiskData) -> Self {
         UIData {
-            opened: value.opened,
+            windows: value.opened,
             scratch_pad: value.scratch_pad,
             scratch_pad_mode: value.scratch_pad_mode,
             mark: value.mark,
             start: value.start,
             hovered: value.hovered,
-            ui_tree: value.ui_tree,
+            tree: value.ui_tree,
             selected: value.selected,
             default_expanded: value.expanded,
             paused: value.paused,
@@ -85,13 +85,13 @@ impl From<DiskData> for UIData {
 impl From<&UIData> for DiskData {
     fn from(value: &UIData) -> Self {
         Self {
-            opened: value.opened.clone(),
+            opened: value.windows.clone(),
             scratch_pad: value.scratch_pad.clone(),
             scratch_pad_mode: value.scratch_pad_mode.clone(),
             mark: value.mark.clone(),
             start: value.start.clone(),
             hovered: value.hovered.clone(),
-            ui_tree: value.ui_tree.clone(),
+            ui_tree: value.tree.clone(),
             selected: value.selected.clone(),
             expanded: value.default_expanded.clone(),
             paused: value.paused,

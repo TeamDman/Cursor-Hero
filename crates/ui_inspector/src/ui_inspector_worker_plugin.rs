@@ -38,7 +38,7 @@ impl Plugin for UiInspectorWorkerPlugin {
         });
         app.add_systems(
             Update,
-            handle_gamebound_messages.run_if(|ui_data: Res<UIData>| ui_data.opened.global_toggle),
+            handle_gamebound_messages.run_if(|ui_data: Res<UIData>| ui_data.windows.global_toggle),
         );
     }
 }
@@ -230,7 +230,7 @@ fn handle_gamebound_messages(
             }
             GameboundUISnapshotMessage::SetUITree { ui_tree, start } => {
                 ui_data.in_flight = false;
-                ui_data.ui_tree = ui_tree.clone();
+                ui_data.tree = ui_tree.clone();
                 ui_data.start = start.clone();
                 ui_data.selected = Some(start.drill_id.clone());
                 ui_data.default_expanded = ui_tree
@@ -240,13 +240,13 @@ fn handle_gamebound_messages(
                     .filter(|x| x.children.is_some())
                     .map(|x| x.drill_id.clone())
                     .collect();
-                ui_data.fresh = true;
+                ui_data.tree_is_fresh = true;
                 debug!("Received snapshot");
             }
             GameboundUISnapshotMessage::PatchUITree { patch } => {
                 ui_data.in_flight = false;
                 debug!("Applying tree patch");
-                let Some(elem) = ui_data.ui_tree.lookup_drill_id_mut(patch.drill_id.clone()) else {
+                let Some(elem) = ui_data.tree.lookup_drill_id_mut(patch.drill_id.clone()) else {
                     warn!("Patch drill_id not found: {}", patch.drill_id);
                     continue;
                 };
