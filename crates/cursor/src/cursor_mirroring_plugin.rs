@@ -33,13 +33,11 @@ enum ThreadboundCursorMessage {
     CaptureCursorPosition,
 }
 
-
 // This can be made public in the types crate if the need arises
 #[derive(Debug, Reflect, Clone, Event)]
 enum GameboundCursorMessage {
     HostCursorPosition(IVec2),
 }
-
 
 fn handle_threadbound_message(
     msg: &ThreadboundCursorMessage,

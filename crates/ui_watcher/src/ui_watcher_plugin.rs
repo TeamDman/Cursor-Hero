@@ -19,7 +19,14 @@ pub struct UiWatcherPlugin;
 impl Plugin for UiWatcherPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(WorkerPlugin {
-            config: WorkerConfig::<ThreadboundUIWatcherMessage, GameboundUIWatcherMessage, (), _,_,_> {
+            config: WorkerConfig::<
+                ThreadboundUIWatcherMessage,
+                GameboundUIWatcherMessage,
+                (),
+                _,
+                _,
+                _,
+            > {
                 name: "ui watcher".to_string(),
                 handle_threadbound_message,
                 ..default()

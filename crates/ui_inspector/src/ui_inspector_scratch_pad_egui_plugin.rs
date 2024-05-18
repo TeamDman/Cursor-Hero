@@ -9,7 +9,12 @@ pub struct UiInspectorScratchPadEguiPlugin;
 
 impl Plugin for UiInspectorScratchPadEguiPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, gui.run_if(|ui_data: Res<UIData>| ui_data.opened.global_toggle && ui_data.opened.scratch_pad));
+        app.add_systems(
+            Update,
+            gui.run_if(|ui_data: Res<UIData>| {
+                ui_data.opened.global_toggle && ui_data.opened.scratch_pad
+            }),
+        );
     }
 }
 

@@ -15,7 +15,11 @@ pub struct UiInspectorPreviewImagePlugin;
 
 impl Plugin for UiInspectorPreviewImagePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, update_preview_image.run_if(|ui_data: Res<UIData>| ui_data.opened.global_toggle && ui_data.opened.tree));
+        app.add_systems(
+            Update,
+            update_preview_image
+                .run_if(|ui_data: Res<UIData>| ui_data.opened.global_toggle && ui_data.opened.tree),
+        );
     }
 }
 

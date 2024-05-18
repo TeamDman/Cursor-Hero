@@ -68,10 +68,8 @@ pub enum GameboundHoverMessage {
     ClearGameHoverInfo,
 }
 
-
 #[derive(Debug, Reflect, Clone, Event, Eq, PartialEq)]
 pub enum ThreadboundHoverMessage {
     AtPositionFromGame(IVec2),
     AtHostCursorPosition,
 }
-

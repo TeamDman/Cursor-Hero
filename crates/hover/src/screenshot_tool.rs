@@ -32,7 +32,7 @@ pub struct ScreenshotToolPlugin;
 impl Plugin for ScreenshotToolPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(WorkerPlugin {
-            config: WorkerConfig::<ThreadboundMessage, GameboundMessage, (), _,_,_> {
+            config: WorkerConfig::<ThreadboundMessage, GameboundMessage, (), _, _, _> {
                 name: "screenshot_tool".to_string(),
                 is_ui_automation_thread: true,
                 handle_threadbound_message,
@@ -57,7 +57,6 @@ enum ThreadboundMessage {
     Fracture { world_position: Vec3 },
 }
 
-
 #[derive(Debug, Reflect, Clone, Event)]
 enum GameboundMessage {
     Capture {
@@ -76,7 +75,6 @@ enum GameboundMessage {
         world_position: Vec3,
     },
 }
-
 
 #[derive(Component, Reflect, Default)]
 struct ScreenshotTool;
@@ -169,9 +167,10 @@ fn handle_input(
         .get_single()
         .ok()
         .map(|ctx| {
-let mut ctx = ctx.clone();
-let ctx = ctx.get_mut(); ctx.is_using_pointer() || ctx.is_pointer_over_area()
-})
+            let mut ctx = ctx.clone();
+            let ctx = ctx.get_mut();
+            ctx.is_using_pointer() || ctx.is_pointer_over_area()
+        })
         .unwrap_or(false);
     if egui_wants_pointer {
         return;

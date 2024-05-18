@@ -24,7 +24,7 @@ impl Plugin for ScreenCaptureAndUpdatePlugin {
         let refresh_fps = 144;
 
         app.add_plugins(WorkerPlugin {
-            config: WorkerConfig::<ThreadboundMessage, GameboundMessage, ThreadState, _,_,_> {
+            config: WorkerConfig::<ThreadboundMessage, GameboundMessage, ThreadState, _, _, _> {
                 name: "screen_update_plugin".to_string(),
                 threadbound_message_receiver: |thread_rx, _state| {
                     // Continuously capture frames when no messages present
@@ -66,7 +66,6 @@ enum ThreadboundMessage {
     SetEnabled(bool),
     CaptureFrames,
 }
-
 
 #[derive(Clone, Event)]
 enum GameboundMessage {

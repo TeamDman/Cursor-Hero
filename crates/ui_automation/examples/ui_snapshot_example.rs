@@ -49,12 +49,10 @@ enum ThreadboundUISnapshotMessage {
     TakeSnapshot,
 }
 
-
 #[derive(Debug, Reflect, Clone, Event)]
 enum GameboundUISnapshotMessage {
     Snapshot(UiSnapshot),
 }
-
 
 fn handle_threadbound_message(
     msg: &ThreadboundUISnapshotMessage,

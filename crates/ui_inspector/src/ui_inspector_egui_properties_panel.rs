@@ -177,7 +177,6 @@ pub fn do_properties_panel(
         ui.image(SizedTexture::new(texture_id, size));
     }
 
-
     // Properties
     ui.separator();
     inspector.ui_for_reflect_readonly(selected_info, ui);

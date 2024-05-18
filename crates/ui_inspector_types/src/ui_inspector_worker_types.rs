@@ -48,6 +48,3 @@ pub enum GameboundUISnapshotMessage {
     },
     Error,
 }
-
-
-

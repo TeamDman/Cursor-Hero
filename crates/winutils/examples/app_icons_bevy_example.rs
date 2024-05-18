@@ -52,12 +52,10 @@ enum ThreadboundMessage {
     GatherRunningProcessIcons,
 }
 
-
 #[derive(Debug, Clone, Event)]
 enum GameboundMessage {
     RunningProcessIcons(HashMap<String, Vec<RgbaImage>>),
 }
-
 
 fn handle_threadbound_message(
     msg: &ThreadboundMessage,

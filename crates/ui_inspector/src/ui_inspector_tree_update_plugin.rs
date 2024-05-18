@@ -14,7 +14,8 @@ impl Plugin for UiInspectorTreeUpdatePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            trigger_tree_update_for_hovered.run_if(|ui_data: Res<UIData>| ui_data.opened.global_toggle && ui_data.opened.tree),
+            trigger_tree_update_for_hovered
+                .run_if(|ui_data: Res<UIData>| ui_data.opened.global_toggle && ui_data.opened.tree),
         );
     }
 }

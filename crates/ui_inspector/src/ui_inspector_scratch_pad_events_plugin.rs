@@ -21,7 +21,8 @@ pub struct UiInspectorScratchPadEventsPlugin;
 
 impl Plugin for UiInspectorScratchPadEventsPlugin {
     fn build(&self, app: &mut App) {
-        let condition = |ui_data: Res<UIData>| ui_data.opened.global_toggle && ui_data.opened.scratch_pad;
+        let condition =
+            |ui_data: Res<UIData>| ui_data.opened.global_toggle && ui_data.opened.scratch_pad;
         app.add_systems(
             Update,
             handle_append_all_known_scratch_pad_events.run_if(condition),

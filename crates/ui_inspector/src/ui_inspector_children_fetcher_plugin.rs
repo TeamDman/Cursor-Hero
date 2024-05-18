@@ -9,7 +9,8 @@ impl Plugin for UiInspectorChildrenFetcherPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            trigger_gather_children_request.run_if(|ui_data: Res<UIData>| ui_data.opened.global_toggle && ui_data.opened.tree),
+            trigger_gather_children_request
+                .run_if(|ui_data: Res<UIData>| ui_data.opened.global_toggle && ui_data.opened.tree),
         );
     }
 }

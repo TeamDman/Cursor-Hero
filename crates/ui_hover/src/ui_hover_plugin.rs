@@ -130,9 +130,10 @@ fn trigger_game_hover_info_update(
         .get_single()
         .ok()
         .map(|ctx| {
-let mut ctx = ctx.clone();
-let ctx = ctx.get_mut(); ctx.is_using_pointer() || ctx.is_pointer_over_area()
-})
+            let mut ctx = ctx.clone();
+            let ctx = ctx.get_mut();
+            ctx.is_using_pointer() || ctx.is_pointer_over_area()
+        })
         .unwrap_or(false);
     if egui_wants_pointer {
         // hover_info.game_hover_indicator = None;
