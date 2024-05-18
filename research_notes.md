@@ -20,6 +20,13 @@
 - [LLaVA](https://llava.hliu.cc/)
 - [YOLOv9](https://github.com/WongKinYiu/yolov9)
 - [Ty on X: "Open Interpreter 0.2.1 is out! -  5X launch speed -  Local OSS model for GUI control -  Native control over Apple Mail, Calendar, Contacts, SMS -  New LLM-first web browser (powered by @perplexity\_ai) -  Profiles, Docker, Jupyter export... ↓ https://t.co/XU4gibTXWk" / X (twitter.com)](https://twitter.com/FieroTy/status/1767328066290987470)
+- [(13) Victor Sanh on X: "💬🔥Releasing idefics2-8b-chatty, the chat-optimized version of Idefics2! It is a very efficient (8B parameters) state-of-the-art VLM, has been red-teamed, and comes with a few surprises: - 📖Paper dissecting a lot of the experimental insights we learned building Idefics2: - https://t.co/DDQkg5ddza" / X](https://x.com/sanhestpasmoi/status/1787503160757485609)
+- [SeeMoE: Implementing a MoE Vision Language Model from Scratch (huggingface.co)](https://huggingface.co/blog/AviSoori1x/seemoe)
+
+## Large Context
+
+- [gradientai/Llama-3-8B-Instruct-Gradient-4194k - Hugging Face](https://huggingface.co/gradientai/Llama-3-8B-Instruct-Gradient-4194k)
+
 
 ## Image Processing
 
@@ -115,7 +122,8 @@
 
 - [Quickstart | Get Started | EdgeDB Docs](https://docs.edgedb.com/get-started/quickstart)
 - [bclavie/RAGatouille: Easily use and train state of the art late-interaction retrieval methods (ColBERT) in any RAG pipeline. Designed for modularity and ease-of-use, backed by research. (github.com)](https://github.com/bclavie/RAGatouille)
-
+- [duckdb/duckdb-rs: Ergonomic bindings to duckdb for Rust (github.com)](https://github.com/duckdb/duckdb-rs)
+  - [Rust API -- DuckDB](https://duckdb.org/docs/api/rust.html)
 
 ## Sandboxing
 
@@ -278,3 +286,16 @@
   - meta+rstick move mouse
   - meta+r1 click
   - meta+y turn off (doesn't work? haven't restarted since installing extended xbox support)
+
+## Music Archival
+
+- [librespot-org/librespot: Open Source Spotify client library (github.com)](https://github.com/librespot-org/librespot)
+- [zotify-dev/zotify: A fast and customizable music and podcast downloader. (github.com)](https://github.com/zotify-dev/zotify/tree/main)
+- [GuillemCastro/spotify-dl: A command-line utility to download songs and playlists directly from Spotify's servers (github.com)](https://github.com/GuillemCastro/spotify-dl)
+
+## Text editor
+
+- [![Coding My Own Text Editor Again (Ded S02E01)](https://img.youtube.com/vi/w_yXlnjeAy4/0.jpg)](https://www.youtube.com/watch?v=w_yXlnjeAy4)
+  - [tsoding/ded: Dramatic EDitor (github.com)](https://github.com/tsoding/ded)
+  - [Rope (data structure) - Wikipedia](https://en.wikipedia.org/wiki/Rope_%28data_structure%29)
+  - [tsoding/noed: Not ed(1) text editor (github.com)](https://github.com/tsoding/noed)
