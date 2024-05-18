@@ -80,4 +80,5 @@ pub enum InspectorScratchPadEvent {
     ScratchPadAppendInfo { info: ElementInfo },
     ScratchPadAppendAllKnown,
     ScratchPadAppendAll,
+    ScratchPadAppendAllUnknown,
 }

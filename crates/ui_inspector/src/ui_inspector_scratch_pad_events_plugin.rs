@@ -28,6 +28,10 @@ impl Plugin for UiInspectorScratchPadEventsPlugin {
         );
         app.add_systems(
             Update,
+            handle_append_all_unknown_scratch_pad_events.run_if(visible_condition),
+        );
+        app.add_systems(
+            Update,
             handle_append_all_scratch_pad_events.run_if(visible_condition),
         );
         app.add_systems(
@@ -209,6 +213,82 @@ fn handle_append_all_known_scratch_pad_events(
                         &info.drill_id.relative_to(&window.drill_id),
                     )
                     .is_some()
+                })
+                .collect(),
+            _ => {
+                // Unknown window, just do selected
+                let Some(selected_info) =
+                    ui_data.ui_tree.lookup_drill_id(selected_drill_id.clone())
+                else {
+                    return;
+                };
+                vec![selected_info]
+            }
+        };
+
+        push_infos.sort_by_key(|info| {
+            let pos = info.bounding_rect.top_left();
+            pos.y * 10000 + pos.x
+        });
+
+        let new_content = push_infos
+            .into_iter()
+            .map(|info| {
+                get_content(
+                    info,
+                    &ui_data.scratch_pad_mode,
+                    &app_kind,
+                    &ui_data,
+                    &screen_access,
+                )
+            })
+            .unique()
+            .join("\n");
+
+        // append to scratch pad
+        // make new rows show at the top by adding to the front
+        ui_data.scratch_pad.insert_str(0, new_content.as_str());
+    }
+}
+
+fn handle_append_all_unknown_scratch_pad_events(
+    mut inspector_events: EventReader<InspectorScratchPadEvent>,
+    mut ui_data: ResMut<UIData>,
+    screen_access: ScreensToImageParam,
+) {
+    for event in inspector_events.read() {
+        let InspectorScratchPadEvent::ScratchPadAppendAllUnknown = event else {
+            continue;
+        };
+
+        // get selected info
+        let Some(selected_drill_id) = &ui_data.selected else {
+            return;
+        };
+
+        // get window
+        let Some(window) = ui_data.ui_tree.find_first_child(selected_drill_id) else {
+            warn!(
+                "Selected drill id not found in tree: {:?}",
+                selected_drill_id
+            );
+            return;
+        };
+
+        let app_kind = CursorHeroAppKind::from_window(window);
+        let mut push_infos = match app_kind {
+            Some(CursorHeroAppKind::Calculator) => window
+                .get_descendents()
+                .into_iter()
+                .filter(|info| CalculatorElementKind::from_info(info).is_none())
+                .collect(),
+            Some(CursorHeroAppKind::Explorer) => std::iter::once(window)
+                .chain(window.get_descendents().into_iter())
+                .filter(|info| {
+                    ExplorerElementKind::from_window_relative_drill_id(
+                        &info.drill_id.relative_to(&window.drill_id),
+                    )
+                    .is_none()
                 })
                 .collect(),
             _ => {

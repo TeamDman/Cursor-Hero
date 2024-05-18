@@ -236,7 +236,12 @@ pub fn do_properties_panel(
         // Scratch pad - push button
         if ui.button("push known").clicked() {
             inspector_events.send(InspectorScratchPadEvent::ScratchPadAppendAllKnown);
-            info!("Sent push all event");
+            info!("Sent push known event");
+        }
+        // Scratch pad - push button
+        if ui.button("push unknown").clicked() {
+            inspector_events.send(InspectorScratchPadEvent::ScratchPadAppendAllUnknown);
+            info!("Sent push unknown event");
         }
         // Scratch pad - push button
         if ui.button("push all").clicked() {
