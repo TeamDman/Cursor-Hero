@@ -63,99 +63,165 @@ pub fn do_properties_panel(
     });
 
     // Drill ID
-    ui.label("drill_id");
-    let drill_id = selected_info.drill_id.to_string();
-    inspector.ui_for_reflect_readonly(&drill_id, ui);
-    if ui.button("copy").clicked() {
-        ui.output_mut(|out| {
-            out.copied_text.clone_from(&drill_id);
-        });
-        info!("Copied drill_id {} to clipboard", drill_id);
-    }
-
-    if let Some(mark) = &ui_data.mark {
-        ui.label("drill_id relative to mark");
-        let relative_drill_id = selected_info.drill_id.relative_to(mark).to_string();
-        inspector.ui_for_reflect_readonly(&relative_drill_id, ui);
+    ui.horizontal(|ui| {
+        let drill_id = selected_info.drill_id.to_string();
         if ui.button("copy").clicked() {
             ui.output_mut(|out| {
-                out.copied_text.clone_from(&relative_drill_id);
+                out.copied_text.clone_from(&drill_id);
             });
-            info!(
-                "Copied drill_id relative to mark {} to clipboard",
-                relative_drill_id
-            );
+            info!("Copied drill_id {} to clipboard", drill_id);
         }
+        ui.label("drill_id");
+        inspector.ui_for_reflect_readonly(&drill_id, ui);
+    });
+
+    if let Some(mark) = &ui_data.mark {
+        ui.horizontal(|ui| {
+            let relative_drill_id = selected_info.drill_id.relative_to(mark).to_string();
+            if ui.button("copy").clicked() {
+                ui.output_mut(|out| {
+                    out.copied_text.clone_from(&relative_drill_id);
+                });
+                info!(
+                    "Copied drill_id relative to mark {} to clipboard",
+                    relative_drill_id
+                );
+            }
+            ui.label("drill_id relative to mark");
+            inspector.ui_for_reflect_readonly(&relative_drill_id, ui);
+        });
     }
 
     // Runtime ID
-    ui.label("runtime_id");
-    let runtime_id = selected_info.runtime_id.to_string();
-    inspector.ui_for_reflect_readonly(&runtime_id, ui);
-    if ui.button("copy").clicked() {
-        ui.output_mut(|out| {
-            out.copied_text.clone_from(&runtime_id);
-        });
-        info!("Copied runtime_id {} to clipboard", runtime_id);
-    }
+
+    ui.horizontal(|ui| {
+        let runtime_id = selected_info.runtime_id.to_string();
+        if ui.button("copy").clicked() {
+            ui.output_mut(|out| {
+                out.copied_text.clone_from(&runtime_id);
+            });
+            info!("Copied runtime_id {} to clipboard", runtime_id);
+        }
+        ui.label("runtime_id");
+        inspector.ui_for_reflect_readonly(&runtime_id, ui);
+    });
+
+    // Automation ID
+
+    ui.horizontal(|ui| {
+        let automation_id = selected_info.automation_id.to_string();
+        if ui.button("copy").clicked() {
+            ui.output_mut(|out| {
+                out.copied_text.clone_from(&automation_id);
+            });
+            info!("Copied automation_id {} to clipboard", automation_id);
+        }
+        ui.label("automation_id");
+        inspector.ui_for_reflect_readonly(&automation_id, ui);
+    });
+
+    // Control Type
+    ui.horizontal(|ui| {
+        let control_type = selected_info.control_type.clone();
+        if ui.button("copy").clicked() {
+            ui.output_mut(|out| {
+                out.copied_text.clone_from(&format!("{control_type:?}"));
+            });
+            info!("Copied control_type {:?} to clipboard", control_type);
+        }
+        ui.label("control_type");
+        inspector.ui_for_reflect_readonly(&control_type, ui);
+    });
+
+    // Localized control Type
+    ui.horizontal(|ui| {
+        let localized_control_type = selected_info.localized_control_type.clone();
+        if ui.button("copy").clicked() {
+            ui.output_mut(|out| {
+                out.copied_text.clone_from(&localized_control_type);
+            });
+            info!(
+                "Copied localized_control_type {:?} to clipboard",
+                localized_control_type
+            );
+        }
+        ui.label("localized_control_type");
+        inspector.ui_for_reflect_readonly(&localized_control_type, ui);
+    });
+
+    // Class name
+    ui.horizontal(|ui| {
+        let class_name = selected_info.class_name.clone();
+        if ui.button("copy").clicked() {
+            ui.output_mut(|out| {
+                out.copied_text.clone_from(&class_name);
+            });
+            info!("Copied class_name {:?} to clipboard", class_name);
+        }
+        ui.label("class_name");
+        inspector.ui_for_reflect_readonly(&class_name, ui);
+    });
 
     // Bounds size
-    ui.label("bounds size");
-    let bounds_size = selected_info.bounding_rect.size().to_string();
-    inspector.ui_for_reflect_readonly(&bounds_size, ui);
-    if ui.button("copy").clicked() {
-        ui.output_mut(|out| {
-            out.copied_text.clone_from(&bounds_size);
-        });
-        info!("Copied bounds size {} to clipboard", bounds_size);
-    }
+    ui.horizontal(|ui| {
+        let bounds_size = selected_info.bounding_rect.size().to_string();
+        if ui.button("copy").clicked() {
+            ui.output_mut(|out| {
+                out.copied_text.clone_from(&bounds_size);
+            });
+            info!("Copied bounds size {} to clipboard", bounds_size);
+        }
+        ui.label("bounds size");
+        inspector.ui_for_reflect_readonly(&bounds_size, ui);
+    });
 
-    ui.label("bounds relative to mark");
+    ui.horizontal(|ui| {
 
-    // Use mark if present, window otherwise
-    let compare_drill_id = ui_data
-        .mark
-        .clone()
-        .or_else(|| {
-            selected_drill_id
-                .as_child()
-                .map(|inner| inner.iter().take(1).cloned().collect())
-        })
-        .unwrap_or(DrillId::Root);
+        // Use mark if present, window otherwise
+        let compare_drill_id = ui_data
+            .mark
+            .clone()
+            .or_else(|| {
+                selected_drill_id
+                    .as_child()
+                    .map(|inner| inner.iter().take(1).cloned().collect())
+            })
+            .unwrap_or(DrillId::Root);
 
-    // Look up the comparison element
-    let compare = ui_data
-        .tree
-        .lookup_drill_id(compare_drill_id)
-        .unwrap_or(&ui_data.tree);
+        // Look up the comparison element
+        let compare = ui_data
+            .tree
+            .lookup_drill_id(compare_drill_id)
+            .unwrap_or(&ui_data.tree);
 
-    // Get the bounds of the selected element relative to the comparison element
-    let bounds_relative = selected_info
-        .bounding_rect
-        .translated(&-compare.bounding_rect.top_left());
+        // Get the bounds of the selected element relative to the comparison element
+        let bounds_relative = selected_info
+            .bounding_rect
+            .translated(&-compare.bounding_rect.top_left());
 
-    // Format as string
-    let bounds_relative_str = format!(
-        "Rect::new({:.1},{:.1},{:.1},{:.1})",
-        bounds_relative.top_left().x as f32,
-        -bounds_relative.top_left().y as f32,
-        bounds_relative.bottom_right().x as f32,
-        -bounds_relative.bottom_right().y as f32
-    );
-
-    // Render the string
-    inspector.ui_for_reflect_readonly(&bounds_relative_str, ui);
-
-    // Render copy button
-    if ui.button("copy").clicked() {
-        ui.output_mut(|out| {
-            out.copied_text.clone_from(&bounds_relative_str);
-        });
-        info!(
-            "Copied bounds relative {} to clipboard",
-            bounds_relative_str
+        // Format as string
+        let bounds_relative_str = format!(
+            "Rect::new({:.1},{:.1},{:.1},{:.1})",
+            bounds_relative.top_left().x as f32,
+            -bounds_relative.top_left().y as f32,
+            bounds_relative.bottom_right().x as f32,
+            -bounds_relative.bottom_right().y as f32
         );
-    }
+
+        // Render copy button
+        if ui.button("copy").clicked() {
+            ui.output_mut(|out| {
+                out.copied_text.clone_from(&bounds_relative_str);
+            });
+            info!(
+                "Copied bounds relative {} to clipboard",
+                bounds_relative_str
+            );
+        }
+
+        ui.label("bounds relative to mark");
+        inspector.ui_for_reflect_readonly(&bounds_relative_str, ui);
+    });
 
     // We can borrow ui_data as mut now since this is
     // the last time selected_info is borrowed
@@ -178,6 +244,6 @@ pub fn do_properties_panel(
     }
 
     // Properties
-    ui.separator();
-    inspector.ui_for_reflect_readonly(selected_info, ui);
+    // ui.separator();
+    // inspector.ui_for_reflect_readonly(selected_info, ui);
 }
