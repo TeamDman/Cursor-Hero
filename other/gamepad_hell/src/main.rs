@@ -2,7 +2,6 @@ extern crate gilrs;
 
 use gilrs::Axis;
 use gilrs::Event;
-use gilrs::EventType;
 use gilrs::Gilrs;
 
 fn main() {

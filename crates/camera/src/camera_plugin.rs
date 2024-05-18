@@ -63,7 +63,10 @@ pub fn update_camera_zoom(
     let egui_wants_pointer = egui_context_query
         .get_single()
         .ok()
-        .map(|egui_context| egui_context.clone().get_mut().wants_pointer_input())
+        .map(|ctx| {
+let mut ctx = ctx.clone();
+let ctx = ctx.get_mut(); ctx.is_using_pointer() || ctx.is_pointer_over_area()
+})
         .unwrap_or(false);
     if egui_wants_pointer {
         scroll_events.clear();

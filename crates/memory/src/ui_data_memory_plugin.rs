@@ -4,6 +4,7 @@ use cursor_hero_ui_automation_types::prelude::DrillId;
 use cursor_hero_ui_automation_types::prelude::ElementInfo;
 use cursor_hero_ui_inspector_types::prelude::ScratchPadMode;
 use cursor_hero_ui_inspector_types::prelude::UIData;
+use cursor_hero_ui_inspector_types::prelude::WindowOpenness;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -53,8 +54,7 @@ impl Default for UIDataMemoryConfig {
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 struct DiskData {
-    pub visible: bool,
-    pub open: bool,
+    pub opened: WindowOpenness,
     pub scratch_pad: String,
     pub scratch_pad_mode: ScratchPadMode,
     pub mark: Option<DrillId>,
@@ -68,8 +68,7 @@ struct DiskData {
 impl From<DiskData> for UIData {
     fn from(value: DiskData) -> Self {
         UIData {
-            visible: value.visible,
-            open: value.open,
+            opened: value.opened,
             scratch_pad: value.scratch_pad,
             scratch_pad_mode: value.scratch_pad_mode,
             mark: value.mark,
@@ -86,8 +85,7 @@ impl From<DiskData> for UIData {
 impl From<&UIData> for DiskData {
     fn from(value: &UIData) -> Self {
         Self {
-            open: value.open,
-            visible: value.visible,
+            opened: value.opened.clone(),
             scratch_pad: value.scratch_pad.clone(),
             scratch_pad_mode: value.scratch_pad_mode.clone(),
             mark: value.mark.clone(),
@@ -130,13 +128,13 @@ fn restore(
 ) -> Result<RestoreSuccess, RestoreError> {
     let file = get_persist_file(memory_config.as_ref(), PERSIST_FILE_NAME, Usage::Restore)
         .map_err(RestoreError::Io)?;
-    let mut data: DiskData = read_from_disk(file)?;
+    let data: DiskData = read_from_disk(file)?;
 
     info!("Restoring UI Data");
 
     // other debug systems are hidden by default
     // force this to be invisible at start until a global debug state is implemented
-    data.visible = false;
+    // data.opened.global_toggle = false;
 
     *ui_data = data.into();
 

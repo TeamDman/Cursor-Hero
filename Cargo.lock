@@ -2763,6 +2763,7 @@ dependencies = [
  "cursor_hero_calculator_app_types",
  "cursor_hero_cursor_types",
  "cursor_hero_explorer_app_types",
+ "cursor_hero_input",
  "cursor_hero_screen",
  "cursor_hero_ui_automation",
  "cursor_hero_ui_hover_types",

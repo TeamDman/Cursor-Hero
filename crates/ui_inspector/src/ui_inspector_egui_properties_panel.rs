@@ -8,8 +8,6 @@ use cursor_hero_bevy::prelude::BottomRightI;
 use cursor_hero_bevy::prelude::TopLeftI;
 use cursor_hero_bevy::prelude::TranslateIVec2;
 use cursor_hero_ui_automation::prelude::DrillId;
-use cursor_hero_ui_inspector_types::prelude::InspectorScratchPadEvent;
-use cursor_hero_ui_inspector_types::prelude::ScratchPadMode;
 use cursor_hero_ui_inspector_types::prelude::ThreadboundUISnapshotMessage;
 use cursor_hero_ui_inspector_types::prelude::UIData;
 
@@ -19,7 +17,6 @@ pub fn do_properties_panel(
     ui_data: &mut UIData,
     preview: Option<(egui::TextureId, (f32, f32))>,
     threadbound_events: &mut EventWriter<ThreadboundUISnapshotMessage>,
-    inspector_events: &mut EventWriter<InspectorScratchPadEvent>,
 ) {
     // Ensure something is selected
     let Some(selected_drill_id) = ui_data.selected.clone() else {
@@ -180,85 +177,6 @@ pub fn do_properties_panel(
         ui.image(SizedTexture::new(texture_id, size));
     }
 
-    // Scratch Pad
-    ui.vertical_centered(|ui| {
-        ui.heading("Scratch Pad");
-    });
-
-    let window_drill_id = selected_drill_id
-        .as_child()
-        .map(|inner| inner.iter().take(1).cloned().collect())
-        .unwrap_or(DrillId::Root);
-
-    // Scratch pad - mode switch
-    ui.label("(changing mode will clear scratch pad)");
-    ui.horizontal(|ui| {
-        let mut changed = false;
-        for mode in ScratchPadMode::variants() {
-            let text = mode.to_string();
-            changed |= ui
-                .radio_value(&mut ui_data.scratch_pad_mode, mode, text)
-                .changed();
-        }
-        if changed {
-            ui_data.scratch_pad.clear();
-        }
-    });
-
-    ui.horizontal(|ui| {
-        // Scratch pad - clear button
-        if ui.button("clear").clicked() {
-            ui_data.scratch_pad.clear();
-        }
-
-        // space between buttons
-        ui.add_space(10.0);
-
-        // Scratch pad - copy button
-        if ui.button("copy").clicked() {
-            ui.output_mut(|out| {
-                out.copied_text.clone_from(&ui_data.scratch_pad);
-            });
-            info!("Copied scratch pad to clipboard");
-        }
-
-        // space between buttons
-        ui.add_space(10.0);
-
-        // Scratch pad - push button
-        if ui.button("push").clicked() {
-            inspector_events.send(InspectorScratchPadEvent::ScratchPadAppendInfo {
-                info: selected_info.clone(),
-            });
-            info!("Sent push event");
-        }
-
-        // Scratch pad - push button
-        if ui.button("push known").clicked() {
-            inspector_events.send(InspectorScratchPadEvent::ScratchPadAppendAllKnown);
-            info!("Sent push known event");
-        }
-        // Scratch pad - push button
-        if ui.button("push unknown").clicked() {
-            inspector_events.send(InspectorScratchPadEvent::ScratchPadAppendAllUnknown);
-            info!("Sent push unknown event");
-        }
-        // Scratch pad - push button
-        if ui.button("push all").clicked() {
-            inspector_events.send(InspectorScratchPadEvent::ScratchPadAppendAll);
-            info!("Sent push all event");
-        }
-
-        // Mark - set to window
-        if ui.button("mark window").clicked() {
-            ui_data.mark = Some(window_drill_id);
-        }
-    });
-
-    // Scratch pad - text area
-    egui::TextEdit::multiline(&mut ui_data.scratch_pad)
-        .desired_width(ui.available_width())
-        .show(ui);
 
     // Properties
     ui.separator();

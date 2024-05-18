@@ -5,20 +5,23 @@ use std::thread;
 
 use windows::Win32::System::Com::CoInitializeEx;
 use windows::Win32::System::Com::COINIT_MULTITHREADED;
-pub struct WorkerPlugin<T, G, S>
+pub struct WorkerPlugin<T, G, S, E, EE, EEE>
 where
     T: WorkerMessage,
     G: WorkerMessage,
     S: WorkerState,
 {
-    pub config: WorkerConfig<T, G, S>,
+    pub config: WorkerConfig<T, G, S, E, EE, EEE>,
 }
 
-impl<T, G, S> Plugin for WorkerPlugin<T, G, S>
+impl<T, G, S, E, EE, EEE> Plugin for WorkerPlugin<T, G, S, E, EE, EEE>
 where
     T: WorkerMessage,
     G: WorkerMessage,
     S: WorkerState,
+    E: WorkerError,
+    EE: WorkerError,
+    EEE: WorkerError,
 {
     fn build(&self, app: &mut App) {
         // TODO: conditionally register if T or G support it
@@ -27,16 +30,23 @@ where
         app.add_event::<T>();
         app.add_event::<G>();
         app.insert_resource(self.config.clone());
-        app.add_systems(Startup, create_worker_thread::<T, G, S>);
-        app.add_systems(Update, bridge_requests::<T, G, S>);
-        app.add_systems(Update, bridge_responses::<T, G, S>);
+        app.add_systems(Startup, create_worker_thread::<T, G, S, E, EE, EEE>);
+        app.add_systems(Update, bridge_requests::<T, G, S, E, EE, EEE>);
+        app.add_systems(Update, bridge_responses::<T, G, S, E, EE, EEE>);
     }
 }
 
-fn create_worker_thread<T: WorkerMessage, G: WorkerMessage, S: WorkerState>(
-    config: Res<WorkerConfig<T, G, S>>,
+fn create_worker_thread<T, G, S, E, EE, EEE>(
+    config: Res<WorkerConfig<T, G, S, E, EE, EEE>>,
     mut commands: Commands,
-) {
+) where
+    T: WorkerMessage,
+    G: WorkerMessage,
+    S: WorkerState,
+    E: WorkerError,
+    EE: WorkerError,
+    EEE: WorkerError,
+{
     let (game_tx, game_rx) = bounded::<G>(config.gamebound_channel_capacity);
     let (thread_tx, thread_rx) = bounded::<T>(config.threadbound_channel_capacity);
 
@@ -102,11 +112,18 @@ fn create_worker_thread<T: WorkerMessage, G: WorkerMessage, S: WorkerState>(
     }
 }
 
-fn bridge_requests<T: WorkerMessage, G: WorkerMessage, S: WorkerState>(
-    config: Res<WorkerConfig<T, G, S>>,
+fn bridge_requests<T, G, S, E, EE, EEE>(
+    config: Res<WorkerConfig<T, G, S, E, EE, EEE>>,
     bridge: ResMut<Bridge<T, G>>,
     mut events: EventReader<T>,
-) {
+) where
+    T: WorkerMessage,
+    G: WorkerMessage,
+    S: WorkerState,
+    E: WorkerError,
+    EE: WorkerError,
+    EEE: WorkerError,
+{
     for event in events.read() {
         trace!("[{}] Bevy => Thread: {:?}", config.name, event);
         if let Err(e) = bridge.sender.try_send(event.clone()) {
@@ -128,11 +145,18 @@ fn bridge_requests<T: WorkerMessage, G: WorkerMessage, S: WorkerState>(
     }
 }
 
-fn bridge_responses<T: WorkerMessage, G: WorkerMessage, S: WorkerState>(
-    config: Res<WorkerConfig<T, G, S>>,
+fn bridge_responses<T, G, S, E, EE, EEE>(
+    config: Res<WorkerConfig<T, G, S, E, EE, EEE>>,
     bridge: ResMut<Bridge<T, G>>,
     mut events: EventWriter<G>,
-) {
+) where
+    T: WorkerMessage,
+    G: WorkerMessage,
+    S: WorkerState,
+    E: WorkerError,
+    EE: WorkerError,
+    EEE: WorkerError,
+{
     for msg in bridge.receiver.try_iter() {
         trace!("[{}] Thread => Bevy: {:?}", config.name, msg);
         events.send(msg);

@@ -1,14 +1,9 @@
-use bevy::input::common_conditions::input_toggle_active;
-use bevy::prelude::*;
-use cursor_hero_input::active_input_state_plugin::InputMethod;
-
 use bevy::audio::AudioPlugin;
 use bevy::audio::SpatialScale;
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::log::LogPlugin;
+use bevy::prelude::*;
 use bevy_embedded_assets::EmbeddedAssetPlugin;
-use bevy_inspector_egui::quick::StateInspectorPlugin;
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use cursor_hero_agent::agent_plugin::AgentPlugin;
 use cursor_hero_camera::camera_plugin::CameraPlugin;
 use cursor_hero_character::character_plugin::CharacterPlugin;
@@ -114,8 +109,6 @@ impl Plugin for DefaultLaunchModePlugin {
         app.add_plugins(ExplorerToolTypesPlugin);
         app.add_plugins(UiHoverTypesPlugin);
         app.add_plugins(UiHoverPlugin);
-        app.add_plugins(UIInspectorTypesPlugin);
-        app.add_plugins(UiInspectorPlugin);
         app.add_plugins(MemoryTypesPlugin);
         let memory_config = MemoryConfig {
             save_dir: "Cursor Hero Memory".to_string(),
@@ -263,14 +256,10 @@ impl Plugin for DefaultLaunchModePlugin {
         app.add_plugins(TextAssetPlugin);
         app.add_plugins(TaskbarTypesPlugin);
 
-        // must be after the default plugins
-        app.add_plugins(
-            WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Grave)),
-        );
-        app.add_plugins(
-            StateInspectorPlugin::<InputMethod>::default()
-                .run_if(input_toggle_active(false, KeyCode::Grave)),
-        );
+        // must be after the default plugins because of bevy-inspector-egui
+        app.add_plugins(UiInspectorTypesPlugin);
+        app.add_plugins(UiInspectorPlugin);
+
         app.add_plugins(FrameTimeDiagnosticsPlugin);
     }
 }

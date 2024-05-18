@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 use cursor_hero_ui_automation::prelude::UiSnapshot;
-use cursor_hero_worker_types::prelude::WorkerMessage;
 use std::fmt;
 use std::fmt::Display;
 use std::fmt::Formatter;
@@ -47,10 +46,8 @@ impl Display for AppUIElement {
 pub enum ThreadboundUIWatcherMessage {
     TakeSnapshot,
 }
-impl WorkerMessage for ThreadboundUIWatcherMessage {}
 
 #[derive(Event, Debug, Reflect, Clone)]
 pub enum GameboundUIWatcherMessage {
     Snapshot(UiSnapshot),
 }
-impl WorkerMessage for GameboundUIWatcherMessage {}

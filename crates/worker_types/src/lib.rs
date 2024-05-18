@@ -5,4 +5,5 @@ pub mod prelude {
     pub use crate::worker_types::*;
     pub use crate::worker_types_plugin::*;
     pub use anyhow;
+    pub use crossbeam_channel;
 }

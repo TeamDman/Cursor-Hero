@@ -5,7 +5,6 @@ use bevy_egui::EguiContexts;
 use bevy_inspector_egui::reflect_inspector::InspectorUi;
 use cursor_hero_ui_hover_types::prelude::HoverInfo;
 use cursor_hero_ui_hover_types::prelude::InspectorHoverIndicator;
-use cursor_hero_ui_inspector_types::prelude::InspectorScratchPadEvent;
 use cursor_hero_ui_inspector_types::prelude::ThreadboundUISnapshotMessage;
 use cursor_hero_ui_inspector_types::prelude::UIData;
 
@@ -16,8 +15,7 @@ pub struct UiInspectorEguiPlugin;
 
 impl Plugin for UiInspectorEguiPlugin {
     fn build(&self, app: &mut App) {
-        let visible_condition = |ui_data: Res<UIData>| ui_data.visible;
-        app.add_systems(Update, gui.run_if(visible_condition));
+        app.add_systems(Update, gui.run_if(|ui_data: Res<UIData>| ui_data.opened.global_toggle && ui_data.opened.tree));
     }
 }
 
@@ -27,12 +25,7 @@ fn gui(
     type_registry: Res<AppTypeRegistry>,
     mut hover_info: ResMut<HoverInfo>,
     mut threadbound_events: EventWriter<ThreadboundUISnapshotMessage>,
-    mut inspector_events: EventWriter<InspectorScratchPadEvent>,
 ) {
-    if !ui_data.visible {
-        return;
-    }
-
     // Get preview image
     let preview = if let Some(ref preview) = ui_data.selected_preview
         && let Some(texture_id) = contexts.image_id(&preview.handle)
@@ -60,7 +53,7 @@ fn gui(
         .default_pos((5.0, 5.0))
         .default_width(1200.0)
         .default_height(1000.0)
-        .default_open(ui_data.open)
+        // .default_open(ui_data.opened.tree)
         .show(ctx, |ui| {
             egui::SidePanel::left(window_id.with("tree"))
                 .resizable(true)
@@ -84,20 +77,19 @@ fn gui(
                         &mut ui_data,
                         preview,
                         &mut threadbound_events,
-                        &mut inspector_events,
                     );
                 });
             });
         });
 
-    // Track window collapsed state
-    if CollapsingState::load(ctx, window_id.with("collapsing"))
-        .map(|x| x.is_open())
-        .unwrap_or(ui_data.open)
-        != ui_data.open
-    {
-        ui_data.open = !ui_data.open;
-    }
+    // // Track window collapsed state
+    // if CollapsingState::load(ctx, window_id.with("collapsing"))
+    //     .map(|x| x.is_open())
+    //     .unwrap_or(ui_data.opened.tree)
+    //     != ui_data.opened.tree
+    // {
+    //     ui_data.opened.tree = !ui_data.opened.tree;
+    // }
 
     // Display paused status
     let id = egui::Id::new("Paused");

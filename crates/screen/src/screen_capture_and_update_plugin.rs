@@ -11,7 +11,6 @@ use cursor_hero_worker::prelude::anyhow::Error;
 use cursor_hero_worker::prelude::anyhow::Result;
 use cursor_hero_worker::prelude::Sender;
 use cursor_hero_worker::prelude::WorkerConfig;
-use cursor_hero_worker::prelude::WorkerMessage;
 use cursor_hero_worker::prelude::WorkerPlugin;
 use cursor_hero_worker::prelude::WorkerState;
 
@@ -25,7 +24,7 @@ impl Plugin for ScreenCaptureAndUpdatePlugin {
         let refresh_fps = 144;
 
         app.add_plugins(WorkerPlugin {
-            config: WorkerConfig::<ThreadboundMessage, GameboundMessage, ThreadState> {
+            config: WorkerConfig::<ThreadboundMessage, GameboundMessage, ThreadState, _,_,_> {
                 name: "screen_update_plugin".to_string(),
                 threadbound_message_receiver: |thread_rx, _state| {
                     // Continuously capture frames when no messages present
@@ -53,6 +52,7 @@ struct ThreadState {
     enabled: bool,
 }
 impl WorkerState for ThreadState {
+    type Error = Error;
     fn try_default() -> Result<Self> {
         Ok(ThreadState {
             capturers: get_full_monitor_capturers()?,
@@ -66,13 +66,13 @@ enum ThreadboundMessage {
     SetEnabled(bool),
     CaptureFrames,
 }
-impl WorkerMessage for ThreadboundMessage {}
+
 
 #[derive(Clone, Event)]
 enum GameboundMessage {
     Frames(HashMap<MonitorId, CapturedFrame>),
 }
-impl WorkerMessage for GameboundMessage {}
+
 impl std::fmt::Debug for GameboundMessage {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {

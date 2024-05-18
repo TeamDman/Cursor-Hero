@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use cursor_hero_cursor_types::prelude::Way;
 use cursor_hero_ui_automation_types::prelude::*;
-use cursor_hero_worker::prelude::WorkerMessage;
 
 #[derive(Debug, Reflect, Clone, Event)]
 pub enum ThreadboundUISnapshotMessage {
@@ -49,6 +48,6 @@ pub enum GameboundUISnapshotMessage {
     },
     Error,
 }
-impl WorkerMessage for ThreadboundUISnapshotMessage {}
 
-impl WorkerMessage for GameboundUISnapshotMessage {}
+
+

@@ -17,13 +17,13 @@ use cursor_hero_worker::prelude::Sender;
 use cursor_hero_worker::prelude::WorkerConfig;
 use cursor_hero_worker::prelude::WorkerPlugin;
 use leafwing_input_manager::prelude::*;
-pub struct ClickToolTickPlugin;
+pub struct ClickToolClickPlugin;
 
-impl Plugin for ClickToolTickPlugin {
+impl Plugin for ClickToolClickPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(InputManagerPlugin::<ClickToolAction>::default());
         app.add_plugins(WorkerPlugin {
-            config: WorkerConfig::<ThreadboundClickMessage, GameboundClickMessage, ()> {
+            config: WorkerConfig::<ThreadboundClickMessage, GameboundClickMessage, (), _,_,_> {
                 name: "click".to_string(),
                 handle_threadbound_message,
                 ..default()
@@ -73,7 +73,10 @@ fn handle_input(
     // Do nothing when clicking over egui
     let egui_wants_pointer = egui_context_query
         .get_single()
-        .map(|ctx| ctx.clone().get_mut().wants_pointer_input())
+        .map(|ctx| {
+let mut ctx = ctx.clone();
+let ctx = ctx.get_mut(); ctx.is_using_pointer() || ctx.is_pointer_over_area()
+})
         .unwrap_or(false);
 
     for tool in tools.iter() {
@@ -110,6 +113,7 @@ fn handle_input(
         let cursor_pos = cursor_transform.translation();
 
         let window = window_query.get_single().expect("Need a single window");
+
         if window.cursor_position().is_some() && !egui_wants_pointer {
             // The host cursor is over the window
             // Perform virtual click instead of sending a message to the worker thread
@@ -160,7 +164,7 @@ fn handle_input(
                     });
                 }
             }
-        } else {
+        } else if !egui_wants_pointer{
             // The host cursor is outside the window
             // Send a message to the worker thread
             // debug!("Performing host click");

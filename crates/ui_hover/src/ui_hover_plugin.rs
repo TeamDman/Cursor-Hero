@@ -31,7 +31,7 @@ impl Plugin for UiHoverPlugin {
         app.insert_resource(HoverInfo::default());
 
         app.add_plugins(WorkerPlugin {
-            config: WorkerConfig::<ThreadboundHoverMessage, GameboundHoverMessage, ()> {
+            config: WorkerConfig::<ThreadboundHoverMessage, GameboundHoverMessage, (), _, _, _> {
                 name: "hover".to_string(),
                 handle_threadbound_message,
                 handle_threadbound_message_error_handler,
@@ -129,7 +129,10 @@ fn trigger_game_hover_info_update(
     let egui_wants_pointer = egui_context_query
         .get_single()
         .ok()
-        .map(|egui_context| egui_context.clone().get_mut().wants_pointer_input())
+        .map(|ctx| {
+let mut ctx = ctx.clone();
+let ctx = ctx.get_mut(); ctx.is_using_pointer() || ctx.is_pointer_over_area()
+})
         .unwrap_or(false);
     if egui_wants_pointer {
         // hover_info.game_hover_indicator = None;

@@ -21,7 +21,14 @@ pub struct UiInspectorWorkerPlugin;
 impl Plugin for UiInspectorWorkerPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(WorkerPlugin {
-            config: WorkerConfig::<ThreadboundUISnapshotMessage, GameboundUISnapshotMessage, ()> {
+            config: WorkerConfig::<
+                ThreadboundUISnapshotMessage,
+                GameboundUISnapshotMessage,
+                (),
+                _,
+                _,
+                _,
+            > {
                 name: "ui_hover".to_string(),
                 is_ui_automation_thread: true,
                 handle_threadbound_message,
@@ -29,9 +36,10 @@ impl Plugin for UiInspectorWorkerPlugin {
                 ..default()
             },
         });
-        let visible_condition = |ui_data: Res<UIData>| ui_data.visible;
-
-        app.add_systems(Update, handle_gamebound_messages.run_if(visible_condition));
+        app.add_systems(
+            Update,
+            handle_gamebound_messages.run_if(|ui_data: Res<UIData>| ui_data.opened.global_toggle),
+        );
     }
 }
 fn handle_threadbound_message_error_handler(

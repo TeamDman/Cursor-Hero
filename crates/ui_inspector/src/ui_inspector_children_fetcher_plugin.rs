@@ -7,11 +7,9 @@ pub struct UiInspectorChildrenFetcherPlugin;
 
 impl Plugin for UiInspectorChildrenFetcherPlugin {
     fn build(&self, app: &mut App) {
-        let visible_condition = |ui_data: Res<UIData>| ui_data.visible;
-
         app.add_systems(
             Update,
-            trigger_gather_children_request.run_if(visible_condition),
+            trigger_gather_children_request.run_if(|ui_data: Res<UIData>| ui_data.opened.global_toggle && ui_data.opened.tree),
         );
     }
 }

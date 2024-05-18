@@ -47,11 +47,30 @@ impl std::fmt::Display for ScratchPadMode {
     }
 }
 
+#[derive(Debug, Reflect, Default, Serialize, Deserialize, PartialEq, Clone)]
+pub struct WindowOpenness {
+    pub global_toggle: bool,
+    pub world: bool,
+    pub state: bool,
+    pub tree: bool,
+    pub properties: bool,
+    pub scratch_pad: bool,
+}
+impl WindowOpenness {
+    pub fn set_all(&mut self, value: bool) {
+        self.global_toggle = value;
+        self.world = value;
+        self.state = value;
+        self.tree = value;
+        self.properties = value;
+        self.scratch_pad = value;
+    }
+}
+
 #[derive(Resource, Debug, Reflect, Default)]
 #[reflect(Resource)]
 pub struct UIData {
-    pub visible: bool,
-    pub open: bool,
+    pub opened: WindowOpenness,
     pub scratch_pad: String,
     pub scratch_pad_mode: ScratchPadMode,
     pub mark: Option<DrillId>,

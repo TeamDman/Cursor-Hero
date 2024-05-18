@@ -12,11 +12,9 @@ pub struct UiInspectorTreeUpdatePlugin;
 
 impl Plugin for UiInspectorTreeUpdatePlugin {
     fn build(&self, app: &mut App) {
-        let visible_condition = |ui_data: Res<UIData>| ui_data.visible;
-
         app.add_systems(
             Update,
-            trigger_tree_update_for_hovered.run_if(visible_condition),
+            trigger_tree_update_for_hovered.run_if(|ui_data: Res<UIData>| ui_data.opened.global_toggle && ui_data.opened.tree),
         );
     }
 }
@@ -39,7 +37,11 @@ fn trigger_tree_update_for_hovered(
     let egui_wants_pointer = egui_context_query
         .get_single()
         .ok()
-        .map(|egui_context| egui_context.clone().get_mut().wants_pointer_input())
+        .map(|ctx| {
+            let mut ctx = ctx.clone();
+            let ctx = ctx.get_mut();
+            ctx.is_using_pointer() || ctx.is_pointer_over_area()
+        })
         .unwrap_or(false);
     if egui_wants_pointer {
         return;

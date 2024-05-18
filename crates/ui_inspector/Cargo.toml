@@ -23,3 +23,4 @@ cursor_hero_worker = { workspace = true }
 image = {workspace = true}
 itertools = { workspace = true }
 uiautomation = { workspace = true }
+cursor_hero_input = {workspace = true}

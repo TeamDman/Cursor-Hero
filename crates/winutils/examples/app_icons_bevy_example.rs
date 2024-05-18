@@ -51,19 +51,19 @@ app_icons_bevy_example=trace,
 enum ThreadboundMessage {
     GatherRunningProcessIcons,
 }
-impl WorkerMessage for ThreadboundMessage {}
+
 
 #[derive(Debug, Clone, Event)]
 enum GameboundMessage {
     RunningProcessIcons(HashMap<String, Vec<RgbaImage>>),
 }
-impl WorkerMessage for GameboundMessage {}
+
 
 fn handle_threadbound_message(
     msg: &ThreadboundMessage,
     reply_tx: &Sender<GameboundMessage>,
     _state: &mut (),
-) -> Result<()> {
+) -> anyhow::Result<()> {
     let ThreadboundMessage::GatherRunningProcessIcons = msg;
     let process_iter = ProcessIterator::new()?;
     let mut result = HashMap::new();

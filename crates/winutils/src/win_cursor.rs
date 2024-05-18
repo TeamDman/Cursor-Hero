@@ -61,7 +61,7 @@ mod tests {
         assert_eq!(icons.len(), 14);
 
         // Save icons
-        let mut path = PathBuf::from("target/cursor_icons");
+        let path = PathBuf::from("target/cursor_icons");
         std::fs::create_dir_all(&path).unwrap();
         for (i, icon) in icons.iter().enumerate() {
             let mut icon_path = path.clone();

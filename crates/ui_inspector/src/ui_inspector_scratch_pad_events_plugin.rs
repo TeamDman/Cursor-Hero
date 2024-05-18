@@ -21,22 +21,22 @@ pub struct UiInspectorScratchPadEventsPlugin;
 
 impl Plugin for UiInspectorScratchPadEventsPlugin {
     fn build(&self, app: &mut App) {
-        let visible_condition = |ui_data: Res<UIData>| ui_data.visible;
+        let condition = |ui_data: Res<UIData>| ui_data.opened.global_toggle && ui_data.opened.scratch_pad;
         app.add_systems(
             Update,
-            handle_append_all_known_scratch_pad_events.run_if(visible_condition),
+            handle_append_all_known_scratch_pad_events.run_if(condition),
         );
         app.add_systems(
             Update,
-            handle_append_all_unknown_scratch_pad_events.run_if(visible_condition),
+            handle_append_all_unknown_scratch_pad_events.run_if(condition),
         );
         app.add_systems(
             Update,
-            handle_append_all_scratch_pad_events.run_if(visible_condition),
+            handle_append_all_scratch_pad_events.run_if(condition),
         );
         app.add_systems(
             Update,
-            handle_append_single_info_scratch_pad_events.run_if(visible_condition),
+            handle_append_single_info_scratch_pad_events.run_if(condition),
         );
     }
 }

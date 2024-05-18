@@ -48,13 +48,13 @@ cursor_hero_worker=debug,
 enum ThreadboundUISnapshotMessage {
     TakeSnapshot,
 }
-impl WorkerMessage for ThreadboundUISnapshotMessage {}
+
 
 #[derive(Debug, Reflect, Clone, Event)]
 enum GameboundUISnapshotMessage {
     Snapshot(UiSnapshot),
 }
-impl WorkerMessage for GameboundUISnapshotMessage {}
+
 
 fn handle_threadbound_message(
     msg: &ThreadboundUISnapshotMessage,

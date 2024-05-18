@@ -4,7 +4,6 @@ use bevy_inspector_egui::InspectorOptions;
 use cursor_hero_cursor_types::cursor_click_types::Way;
 use cursor_hero_input::active_input_state_plugin::InputMethod;
 use cursor_hero_toolbelt_types::prelude::*;
-use cursor_hero_worker_types::prelude::WorkerMessage;
 use leafwing_input_manager::prelude::*;
 
 #[derive(Component, Reflect, Debug, InspectorOptions)]
@@ -49,11 +48,9 @@ pub enum ThreadboundClickMessage {
     LeftMouse(Motion, IVec2),
     RightMouse(Motion, IVec2),
 }
-impl WorkerMessage for ThreadboundClickMessage {}
 
 #[derive(Debug, Reflect, Clone, Event, Eq, PartialEq)]
 pub enum GameboundClickMessage {}
-impl WorkerMessage for GameboundClickMessage {}
 
 #[derive(Debug, Reflect, Clone, Eq, PartialEq)]
 pub enum Motion {

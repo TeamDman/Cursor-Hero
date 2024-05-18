@@ -1,9 +1,9 @@
 use crate::prelude::*;
 use bevy::prelude::*;
 
-pub struct UIInspectorTypesPlugin;
+pub struct UiInspectorTypesPlugin;
 
-impl Plugin for UIInspectorTypesPlugin {
+impl Plugin for UiInspectorTypesPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<UIData>();
         app.register_type::<UIData>();

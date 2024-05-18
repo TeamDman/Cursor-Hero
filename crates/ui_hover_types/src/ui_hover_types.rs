@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 use cursor_hero_ui_automation_types::prelude::ElementInfo;
-use cursor_hero_worker_types::prelude::WorkerMessage;
 
 #[derive(Resource, Default, Reflect)]
 #[reflect(Resource)]
@@ -68,11 +67,11 @@ pub enum GameboundHoverMessage {
     },
     ClearGameHoverInfo,
 }
-impl WorkerMessage for GameboundHoverMessage {}
+
 
 #[derive(Debug, Reflect, Clone, Event, Eq, PartialEq)]
 pub enum ThreadboundHoverMessage {
     AtPositionFromGame(IVec2),
     AtHostCursorPosition,
 }
-impl WorkerMessage for ThreadboundHoverMessage {}
+

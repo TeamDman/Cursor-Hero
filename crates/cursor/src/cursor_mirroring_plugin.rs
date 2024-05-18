@@ -5,14 +5,13 @@ use cursor_hero_winutils::win_mouse::get_host_cursor_position;
 use cursor_hero_worker::prelude::anyhow::Result;
 use cursor_hero_worker::prelude::Sender;
 use cursor_hero_worker::prelude::WorkerConfig;
-use cursor_hero_worker::prelude::WorkerMessage;
 use cursor_hero_worker::prelude::WorkerPlugin;
 
 pub struct CursorMirroringPlugin;
 impl Plugin for CursorMirroringPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(WorkerPlugin {
-            config: WorkerConfig::<ThreadboundCursorMessage, GameboundCursorMessage, ()> {
+            config: WorkerConfig::<ThreadboundCursorMessage, GameboundCursorMessage, (), _, _, _> {
                 name: "cursor_mirroring".to_string(),
                 handle_threadbound_message,
                 threadbound_message_receiver: |_thread_rx, _state| {
@@ -33,14 +32,14 @@ impl Plugin for CursorMirroringPlugin {
 enum ThreadboundCursorMessage {
     CaptureCursorPosition,
 }
-impl WorkerMessage for ThreadboundCursorMessage {}
+
 
 // This can be made public in the types crate if the need arises
 #[derive(Debug, Reflect, Clone, Event)]
 enum GameboundCursorMessage {
     HostCursorPosition(IVec2),
 }
-impl WorkerMessage for GameboundCursorMessage {}
+
 
 fn handle_threadbound_message(
     msg: &ThreadboundCursorMessage,
