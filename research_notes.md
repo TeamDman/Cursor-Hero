@@ -34,6 +34,14 @@
 - [Seam Carving Algorithm in Python | Liquid Resizing - YouTube](https://www.youtube.com/watch?v=g2FAonk6bss&feature=youtu.be)
 - [Using Generative AI to Organize Video Game Screenshots (raymondcamden.com)](https://www.raymondcamden.com/2024/02/19/using-generative-ai-to-organize-video-game-screenshots)
 - [Page dewarping (mzucker.github.io)](https://mzucker.github.io/2016/08/15/page-dewarping.html)
+- [HackerNews search for "Ai screenshot" | Search powered by Algolia](https://hn.algolia.com/?dateRange=all&page=0&prefix=true&query=Ai%20screenshot&sort=byPopularity&type=story)
+
+## Video Editing
+
+- [omni-clip (omniclip.app)](https://omniclip.app/)
+  - [Show HN: Open-Source Video Editor Web App | Hacker News (ycombinator.com)](https://news.ycombinator.com/item?id=40331968)
+  - [aegir-assembly/omni-clip: Open source video editing web application (github.com)](https://github.com/aegir-assembly/omni-clip)
+- [cnlohr/h264fun: Fun with h264 (mostly encoding) (github.com)](https://github.com/cnlohr/h264fun)
 
 ## RPA
 
@@ -53,12 +61,6 @@
 - [c# - UIAutomation won't retrieve children of an element - Stack Overflow](https://stackoverflow.com/questions/14187110/uiautomation-wont-retrieve-children-of-an-element)
 - [comEle = \_AutomationClient.instance().dll.GetNextSiblingElement(self.Element) Hangs - Issue #30 - yinkaisheng/Python-UIAutomation-for-Windows (github.com)](https://github.com/yinkaisheng/Python-UIAutomation-for-Windows/issues/30)
 - [microsoft/WinAppDriver: Windows Application Driver (github.com)](https://github.com/microsoft/WinAppDriver)
-- [How to force UI automation tree refresh](https://stackoverflow.com/q/64120894/11141271)
-  - mostly interested in the screen reader flag mentioned
-    ```
-    SystemParametersInfo( SPI_SETSCREENREADER, TRUE, NULL, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE);
-    PostMessage( HWND_BROADCAST, WM_WININICHANGE, SPI_SETSCREENREADER, 0);
-    ```
 - [UI Automation Fundamentals - .NET Framework | Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/ui-automation-fundamentals)
 - [Understanding Threading Issues - Win32 apps | Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/winauto/uiauto-threading)
 - [UI Automation Threading Issues - .NET Framework | Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/ui-automation-threading-issues)
@@ -77,6 +79,37 @@
 ### PowerAutomate
 
 - [🤖 How to use Microsoft Power Automate Desktop - Full tutorial - YouTube](https://www.youtube.com/watch?v=IQ_KpBC8fwo&feature=youtu.be)
+
+## Compression
+
+- [PeaZip: Open-source file compression and encryption software | Hacker News (ycombinator.com)](https://news.ycombinator.com/item?id=40327631)
+
+## Disk Health
+
+- [hiyohiyo/CrystalDiskInfo: CrystalDiskInfo (github.com)](https://github.com/hiyohiyo/crystaldiskinfo/)
+- [hiyohiyo/CrystalDiskMark: CrystalDiskMark (github.com)](https://github.com/hiyohiyo/crystaldiskmark/)
+
+## Screen Readers
+
+- [How to force UI automation tree refresh](https://stackoverflow.com/q/64120894/11141271)
+  - mostly interested in the screen reader flag mentioned
+    ```
+    SystemParametersInfo( SPI_SETSCREENREADER, TRUE, NULL, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE);
+    PostMessage( HWND_BROADCAST, WM_WININICHANGE, SPI_SETSCREENREADER, 0);
+    ```
+- [NV Access | Download NVDA](https://www.nvaccess.org/download/)
+  - has neat sound effects
+    - startup sound
+    - shutdown sound
+    - focus changed sound
+    - mouse down sound
+    - mouse up sound
+- [Let's create a screen reader!. Some time ago my colleague asked me why... | by Tomasz Jakut | Content Uneditable | Medium](https://medium.com/content-uneditable/lets-create-a-screen-reader-6734fe45aa3d)
+- 
+## Localization 
+
+- [Project Fluent](https://projectfluent.org/)
+  - [projectfluent/fluent-rs: Rust implementation of Project Fluent (github.com)](https://github.com/projectfluent/fluent-rs)
 
 ## Win32
 
@@ -105,6 +138,7 @@
 
 - [guidance-ai/guidance: A guidance language for controlling large language models.](https://github.com/guidance-ai/guidance)
 - [Eladlev/AutoPrompt: A framework for prompt tuning using Intent-based Prompt Calibration (github.com)](https://github.com/Eladlev/AutoPrompt)
+- [Vision Transformers Need Registers | Hacker News (ycombinator.com)](https://news.ycombinator.com/item?id=40329675)
 
 ## RAG, Tools and Actions
 
@@ -142,7 +176,8 @@
 
 - [Veilid: open-source, peer-to-peer, mobile-ﬁrst, networked application framework.](https://veilid.com/)
 - [stillonearth/bevy\_veilid: Build two-player turn-based p2p games with Bevy and Veilid (github.com)](https://github.com/stillonearth/bevy_veilid)
-
+  - use +nightly
+  - I get build errors :(
 ## Impl
 
 - [beartype](https://beartype.readthedocs.io/en/latest/)
@@ -169,6 +204,16 @@
 - [Entity-entity relations 🌈 - Issue #3742 - bevyengine/bevy (github.com)](https://github.com/bevyengine/bevy/issues/3742)
   - [Flecs: Relationships](https://www.flecs.dev/flecs/md_docs_2Relationships.html#symmetric-property)
   - [iiYese/aery: A plugin that enables a subset of entity relationship features for bevy (github.com)](https://github.com/iiYese/aery)
+
+## Text
+
+- [StarArawn/kayak\_ui (github.com)](https://github.com/StarArawn/kayak_ui)
+- [blaind/bevy\_text\_mesh: A bevy 3D text mesh generator for displaying text (github.com)](https://github.com/blaind/bevy_text_mesh)
+  - [fetisov/ttf2mesh: Standalone library for TrueType font tessellation. Allows to load ttf-file and convert its glyphs to 2D or 3D mesh objects without rasterization. (github.com)](https://github.com/fetisov/ttf2mesh/)
+- [FrankenApps/meshtext: Generate vertex-vertex meshes from text. (github.com)](https://github.com/FrankenApps/meshtext)
+- [ForTehLose/bevy\_meshtext (github.com)](https://github.com/ForTehLose/bevy_meshtext)
+- [Render to Texture (bevyengine.org)](https://bevyengine.org/examples/3D%20Rendering/render-to-texture/)
+
 ## Game inspiration
 
 - [The Last Clockwinder](https://store.steampowered.com/app/1755100/The_Last_Clockwinder/)
@@ -191,6 +236,7 @@
 ## Art
 
 - [LibreSprite/LibreSprite: Animated sprite editor & pixel art tool -- Fork of the last GPLv2 commit of Aseprite (github.com)](https://github.com/LibreSprite/LibreSprite)
+- [Pixelorama by Orama Interactive (itch.io)](https://orama-interactive.itch.io/pixelorama)
 
 ## UI
 
@@ -210,6 +256,7 @@
 ## Docs
 
 - [tbillington/bevy\_game\_docs: Generate documentation for Bevy games (github.com)](https://github.com/tbillington/bevy_game_docs)
+  - [Spacegame Docs (tbillington.github.io)](https://tbillington.github.io/bevy_game_docs/)
   - [bevy\_game\_docs/src/main.rs at main - tbillington/bevy\_game\_docs (github.com)](https://github.com/tbillington/bevy_game_docs/blob/main/src/main.rs)
   - [Motion Blur, Visualizations, and Beautiful Renders - This Week in Bevy Engine](https://youtu.be/M55pVZ6a8yk?t=286)
 
@@ -299,3 +346,34 @@
   - [tsoding/ded: Dramatic EDitor (github.com)](https://github.com/tsoding/ded)
   - [Rope (data structure) - Wikipedia](https://en.wikipedia.org/wiki/Rope_%28data_structure%29)
   - [tsoding/noed: Not ed(1) text editor (github.com)](https://github.com/tsoding/noed)
+
+## Linker
+
+(linux only for now)
+- [Faster linking times on nightly on Linux using \`rust-lld\` | Rust Blog (rust-lang.org)](https://blog.rust-lang.org/2024/05/17/enabling-rust-lld-on-linux.html)
+- [Using LLD as the linker on windows : r/rust (reddit.com)](https://www.reddit.com/r/rust/comments/nivznh/using_lld_as_the_linker_on_windows/)
+  - [bevy/.cargo/config\_fast\_builds at 653c10371e546176059bb779844c0569c0190b6b - bevyengine/bevy (github.com)](https://github.com/bevyengine/bevy/blob/653c10371e546176059bb779844c0569c0190b6b/.cargo/config_fast_builds#L16)
+    - [bevy/.cargo/config\_fast\_builds.toml at release-0.13.2 - bevyengine/bevy (github.com)](https://github.com/bevyengine/bevy/blob/release-0.13.2/.cargo/config_fast_builds.toml#L31)
+- [Use lld by default on x64 msvc windows - Issue #71520 - rust-lang/rust (github.com)](https://github.com/rust-lang/rust/issues/71520)
+- [YouTube Transcript - read YouTube videos](https://youtubetranscript.com/?v=VoPbpn4u93I&t=172)
+  - [Rust 1.78.0: Last Rust News Video...ever? - YouTube](https://www.youtube.com/watch?v=VoPbpn4u93I?t=172)
+
+## Encryption
+
+- [The Signal Protocol - X3DH explained](https://youtu.be/1R8lruHAbvY)
+
+## Web browser
+
+- [Dillo Website (dillo-browser.github.io)](https://dillo-browser.github.io/)
+- Tauri
+
+
+## GitHub
+
+- `gh api user/starred --jq ".[].full_name" --paginate`
+
+
+## Performance Profiling
+
+- Tracy
+- [google/perfetto: Performance instrumentation and tracing for Android, Linux and Chrome (read-only mirror of https://android.googlesource.com/platform/external/perfetto/) (github.com)](https://github.com/google/perfetto)
