@@ -56,7 +56,13 @@ pub(crate) fn start() -> Result<SecretString, Box<dyn Error>> {
             "--",
             "pwsh",
             "-Command",
-            r"cd D:\Repos\ml\voice2text && conda activate whisperx && python .\transcribe_hotkey_typer.py $env:port $env:api_key",
+            r"cd D:\Repos\ml\voice2text && bonda && conda activate whisperx && python .\transcribe_hotkey_typer.py",
+            /*
+                # in pwsh profile
+                function bonda() {
+                    (& "C:\ProgramData\Anaconda3\Scripts\conda.exe" "shell.powershell" "hook") | Out-String | ?{$_} | Invoke-Expression
+                }
+             */
         ])
         .env("port", port.to_string())
         .env("api_key", api_key.expose_secret())
