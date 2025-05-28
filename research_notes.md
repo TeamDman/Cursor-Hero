@@ -1,5 +1,7 @@
 # Research Notes
 
+Image matching https://www.reddit.com/r/rust/comments/1ea7xbg/rustautogui_a_gui_automation_tool_that_lets_you/
+
 ## Inference
 
 - [LM Studio](https://lmstudio.ai/)
