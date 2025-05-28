@@ -193,6 +193,7 @@
 - [Xelu's FREE Controller Prompts (thoseawesomeguys.com)](https://thoseawesomeguys.com/prompts/)
 - [\[DIVIDE BY ZERO\] Fonts : 1998-infinity (tom7.com)](http://fonts.tom7.com/fonts98.html)
 - [\[DIVIDE BY ZERO\] Fonts : 1993-1997 (tom7.com)](http://fonts.tom7.com/fonts93.html)
+- [The Ultimate Oldschool PC Font Pack: Font Index (int10h.org)](https://int10h.org/oldschool-pc-fonts/fontlist/)
 
 ## Bevy stuff
 
@@ -272,6 +273,7 @@
 - [c++ - How to create a virtual audio input device to simulate a microphone on windows? - Stack Overflow](https://stackoverflow.com/questions/74907682/how-to-create-a-virtual-audio-input-device-to-simulate-a-microphone-on-windows)
 - [Windows-driver-samples/audio/simpleaudiosample at main - microsoft/Windows-driver-samples (github.com)](https://github.com/microsoft/Windows-driver-samples/tree/main/audio/simpleaudiosample)
 - [wdmaudiodev Mailing List Archive (freelists.org)](https://www.freelists.org/archive/wdmaudiodev/)
+- [Elevenlabs sound effects API](https://elevenlabs.io/docs/api-reference/how-to-use-text-to-sound-effects)
 
 ## Animations
 
