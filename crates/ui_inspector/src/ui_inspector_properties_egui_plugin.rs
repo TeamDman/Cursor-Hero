@@ -3,13 +3,10 @@ use bevy_egui::egui;
 use bevy_egui::egui::collapsing_header::CollapsingState;
 use bevy_egui::EguiContexts;
 use bevy_inspector_egui::reflect_inspector::InspectorUi;
-use cursor_hero_ui_hover_types::prelude::HoverInfo;
-use cursor_hero_ui_hover_types::prelude::InspectorHoverIndicator;
 use cursor_hero_ui_inspector_types::prelude::ThreadboundUISnapshotMessage;
 use cursor_hero_ui_inspector_types::prelude::UIData;
 
 use crate::ui_inspector_egui_properties_panel::do_properties_panel;
-use crate::ui_inspector_egui_tree_panel::do_tree_panel;
 
 pub struct UiInspectorPropertiesEguiPlugin;
 
@@ -18,7 +15,7 @@ impl Plugin for UiInspectorPropertiesEguiPlugin {
         app.add_systems(
             Update,
             gui.run_if(|ui_data: Res<UIData>| {
-                ui_data.windows.global_toggle && ui_data.windows.properties
+                ui_data.windows.global_toggle && ui_data.windows.properties.open
             }),
         );
     }
@@ -28,7 +25,6 @@ fn gui(
     mut contexts: EguiContexts,
     mut ui_data: ResMut<UIData>,
     type_registry: Res<AppTypeRegistry>,
-    mut hover_info: ResMut<HoverInfo>,
     mut threadbound_events: EventWriter<ThreadboundUISnapshotMessage>,
 ) {
     // Get preview image
@@ -55,7 +51,7 @@ fn gui(
     let window_id = egui::Id::new("UI Properties");
     egui::Window::new("UI Properties")
         .id(window_id)
-        .default_open(ui_data.windows.properties_header_open)
+        .default_open(ui_data.windows.properties.header_open)
         .show(ctx, |ui| {
             do_properties_panel(
                 ui,
@@ -67,7 +63,7 @@ fn gui(
         });
 
     // Track window collapsed state
-    ui_data.windows.properties_header_open = CollapsingState::load(ctx, window_id.with("collapsing"))
+    ui_data.windows.properties.header_open = CollapsingState::load(ctx, window_id.with("collapsing"))
         .map(|x| x.is_open())
-        .unwrap_or(ui_data.windows.properties_header_open);
+        .unwrap_or(ui_data.windows.properties.header_open);
 }

@@ -26,6 +26,7 @@ fn toggle_global(mut ui_data: ResMut<UIData>) {
     ui_data.windows.global_toggle ^= true;
 }
 fn toggle_each(mut ui_data: ResMut<UIData>) {
-    let new = !ui_data.windows.global_toggle;
-    ui_data.windows.set_all(new);
+    ui_data.windows.global_toggle ^= true;
+    let new = ui_data.windows.global_toggle;
+    ui_data.windows.iter_mut().for_each(|window| window.open = new);
 }

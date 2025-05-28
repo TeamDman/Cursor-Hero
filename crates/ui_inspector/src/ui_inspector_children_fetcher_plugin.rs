@@ -10,7 +10,7 @@ impl Plugin for UiInspectorChildrenFetcherPlugin {
         app.add_systems(
             Update,
             trigger_gather_children_request.run_if(|ui_data: Res<UIData>| {
-                ui_data.windows.global_toggle && ui_data.windows.tree
+                ui_data.windows.global_toggle && ui_data.windows.tree.open
             }),
         );
     }

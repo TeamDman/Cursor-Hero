@@ -22,7 +22,7 @@ pub struct UiInspectorScratchPadEventsPlugin;
 impl Plugin for UiInspectorScratchPadEventsPlugin {
     fn build(&self, app: &mut App) {
         let condition =
-            |ui_data: Res<UIData>| ui_data.windows.global_toggle && ui_data.windows.scratch_pad;
+            |ui_data: Res<UIData>| ui_data.windows.global_toggle && ui_data.windows.scratch_pad.open;
         app.add_systems(
             Update,
             handle_append_all_known_scratch_pad_events.run_if(condition),
@@ -42,77 +42,117 @@ impl Plugin for UiInspectorScratchPadEventsPlugin {
     }
 }
 
-fn get_content(
-    info: &ElementInfo,
+fn get_content_many(
+    infos: Vec<&ElementInfo>,
     mode: &ScratchPadMode,
     app_kind: &Option<CursorHeroAppKind>,
     ui_data: &UIData,
     screen_access: &ScreensToImageParam,
 ) -> String {
-    let map_enhanced_thing = |transform: fn(&dyn Reflect) -> Option<String>| match app_kind {
-        Some(CursorHeroAppKind::Calculator)
-            if let Some(calc_elem_kind) = CalculatorElementKind::from_info(info) =>
-        {
-            transform(calc_elem_kind.as_reflect())
-        }
-        Some(CursorHeroAppKind::Explorer)
-            if let Some(explorer_elem_kind) =
-                ExplorerElementKind::from_window_relative_drill_id(&info.drill_id) =>
-        {
-            transform(explorer_elem_kind.as_reflect())
-        }
-        _ => None,
-    };
-    match mode {
-        ScratchPadMode::Identify => {
-            format!(
-                "{},",
-                map_enhanced_thing(display_enum_unqualified_variant_definition)
-                    .unwrap_or_else(|| info.as_pascal())
-            )
-        }
-        ScratchPadMode::MapIdentify => {
-            // info if info.name == "Plus" && info.class_name == "Button" => Some(CalculatorElementKind::PlusButton),
-            format!(
-                "info if info.name == \"{}\" && info.class_name == \"{}\" => Some({}),",
-                info.name,
-                info.class_name,
-                map_enhanced_thing(display_enum_qualified_variant_instance)
-                    .or_else(|| app_kind.as_ref().map(|k| format!(
-                        "{}::{}",
-                        k.element_kind_enum_name(),
-                        info.as_pascal()
-                    )))
-                    .unwrap_or_else(|| info.as_pascal())
-            )
-        }
-        ScratchPadMode::PerformDrill => {
-            let drill_id = info
-                .drill_id
-                .as_child()
-                .map(|d| d.iter().skip(1).map(|x| x.to_string()).join(", "))
-                .unwrap_or_default();
+    // infos
+    //     .into_iter()
+    //     .map(|info| get_content(info, mode, app_kind, ui_data, screen_access))
+    //     .unique()
+    //     .join("\n")
+    let transform_reflect =
+        |info: &ElementInfo, transform: fn(&dyn Reflect) -> Option<String>| -> Option<String> {
+            match app_kind {
+                Some(CursorHeroAppKind::Calculator)
+                    if let Some(calc_elem_kind) = CalculatorElementKind::from_info(info) =>
+                {
+                    transform(calc_elem_kind.as_reflect())
+                }
+                Some(CursorHeroAppKind::Explorer)
+                    if let Some(explorer_elem_kind) =
+                        ExplorerElementKind::from_window_relative_drill_id(&info.drill_id) =>
+                {
+                    transform(explorer_elem_kind.as_reflect())
+                }
+                _ => None,
+            }
+        };
+    let mut rtn = match mode {
+        ScratchPadMode::Identify => infos
+            .into_iter()
+            .map(|info| {
+                format!(
+                    "{},",
+                    transform_reflect(info, display_enum_unqualified_variant_definition)
+                        .unwrap_or_else(|| info.as_pascal())
+                )
+            })
+            .unique()
+            .sorted()
+            .join("\n"),
+        ScratchPadMode::MapIdentify => infos
+            .into_iter()
+            .map(|info| {
+                (
+                    info,
+                    transform_reflect(info, display_enum_qualified_variant_instance)
+                        .or_else(|| {
+                            app_kind.as_ref().map(|k| {
+                                format!("{}::{}", k.element_kind_enum_name(), info.as_pascal())
+                            })
+                        })
+                        .unwrap_or_else(|| info.as_pascal()),
+                )
+            })
+            .sorted_by_key(|(_, name)| name.clone())
+            .map(|(info, name)| {
+                let mut conditions = vec![];
+                if !info.name.is_empty() {
+                    conditions.push(format!("info.name == \"{}\"", info.name));
+                }
+                if !info.class_name.is_empty() {
+                    conditions.push(format!("info.class_name == \"{}\"", info.class_name));
+                }
+                if !info.automation_id.is_empty() {
+                    conditions.push(format!("info.automation_id == \"{}\"", info.automation_id));
+                }
 
-            format!(
-                "let {0} = root.drill(&walker, vec![{1}]).context(\"{0}\")?.try_into()?;",
-                info.as_identifier(),
-                drill_id,
-            )
-        }
-        ScratchPadMode::MapDrill => {
-            let drill_id = info
-                .drill_id
-                .as_child()
-                .map(|d| d.iter().skip(1).cloned().collect::<DrillId>())
-                .unwrap_or_default();
+                let mut rtn = "info if ".to_string();
+                rtn.push_str(&format!("{:width$}", conditions.join(" && "), width = 124));
+                rtn.push_str(&format!(" => Some({}),", name));
+                rtn
+            })
+            .join("\n"),
+        ScratchPadMode::PerformDrill => infos
+            .into_iter()
+            .map(|info| (info, info.as_identifier()))
+            .sorted_by_key(|(_, name)| name.clone())
+            .map(|(info, name)| {
+                let drill_id = info
+                    .drill_id
+                    .as_child()
+                    .map(|d| d.iter().skip(1).map(|x| x.to_string()).join(", "))
+                    .unwrap_or_default();
 
-            format!(
-                "{} => {}",
-                map_enhanced_thing(display_enum_qualified_variant_instance)
-                    .unwrap_or_else(|| info.as_identifier()),
-                drill_id
-            )
-        }
+                format!(
+                    "let {0} = root.drill(&walker, vec![{1}]).context(\"{0}\")?.try_into()?;",
+                    name, drill_id,
+                )
+            })
+            .join("\n"),
+        ScratchPadMode::MapDrill => infos
+            .into_iter()
+            .map(|info| (info, info.as_identifier()))
+            .sorted_by_key(|(_, name)| name.clone())
+            .map(|(info, name)| {
+                let drill_id = info
+                    .drill_id
+                    .as_child()
+                    .map(|d| d.iter().skip(1).cloned().collect::<DrillId>())
+                    .unwrap_or_default();
+
+                format!(
+                    "{} => {},",
+                    transform_reflect(info, display_enum_qualified_variant_instance)
+                        .unwrap_or_else(|| name),
+                    drill_id
+                )
+            })
+            .join("\n"),
         ScratchPadMode::MapBounds => {
             let compare = ui_data
                 .mark
@@ -125,55 +165,119 @@ fn get_content(
                 })
                 .unwrap_or(&ui_data.tree);
 
-            // Get the bounds of the selected element relative to the comparison element
-            let bounds_relative = info
-                .bounding_rect
-                .translated(&-compare.bounding_rect.top_left());
+            infos
+                .into_iter()
+                .map(|info| {
+                    (
+                        info,
+                        transform_reflect(info, display_enum_qualified_variant_instance)
+                            .unwrap_or_else(|| info.as_identifier()),
+                    )
+                })
+                .sorted_by_key(|(_, name)| name.clone())
+                .map(|(info, name)| {
+                    // Get the bounds of the selected element relative to the comparison element
+                    let bounds_relative = info
+                        .bounding_rect
+                        .translated(&-compare.bounding_rect.top_left());
 
-            // Format as string
-            format!(
-                "{} => Rect::new({:.1},{:.1},{:.1},{:.1}),",
-                map_enhanced_thing(display_enum_qualified_variant_instance)
-                    .unwrap_or_else(|| info.as_identifier()),
-                bounds_relative.top_left().x as f32,
-                -bounds_relative.top_left().y as f32,
-                bounds_relative.bottom_right().x as f32,
-                -bounds_relative.bottom_right().y as f32
-            )
+                    // Format as string
+                    format!(
+                        "{} => Rect::new({:.1},{:.1},{:.1},{:.1}),",
+                        transform_reflect(info, display_enum_qualified_variant_instance)
+                            .unwrap_or_else(|| name),
+                        bounds_relative.top_left().x as f32,
+                        -bounds_relative.top_left().y as f32,
+                        bounds_relative.bottom_right().x as f32,
+                        -bounds_relative.bottom_right().y as f32
+                    )
+                })
+                .join("\n")
         }
         ScratchPadMode::MapColor => {
-            let image = screen_access.get_image_buffer(info.bounding_rect);
-            let color = match image {
-                Ok(image) => {
-                    // find the most common colour
-                    let mut color_counts = HashMap::new();
-                    for (_, _, pixel) in image.enumerate_pixels() {
-                        *color_counts.entry(pixel).or_insert(0) += 1;
+            infos
+                .into_iter()
+                .map(|info| {
+                    (
+                        info,
+                        transform_reflect(info, display_enum_qualified_variant_instance)
+                            .unwrap_or_else(|| info.as_identifier()),
+                    )
+                })
+                .sorted_by_key(|(_, name)| name.clone())
+                .map(|(info, name)| {
+                    let image = screen_access.get_image_buffer(info.bounding_rect);
+                    let color = match image {
+                        Ok(image) => {
+                            // find the most common colour
+                            let mut color_counts = HashMap::new();
+                            for (_, _, pixel) in image.enumerate_pixels() {
+                                *color_counts.entry(pixel).or_insert(0) += 1;
+                            }
+                            color_counts
+                                .into_iter()
+                                .max_by_key(|(_, count)| *count)
+                                .map(|(image_color, _)| image_color.as_bevy_color())
+                                .unwrap_or(Color::BLACK)
+                        }
+                        Err(e) => {
+                            warn!(
+                                "Failed to get image for region {:?}: {e:?}",
+                                info.bounding_rect
+                            );
+                            Color::BLACK
+                        }
+                    };
+                    format!(
+                        "{} => Color::rgb({:.1},{:.1},{:.1}),",
+                        transform_reflect(info, display_enum_qualified_variant_instance)
+                            .unwrap_or_else(|| name),
+                        color.r(),
+                        color.g(),
+                        color.b()
+                    )
+                })
+                .join("\n")
+        
+        },
+        ScratchPadMode::MapText => {
+            infos
+                .into_iter()
+                .map(|info| {
+                    (
+                        info,
+                        transform_reflect(info, display_enum_qualified_variant_instance)
+                            .unwrap_or_else(|| info.as_identifier()),
+                    )
+                })
+                .sorted_by_key(|(_, name)| name.clone())
+                .map(|(info, name)| {
+                    let text = info.children.as_ref().and_then(|children| {
+                        children
+                            .iter()
+                            .find(|child| child.control_type == ControlType::Text)
+                            .map(|child| child.name.to_owned())
+                    });
+                    if let Some(text) = text {
+                        format!(
+                            "{} => Some(\"{}\".to_string()),",
+                            transform_reflect(info, display_enum_qualified_variant_instance)
+                                .unwrap_or_else(|| name),
+                            text
+                        )
+                    } else {
+                        format!(
+                            "{} => None,",
+                            transform_reflect(info, display_enum_qualified_variant_instance)
+                                .unwrap_or_else(|| name)
+                        )
                     }
-                    color_counts
-                        .into_iter()
-                        .max_by_key(|(_, count)| *count)
-                        .map(|(image_color, _)| image_color.as_bevy_color())
-                        .unwrap_or(Color::BLACK)
-                }
-                Err(e) => {
-                    warn!(
-                        "Failed to get image for region {:?}: {e:?}",
-                        info.bounding_rect
-                    );
-                    Color::BLACK
-                }
-            };
-            format!(
-                "{} => Color::rgb({:.1},{:.1},{:.1}),\n",
-                map_enhanced_thing(display_enum_qualified_variant_instance)
-                    .unwrap_or_else(|| info.as_identifier()),
-                color.r(),
-                color.g(),
-                color.b()
-            )
-        }
-    }
+                })
+                .join("\n")
+        },
+    };
+    rtn.push('\n');
+    rtn
 }
 
 fn handle_append_all_known_scratch_pad_events(
@@ -218,8 +322,7 @@ fn handle_append_all_known_scratch_pad_events(
                 .collect(),
             _ => {
                 // Unknown window, just do selected
-                let Some(selected_info) =
-                    ui_data.tree.lookup_drill_id(selected_drill_id.clone())
+                let Some(selected_info) = ui_data.tree.lookup_drill_id(selected_drill_id.clone())
                 else {
                     return;
                 };
@@ -232,19 +335,13 @@ fn handle_append_all_known_scratch_pad_events(
             pos.y * 10000 + pos.x
         });
 
-        let new_content = push_infos
-            .into_iter()
-            .map(|info| {
-                get_content(
-                    info,
-                    &ui_data.scratch_pad_mode,
-                    &app_kind,
-                    &ui_data,
-                    &screen_access,
-                )
-            })
-            .unique()
-            .join("\n");
+        let new_content = get_content_many(
+            push_infos,
+            &ui_data.scratch_pad_mode,
+            &app_kind,
+            &ui_data,
+            &screen_access,
+        );
 
         // append to scratch pad
         // make new rows show at the top by adding to the front
@@ -294,8 +391,7 @@ fn handle_append_all_unknown_scratch_pad_events(
                 .collect(),
             _ => {
                 // Unknown window, just do selected
-                let Some(selected_info) =
-                    ui_data.tree.lookup_drill_id(selected_drill_id.clone())
+                let Some(selected_info) = ui_data.tree.lookup_drill_id(selected_drill_id.clone())
                 else {
                     return;
                 };
@@ -308,19 +404,13 @@ fn handle_append_all_unknown_scratch_pad_events(
             pos.y * 10000 + pos.x
         });
 
-        let new_content = push_infos
-            .into_iter()
-            .map(|info| {
-                get_content(
-                    info,
-                    &ui_data.scratch_pad_mode,
-                    &app_kind,
-                    &ui_data,
-                    &screen_access,
-                )
-            })
-            .unique()
-            .join("\n");
+        let new_content = get_content_many(
+            push_infos,
+            &ui_data.scratch_pad_mode,
+            &app_kind,
+            &ui_data,
+            &screen_access,
+        );
 
         // append to scratch pad
         // make new rows show at the top by adding to the front
@@ -360,19 +450,13 @@ fn handle_append_all_scratch_pad_events(
             pos.y * 10000 + pos.x
         });
 
-        let new_content = push_infos
-            .into_iter()
-            .map(|info| {
-                get_content(
-                    info,
-                    &ui_data.scratch_pad_mode,
-                    &app_kind,
-                    &ui_data,
-                    &screen_access,
-                )
-            })
-            .unique()
-            .join("\n");
+        let new_content = get_content_many(
+            push_infos,
+            &ui_data.scratch_pad_mode,
+            &app_kind,
+            &ui_data,
+            &screen_access,
+        );
 
         // append to scratch pad
         // make new rows show at the top by adding to the front
@@ -397,15 +481,12 @@ fn handle_append_single_info_scratch_pad_events(
             return;
         };
 
-        let content = format!(
-            "{}\n",
-            get_content(
-                info,
-                &ui_data.scratch_pad_mode,
-                &CursorHeroAppKind::from_window(window),
-                &ui_data,
-                &screen_access,
-            )
+        let content = get_content_many(
+            vec![info],
+            &ui_data.scratch_pad_mode,
+            &CursorHeroAppKind::from_window(window),
+            &ui_data,
+            &screen_access,
         );
 
         // append to scratch pad

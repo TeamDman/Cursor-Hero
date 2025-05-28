@@ -92,8 +92,20 @@ pub fn do_properties_panel(
         });
     }
 
-    // Runtime ID
+    // Name
+    ui.horizontal(|ui| {
+        let name = selected_info.name.to_string();
+        if ui.button("copy").clicked() {
+            ui.output_mut(|out| {
+                out.copied_text.clone_from(&name);
+            });
+            info!("Copied name {} to clipboard", name);
+        }
+        ui.label("name");
+        inspector.ui_for_reflect_readonly(&name, ui);
+    });
 
+    // Runtime ID
     ui.horizontal(|ui| {
         let runtime_id = selected_info.runtime_id.to_string();
         if ui.button("copy").clicked() {
@@ -107,7 +119,6 @@ pub fn do_properties_panel(
     });
 
     // Automation ID
-
     ui.horizontal(|ui| {
         let automation_id = selected_info.automation_id.to_string();
         if ui.button("copy").clicked() {

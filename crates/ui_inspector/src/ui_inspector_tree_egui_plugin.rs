@@ -5,7 +5,6 @@ use bevy_egui::EguiContexts;
 use bevy_inspector_egui::reflect_inspector::InspectorUi;
 use cursor_hero_ui_hover_types::prelude::HoverInfo;
 use cursor_hero_ui_hover_types::prelude::InspectorHoverIndicator;
-use cursor_hero_ui_inspector_types::prelude::ThreadboundUISnapshotMessage;
 use cursor_hero_ui_inspector_types::prelude::UIData;
 use crate::ui_inspector_egui_tree_panel::do_tree_panel;
 
@@ -16,7 +15,7 @@ impl Plugin for UiInspectorTreeEguiPlugin {
         app.add_systems(
             Update,
             gui.run_if(|ui_data: Res<UIData>| {
-                ui_data.windows.global_toggle && ui_data.windows.tree
+                ui_data.windows.global_toggle && ui_data.windows.tree.open
             }),
         );
     }
@@ -27,18 +26,7 @@ fn gui(
     mut ui_data: ResMut<UIData>,
     type_registry: Res<AppTypeRegistry>,
     mut hover_info: ResMut<HoverInfo>,
-    mut threadbound_events: EventWriter<ThreadboundUISnapshotMessage>,
 ) {
-    // Get preview image
-    let preview = if let Some(ref preview) = ui_data.selected_preview
-        && let Some(texture_id) = contexts.image_id(&preview.handle)
-    {
-        let size = preview.size.as_vec2().normalize() * 400.0;
-        Some((texture_id, (size.x, size.y)))
-    } else {
-        None
-    };
-
     // Get context
     let ctx = contexts.ctx_mut();
     let mut cx = bevy_inspector_egui::reflect_inspector::Context {
@@ -53,15 +41,15 @@ fn gui(
     let window_id = egui::Id::new("UI Tree");
     egui::Window::new("UI Tree")
         .id(window_id)
-        .default_open(ui_data.windows.tree_header_open)
+        .default_open(ui_data.windows.tree.header_open)
         .show(ctx, |ui| {
             do_tree_panel(ui, &window_id, &mut inspector, &mut ui_data);
         });
 
     // Track window collapsed state
-    ui_data.windows.tree_header_open = CollapsingState::load(ctx, window_id.with("collapsing"))
+    ui_data.windows.tree.header_open = CollapsingState::load(ctx, window_id.with("collapsing"))
         .map(|x| x.is_open())
-        .unwrap_or(ui_data.windows.tree_header_open);
+        .unwrap_or(ui_data.windows.tree.header_open);
 
     // Reset fresh state after drawing tree
     ui_data.tree_is_fresh = false;

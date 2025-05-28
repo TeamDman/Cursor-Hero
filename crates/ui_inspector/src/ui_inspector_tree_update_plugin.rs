@@ -15,7 +15,7 @@ impl Plugin for UiInspectorTreeUpdatePlugin {
         app.add_systems(
             Update,
             trigger_tree_update_for_hovered.run_if(|ui_data: Res<UIData>| {
-                ui_data.windows.global_toggle && ui_data.windows.tree
+                ui_data.windows.global_toggle && ui_data.windows.tree.open
             }),
         );
     }

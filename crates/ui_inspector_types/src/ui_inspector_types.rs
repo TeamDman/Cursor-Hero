@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use bevy::prelude::*;
 use bevy::utils::HashMap;
 use cursor_hero_ui_automation_types::prelude::DrillId;
@@ -21,6 +23,7 @@ pub enum ScratchPadMode {
     MapDrill,
     MapBounds,
     MapColor,
+    MapText,
 }
 impl ScratchPadMode {
     pub fn variants() -> Vec<Self> {
@@ -31,6 +34,7 @@ impl ScratchPadMode {
             Self::MapDrill,
             Self::MapBounds,
             Self::MapColor,
+            Self::MapText,
         ]
     }
 }
@@ -43,6 +47,25 @@ impl std::fmt::Display for ScratchPadMode {
             Self::MapDrill => write!(f, "Map Drill"),
             Self::MapBounds => write!(f, "Map Bounds"),
             Self::MapColor => write!(f, "Map Color"),
+            Self::MapText => write!(f, "Map Text"),
+        }
+    }
+}
+
+#[derive(Debug, Reflect, Serialize, Deserialize, PartialEq, Clone)]
+pub struct EguiWindow {
+    pub open: bool,
+    pub header_open: bool,
+    pub position: Option<IVec2>,
+    pub size: Option<IVec2>,
+}
+impl Default for EguiWindow {
+    fn default() -> Self {
+        Self {
+            open: true,
+            header_open: true,
+            position: None,
+            size: None,
         }
     }
 }
@@ -50,39 +73,85 @@ impl std::fmt::Display for ScratchPadMode {
 #[derive(Debug, Reflect, Serialize, Deserialize, PartialEq, Clone)]
 pub struct InspectorWindows {
     pub global_toggle: bool,
-    pub world: bool,
-    // pub world_collapsed: bool,
-    pub state: bool,
-    // pub state_collapsed: bool,
-    pub tree: bool,
-    pub tree_header_open: bool,
-    pub properties: bool,
-    pub properties_header_open: bool,
-    pub scratch_pad: bool,
-    pub scratch_pad_header_open: bool,
+    pub world: EguiWindow,
+    pub state: EguiWindow,
+    pub tree: EguiWindow,
+    pub properties: EguiWindow,
+    pub scratch_pad: EguiWindow,
 }
+
+pub struct InspectorWindowsIter<'a> {
+    windows: &'a InspectorWindows,
+    index: usize,
+}
+pub struct InspectorWindowsIterMut<'a> {
+    windows: *mut InspectorWindows,
+    index: usize,
+    _marker: PhantomData<&'a mut EguiWindow>,
+}
+
 impl InspectorWindows {
-    pub fn set_all(&mut self, value: bool) {
-        self.global_toggle = value;
-        self.world = value;
-        self.state = value;
-        self.tree = value;
-        self.properties = value;
-        self.scratch_pad = value;
+    pub fn iter(&self) -> InspectorWindowsIter {
+        InspectorWindowsIter {
+            windows: self,
+            index: 0,
+        }
+    }
+    pub fn iter_mut(&mut self) -> InspectorWindowsIterMut {
+        InspectorWindowsIterMut {
+            windows: self,
+            index: 0,
+            _marker: PhantomData,
+        }
+    }
+
+}
+
+impl<'a> Iterator for InspectorWindowsIter<'a> {
+    type Item = &'a EguiWindow;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let result = match self.index {
+            0 => Some(&self.windows.world),
+            1 => Some(&self.windows.state),
+            2 => Some(&self.windows.tree),
+            3 => Some(&self.windows.properties),
+            4 => Some(&self.windows.scratch_pad),
+            _ => None,
+        };
+        self.index += 1;
+        result
     }
 }
+
+impl<'a> Iterator for InspectorWindowsIterMut<'a> {
+    type Item = &'a mut EguiWindow;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        unsafe {
+            let result = match self.index {
+                0 => Some(&mut (*self.windows).world),
+                1 => Some(&mut (*self.windows).state),
+                2 => Some(&mut (*self.windows).tree),
+                3 => Some(&mut (*self.windows).properties),
+                4 => Some(&mut (*self.windows).scratch_pad),
+                _ => None,
+            };
+            self.index += 1;
+            result
+        }
+    }
+}
+
 impl Default for InspectorWindows {
     fn default() -> Self {
         Self {
             global_toggle: false,
-            world: true,
-            state: true,
-            tree: true,
-            tree_header_open: true,
-            properties: true,
-            properties_header_open: true,
-            scratch_pad: true,
-            scratch_pad_header_open: true,
+            world: EguiWindow::default(),
+            state: EguiWindow::default(),
+            tree: EguiWindow::default(),
+            properties: EguiWindow::default(),
+            scratch_pad: EguiWindow::default(),
         }
     }
 }

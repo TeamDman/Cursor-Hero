@@ -1,6 +1,6 @@
 use bevy::diagnostic::DiagnosticsStore;
-use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::prelude::*;
+use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 pub struct FpsTextPlugin;
 impl Plugin for FpsTextPlugin {
     fn build(&self, app: &mut App) {

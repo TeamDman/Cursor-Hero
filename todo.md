@@ -2,18 +2,22 @@
 
 ## Active
 
-- separate tools from tools crate
-- separate debug eguis
-  - tilde to show wheel for toggling visibility of each
-- default to no character; action to spawn character; toolbelt live outside of character; rename toolbelt to actionspace
+- some kind of diffing process between themes for the calculator
+  - save merge conflict resolutions
+- remember egui window positions and sizes
 
 ## Up Next
 
+- startup sound
+- shutdown sound
 - annotations in host environment
 - make existing buttons only respond to clicks from host environment
+- add exit button on virtual apps
 
 ## Grab Bag
 
+- default to no character; action to spawn character; toolbelt live outside of character; rename toolbelt to actionspace
+- separate tools from tools crate
 - add possession mode to control the agent body to test environment restrictions
 - clean up todos
 - graceful worker shutdown message

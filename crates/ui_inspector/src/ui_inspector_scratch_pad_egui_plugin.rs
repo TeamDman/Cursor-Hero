@@ -13,7 +13,7 @@ impl Plugin for UiInspectorScratchPadEguiPlugin {
         app.add_systems(
             Update,
             gui.run_if(|ui_data: Res<UIData>| {
-                ui_data.windows.global_toggle && ui_data.windows.scratch_pad
+                ui_data.windows.global_toggle && ui_data.windows.scratch_pad.open
             }),
         );
     }
@@ -35,7 +35,7 @@ fn gui(
         // .default_pos((5.0, 5.0))
         // .default_width(1200.0)
         // .default_height(1000.0)
-        .default_open(ui_data.windows.scratch_pad_header_open)
+        .default_open(ui_data.windows.scratch_pad.header_open)
         .show(ctx, |ui| {
             egui::ScrollArea::vertical().show(ui, |ui| {
                 let window_drill_id = ui_data
@@ -124,8 +124,8 @@ fn gui(
         });
 
     // Track window collapsed state
-    ui_data.windows.scratch_pad_header_open =
+    ui_data.windows.scratch_pad.header_open =
         CollapsingState::load(ctx, window_id.with("collapsing"))
             .map(|x| x.is_open())
-            .unwrap_or(ui_data.windows.scratch_pad_header_open);
+            .unwrap_or(ui_data.windows.scratch_pad.header_open);
 }

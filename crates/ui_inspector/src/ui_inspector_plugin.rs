@@ -35,12 +35,12 @@ impl Plugin for UiInspectorPlugin {
         // must be after the default plugins
         app.add_plugins(
             WorldInspectorPlugin::default().run_if(|ui_data: Res<UIData>| {
-                ui_data.windows.global_toggle && ui_data.windows.world
+                ui_data.windows.global_toggle && ui_data.windows.world.open
             }),
         );
         app.add_plugins(
             StateInspectorPlugin::<InputMethod>::default().run_if(|ui_data: Res<UIData>| {
-                ui_data.windows.global_toggle && ui_data.windows.state
+                ui_data.windows.global_toggle && ui_data.windows.state.open
             }),
         );
     }

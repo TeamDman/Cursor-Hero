@@ -18,7 +18,7 @@ impl Plugin for UiInspectorPreviewImagePlugin {
         app.add_systems(
             Update,
             update_preview_image.run_if(|ui_data: Res<UIData>| {
-                ui_data.windows.global_toggle && ui_data.windows.tree
+                ui_data.windows.global_toggle && ui_data.windows.tree.open
             }),
         );
     }
